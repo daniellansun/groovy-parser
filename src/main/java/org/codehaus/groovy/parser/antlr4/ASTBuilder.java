@@ -24,7 +24,7 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.codehaus.groovy.ast.ModuleNode;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+import org.codehaus.groovy.runtime.IOGroovyMethods;
 import org.codehaus.groovy.syntax.SyntaxException;
 
 import java.io.BufferedReader;
@@ -61,7 +61,7 @@ public class ASTBuilder {
     private String readSourceCode(SourceUnit sourceUnit) {
         String text = null;
         try {
-            text = DefaultGroovyMethods.getText(
+            text = IOGroovyMethods.getText(
                     new BufferedReader(
                             sourceUnit.getSource().getReader()));
         } catch (IOException e) {
