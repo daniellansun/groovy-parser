@@ -105,6 +105,14 @@ sourceSets.main.resources.srcDirs += file("$antlr4Source");
 sourceSets.main.java.srcDirs += file("$srcMain/groovy-sources");
 sourceSets.test.java.srcDirs += file("$srcTest/groovy-sources");
 
+test {
+    if (JavaVersion.current().isJava8Compatible()) {
+        jvmArgs '-ea', "-Xms256m", "-Xmx512m"
+    } else {
+        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-XX:PermSize=64m", "-XX:MaxPermSize=192m"
+    }
+}
+
 task wrapper(type: Wrapper) {
     gradleVersion = '2.14.1'
 }
