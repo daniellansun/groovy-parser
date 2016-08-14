@@ -1,0 +1,110 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+
+        maven { url 'http://dl.bintray.com/melix/gradle-javadoc-hotfix-plugin' }
+    }
+
+    dependencies {
+        classpath 'me.champeau.gradle:antlr4-gradle-plugin:0.1'
+    }
+}
+
+group 'com.groovyhelp'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'me.champeau.gradle.antlr4'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+
+    maven { url 'https://oss.jfrog.org/oss-snapshot-local/' }
+}
+
+def srcBase = "src"
+def srcMain = "$srcBase/main"
+def srcTest = "$srcBase/test"
+def antlr4Source = "$srcMain/antlr4"
+def antlr4OutputRootDir = "$srcMain/generated-sources"
+def antlr4Output = "$antlr4OutputRootDir/org/codehaus/groovy/parser/antlr4"
+
+antlr4 {
+    source = file(antlr4Source)
+    extraArgs = ["-no-listener", "-package", "org.codehaus.groovy.parser.antlr4"]
+    output = file(antlr4Output)
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+// make the Java compile task depend on the antlr4 task
+compileJava.dependsOn antlr4
+
+// add antlr4 to classpath
+configurations {
+    compile.extendsFrom antlr4
+}
+
+task cleanGeneratedSources(type: Delete) {
+    delete antlr4OutputRootDir
+    file(antlr4OutputRootDir).mkdirs()
+}
+
+clean.dependsOn cleanGeneratedSources
+antlr4.dependsOn clean
+
+ext {
+    asmVersion = '5.0.3'
+    antlr4Version = '4.5.3'
+    groovyVersion = '2.5.0-SNAPSHOT'
+    junitVersion = '4.12'
+}
+
+dependencies {
+    antlr4 "org.antlr:antlr4:$antlr4Version"
+    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
+
+    compile "org.ow2.asm:asm:$asmVersion"
+    compile "org.ow2.asm:asm-analysis:$asmVersion"
+    compile "org.ow2.asm:asm-commons:$asmVersion"
+    compile "org.ow2.asm:asm-tree:$asmVersion"
+    compile "org.ow2.asm:asm-util:$asmVersion"
+
+    testCompile "junit:junit:$junitVersion"
+}
+
+// add the generated source files to the list of java sources
+sourceSets.main.java.srcDirs += file("$antlr4OutputRootDir");
+sourceSets.main.resources.srcDirs += file("$antlr4Source");
+sourceSets.main.java.srcDirs += file("$srcMain/groovy-sources");
+sourceSets.test.java.srcDirs += file("$srcTest/groovy-sources");
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.14.1'
+}

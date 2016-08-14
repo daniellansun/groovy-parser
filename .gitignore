@@ -1,0 +1,17 @@
+*.iml
+*.ipr
+*.iws
+.idea/
+
+build/
+out/
+src/main/generated-sources/
+*.DS_Store
+*~
+.gradle/
+.*.swp
+*.class
+bin/
+.settings/
+.classpath
+.project
