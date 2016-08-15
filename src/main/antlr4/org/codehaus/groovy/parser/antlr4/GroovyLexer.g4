@@ -377,8 +377,9 @@ MUL             : '*';
 DIV             : '/';
 BITAND          : '&';
 BITOR           : '|';
-CARET           : '^';
+XOR             : '^';
 MOD             : '%';
+ARROW           : '->';
 
 ADD_ASSIGN      : '+=';
 SUB_ASSIGN      : '-=';

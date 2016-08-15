@@ -33,11 +33,11 @@ compilationUnit
     ;
 
 packageDeclaration
-    :   annotation* 'package' qualifiedName ';'
+    :   annotation* PACKAGE qualifiedName SEMI
     ;
 
 importDeclaration
-    :   'import' 'static'? qualifiedName ('.' '*')? ';'
+    :   IMPORT STATIC? qualifiedName (DOT MUL)? SEMI
     ;
 
 typeDeclaration
@@ -45,61 +45,61 @@ typeDeclaration
     |   classOrInterfaceModifier* enumDeclaration
     |   classOrInterfaceModifier* interfaceDeclaration
     |   classOrInterfaceModifier* annotationTypeDeclaration
-    |   ';'
+    |   SEMI
     ;
 
 modifier
     :   classOrInterfaceModifier
-    |   (   'native'
-        |   'synchronized'
-        |   'transient'
-        |   'volatile'
+    |   (   NATIVE
+        |   SYNCHRONIZED
+        |   TRANSIENT
+        |   VOLATILE
         )
     ;
 
 classOrInterfaceModifier
     :   annotation       // class or interface
-    |   (   'public'     // class or interface
-        |   'protected'  // class or interface
-        |   'private'    // class or interface
-        |   'static'     // class or interface
-        |   'abstract'   // class or interface
-        |   'final'      // class only -- does not apply to interfaces
-        |   'strictfp'   // class or interface
+    |   (   PUBLIC     // class or interface
+        |   PROTECTED  // class or interface
+        |   PRIVATE    // class or interface
+        |   STATIC     // class or interface
+        |   ABSTRACT   // class or interface
+        |   FINAL      // class only -- does not apply to interfaces
+        |   STRICTFP   // class or interface
         )
     ;
 
 variableModifier
-    :   'final'
+    :   FINAL
     |   annotation
     ;
 
 classDeclaration
-    :   'class' Identifier typeParameters?
-        ('extends' type)?
-        ('implements' typeList)?
+    :   CLASS Identifier typeParameters?
+        (EXTENDS type)?
+        (IMPLEMENTS typeList)?
         classBody
     ;
 
 typeParameters
-    :   '<' typeParameter (',' typeParameter)* '>'
+    :   LT typeParameter (COMMA typeParameter)* GT
     ;
 
 typeParameter
-    :   Identifier ('extends' typeBound)?
+    :   Identifier (EXTENDS typeBound)?
     ;
 
 typeBound
-    :   type ('&' type)*
+    :   type (BITAND type)*
     ;
 
 enumDeclaration
-    :   ENUM Identifier ('implements' typeList)?
-        '{' enumConstants? ','? enumBodyDeclarations? '}'
+    :   ENUM Identifier (IMPLEMENTS typeList)?
+        LBRACE enumConstants? COMMA? enumBodyDeclarations? RBRACE
     ;
 
 enumConstants
-    :   enumConstant (',' enumConstant)*
+    :   enumConstant (COMMA enumConstant)*
     ;
 
 enumConstant
@@ -107,28 +107,28 @@ enumConstant
     ;
 
 enumBodyDeclarations
-    :   ';' classBodyDeclaration*
+    :   SEMI classBodyDeclaration*
     ;
 
 interfaceDeclaration
-    :   'interface' Identifier typeParameters? ('extends' typeList)? interfaceBody
+    :   INTERFACE Identifier typeParameters? (EXTENDS typeList)? interfaceBody
     ;
 
 typeList
-    :   type (',' type)*
+    :   type (COMMA type)*
     ;
 
 classBody
-    :   '{' classBodyDeclaration* '}'
+    :   LBRACE classBodyDeclaration* RBRACE
     ;
 
 interfaceBody
-    :   '{' interfaceBodyDeclaration* '}'
+    :   LBRACE interfaceBodyDeclaration* RBRACE
     ;
 
 classBodyDeclaration
-    :   ';'
-    |   'static'? block
+    :   SEMI
+    |   STATIC? block
     |   modifier* memberDeclaration
     ;
 
@@ -150,10 +150,10 @@ memberDeclaration
    for invalid return type after parsing.
  */
 methodDeclaration
-    :   (type|'void') Identifier formalParameters ('[' ']')*
-        ('throws' qualifiedNameList)?
+    :   (type|VOID) Identifier formalParameters (LBRACK RBRACK)*
+        (THROWS qualifiedNameList)?
         (   methodBody
-        |   ';'
+        |   SEMI
         )
     ;
 
@@ -162,7 +162,7 @@ genericMethodDeclaration
     ;
 
 constructorDeclaration
-    :   Identifier formalParameters ('throws' qualifiedNameList)?
+    :   Identifier formalParameters (THROWS qualifiedNameList)?
         constructorBody
     ;
 
@@ -171,12 +171,12 @@ genericConstructorDeclaration
     ;
 
 fieldDeclaration
-    :   type variableDeclarators ';'
+    :   type variableDeclarators SEMI
     ;
 
 interfaceBodyDeclaration
     :   modifier* interfaceMemberDeclaration
-    |   ';'
+    |   SEMI
     ;
 
 interfaceMemberDeclaration
@@ -190,18 +190,18 @@ interfaceMemberDeclaration
     ;
 
 constDeclaration
-    :   type constantDeclarator (',' constantDeclarator)* ';'
+    :   type constantDeclarator (COMMA constantDeclarator)* SEMI
     ;
 
 constantDeclarator
-    :   Identifier ('[' ']')* '=' variableInitializer
+    :   Identifier (LBRACK RBRACK)* ASSIGN variableInitializer
     ;
 
 // see matching of [] comment in methodDeclaratorRest
 interfaceMethodDeclaration
-    :   (type|'void') Identifier formalParameters ('[' ']')*
-        ('throws' qualifiedNameList)?
-        ';'
+    :   (type|VOID) Identifier formalParameters (LBRACK RBRACK)*
+        (THROWS qualifiedNameList)?
+        SEMI
     ;
 
 genericInterfaceMethodDeclaration
@@ -209,15 +209,15 @@ genericInterfaceMethodDeclaration
     ;
 
 variableDeclarators
-    :   variableDeclarator (',' variableDeclarator)*
+    :   variableDeclarator (COMMA variableDeclarator)*
     ;
 
 variableDeclarator
-    :   variableDeclaratorId ('=' variableInitializer)?
+    :   variableDeclaratorId (ASSIGN variableInitializer)?
     ;
 
 variableDeclaratorId
-    :   Identifier ('[' ']')*
+    :   Identifier (LBRACK RBRACK)*
     ;
 
 variableInitializer
@@ -226,7 +226,7 @@ variableInitializer
     ;
 
 arrayInitializer
-    :   '{' (variableInitializer (',' variableInitializer)* (',')? )? '}'
+    :   LBRACE (variableInitializer (COMMA variableInitializer)* (COMMA)? )? RBRACE
     ;
 
 enumConstantName
@@ -234,44 +234,44 @@ enumConstantName
     ;
 
 type
-    :   classOrInterfaceType ('[' ']')*
-    |   primitiveType ('[' ']')*
+    :   classOrInterfaceType (LBRACK RBRACK)*
+    |   primitiveType (LBRACK RBRACK)*
     ;
 
 classOrInterfaceType
-    :   Identifier typeArguments? ('.' Identifier typeArguments? )*
+    :   Identifier typeArguments? (DOT Identifier typeArguments? )*
     ;
 
 primitiveType
-    :   'boolean'
-    |   'char'
-    |   'byte'
-    |   'short'
-    |   'int'
-    |   'long'
-    |   'float'
-    |   'double'
+    :   BOOLEAN
+    |   CHAR
+    |   BYTE
+    |   SHORT
+    |   INT
+    |   LONG
+    |   FLOAT
+    |   DOUBLE
     ;
 
 typeArguments
-    :   '<' typeArgument (',' typeArgument)* '>'
+    :   LT typeArgument (COMMA typeArgument)* GT
     ;
 
 typeArgument
     :   type
-    |   '?' (('extends' | 'super') type)?
+    |   QUESTION ((EXTENDS | SUPER) type)?
     ;
 
 qualifiedNameList
-    :   qualifiedName (',' qualifiedName)*
+    :   qualifiedName (COMMA qualifiedName)*
     ;
 
 formalParameters
-    :   '(' formalParameterList? ')'
+    :   LPAREN formalParameterList? RPAREN
     ;
 
 formalParameterList
-    :   formalParameter (',' formalParameter)* (',' lastFormalParameter)?
+    :   formalParameter (COMMA formalParameter)* (COMMA lastFormalParameter)?
     |   lastFormalParameter
     ;
 
@@ -280,7 +280,7 @@ formalParameter
     ;
 
 lastFormalParameter
-    :   variableModifier* type '...' variableDeclaratorId
+    :   variableModifier* type ELLIPSIS variableDeclaratorId
     ;
 
 methodBody
@@ -292,7 +292,7 @@ constructorBody
     ;
 
 qualifiedName
-    :   Identifier ('.' Identifier)*
+    :   Identifier (DOT Identifier)*
     ;
 
 literal
@@ -301,23 +301,23 @@ literal
     |   CharacterLiteral
     |   StringLiteral
     |   BooleanLiteral
-    |   'null'
+    |   NullLiteral
     ;
 
 // ANNOTATIONS
 
 annotation
-    :   '@' annotationName ( '(' ( elementValuePairs | elementValue )? ')' )?
+    :   AT annotationName ( LPAREN ( elementValuePairs | elementValue )? RPAREN )?
     ;
 
 annotationName : qualifiedName ;
 
 elementValuePairs
-    :   elementValuePair (',' elementValuePair)*
+    :   elementValuePair (COMMA elementValuePair)*
     ;
 
 elementValuePair
-    :   Identifier '=' elementValue
+    :   Identifier ASSIGN elementValue
     ;
 
 elementValue
@@ -327,28 +327,28 @@ elementValue
     ;
 
 elementValueArrayInitializer
-    :   '{' (elementValue (',' elementValue)*)? (',')? '}'
+    :   LBRACE (elementValue (COMMA elementValue)*)? (COMMA)? RBRACE
     ;
 
 annotationTypeDeclaration
-    :   '@' 'interface' Identifier annotationTypeBody
+    :   AT INTERFACE Identifier annotationTypeBody
     ;
 
 annotationTypeBody
-    :   '{' (annotationTypeElementDeclaration)* '}'
+    :   LBRACE (annotationTypeElementDeclaration)* RBRACE
     ;
 
 annotationTypeElementDeclaration
     :   modifier* annotationTypeElementRest
-    |   ';' // this is not allowed by the grammar, but apparently allowed by the actual compiler
+    |   SEMI // this is not allowed by the grammar, but apparently allowed by the actual compiler
     ;
 
 annotationTypeElementRest
-    :   type annotationMethodOrConstantRest ';'
-    |   classDeclaration ';'?
-    |   interfaceDeclaration ';'?
-    |   enumDeclaration ';'?
-    |   annotationTypeDeclaration ';'?
+    :   type annotationMethodOrConstantRest SEMI
+    |   classDeclaration SEMI?
+    |   interfaceDeclaration SEMI?
+    |   enumDeclaration SEMI?
+    |   annotationTypeDeclaration SEMI?
     ;
 
 annotationMethodOrConstantRest
@@ -357,7 +357,7 @@ annotationMethodOrConstantRest
     ;
 
 annotationMethodRest
-    :   Identifier '(' ')' defaultValue?
+    :   Identifier LPAREN RPAREN defaultValue?
     ;
 
 annotationConstantRest
@@ -365,13 +365,13 @@ annotationConstantRest
     ;
 
 defaultValue
-    :   'default' elementValue
+    :   DEFAULT elementValue
     ;
 
 // STATEMENTS / BLOCKS
 
 block
-    :   '{' blockStatement* '}'
+    :   LBRACE blockStatement* RBRACE
     ;
 
 blockStatement
@@ -381,7 +381,7 @@ blockStatement
     ;
 
 localVariableDeclarationStatement
-    :    localVariableDeclaration ';'
+    :    localVariableDeclaration SEMI
     ;
 
 localVariableDeclaration
@@ -390,46 +390,46 @@ localVariableDeclaration
 
 statement
     :   block
-    |   ASSERT expression (':' expression)? ';'
-    |   'if' parExpression statement ('else' statement)?
-    |   'for' '(' forControl ')' statement
-    |   'while' parExpression statement
-    |   'do' statement 'while' parExpression ';'
-    |   'try' block (catchClause+ finallyBlock? | finallyBlock)
-    |   'try' resourceSpecification block catchClause* finallyBlock?
-    |   'switch' parExpression '{' switchBlockStatementGroup* switchLabel* '}'
-    |   'synchronized' parExpression block
-    |   'return' expression? ';'
-    |   'throw' expression ';'
-    |   'break' Identifier? ';'
-    |   'continue' Identifier? ';'
-    |   ';'
-    |   statementExpression ';'
-    |   Identifier ':' statement
+    |   ASSERT expression (COLON expression)? SEMI
+    |   IF parExpression statement (ELSE statement)?
+    |   FOR LPAREN forControl RPAREN statement
+    |   WHILE parExpression statement
+    |   DO statement WHILE parExpression SEMI
+    |   TRY block (catchClause+ finallyBlock? | finallyBlock)
+    |   TRY resourceSpecification block catchClause* finallyBlock?
+    |   SWITCH parExpression LBRACE switchBlockStatementGroup* switchLabel* RBRACE
+    |   SYNCHRONIZED parExpression block
+    |   RETURN expression? SEMI
+    |   THROW expression SEMI
+    |   BREAK Identifier? SEMI
+    |   CONTINUE Identifier? SEMI
+    |   SEMI
+    |   statementExpression SEMI
+    |   Identifier COLON statement
     ;
 
 catchClause
-    :   'catch' '(' variableModifier* catchType Identifier ')' block
+    :   CATCH LPAREN variableModifier* catchType Identifier RPAREN block
     ;
 
 catchType
-    :   qualifiedName ('|' qualifiedName)*
+    :   qualifiedName (BITOR qualifiedName)*
     ;
 
 finallyBlock
-    :   'finally' block
+    :   FINALLY block
     ;
 
 resourceSpecification
-    :   '(' resources ';'? ')'
+    :   LPAREN resources SEMI? RPAREN
     ;
 
 resources
-    :   resource (';' resource)*
+    :   resource (SEMI resource)*
     ;
 
 resource
-    :   variableModifier* classOrInterfaceType variableDeclaratorId '=' expression
+    :   variableModifier* classOrInterfaceType variableDeclaratorId ASSIGN expression
     ;
 
 /** Matches cases then statements, both of which are mandatory.
@@ -440,14 +440,14 @@ switchBlockStatementGroup
     ;
 
 switchLabel
-    :   'case' constantExpression ':'
-    |   'case' enumConstantName ':'
-    |   'default' ':'
+    :   CASE constantExpression COLON
+    |   CASE enumConstantName COLON
+    |   DEFAULT COLON
     ;
 
 forControl
     :   enhancedForControl
-    |   forInit? ';' expression? ';' forUpdate?
+    |   forInit? SEMI expression? SEMI forUpdate?
     ;
 
 forInit
@@ -456,7 +456,7 @@ forInit
     ;
 
 enhancedForControl
-    :   variableModifier* type variableDeclaratorId ':' expression
+    :   variableModifier* type variableDeclaratorId COLON expression
     ;
 
 forUpdate
@@ -466,11 +466,11 @@ forUpdate
 // EXPRESSIONS
 
 parExpression
-    :   '(' expression ')'
+    :   LPAREN expression RPAREN
     ;
 
 expressionList
-    :   expression (',' expression)*
+    :   expression (COMMA expression)*
     ;
 
 statementExpression
@@ -483,56 +483,56 @@ constantExpression
 
 expression
     :   primary
-    |   expression '.' Identifier
-    |   expression '.' 'this'
-    |   expression '.' 'new' nonWildcardTypeArguments? innerCreator
-    |   expression '.' 'super' superSuffix
-    |   expression '.' explicitGenericInvocation
-    |   expression '[' expression ']'
-    |   expression '(' expressionList? ')'
-    |   'new' creator
-    |   '(' type ')' expression
-    |   expression ('++' | '--')
-    |   ('+'|'-'|'++'|'--') expression
-    |   ('~'|'!') expression
-    |   expression ('*'|'/'|'%') expression
-    |   expression ('+'|'-') expression
-    |   expression ('<' '<' | '>' '>' '>' | '>' '>') expression
-    |   expression ('<=' | '>=' | '>' | '<') expression
-    |   expression 'instanceof' type
-    |   expression ('==' | '!=') expression
-    |   expression '&' expression
-    |   expression '^' expression
-    |   expression '|' expression
-    |   expression '&&' expression
-    |   expression '||' expression
-    |   expression '?' expression ':' expression
+    |   expression DOT Identifier
+    |   expression DOT THIS
+    |   expression DOT NEW nonWildcardTypeArguments? innerCreator
+    |   expression DOT SUPER superSuffix
+    |   expression DOT explicitGenericInvocation
+    |   expression LBRACK expression RBRACK
+    |   expression LPAREN expressionList? RPAREN
+    |   NEW creator
+    |   LPAREN type RPAREN expression
+    |   expression (INC | DEC)
+    |   (ADD|SUB|INC|DEC) expression
+    |   (TILDE|BANG) expression
+    |   expression (MUL|DIV|MOD) expression
+    |   expression (ADD|SUB) expression
+    |   expression (LT LT | GT GT GT | GT GT) expression
+    |   expression (LE | GE | GT | LT) expression
+    |   expression INSTANCEOF type
+    |   expression (EQUAL | NOTEQUAL) expression
+    |   expression BITAND expression
+    |   expression XOR expression
+    |   expression BITOR expression
+    |   expression AND expression
+    |   expression OR expression
+    |   expression QUESTION expression COLON expression
     |   <assoc=right> expression
-        (   '='
-        |   '+='
-        |   '-='
-        |   '*='
-        |   '/='
-        |   '&='
-        |   '|='
-        |   '^='
-        |   '>>='
-        |   '>>>='
-        |   '<<='
-        |   '%='
+        (   ASSIGN
+        |   ADD_ASSIGN
+        |   SUB_ASSIGN
+        |   MUL_ASSIGN
+        |   DIV_ASSIGN
+        |   AND_ASSIGN
+        |   OR_ASSIGN
+        |   XOR_ASSIGN
+        |   RSHIFT_ASSIGN
+        |   URSHIFT_ASSIGN
+        |   LSHIFT_ASSIGN
+        |   MOD_ASSIGN
         )
         expression
     ;
 
 primary
-    :   '(' expression ')'
-    |   'this'
-    |   'super'
+    :   LPAREN expression RPAREN
+    |   THIS
+    |   SUPER
     |   literal
     |   Identifier
-    |   type '.' 'class'
-    |   'void' '.' 'class'
-    |   nonWildcardTypeArguments (explicitGenericInvocationSuffix | 'this' arguments)
+    |   type DOT CLASS
+    |   VOID DOT CLASS
+    |   nonWildcardTypeArguments (explicitGenericInvocationSuffix | THIS arguments)
     ;
 
 creator
@@ -541,7 +541,7 @@ creator
     ;
 
 createdName
-    :   Identifier typeArgumentsOrDiamond? ('.' Identifier typeArgumentsOrDiamond?)*
+    :   Identifier typeArgumentsOrDiamond? (DOT Identifier typeArgumentsOrDiamond?)*
     |   primitiveType
     ;
 
@@ -550,9 +550,9 @@ innerCreator
     ;
 
 arrayCreatorRest
-    :   '['
-        (   ']' ('[' ']')* arrayInitializer
-        |   expression ']' ('[' expression ']')* ('[' ']')*
+    :   LBRACK
+        (   RBRACK (LBRACK RBRACK)* arrayInitializer
+        |   expression RBRACK (LBRACK expression RBRACK)* (LBRACK RBRACK)*
         )
     ;
 
@@ -565,30 +565,30 @@ explicitGenericInvocation
     ;
 
 nonWildcardTypeArguments
-    :   '<' typeList '>'
+    :   LT typeList GT
     ;
 
 typeArgumentsOrDiamond
-    :   '<' '>'
+    :   LT GT
     |   typeArguments
     ;
 
 nonWildcardTypeArgumentsOrDiamond
-    :   '<' '>'
+    :   LT GT
     |   nonWildcardTypeArguments
     ;
 
 superSuffix
     :   arguments
-    |   '.' Identifier arguments?
+    |   DOT Identifier arguments?
     ;
 
 explicitGenericInvocationSuffix
-    :   'super' superSuffix
+    :   SUPER superSuffix
     |   Identifier arguments
     ;
 
 arguments
-    :   '(' expressionList? ')'
+    :   LPAREN expressionList? RPAREN
     ;
 
