@@ -37,23 +37,24 @@ import java.util.logging.Logger;
 /**
  * Created by Daniel.Sun on 2016/8/14.
  */
-public class ASTBuilder {
+public class ASTBuilder extends GroovyParserBaseVisitor implements GroovyParserVisitor {
 
     public ASTBuilder(SourceUnit sourceUnit, ClassLoader classLoader) {
         this.classLoader = classLoader;
         this.sourceUnit = sourceUnit;
         this.moduleNode = new ModuleNode(sourceUnit);
 
-        String text = this.readSourceCode(sourceUnit);
-
-        this.lexer = new GroovyLangLexer(new ANTLRInputStream(text));
-        this.parser = new GroovyLangParser(new CommonTokenStream(lexer));
+        this.lexer = new GroovyLangLexer(
+                            new ANTLRInputStream(
+                                this.readSourceCode(sourceUnit)));
+        this.parser = new GroovyLangParser(
+                            new CommonTokenStream(this.lexer));
 
         this.setupErrorListener(this.parser);
     }
 
     public ModuleNode buildAST() {
-        // TODO parse the source code via the visitor
+        this.visit(parser.compilationUnit());
 
         return this.moduleNode;
     }
