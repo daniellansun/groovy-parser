@@ -29,7 +29,11 @@ options { tokenVocab = GroovyLexer; }
 
 // starting point for parsing a groovy file
 compilationUnit
-    :   packageDeclaration? importDeclaration* typeDeclaration* EOF
+    :
+        // The very first characters of the file may be "#!".  If so, ignore the first line.
+        SH_COMMENT?
+        nls
+        packageDeclaration? importDeclaration* typeDeclaration* EOF
     ;
 
 packageDeclaration
@@ -590,5 +594,12 @@ explicitGenericInvocationSuffix
 
 arguments
     :   LPAREN expressionList? RPAREN
+    ;
+
+nls :   NL*
+    ;
+
+sep :   SEMI
+    |   nls
     ;
 

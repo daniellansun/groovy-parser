@@ -26,7 +26,33 @@
 lexer grammar GroovyLexer;
 
 @members {
-    // just a hook, which will be overrided by GroovyLangLexer
+    private long tokenIndex     = 0;
+    private int  lastTokenType  = 0;
+
+    /**
+     * Record the index and token type of the current token while emitting tokens.
+     */
+    @Override
+    public void emit(Token token) {
+        this.tokenIndex++;
+
+        int tokenType = token.getType();
+        if (NL != tokenType) { // newline should be ignored
+            lastTokenType = tokenType;
+        }
+
+        /*
+        if (ROLLBACK_ONE == tokenType) {
+            this.rollbackOneChar();
+        }
+        */
+
+        super.emit(token);
+    }
+
+    /**
+     * just a hook, which will be overrided by GroovyLangLexer
+     */
     protected void rollbackOneChar() {}
 }
 
@@ -431,14 +457,26 @@ ELLIPSIS : '...';
 //
 // Whitespace and comments
 //
-
-WS  :  [ \t\r\n\u000C]+ -> skip
+WS  :  [ \t\u000C]+     -> skip
     ;
 
-COMMENT
-    :   '/*' .*? '*/' -> skip
+NL  : '\r'? '\n'
     ;
 
-LINE_COMMENT
-    :   '//' ~[\r\n]* -> skip
+
+DC_COMMENT
+    :   '/**' .*? '*/'      -> type(NL)
+    ;
+
+ML_COMMENT
+    :   '/*' .*? '*/'       -> type(NL)
+    ;
+
+SL_COMMENT
+    :   '//' ~[\r\n\uFFFF]* -> type(NL)
+    ;
+
+SH_COMMENT
+    :   { 0 == tokenIndex }?
+        '#!' ~[\r\n\uFFFF]* -> skip
     ;

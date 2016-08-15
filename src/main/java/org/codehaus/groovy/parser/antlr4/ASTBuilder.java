@@ -21,7 +21,11 @@ package org.codehaus.groovy.parser.antlr4;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.codehaus.groovy.ast.ModuleNode;
+import org.codehaus.groovy.ast.expr.ConstantExpression;
+import org.codehaus.groovy.ast.stmt.ReturnStatement;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.runtime.IOGroovyMethods;
@@ -37,7 +41,7 @@ import java.util.logging.Logger;
 /**
  * Created by Daniel.Sun on 2016/8/14.
  */
-public class ASTBuilder extends GroovyParserBaseVisitor implements GroovyParserVisitor {
+public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements GroovyParserVisitor<Object> {
 
     public ASTBuilder(SourceUnit sourceUnit, ClassLoader classLoader) {
         this.classLoader = classLoader;
@@ -54,9 +58,32 @@ public class ASTBuilder extends GroovyParserBaseVisitor implements GroovyParserV
     }
 
     public ModuleNode buildAST() {
-        this.visit(parser.compilationUnit());
+        return (ModuleNode) this.visit(parser.compilationUnit());
+    }
 
-        return this.moduleNode;
+    @Override
+    public Object visitCompilationUnit(GroovyParser.CompilationUnitContext ctx) {
+        int blankCnt = 0;
+
+        for (ParseTree child : ctx.children) {
+            if (child instanceof GroovyParser.NlsContext
+                    || ((TerminalNode) child).getSymbol().getType() == GroovyLangParser.EOF) {
+                blankCnt++;
+            }
+
+            this.visit(child);
+        }
+
+        // if groovy source file only contains blank(including EOF), add "return null" to the AST
+        if (blankCnt == ctx.children.size()) {
+            this.addEmptyReturnStatement();
+        }
+
+        return moduleNode;
+    }
+
+    private void addEmptyReturnStatement() {
+        moduleNode.addStatement(new ReturnStatement(new ConstantExpression(null)));
     }
 
     private String readSourceCode(SourceUnit sourceUnit) {

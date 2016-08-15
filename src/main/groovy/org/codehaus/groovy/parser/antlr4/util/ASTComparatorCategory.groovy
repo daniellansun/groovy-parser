@@ -56,7 +56,7 @@ class ASTComparatorCategory {
             (Parameter): [],
             (PropertyNode): ['declaringClass', 'initialValueExpression', "assignToken"],
             (Variable): [],
-            (VariableScope): ["clazzScope", "parent"],
+            (VariableScope): ["clazzScope", "parent", "declaredVariablesIterator"],
             (Token): ["root", "startColumn"],
             (AnnotationNode): (["text"] + LOCATION_IGNORE_LIST) as List<String>,
             (AssertStatement): ["text"],
@@ -139,6 +139,7 @@ class ASTComparatorCategory {
      * @return
      */
     static reflexiveEquals(a, b, ignore = []) {
+
         if (a.getClass() != b.getClass()) {
             log.warning(" !!!! DIFFERENCE WAS FOUND! ${a.getClass()} != ${b.getClass()}")
             return false;
@@ -188,11 +189,12 @@ class ASTComparatorCategory {
                         new LinkedList(bValue?.getClass()?.isArray() ? Arrays.asList(bValue) : (bValue ?: [])).sort {c1, c2 -> c1."${orderName}" <=> c2."${orderName}"}
             }
 
+
             !(name in ignore) && name != 'nodeMetaData' && a."$name" != b."$name"
         }
 
         if (difference)
-            log.warning(" !!!! DIFFERENCE WAS FOUND! [${a.text}][${a.class}][${difference.name}]:: ${ a."$difference.name" } != ${ b."$difference.name" }")
+            log.warning(" !!!! DIFFERENCE WAS FOUND! [${a.class}][${difference.name}]:: ${ a."$difference.name" } != ${ b."$difference.name" }")
         else
             log.info(" ==== Exit ${ a.getClass() } ${ a.hashCode() } ====== ")
 

@@ -38,18 +38,15 @@ class GroovyParserTest extends GroovyTestCase {
 
     void tearDown() {}
 
-    void "test GinA2"() {
-        // TODO add test cases from Groovy in Action 2nd Edition
-        File file = new File("$RESOURCES_PATH/HelloWorld.groovy");
+    void "test groovy core"() {
+        File file = new File("$RESOURCES_PATH/core/Comments.groovy");
         def oldAST = defaultParser.parse(file)
         def newAST = antlr4Parser.parse(file);
 
-        // FIXME
-        /*
         ASTComparatorCategory.apply(ASTComparatorCategory.DEFAULT_CONFIGURATION) {
             assert newAST == oldAST
         }
-        */
+
     }
 
 }
