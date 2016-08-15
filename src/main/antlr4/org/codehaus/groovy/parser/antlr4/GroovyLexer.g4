@@ -38,7 +38,7 @@ lexer grammar GroovyLexer;
 
         int tokenType = token.getType();
         if (NL != tokenType) { // newline should be ignored
-            lastTokenType = tokenType;
+            this.lastTokenType = tokenType;
         }
 
         /*
@@ -477,6 +477,5 @@ SL_COMMENT
     ;
 
 SH_COMMENT
-    :   { 0 == tokenIndex }?
-        '#!' ~[\r\n\uFFFF]* -> skip
+    :   '#!' { 0 == this.tokenIndex }? ~[\r\n\uFFFF]* -> skip
     ;
