@@ -63,8 +63,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor implements GroovyParserV
         String text = null;
         try {
             text = IOGroovyMethods.getText(
-                    new BufferedReader(
-                            sourceUnit.getSource().getReader()));
+                            new BufferedReader(
+                                    sourceUnit.getSource().getReader()));
         } catch (IOException e) {
             LOGGER.severe(createExceptionMessage(e));
             throw new RuntimeException("Error occurred when reading source code.", e);
@@ -120,10 +120,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor implements GroovyParserV
         return sw.toString();
     }
 
-    private final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
+
     private final ModuleNode moduleNode;
     private final SourceUnit sourceUnit;
     private final ClassLoader classLoader;
     private final GroovyLangLexer lexer;
     private final GroovyLangParser parser;
+    private final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 }
