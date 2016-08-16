@@ -21,7 +21,6 @@ package org.codehaus.groovy.parser.antlr4;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.codehaus.groovy.ast.ModuleNode;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
@@ -50,7 +49,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         this.lexer = new GroovyLangLexer(
                             new ANTLRInputStream(
-                                this.readSourceCode(sourceUnit)));
+                                    this.readSourceCode(sourceUnit)));
         this.parser = new GroovyLangParser(
                             new CommonTokenStream(this.lexer));
 
@@ -63,23 +62,25 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Object visitCompilationUnit(GroovyParser.CompilationUnitContext ctx) {
-        int blankCnt = 0;
-
-        for (ParseTree child : ctx.children) {
-            if (child instanceof GroovyParser.NlsContext
-                    || ((TerminalNode) child).getSymbol().getType() == GroovyLangParser.EOF) {
-                blankCnt++;
-            }
-
-            this.visit(child);
-        }
-
         // if groovy source file only contains blank(including EOF), add "return null" to the AST
-        if (blankCnt == ctx.children.size()) {
+        if (this.isBlankScript(ctx)) {
             this.addEmptyReturnStatement();
+            return moduleNode;
         }
+
+        ctx.children.stream().forEach(this::visit);
 
         return moduleNode;
+    }
+
+    private boolean isBlankScript(GroovyParser.CompilationUnitContext ctx) {
+        long blankCnt =
+                ctx.children.stream().filter(e -> e instanceof GroovyParser.NlsContext ||
+                        e instanceof TerminalNode && (((TerminalNode) e).getSymbol().getType() == GroovyLangParser.EOF)
+                ).count();
+
+
+        return blankCnt == ctx.children.size();
     }
 
     private void addEmptyReturnStatement() {
@@ -90,8 +91,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         String text = null;
         try {
             text = IOGroovyMethods.getText(
-                            new BufferedReader(
-                                    sourceUnit.getSource().getReader()));
+                    new BufferedReader(
+                            sourceUnit.getSource().getReader()));
         } catch (IOException e) {
             LOGGER.severe(createExceptionMessage(e));
             throw new RuntimeException("Error occurred when reading source code.", e);

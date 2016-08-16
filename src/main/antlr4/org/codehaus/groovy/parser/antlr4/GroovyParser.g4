@@ -497,10 +497,10 @@ expression
     |   NEW creator
     |   LPAREN type RPAREN expression
     |   expression (INC | DEC)
-    |   (ADD|SUB|INC|DEC) expression
-    |   (TILDE|BANG) expression
-    |   expression (MUL|DIV|MOD) expression
-    |   expression (ADD|SUB) expression
+    |   (ADD | SUB | INC | DEC) expression
+    |   (TILDE | BANG) expression
+    |   expression (MUL | DIV | MOD) expression
+    |   expression (ADD | SUB) expression
     |   expression (LT LT | GT GT GT | GT GT) expression
     |   expression (LE | GE | GT | LT) expression
     |   expression INSTANCEOF type
@@ -524,6 +524,7 @@ expression
         |   URSHIFT_ASSIGN
         |   LSHIFT_ASSIGN
         |   MOD_ASSIGN
+        |   STAR_STAR_ASSIGN
         )
         expression
     ;
@@ -599,7 +600,7 @@ arguments
 nls :   NL*
     ;
 
-sep :   SEMI
-    |   nls
+sep :   SEMI NL*
+    |   NL+ (SEMI NL*)*
     ;
 

@@ -28,25 +28,35 @@ import org.codehaus.groovy.parser.antlr4.util.ASTComparatorCategory
  */
 class GroovyParserTest extends GroovyTestCase {
     public static final String RESOURCES_PATH = 'src/test/resources';
-    private AbstractParser defaultParser;
-    private AbstractParser antlr4Parser;
 
-    void setUp() {
-        this.defaultParser = new DefaultParser();
-        this.antlr4Parser = new Antlr4Parser();
-    }
+    void setUp() {}
 
     void tearDown() {}
 
     void "test groovy core"() {
-        File file = new File("$RESOURCES_PATH/core/Comments.groovy");
-        def oldAST = defaultParser.parse(file)
-        def newAST = antlr4Parser.parse(file);
+        test('core/Comments.groovy');
+    }
+
+    static test(String path) {
+        AbstractParser defaultParser = new DefaultParser()
+        AbstractParser antlr4Parser = new Antlr4Parser()
+
+        File file = new File("$RESOURCES_PATH/$path");
+        def (oldAST, oldElapsedTime) = profile { defaultParser.parse(file) }
+        def (newAST, newElapsedTime) = profile { antlr4Parser.parse(file) }
 
         ASTComparatorCategory.apply(ASTComparatorCategory.DEFAULT_CONFIGURATION) {
             assert newAST == oldAST
         }
 
+        println "${path}\t\t\t\t\tdiff:${(newElapsedTime - oldElapsedTime) / 1000}ms,\tnew:${newElapsedTime / 1000}ms,\told:${oldElapsedTime / 1000}ms."
     }
 
+    static profile(Closure c) {
+        long begin = System.currentTimeMillis()
+        def result = c.call()
+        long end = System.currentTimeMillis()
+
+        return [result, end - begin];
+    }
 }

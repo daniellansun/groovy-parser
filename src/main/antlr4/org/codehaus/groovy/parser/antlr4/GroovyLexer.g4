@@ -368,6 +368,26 @@ NullLiteral
     :   'null'
     ;
 
+// Groovy Operators
+
+RANGE_INCLUSIVE : '..';
+RANGE_EXCLUSIVE : '..<';
+TRIPLE_DOT      : '...';
+SPREAD_DOT      : '*.';
+OPTIONAL_DOT    : '?.';
+ELVIS_OPERATOR  : '?:';
+MEMBER_POINTER  : '.&';
+REGEX_FIND      : '=~';
+REGEX_MATCH     : '==~';
+STAR_STAR       : '**';
+STAR_STAR_ASSIGN: '**=';
+COMPARE_TO      : '<=>';
+IDENTICAL       : '===';
+NOT_IDENTICAL   : '!==';
+ARROW           : '->';
+DOLLAR          : '$';
+
+
 // §3.11 Separators
 
 LPAREN          : '(';
@@ -405,7 +425,7 @@ BITAND          : '&';
 BITOR           : '|';
 XOR             : '^';
 MOD             : '%';
-ARROW           : '->';
+
 
 ADD_ASSIGN      : '+=';
 SUB_ASSIGN      : '-=';
@@ -418,6 +438,7 @@ MOD_ASSIGN      : '%=';
 LSHIFT_ASSIGN   : '<<=';
 RSHIFT_ASSIGN   : '>>=';
 URSHIFT_ASSIGN  : '>>>=';
+
 
 // §3.8 Identifiers (must appear after all keywords in the grammar)
 
@@ -463,19 +484,22 @@ WS  :  [ \t\u000C]+     -> skip
 NL  : '\r'? '\n'
     ;
 
-
+// groovydoc comments
 DC_COMMENT
     :   '/**' .*? '*/'      -> type(NL)
     ;
 
+// multiple-line comments
 ML_COMMENT
     :   '/*' .*? '*/'       -> type(NL)
     ;
 
+// Single-line comments
 SL_COMMENT
     :   '//' ~[\r\n\uFFFF]* -> type(NL)
     ;
 
+// Script-header comments
 SH_COMMENT
     :   '#!' { 0 == this.tokenIndex }? ~[\r\n\uFFFF]* -> skip
     ;
