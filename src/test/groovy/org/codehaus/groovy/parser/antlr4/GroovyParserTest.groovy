@@ -36,10 +36,10 @@ class GroovyParserTest extends GroovyTestCase {
     void tearDown() {}
 
     void "test groovy core"() {
-        test('core/Comments.groovy');
+        test('core/Comments.groovy', ASTComparatorCategory.DEFAULT_CONFIGURATION);
     }
 
-    static test(String path) {
+    static test(String path, conf) {
         AbstractParser defaultParser = new DefaultParser()
         AbstractParser antlr4Parser = new Antlr4Parser()
 
@@ -47,7 +47,7 @@ class GroovyParserTest extends GroovyTestCase {
         def (oldAST, oldElapsedTime) = profile { defaultParser.parse(file) }
         def (newAST, newElapsedTime) = profile { antlr4Parser.parse(file) }
 
-        ASTComparatorCategory.apply(ASTComparatorCategory.DEFAULT_CONFIGURATION) {
+        ASTComparatorCategory.apply(conf) {
             assert newAST == oldAST
         }
 
