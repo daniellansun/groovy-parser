@@ -489,7 +489,7 @@ DC_COMMENT
     :   '/**' .*? '*/'      -> type(NL)
     ;
 
-// multiple-line comments
+// Multiple-line comments
 ML_COMMENT
     :   '/*' .*? '*/'       -> type(NL)
     ;
@@ -499,7 +499,8 @@ SL_COMMENT
     :   '//' ~[\r\n\uFFFF]* -> type(NL)
     ;
 
-// Script-header comments
+// Script-header comments.
+// The very first characters of the file may be "#!".  If so, ignore the first line.
 SH_COMMENT
-    :   '#!' { 0 == this.tokenIndex }? ~[\r\n\uFFFF]* -> skip
+    :   '#!' { 0 == this.tokenIndex }?<fail={"Shebang comment should appear at the first line"}> ~[\r\n\uFFFF]* -> skip
     ;

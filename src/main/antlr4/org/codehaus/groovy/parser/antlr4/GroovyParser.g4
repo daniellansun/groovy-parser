@@ -30,8 +30,6 @@ options { tokenVocab = GroovyLexer; }
 // starting point for parsing a groovy file
 compilationUnit
     :
-        // The very first characters of the file may be "#!".  If so, ignore the first line.
-        SH_COMMENT?
         nls
         packageDeclaration? importDeclaration* typeDeclaration* EOF
     ;

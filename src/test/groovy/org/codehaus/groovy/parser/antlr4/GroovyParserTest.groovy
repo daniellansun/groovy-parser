@@ -18,10 +18,12 @@
  */
 package org.codehaus.groovy.parser.antlr4
 
+import org.codehaus.groovy.ast.ModuleNode
 import org.codehaus.groovy.parser.AbstractParser
 import org.codehaus.groovy.parser.Antlr4Parser
 import org.codehaus.groovy.parser.DefaultParser
 import org.codehaus.groovy.parser.antlr4.util.ASTComparatorCategory
+import org.codehaus.groovy.parser.antlr4.util.GroovySourceGenerator
 
 /**
  * Created by Daniel.Sun on 2016/8/14.
@@ -49,7 +51,13 @@ class GroovyParserTest extends GroovyTestCase {
             assert newAST == oldAST
         }
 
-        println "${path}\t\t\t\t\tdiff:${(newElapsedTime - oldElapsedTime) / 1000}ms,\tnew:${newElapsedTime / 1000}ms,\told:${oldElapsedTime / 1000}ms."
+        assert genSrc(newAST) == genSrc(oldAST)
+
+        log.info "${path}\t\t\t\t\tdiff:${(newElapsedTime - oldElapsedTime) / 1000}ms,\tnew:${newElapsedTime / 1000}ms,\told:${oldElapsedTime / 1000}ms."
+    }
+
+    static String genSrc(ModuleNode ast) {
+        return new GroovySourceGenerator(ast).gen();
     }
 
     static profile(Closure c) {
