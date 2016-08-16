@@ -45,15 +45,20 @@ class GroovyParserTest extends GroovyTestCase {
 
         File file = new File("$RESOURCES_PATH/$path");
         def (oldAST, oldElapsedTime) = profile { defaultParser.parse(file) }
+        def (oldAST2, oldElapsedTime2) = profile { defaultParser.parse(file) }
         def (newAST, newElapsedTime) = profile { antlr4Parser.parse(file) }
 
-        ASTComparatorCategory.apply(conf) {
-            assert newAST == oldAST
-        }
-
-        assert genSrc(newAST) == genSrc(oldAST)
+        assertAST(oldAST2, oldAST, conf);
+        assertAST(newAST, oldAST, conf);
 
         log.info "${path}\t\t\t\t\tdiff:${(newElapsedTime - oldElapsedTime) / 1000}ms,\tnew:${newElapsedTime / 1000}ms,\told:${oldElapsedTime / 1000}ms."
+    }
+
+    static assertAST(ast1, ast2, conf) {
+        ASTComparatorCategory.apply(conf) {
+            assert ast1 == ast2
+        }
+        assert genSrc(ast1) == genSrc(ast2)
     }
 
     static String genSrc(ModuleNode ast) {
