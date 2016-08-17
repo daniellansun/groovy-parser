@@ -21,7 +21,9 @@ package org.codehaus.groovy.parser.antlr4;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.codehaus.groovy.ast.ASTNode;
 import org.codehaus.groovy.ast.ModuleNode;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.codehaus.groovy.ast.stmt.ReturnStatement;
@@ -36,6 +38,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.BitSet;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Created by Daniel.Sun on 2016/8/14.
@@ -62,22 +65,48 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Object visitCompilationUnit(GroovyParser.CompilationUnitContext ctx) {
+
+        ctx.children.stream().forEach(this::visit);
+
         // if groovy source file only contains blank(including EOF), add "return null" to the AST
         if (this.isBlankScript(ctx)) {
             this.addEmptyReturnStatement();
             return moduleNode;
         }
 
-        ctx.children.stream().forEach(this::visit);
-
         return moduleNode;
+    }
+
+    @Override
+    public Object visitPackageDeclaration(GroovyParser.PackageDeclarationContext ctx) {
+        String packageName = this.visitQualifiedName(ctx.qualifiedName());
+        moduleNode.setPackageName(packageName + ".");
+        // TODO SUPPORT ANNOTATIONS
+        setupNodeLocation(moduleNode.getPackage(), ctx);
+
+        return null;
+    }
+
+    @Override
+    public Object visitAnnotation(GroovyParser.AnnotationContext ctx) {
+        // TODO
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public String visitQualifiedName(GroovyParser.QualifiedNameContext ctx) {
+        return ctx.Identifier().stream()
+                    .map(ParseTree::getText)
+                    .collect(Collectors.joining("."));
     }
 
     private boolean isBlankScript(GroovyParser.CompilationUnitContext ctx) {
         long blankCnt =
-                ctx.children.stream().filter(e -> e instanceof GroovyParser.NlsContext ||
-                        e instanceof TerminalNode && (((TerminalNode) e).getSymbol().getType() == GroovyLangParser.EOF)
-                ).count();
+                ctx.children.stream()
+                        .filter(e -> e instanceof GroovyParser.NlsContext
+                                || e instanceof GroovyParser.PackageDeclarationContext
+                                || e instanceof TerminalNode && (((TerminalNode) e).getSymbol().getType() == GroovyLangParser.EOF)
+                        ).count();
 
 
         return blankCnt == ctx.children.size();
@@ -85,6 +114,48 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private void addEmptyReturnStatement() {
         moduleNode.addStatement(new ReturnStatement(new ConstantExpression(null)));
+    }
+
+    /**
+     * Sets location(lineNumber, colNumber, lastLineNumber, lastColumnNumber) for node using standard context information.
+     * Note: this method is implemented to be closed over ASTNode. It returns same node as it received in arguments.
+     *
+     * @param astNode Node to be modified.
+     * @param ctx     Context from which information is obtained.
+     * @return Modified astNode.
+     */
+    private <T extends ASTNode> T setupNodeLocation(T astNode, ParserRuleContext ctx) {
+        if (null == ctx) {
+            return astNode;
+        }
+
+        Token start = ctx.getStart();
+        Token stop = ctx.getStop();
+
+        astNode.setLineNumber(start.getLine());
+        astNode.setColumnNumber(start.getCharPositionInLine() + 1);
+        astNode.setLastLineNumber(stop.getLine());
+        astNode.setLastColumnNumber(stop.getCharPositionInLine() + 1 + stop.getText().length());
+
+        return astNode;
+    }
+
+    private <T extends ASTNode> T setupNodeLocation(T astNode, Token token) {
+        astNode.setLineNumber(token.getLine());
+        astNode.setColumnNumber(token.getCharPositionInLine() + 1);
+        astNode.setLastLineNumber(token.getLine());
+        astNode.setLastColumnNumber(token.getCharPositionInLine() + 1 + token.getText().length());
+
+        return astNode;
+    }
+
+    private <T extends ASTNode> T setupNodeLocation(T astNode, ASTNode source) {
+        astNode.setLineNumber(source.getLineNumber());
+        astNode.setColumnNumber(source.getColumnNumber());
+        astNode.setLastLineNumber(source.getLastLineNumber());
+        astNode.setLastColumnNumber(source.getLastColumnNumber());
+
+        return astNode;
     }
 
     private String readSourceCode(SourceUnit sourceUnit) {

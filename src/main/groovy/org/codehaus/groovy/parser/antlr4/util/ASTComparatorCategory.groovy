@@ -180,7 +180,7 @@ class ASTComparatorCategory {
                     continue;
                 }
 
-                def aValue = a."${propName}";
+                def aValue = a."${propName}"; // FIXME when the propName is "classes", a classNode will be added to moduleNode.classes
                 def bValue = b."${propName}";
 
                 String orderName = me.value[1];

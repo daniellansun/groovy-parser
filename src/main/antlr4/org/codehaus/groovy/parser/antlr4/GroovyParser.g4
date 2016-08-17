@@ -31,15 +31,15 @@ options { tokenVocab = GroovyLexer; }
 compilationUnit
     :
         nls
-        packageDeclaration? importDeclaration* typeDeclaration* EOF
+        packageDeclaration? statement* EOF
     ;
 
 packageDeclaration
-    :   annotation* PACKAGE qualifiedName SEMI
+    :   annotation* PACKAGE qualifiedName (sep | EOF)
     ;
 
 importDeclaration
-    :   IMPORT STATIC? qualifiedName (DOT MUL)? SEMI
+    :   IMPORT STATIC? qualifiedName (DOT MUL | AS Identifier)? sep
     ;
 
 typeDeclaration
@@ -47,7 +47,7 @@ typeDeclaration
     |   classOrInterfaceModifier* enumDeclaration
     |   classOrInterfaceModifier* interfaceDeclaration
     |   classOrInterfaceModifier* annotationTypeDeclaration
-    |   SEMI
+    |   sep
     ;
 
 modifier
@@ -392,22 +392,27 @@ localVariableDeclaration
 
 statement
     :   block
-    |   ASSERT expression (COLON expression)? SEMI
+    |   ASSERT expression (COLON expression)? sep
     |   IF parExpression statement (ELSE statement)?
     |   FOR LPAREN forControl RPAREN statement
     |   WHILE parExpression statement
-    |   DO statement WHILE parExpression SEMI
+    |   DO statement WHILE parExpression sep
     |   TRY block (catchClause+ finallyBlock? | finallyBlock)
     |   TRY resourceSpecification block catchClause* finallyBlock?
     |   SWITCH parExpression LBRACE switchBlockStatementGroup* switchLabel* RBRACE
     |   SYNCHRONIZED parExpression block
-    |   RETURN expression? SEMI
-    |   THROW expression SEMI
-    |   BREAK Identifier? SEMI
-    |   CONTINUE Identifier? SEMI
-    |   SEMI
-    |   statementExpression SEMI
+    |   RETURN expression? sep
+    |   THROW expression sep
+    |   BREAK Identifier? sep
+    |   CONTINUE Identifier? sep
+    |   sep
+    |   statementExpression sep
     |   Identifier COLON statement
+
+    // Import statement.  Can be used in any scope.  Has "import x as y" also.
+    |   importDeclaration
+
+    |   typeDeclaration
     ;
 
 catchClause

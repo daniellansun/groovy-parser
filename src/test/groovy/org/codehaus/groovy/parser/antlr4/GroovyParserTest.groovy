@@ -19,6 +19,7 @@
 package org.codehaus.groovy.parser.antlr4
 
 import org.codehaus.groovy.ast.ModuleNode
+import org.codehaus.groovy.ast.PackageNode
 import org.codehaus.groovy.parser.AbstractParser
 import org.codehaus.groovy.parser.Antlr4Parser
 import org.codehaus.groovy.parser.DefaultParser
@@ -35,8 +36,16 @@ class GroovyParserTest extends GroovyTestCase {
 
     void tearDown() {}
 
-    void "test groovy core"() {
+    void "test groovy core - Comments"() {
         test('core/Comments.groovy', ASTComparatorCategory.DEFAULT_CONFIGURATION);
+    }
+
+    void "test groovy core - PackageDeclaration"() {
+        test('core/PackageDeclaration_01.groovy', addIgnore([PackageNode], ASTComparatorCategory.LOCATION_IGNORE_LIST));
+        test('core/PackageDeclaration_02.groovy', addIgnore([PackageNode], ASTComparatorCategory.LOCATION_IGNORE_LIST));
+        test('core/PackageDeclaration_03.groovy', addIgnore([PackageNode], ASTComparatorCategory.LOCATION_IGNORE_LIST));
+        test('core/PackageDeclaration_04.groovy', addIgnore([PackageNode], ASTComparatorCategory.LOCATION_IGNORE_LIST));
+        test('core/PackageDeclaration_05.groovy', addIgnore([PackageNode], ASTComparatorCategory.LOCATION_IGNORE_LIST));
     }
 
     static test(String path, conf) {
@@ -45,10 +54,8 @@ class GroovyParserTest extends GroovyTestCase {
 
         File file = new File("$RESOURCES_PATH/$path");
         def (oldAST, oldElapsedTime) = profile { defaultParser.parse(file) }
-        def (oldAST2, oldElapsedTime2) = profile { defaultParser.parse(file) }
         def (newAST, newElapsedTime) = profile { antlr4Parser.parse(file) }
 
-        assertAST(oldAST2, oldAST, conf);
         assertAST(newAST, oldAST, conf);
 
         log.info "${path}\t\t\t\t\tdiff:${(newElapsedTime - oldElapsedTime) / 1000}ms,\tnew:${newElapsedTime / 1000}ms,\told:${oldElapsedTime / 1000}ms."
@@ -71,5 +78,17 @@ class GroovyParserTest extends GroovyTestCase {
         long end = System.currentTimeMillis()
 
         return [result, end - begin];
+    }
+
+    static addIgnore(Class aClass, ArrayList<String> ignore, Map<Class, List<String>> c = null) {
+        c = c ?: ASTComparatorCategory.DEFAULT_CONFIGURATION.clone() as Map<Class, List<String>>;
+        c[aClass].addAll(ignore)
+        return c
+    }
+
+    static addIgnore(Collection<Class> aClass, ArrayList<String> ignore, Map<Class, List<String>> c = null) {
+        c = c ?: ASTComparatorCategory.DEFAULT_CONFIGURATION.clone() as Map<Class, List<String>>;
+        aClass.each { c[it].addAll(ignore) }
+        return c
     }
 }
