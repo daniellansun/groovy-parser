@@ -56,6 +56,9 @@ lexer grammar GroovyLexer;
     protected void rollbackOneChar() {}
 }
 
+// Groovy keywords
+AS            : 'as';
+
 // §3.9 Keywords
 
 ABSTRACT      : 'abstract';
@@ -108,6 +111,7 @@ TRY           : 'try';
 VOID          : 'void';
 VOLATILE      : 'volatile';
 WHILE         : 'while';
+
 
 // §3.10.1 Integer Literals
 

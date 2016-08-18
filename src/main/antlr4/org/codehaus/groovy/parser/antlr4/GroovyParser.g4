@@ -31,15 +31,15 @@ options { tokenVocab = GroovyLexer; }
 compilationUnit
     :
         nls
-        packageDeclaration? statement* EOF
+        (packageDeclaration (sep | EOF))? statement* EOF
     ;
 
 packageDeclaration
-    :   annotation* PACKAGE qualifiedName (sep | EOF)
+    :   annotation* PACKAGE qualifiedName
     ;
 
 importDeclaration
-    :   IMPORT STATIC? qualifiedName (DOT MUL | AS Identifier)? sep
+    :   IMPORT STATIC? qualifiedName (DOT MUL | AS Identifier)?
     ;
 
 typeDeclaration
@@ -410,7 +410,7 @@ statement
     |   Identifier COLON statement
 
     // Import statement.  Can be used in any scope.  Has "import x as y" also.
-    |   importDeclaration
+    |   importDeclaration (sep | EOF)
 
     |   typeDeclaration
     ;

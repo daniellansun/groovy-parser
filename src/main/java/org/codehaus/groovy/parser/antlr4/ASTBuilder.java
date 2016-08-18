@@ -23,8 +23,7 @@ import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.codehaus.groovy.ast.ASTNode;
-import org.codehaus.groovy.ast.ModuleNode;
+import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.codehaus.groovy.ast.stmt.ReturnStatement;
 import org.codehaus.groovy.control.SourceUnit;
@@ -36,14 +35,22 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import static org.codehaus.groovy.parser.antlr4.GroovyParser.*;
+import static org.codehaus.groovy.runtime.DefaultGroovyMethods.*;
 
 /**
  * Created by Daniel.Sun on 2016/8/14.
  */
 public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements GroovyParserVisitor<Object> {
+
+    public static final Class<ImportNode> IMPORT_NODE_CLASS = ImportNode.class;
 
     public ASTBuilder(SourceUnit sourceUnit, ClassLoader classLoader) {
         this.classLoader = classLoader;
@@ -51,20 +58,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         this.moduleNode = new ModuleNode(sourceUnit);
 
         this.lexer = new GroovyLangLexer(
-                            new ANTLRInputStream(
-                                    this.readSourceCode(sourceUnit)));
+                new ANTLRInputStream(
+                        this.readSourceCode(sourceUnit)));
         this.parser = new GroovyLangParser(
-                            new CommonTokenStream(this.lexer));
+                new CommonTokenStream(this.lexer));
 
         this.setupErrorListener(this.parser);
     }
 
     public ModuleNode buildAST() {
-        return (ModuleNode) this.visit(parser.compilationUnit());
+        ModuleNode moduleNode = (ModuleNode) this.visit(parser.compilationUnit());
+
+        return moduleNode;
     }
 
     @Override
-    public Object visitCompilationUnit(GroovyParser.CompilationUnitContext ctx) {
+    public Object visitCompilationUnit(CompilationUnitContext ctx) {
 
         ctx.children.stream().forEach(this::visit);
 
@@ -78,33 +87,107 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Object visitPackageDeclaration(GroovyParser.PackageDeclarationContext ctx) {
+    public Object visitPackageDeclaration(PackageDeclarationContext ctx) {
         String packageName = this.visitQualifiedName(ctx.qualifiedName());
         moduleNode.setPackageName(packageName + ".");
-        // TODO SUPPORT ANNOTATIONS
-        setupNodeLocation(moduleNode.getPackage(), ctx);
+        // TODO support annotations
 
-        return null;
+        return configureAST(moduleNode.getPackage(), ctx);
     }
 
     @Override
-    public Object visitAnnotation(GroovyParser.AnnotationContext ctx) {
+    public Object visitAnnotation(AnnotationContext ctx) {
         // TODO
         return visitChildren(ctx);
     }
 
     @Override
-    public String visitQualifiedName(GroovyParser.QualifiedNameContext ctx) {
+    public String visitQualifiedName(QualifiedNameContext ctx) {
         return ctx.Identifier().stream()
-                    .map(ParseTree::getText)
-                    .collect(Collectors.joining("."));
+                .map(ParseTree::getText)
+                .collect(Collectors.joining("."));
     }
 
-    private boolean isBlankScript(GroovyParser.CompilationUnitContext ctx) {
+    @Override
+    public Object visitImportDeclaration(ImportDeclarationContext ctx) {
+        // GROOVY-6094
+        moduleNode.putNodeMetaData(IMPORT_NODE_CLASS, IMPORT_NODE_CLASS);
+
+        ImportNode importNode = null;
+
+        boolean hasStatic = asBoolean(ctx.STATIC());
+        boolean hasStar = asBoolean(ctx.MUL());
+        boolean hasAlias = asBoolean(ctx.Identifier());
+
+        if (hasStatic) {
+
+            if (hasStar) { // e.g. import static java.lang.Math.*
+                String qualifiedName = visitQualifiedName(ctx.qualifiedName());
+                ClassNode type = ClassHelper.make(qualifiedName);
+
+                // TODO support annotations
+                moduleNode.addStaticStarImport(type.getText(), type, new ArrayList<AnnotationNode>());
+
+                importNode = last(moduleNode.getStaticStarImports().values());
+            } else { // e.g. import static java.lang.Math.pow
+                List<TerminalNode> identifierList = new LinkedList<>(ctx.qualifiedName().Identifier());
+                String name = pop(identifierList).getText();
+                ClassNode classNode =
+                        ClassHelper.make(
+                                identifierList.stream()
+                                        .map(ParseTree::getText)
+                                        .collect(Collectors.joining(".")));
+                String alias = hasAlias ? ctx.Identifier().getText() : name;
+
+                // TODO support annotations
+                moduleNode.addStaticImport(classNode, name, alias, new ArrayList<AnnotationNode>());
+
+                importNode = last(moduleNode.getStaticImports().values());
+            }
+        } else {
+            if (hasStar) { // e.g. import java.util.*
+                String qualifiedName = visitQualifiedName(ctx.qualifiedName());
+
+                // TODO support annotations
+                moduleNode.addStarImport(qualifiedName + ".", new ArrayList<AnnotationNode>());
+
+                importNode = last(moduleNode.getStarImports());
+            } else { // e.g. import java.util.Map
+                String qualifiedName = visitQualifiedName(ctx.qualifiedName());
+                String name = last(ctx.qualifiedName().Identifier()).getText();
+                ClassNode classNode = ClassHelper.make(qualifiedName);
+                String alias = hasAlias
+                        ? ctx.Identifier().getText()
+                        : name;
+
+                // TODO support annotations
+                moduleNode.addImport(alias, classNode, new ArrayList<AnnotationNode>());
+
+                importNode = last(moduleNode.getImports());
+            }
+        }
+
+        // TODO verify whether the following code is useful or not
+        // we're using node metadata here in order to fix GROOVY-6094
+        // without breaking external APIs
+        Object node = moduleNode.getNodeMetaData(IMPORT_NODE_CLASS);
+        if (null != node && IMPORT_NODE_CLASS != node) {
+            configureAST((ImportNode) node, importNode);
+        }
+        moduleNode.removeNodeMetaData(IMPORT_NODE_CLASS);
+
+
+        return configureAST(importNode, ctx);
+    }
+
+
+    private boolean isBlankScript(CompilationUnitContext ctx) {
         long blankCnt =
                 ctx.children.stream()
-                        .filter(e -> e instanceof GroovyParser.NlsContext
-                                || e instanceof GroovyParser.PackageDeclarationContext
+                        .filter(e -> e instanceof NlsContext
+                                || e instanceof PackageDeclarationContext
+                                || e instanceof SepContext
+                                || e instanceof StatementContext && asBoolean(((StatementContext) e).importDeclaration())
                                 || e instanceof TerminalNode && (((TerminalNode) e).getSymbol().getType() == GroovyLangParser.EOF)
                         ).count();
 
@@ -124,7 +207,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
      * @param ctx     Context from which information is obtained.
      * @return Modified astNode.
      */
-    private <T extends ASTNode> T setupNodeLocation(T astNode, ParserRuleContext ctx) {
+    private <T extends ASTNode> T configureAST(T astNode, ParserRuleContext ctx) {
         if (null == ctx) {
             return astNode;
         }
@@ -140,7 +223,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return astNode;
     }
 
-    private <T extends ASTNode> T setupNodeLocation(T astNode, Token token) {
+    private <T extends ASTNode> T configureAST(T astNode, Token token) {
         astNode.setLineNumber(token.getLine());
         astNode.setColumnNumber(token.getCharPositionInLine() + 1);
         astNode.setLastLineNumber(token.getLine());
@@ -149,7 +232,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return astNode;
     }
 
-    private <T extends ASTNode> T setupNodeLocation(T astNode, ASTNode source) {
+    private <T extends ASTNode> T configureAST(T astNode, ASTNode source) {
         astNode.setLineNumber(source.getLineNumber());
         astNode.setColumnNumber(source.getColumnNumber());
         astNode.setLastLineNumber(source.getLastLineNumber());

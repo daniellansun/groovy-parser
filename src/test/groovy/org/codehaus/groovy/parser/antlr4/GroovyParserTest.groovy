@@ -37,15 +37,30 @@ class GroovyParserTest extends GroovyTestCase {
     void tearDown() {}
 
     void "test groovy core - Comments"() {
-        test('core/Comments.groovy', ASTComparatorCategory.DEFAULT_CONFIGURATION);
+        test('core/Comments.groovy');
     }
 
     void "test groovy core - PackageDeclaration"() {
-        test('core/PackageDeclaration_01.groovy', addIgnore([PackageNode], ASTComparatorCategory.LOCATION_IGNORE_LIST));
-        test('core/PackageDeclaration_02.groovy', addIgnore([PackageNode], ASTComparatorCategory.LOCATION_IGNORE_LIST));
-        test('core/PackageDeclaration_03.groovy', addIgnore([PackageNode], ASTComparatorCategory.LOCATION_IGNORE_LIST));
-        test('core/PackageDeclaration_04.groovy', addIgnore([PackageNode], ASTComparatorCategory.LOCATION_IGNORE_LIST));
-        test('core/PackageDeclaration_05.groovy', addIgnore([PackageNode], ASTComparatorCategory.LOCATION_IGNORE_LIST));
+        test('core/PackageDeclaration_01.groovy');
+        test('core/PackageDeclaration_02.groovy');
+        test('core/PackageDeclaration_03.groovy');
+        test('core/PackageDeclaration_04.groovy');
+        test('core/PackageDeclaration_05.groovy');
+    }
+
+    void "test groovy core - ImportDeclaration"() {
+        test('core/ImportDeclaration_01.groovy');
+        test('core/ImportDeclaration_02.groovy');
+        test('core/ImportDeclaration_03.groovy');
+        test('core/ImportDeclaration_04.groovy');
+        test('core/ImportDeclaration_05.groovy');
+        test('core/ImportDeclaration_06.groovy');
+        test('core/ImportDeclaration_07.groovy');
+        test('core/ImportDeclaration_08.groovy');
+    }
+
+    static test(String path) {
+        test(path, ASTComparatorCategory.DEFAULT_CONFIGURATION)
     }
 
     static test(String path, conf) {
