@@ -19,10 +19,9 @@
 package org.codehaus.groovy.parser.antlr4
 
 import org.codehaus.groovy.ast.ModuleNode
-import org.codehaus.groovy.ast.PackageNode
 import org.codehaus.groovy.parser.AbstractParser
 import org.codehaus.groovy.parser.Antlr4Parser
-import org.codehaus.groovy.parser.DefaultParser
+import org.codehaus.groovy.parser.Antlr2Parser
 import org.codehaus.groovy.parser.antlr4.util.ASTComparatorCategory
 import org.codehaus.groovy.parser.antlr4.util.GroovySourceGenerator
 
@@ -64,11 +63,11 @@ class GroovyParserTest extends GroovyTestCase {
     }
 
     static test(String path, conf) {
-        AbstractParser defaultParser = new DefaultParser()
+        AbstractParser antlr2Parser = new Antlr2Parser()
         AbstractParser antlr4Parser = new Antlr4Parser()
 
         File file = new File("$RESOURCES_PATH/$path");
-        def (oldAST, oldElapsedTime) = profile { defaultParser.parse(file) }
+        def (oldAST, oldElapsedTime) = profile { antlr2Parser.parse(file) }
         def (newAST, newElapsedTime) = profile { antlr4Parser.parse(file) }
 
         assertAST(newAST, oldAST, conf);

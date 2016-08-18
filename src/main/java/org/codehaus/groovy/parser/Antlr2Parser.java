@@ -23,7 +23,7 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 /**
  * Created by Daniel.Sun on 2016/8/14.
  */
-public class DefaultParser extends AbstractParser {
+public class Antlr2Parser extends AbstractParser {
     @Override
     protected CompilerConfiguration getCompilerConfiguration() {
         return CompilerConfiguration.DEFAULT;
