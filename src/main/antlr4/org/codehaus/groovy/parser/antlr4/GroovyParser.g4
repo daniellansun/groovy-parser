@@ -35,7 +35,7 @@ compilationUnit
     ;
 
 packageDeclaration
-    :   annotation* PACKAGE qualifiedName
+    :   (annotation nls)* PACKAGE qualifiedName
     ;
 
 importDeclaration

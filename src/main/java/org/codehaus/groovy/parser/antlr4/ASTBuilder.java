@@ -71,7 +71,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Object visitCompilationUnit(CompilationUnitContext ctx) {
+    public ModuleNode visitCompilationUnit(CompilationUnitContext ctx) {
 
         ctx.children.stream().forEach(this::visit);
 
@@ -85,18 +85,35 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Object visitPackageDeclaration(PackageDeclarationContext ctx) {
+    public PackageNode visitPackageDeclaration(PackageDeclarationContext ctx) {
         String packageName = this.visitQualifiedName(ctx.qualifiedName());
         moduleNode.setPackageName(packageName + ".");
-        // TODO support annotations
 
-        return configureAST(moduleNode.getPackage(), ctx);
+        PackageNode packageNode = moduleNode.getPackage();
+
+        ctx.annotation().stream().forEach(e -> { packageNode.addAnnotation(this.visitAnnotation(e)); });
+
+        return configureAST(packageNode, ctx);
     }
 
     @Override
-    public Object visitAnnotation(AnnotationContext ctx) {
-        // TODO
-        return visitChildren(ctx);
+    public AnnotationNode visitAnnotation(AnnotationContext ctx) {
+        String annotationName = this.visitAnnotationName(ctx.annotationName());
+
+        AnnotationNode annotationNode = new AnnotationNode(ClassHelper.make(annotationName));
+
+        if (asBoolean(ctx.elementValuePairs())) {
+            // TODO
+        } else if (asBoolean(ctx.elementValue())) {
+            // TODO
+        }
+
+        return configureAST(annotationNode, ctx);
+    }
+
+    @Override
+    public String visitAnnotationName(GroovyParser.AnnotationNameContext ctx) {
+        return this.visitQualifiedName(ctx.qualifiedName());
     }
 
     @Override
@@ -107,7 +124,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Object visitImportDeclaration(ImportDeclarationContext ctx) {
+    public ImportNode visitImportDeclaration(ImportDeclarationContext ctx) {
         // GROOVY-6094
         moduleNode.putNodeMetaData(IMPORT_NODE_CLASS, IMPORT_NODE_CLASS);
 
