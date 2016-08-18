@@ -50,8 +50,6 @@ import static org.codehaus.groovy.runtime.DefaultGroovyMethods.*;
  */
 public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements GroovyParserVisitor<Object> {
 
-    public static final Class<ImportNode> IMPORT_NODE_CLASS = ImportNode.class;
-
     public ASTBuilder(SourceUnit sourceUnit, ClassLoader classLoader) {
         this.classLoader = classLoader;
         this.sourceUnit = sourceUnit;
@@ -122,7 +120,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (hasStatic) {
 
             if (hasStar) { // e.g. import static java.lang.Math.*
-                String qualifiedName = visitQualifiedName(ctx.qualifiedName());
+                String qualifiedName = this.visitQualifiedName(ctx.qualifiedName());
                 ClassNode type = ClassHelper.make(qualifiedName);
 
                 // TODO support annotations
@@ -137,7 +135,9 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 identifierList.stream()
                                         .map(ParseTree::getText)
                                         .collect(Collectors.joining(".")));
-                String alias = hasAlias ? ctx.Identifier().getText() : name;
+                String alias = hasAlias
+                        ? ctx.Identifier().getText()
+                        : name;
 
                 // TODO support annotations
                 moduleNode.addStaticImport(classNode, name, alias, new ArrayList<AnnotationNode>());
@@ -146,14 +146,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
         } else {
             if (hasStar) { // e.g. import java.util.*
-                String qualifiedName = visitQualifiedName(ctx.qualifiedName());
+                String qualifiedName = this.visitQualifiedName(ctx.qualifiedName());
 
                 // TODO support annotations
                 moduleNode.addStarImport(qualifiedName + ".", new ArrayList<AnnotationNode>());
 
                 importNode = last(moduleNode.getStarImports());
             } else { // e.g. import java.util.Map
-                String qualifiedName = visitQualifiedName(ctx.qualifiedName());
+                String qualifiedName = this.visitQualifiedName(ctx.qualifiedName());
                 String name = last(ctx.qualifiedName().Identifier()).getText();
                 ClassNode classNode = ClassHelper.make(qualifiedName);
                 String alias = hasAlias
@@ -308,5 +308,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private final ClassLoader classLoader;
     private final GroovyLangLexer lexer;
     private final GroovyLangParser parser;
-    private final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
+    private static final Class<ImportNode> IMPORT_NODE_CLASS = ImportNode.class;
+    private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 }
