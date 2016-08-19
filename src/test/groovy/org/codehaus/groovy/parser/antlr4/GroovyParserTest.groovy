@@ -63,6 +63,10 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/Annotation_02.groovy');
         test('core/Annotation_03.groovy');
         test('core/Annotation_04.groovy');
+        test('core/Annotation_05.groovy');
+        test('core/Annotation_06.groovy');
+        test('core/Annotation_07.groovy');
+        test('core/Annotation_08.groovy');
     }
 
     static test(String path) {

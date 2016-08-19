@@ -35,7 +35,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -91,37 +90,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         PackageNode packageNode = moduleNode.getPackage();
 
-        ctx.annotation().stream().forEach(e -> { packageNode.addAnnotation(this.visitAnnotation(e)); });
+        this.visitAnnotationsOpt(ctx.annotationsOpt()).stream()
+                .forEach(packageNode::addAnnotation);
 
         return configureAST(packageNode, ctx);
     }
 
-    @Override
-    public AnnotationNode visitAnnotation(AnnotationContext ctx) {
-        String annotationName = this.visitAnnotationName(ctx.annotationName());
-
-        AnnotationNode annotationNode = new AnnotationNode(ClassHelper.make(annotationName));
-
-        if (asBoolean(ctx.elementValuePairs())) {
-            // TODO
-        } else if (asBoolean(ctx.elementValue())) {
-            // TODO
-        }
-
-        return configureAST(annotationNode, ctx);
-    }
-
-    @Override
-    public String visitAnnotationName(GroovyParser.AnnotationNameContext ctx) {
-        return this.visitQualifiedName(ctx.qualifiedName());
-    }
-
-    @Override
-    public String visitQualifiedName(QualifiedNameContext ctx) {
-        return ctx.Identifier().stream()
-                .map(ParseTree::getText)
-                .collect(Collectors.joining("."));
-    }
 
     @Override
     public ImportNode visitImportDeclaration(ImportDeclarationContext ctx) {
@@ -134,14 +108,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         boolean hasStar = asBoolean(ctx.MUL());
         boolean hasAlias = asBoolean(ctx.Identifier());
 
+        List<AnnotationNode> annotationNodeList = this.visitAnnotationsOpt(ctx.annotationsOpt());
+
         if (hasStatic) {
 
             if (hasStar) { // e.g. import static java.lang.Math.*
                 String qualifiedName = this.visitQualifiedName(ctx.qualifiedName());
                 ClassNode type = ClassHelper.make(qualifiedName);
 
-                // TODO support annotations
-                moduleNode.addStaticStarImport(type.getText(), type, new ArrayList<AnnotationNode>());
+
+                moduleNode.addStaticStarImport(type.getText(), type, annotationNodeList);
 
                 importNode = last(moduleNode.getStaticStarImports().values());
             } else { // e.g. import static java.lang.Math.pow
@@ -156,8 +132,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         ? ctx.Identifier().getText()
                         : name;
 
-                // TODO support annotations
-                moduleNode.addStaticImport(classNode, name, alias, new ArrayList<AnnotationNode>());
+                moduleNode.addStaticImport(classNode, name, alias, annotationNodeList);
 
                 importNode = last(moduleNode.getStaticImports().values());
             }
@@ -165,8 +140,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             if (hasStar) { // e.g. import java.util.*
                 String qualifiedName = this.visitQualifiedName(ctx.qualifiedName());
 
-                // TODO support annotations
-                moduleNode.addStarImport(qualifiedName + ".", new ArrayList<AnnotationNode>());
+                moduleNode.addStarImport(qualifiedName + ".", annotationNodeList);
 
                 importNode = last(moduleNode.getStarImports());
             } else { // e.g. import java.util.Map
@@ -177,8 +151,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         ? ctx.Identifier().getText()
                         : name;
 
-                // TODO support annotations
-                moduleNode.addImport(alias, classNode, new ArrayList<AnnotationNode>());
+                moduleNode.addImport(alias, classNode, annotationNodeList);
 
                 importNode = last(moduleNode.getImports());
             }
@@ -197,6 +170,39 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return configureAST(importNode, ctx);
     }
 
+    @Override
+    public List<AnnotationNode> visitAnnotationsOpt(AnnotationsOptContext ctx) {
+        return ctx.annotation().stream()
+                .map(this::visitAnnotation)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public AnnotationNode visitAnnotation(AnnotationContext ctx) {
+        String annotationName = this.visitAnnotationName(ctx.annotationName());
+
+        AnnotationNode annotationNode = new AnnotationNode(ClassHelper.make(annotationName));
+
+        if (asBoolean(ctx.elementValuePairs())) {
+            // TODO
+        } else if (asBoolean(ctx.elementValue())) {
+            // TODO
+        }
+
+        return configureAST(annotationNode, ctx);
+    }
+
+    @Override
+    public String visitAnnotationName(AnnotationNameContext ctx) {
+        return this.visitQualifiedName(ctx.qualifiedName());
+    }
+
+    @Override
+    public String visitQualifiedName(QualifiedNameContext ctx) {
+        return ctx.Identifier().stream()
+                .map(ParseTree::getText)
+                .collect(Collectors.joining("."));
+    }
 
     private boolean isBlankScript(CompilationUnitContext ctx) {
         long blankCnt =

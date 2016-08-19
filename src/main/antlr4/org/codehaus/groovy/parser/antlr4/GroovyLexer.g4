@@ -58,6 +58,7 @@ lexer grammar GroovyLexer;
 
 // Groovy keywords
 AS            : 'as';
+IN            : 'in';
 
 // §3.9 Keywords
 
@@ -376,7 +377,6 @@ NullLiteral
 
 RANGE_INCLUSIVE : '..';
 RANGE_EXCLUSIVE : '..<';
-TRIPLE_DOT      : '...';
 SPREAD_DOT      : '*.';
 OPTIONAL_DOT    : '?.';
 ELVIS_OPERATOR  : '?:';
@@ -385,7 +385,7 @@ REGEX_FIND      : '=~';
 REGEX_MATCH     : '==~';
 STAR_STAR       : '**';
 STAR_STAR_ASSIGN: '**=';
-COMPARE_TO      : '<=>';
+SPACESHIP       : '<=>';
 IDENTICAL       : '===';
 NOT_IDENTICAL   : '!==';
 ARROW           : '->';

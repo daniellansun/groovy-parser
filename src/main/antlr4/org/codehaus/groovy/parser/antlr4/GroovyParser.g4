@@ -35,11 +35,11 @@ compilationUnit
     ;
 
 packageDeclaration
-    :   (annotation nls)* PACKAGE qualifiedName
+    :   annotationsOpt PACKAGE qualifiedName
     ;
 
 importDeclaration
-    :   IMPORT STATIC? qualifiedName (DOT MUL | AS Identifier)?
+    :   annotationsOpt IMPORT STATIC? qualifiedName (DOT MUL | AS Identifier)?
     ;
 
 typeDeclaration
@@ -307,6 +307,10 @@ literal
     ;
 
 // ANNOTATIONS
+
+annotationsOpt
+    :   (annotation nls)*
+    ;
 
 annotation
     :   AT annotationName ( LPAREN ( elementValuePairs | elementValue )? RPAREN )?
