@@ -69,6 +69,10 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/Annotation_08.groovy');
     }
 
+    void "test groovy core - Literal"() {
+        test('core/Literal_01.groovy');
+    }
+
     static test(String path) {
         test(path, ASTComparatorCategory.DEFAULT_CONFIGURATION)
     }

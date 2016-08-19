@@ -145,7 +145,7 @@ BinaryIntegerLiteral
 
 fragment
 IntegerTypeSuffix
-    :   [lL]
+    :   [lLiIgG]
     ;
 
 fragment
@@ -281,7 +281,7 @@ Sign
 
 fragment
 FloatTypeSuffix
-    :   [fFdD]
+    :   [fFdDgG]
     ;
 
 fragment

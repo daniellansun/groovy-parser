@@ -31,7 +31,7 @@ options { tokenVocab = GroovyLexer; }
 compilationUnit
     :
         nls
-        (packageDeclaration (sep | EOF))? statement* EOF
+        (packageDeclaration (sep | EOF))? (statement (sep | EOF))* EOF
     ;
 
 packageDeclaration
@@ -298,12 +298,12 @@ qualifiedName
     ;
 
 literal
-    :   IntegerLiteral
-    |   FloatingPointLiteral
-    |   CharacterLiteral
-    |   StringLiteral
-    |   BooleanLiteral
-    |   NullLiteral
+    :   IntegerLiteral                                                                      #integerLiteralAlt
+    |   FloatingPointLiteral                                                                #floatingPointLiteralAlt
+    |   CharacterLiteral                                                                    #charLiteralAlt
+    |   StringLiteral                                                                       #stringLiteralAlt
+    |   BooleanLiteral                                                                      #booleanLiteralAlt
+    |   NullLiteral                                                                         #nullLiteralAlt
     ;
 
 // ANNOTATIONS
@@ -395,28 +395,28 @@ localVariableDeclaration
     ;
 
 statement
-    :   block
-    |   ASSERT expression (COLON expression)? sep
-    |   IF parExpression statement (ELSE statement)?
-    |   FOR LPAREN forControl RPAREN statement
-    |   WHILE parExpression statement
-    |   DO statement WHILE parExpression sep
-    |   TRY block (catchClause+ finallyBlock? | finallyBlock)
-    |   TRY resourceSpecification block catchClause* finallyBlock?
-    |   SWITCH parExpression LBRACE switchBlockStatementGroup* switchLabel* RBRACE
-    |   SYNCHRONIZED parExpression block
-    |   RETURN expression? sep
-    |   THROW expression sep
-    |   BREAK Identifier? sep
-    |   CONTINUE Identifier? sep
-    |   sep
-    |   statementExpression sep
-    |   Identifier COLON statement
+    :   block                                                                               #blockStmtAlt
+    |   ASSERT expression (COLON expression)? sep                                           #assertStmtAlt
+    |   IF parExpression statement (ELSE statement)?                                        #ifElseStmtAlt
+    |   FOR LPAREN forControl RPAREN statement                                              #forStmtAlt
+    |   WHILE parExpression statement                                                       #whileStmtAlt
+    |   DO statement WHILE parExpression sep                                                #doWhileStmtAlt
+    |   TRY block (catchClause+ finallyBlock? | finallyBlock)                               #tryCatchStmtAlt
+    |   TRY resourceSpecification block catchClause* finallyBlock?                          #tryResourceStmtAlt
+    |   SWITCH parExpression LBRACE switchBlockStatementGroup* switchLabel* RBRACE          #switchStmtAlt
+    |   SYNCHRONIZED parExpression block                                                    #synchronizedStmtAlt
+    |   RETURN expression? sep                                                              #returnStmtAlt
+    |   THROW expression sep                                                                #throwStmtAlt
+    |   BREAK Identifier? sep                                                               #breakStmtAlt
+    |   CONTINUE Identifier? sep                                                            #continueStmtAlt
+    |   sep                                                                                 #emptyStmtAlt
+    |   statementExpression                                                                 #expressionStmtAlt
+    |   Identifier COLON statement                                                          #labelStmtAlt
 
     // Import statement.  Can be used in any scope.  Has "import x as y" also.
-    |   importDeclaration (sep | EOF)
+    |   importDeclaration                                                                   #importStmtAlt
 
-    |   typeDeclaration
+    |   typeDeclaration                                                                     #typeStmtAlt
     ;
 
 catchClause
@@ -493,31 +493,31 @@ constantExpression
     ;
 
 expression
-    :   primary
-    |   expression DOT Identifier
-    |   expression DOT THIS
-    |   expression DOT NEW nonWildcardTypeArguments? innerCreator
-    |   expression DOT SUPER superSuffix
-    |   expression DOT explicitGenericInvocation
-    |   expression LBRACK expression RBRACK
-    |   expression LPAREN expressionList? RPAREN
-    |   NEW creator
-    |   LPAREN type RPAREN expression
-    |   expression (INC | DEC)
-    |   (ADD | SUB | INC | DEC) expression
-    |   (TILDE | BANG) expression
-    |   expression (MUL | DIV | MOD) expression
-    |   expression (ADD | SUB) expression
-    |   expression (LT LT | GT GT GT | GT GT) expression
-    |   expression (LE | GE | GT | LT) expression
-    |   expression INSTANCEOF type
-    |   expression (EQUAL | NOTEQUAL) expression
-    |   expression BITAND expression
-    |   expression XOR expression
-    |   expression BITOR expression
-    |   expression AND expression
-    |   expression OR expression
-    |   expression QUESTION expression COLON expression
+    :   primary                                                                             #primaryExprAlt
+    |   expression DOT Identifier                                                           #accessExprAlt
+    |   expression DOT THIS                                                                 #accessExprAlt
+    |   expression DOT NEW nonWildcardTypeArguments? innerCreator                           #createExprAlt
+    |   expression DOT SUPER superSuffix                                                    #superExprAlt
+    |   expression DOT explicitGenericInvocation                                            #invokeExprAlt
+    |   expression LBRACK expression RBRACK                                                 #indexExprAlt
+    |   expression LPAREN expressionList? RPAREN                                            #invokeExprAlt
+    |   NEW creator                                                                         #createExprAlt
+    |   LPAREN type RPAREN expression                                                       #castExprAlt
+    |   expression (INC | DEC)                                                              #postfixExprAlt
+    |   (ADD | SUB | INC | DEC) expression                                                  #prefixExprAlt
+    |   (TILDE | BANG) expression                                                           #unaryExprAlt
+    |   expression (MUL | DIV | MOD) expression                                             #binaryExprAlt
+    |   expression (ADD | SUB) expression                                                   #binaryExprAlt
+    |   expression (LT LT | GT GT GT | GT GT) expression                                    #binaryExprAlt
+    |   expression (LE | GE | GT | LT) expression                                           #binaryExprAlt
+    |   expression INSTANCEOF type                                                          #binaryExprAlt
+    |   expression (EQUAL | NOTEQUAL) expression                                            #binaryExprAlt
+    |   expression BITAND expression                                                        #binaryExprAlt
+    |   expression XOR expression                                                           #binaryExprAlt
+    |   expression BITOR expression                                                         #binaryExprAlt
+    |   expression AND expression                                                           #binaryExprAlt
+    |   expression OR expression                                                            #binaryExprAlt
+    |   <assoc=right> expression QUESTION expression COLON expression                       #ternaryExprAlt
     |   <assoc=right> expression
         (   ASSIGN
         |   ADD_ASSIGN
@@ -533,18 +533,18 @@ expression
         |   MOD_ASSIGN
         |   STAR_STAR_ASSIGN
         )
-        expression
+        expression                                                                          #assignExprAlt
     ;
 
 primary
-    :   LPAREN expression RPAREN
-    |   THIS
-    |   SUPER
-    |   literal
-    |   Identifier
-    |   type DOT CLASS
-    |   VOID DOT CLASS
-    |   nonWildcardTypeArguments (explicitGenericInvocationSuffix | THIS arguments)
+    :   LPAREN expression RPAREN                                                            #parenPrmrAlt
+    |   THIS                                                                                #thisPrmrAlt
+    |   SUPER                                                                               #superPrmrAlt
+    |   literal                                                                             #constantPrmrAlt
+    |   Identifier                                                                          #identifierPrmrAlt
+    |   type DOT CLASS                                                                      #classPrmrAlt
+    |   VOID DOT CLASS                                                                      #classPrmrAlt
+    |   nonWildcardTypeArguments (explicitGenericInvocationSuffix | THIS arguments)         #invocationPrmrAlt
     ;
 
 creator

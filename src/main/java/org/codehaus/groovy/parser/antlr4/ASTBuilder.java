@@ -25,10 +25,14 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
+import org.codehaus.groovy.ast.expr.Expression;
+import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.ReturnStatement;
+import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.runtime.IOGroovyMethods;
+import org.codehaus.groovy.syntax.Numbers;
 import org.codehaus.groovy.syntax.SyntaxException;
 
 import java.io.BufferedReader;
@@ -64,15 +68,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     public ModuleNode buildAST() {
-        ModuleNode moduleNode = (ModuleNode) this.visit(parser.compilationUnit());
-
-        return moduleNode;
+        return (ModuleNode) this.visit(parser.compilationUnit());
     }
 
     @Override
     public ModuleNode visitCompilationUnit(CompilationUnitContext ctx) {
+        this.visit(ctx.packageDeclaration());
 
-        ctx.children.stream().forEach(this::visit);
+        ctx.statement().stream()
+                .map(e -> this.visit(e))
+                .filter(e -> e instanceof Statement)
+                .forEach(e -> moduleNode.addStatement((Statement) e));
 
         // if groovy source file only contains blank(including EOF), add "return null" to the AST
         if (this.isBlankScript(ctx)) {
@@ -93,9 +99,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         this.visitAnnotationsOpt(ctx.annotationsOpt()).stream()
                 .forEach(packageNode::addAnnotation);
 
-        return configureAST(packageNode, ctx);
+        return this.configureAST(packageNode, ctx);
     }
-
 
     @Override
     public ImportNode visitImportDeclaration(ImportDeclarationContext ctx) {
@@ -111,7 +116,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         List<AnnotationNode> annotationNodeList = this.visitAnnotationsOpt(ctx.annotationsOpt());
 
         if (hasStatic) {
-
             if (hasStar) { // e.g. import static java.lang.Math.*
                 String qualifiedName = this.visitQualifiedName(ctx.qualifiedName());
                 ClassNode type = ClassHelper.make(qualifiedName);
@@ -162,13 +166,69 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         // without breaking external APIs
         Object node = moduleNode.getNodeMetaData(IMPORT_NODE_CLASS);
         if (null != node && IMPORT_NODE_CLASS != node) {
-            configureAST((ImportNode) node, importNode);
+            this.configureAST((ImportNode) node, importNode);
         }
         moduleNode.removeNodeMetaData(IMPORT_NODE_CLASS);
 
-
-        return configureAST(importNode, ctx);
+        return this.configureAST(importNode, ctx);
     }
+
+// statement {    --------------------------------------------------------------------
+    @Override
+    public ExpressionStatement visitExpressionStmtAlt(ExpressionStmtAltContext ctx) {
+        return this.visitStatementExpression(ctx.statementExpression());
+    }
+// } statement    --------------------------------------------------------------------
+
+
+    @Override
+    public ExpressionStatement visitStatementExpression(StatementExpressionContext ctx) {
+        return this.configureAST(new ExpressionStatement((Expression) this.visit(ctx.expression())), ctx);
+    }
+
+
+// expression {    --------------------------------------------------------------------
+    @Override
+    public Expression visitPrimaryExprAlt(PrimaryExprAltContext ctx) {
+        return (Expression) this.visit(ctx.primary());
+    }
+// } expression    --------------------------------------------------------------------
+
+
+// primary {       --------------------------------------------------------------------
+    @Override
+    public ConstantExpression visitConstantPrmrAlt(GroovyParser.ConstantPrmrAltContext ctx) {
+        return (ConstantExpression) this.visit(ctx.literal());
+    }
+// } primary       --------------------------------------------------------------------
+
+
+// literal {       --------------------------------------------------------------------
+    @Override
+    public ConstantExpression visitIntegerLiteralAlt(GroovyParser.IntegerLiteralAltContext ctx) {
+        String text = ctx.IntegerLiteral().getText();
+
+        return this.configureAST(new ConstantExpression(Numbers.parseInteger(null, text), !text.startsWith("-")), ctx);
+    }
+
+    @Override
+    public ConstantExpression visitFloatingPointLiteralAlt(GroovyParser.FloatingPointLiteralAltContext ctx) {
+        String text = ctx.FloatingPointLiteral().getText();
+
+        return this.configureAST(new ConstantExpression(Numbers.parseDecimal(text), !text.startsWith("-")), ctx);
+    }
+
+    @Override
+    public ConstantExpression visitBooleanLiteralAlt(GroovyParser.BooleanLiteralAltContext ctx) {
+        return this.configureAST(new ConstantExpression("true".equals(ctx.BooleanLiteral().getText()), true), ctx);
+    }
+
+    @Override
+    public ConstantExpression visitNullLiteralAlt(GroovyParser.NullLiteralAltContext ctx) {
+        return this.configureAST(new ConstantExpression(null), ctx);
+    }
+// } literal       --------------------------------------------------------------------
+
 
     @Override
     public List<AnnotationNode> visitAnnotationsOpt(AnnotationsOptContext ctx) {
@@ -189,7 +249,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             // TODO
         }
 
-        return configureAST(annotationNode, ctx);
+        return this.configureAST(annotationNode, ctx);
     }
 
     @Override
@@ -204,13 +264,28 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 .collect(Collectors.joining("."));
     }
 
+    /**
+     * Visit tree safely, no NPE occurred when the tree is null.
+     *
+     * @param tree an AST node
+     * @return the visiting result
+     */
+    @Override
+    public Object visit(ParseTree tree) {
+        if (null == tree) {
+            return null;
+        }
+
+        return super.visit(tree);
+    }
+
     private boolean isBlankScript(CompilationUnitContext ctx) {
         long blankCnt =
                 ctx.children.stream()
                         .filter(e -> e instanceof NlsContext
                                 || e instanceof PackageDeclarationContext
                                 || e instanceof SepContext
-                                || e instanceof StatementContext && asBoolean(((StatementContext) e).importDeclaration())
+                                || e instanceof ImportStmtAltContext
                                 || e instanceof TerminalNode && (((TerminalNode) e).getSymbol().getType() == GroovyLangParser.EOF)
                         ).count();
 
