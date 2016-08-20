@@ -316,27 +316,38 @@ BooleanLiteral
 // §3.10.5 String Literals
 
 StringLiteral
-    :   '"'  DqStringCharacter*?     '"'
-    |   '\'' SqStringCharacter*?     '\''
-    |   '/'  SlashyStringCharacter+? '/'
+    :   '"'      DqStringCharacter*?     '"'
+    |   '\''     SqStringCharacter*?     '\''
+    |   '/'      SlashyStringCharacter+? '/'
+    |   '\'\'\'' TsqStringCharacter*?    '\'\'\''
     ;
 
+// character in the double quotation string. e.g. "a"
 fragment
 DqStringCharacter
     :   ~["\\$]
     |   EscapeSequence
     ;
 
+// character in the single quotation string. e.g. 'a'
 fragment
 SqStringCharacter
     :   ~['\\]
     |   EscapeSequence
     ;
 
+// character in the triple single quotation string. e.g. '''a'''
+fragment TsqStringCharacter
+    :   ~['\\]
+    |   '\'' { !(_input.LA(1) == '\'' && _input.LA(2) == '\'') }?
+    |   EscapeSequence
+    ;
+
+// character in the slashy string. e.g. /a/
 fragment SlashyStringCharacter
-    :   SlashEscape
+    :   ~[/$\u0000\n]
     |   '$' { !GrammarPredicates.isFollowedByJavaLetterInGString(_input) }?
-    |    ~('/' | '$' | '\u0000' | '\n')
+    |    SlashEscape
     ;
 
 // §3.10.6 Escape Sequences for Character and String Literals
