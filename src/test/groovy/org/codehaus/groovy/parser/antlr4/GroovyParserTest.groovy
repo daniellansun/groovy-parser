@@ -73,6 +73,10 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/Literal_01.groovy');
     }
 
+    void "test groovy core - Expression"() {
+        test('core/Expression_01.groovy');
+    }
+
     static test(String path) {
         test(path, ASTComparatorCategory.DEFAULT_CONFIGURATION)
     }
@@ -87,7 +91,12 @@ class GroovyParserTest extends GroovyTestCase {
 
         assertAST(newAST, oldAST, conf);
 
-        log.info "${path}\t\t\t\t\tdiff:${(newElapsedTime - oldElapsedTime) / 1000}ms,\tnew:${newElapsedTime / 1000}ms,\told:${oldElapsedTime / 1000}ms."
+        long diffInMillis = newElapsedTime - oldElapsedTime;
+
+        if (diffInMillis >= 500) {
+            log.warning "${path}\t\t\t\t\tdiff:${diffInMillis / 1000}ms,\tnew:${newElapsedTime / 1000}ms,\told:${oldElapsedTime / 1000}ms."
+        }
+
     }
 
     static assertAST(ast1, ast2, conf) {

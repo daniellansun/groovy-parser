@@ -390,14 +390,18 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private CompilationFailedException createParsingFailedException(String msg, ParserRuleContext ctx) {
+        return createParsingFailedException(new SyntaxException(msg,
+                ctx.start.getLine(),
+                ctx.start.getCharPositionInLine() + 1,
+                ctx.stop.getLine(),
+                ctx.stop.getCharPositionInLine() + 1 + ctx.stop.getText().length()));
+    }
+
+    private CompilationFailedException createParsingFailedException(Exception e) {
         return new CompilationFailedException(
                 CompilePhase.PARSING.getPhaseNumber(),
                 this.sourceUnit,
-                new SyntaxException(msg,
-                        ctx.start.getLine(),
-                        ctx.start.getCharPositionInLine() + 1,
-                        ctx.stop.getLine(),
-                        ctx.stop.getCharPositionInLine() + 1 + ctx.stop.getText().length()));
+                e);
     }
 
     private String readSourceCode(SourceUnit sourceUnit) {
