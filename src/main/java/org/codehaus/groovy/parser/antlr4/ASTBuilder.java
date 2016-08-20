@@ -32,6 +32,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
+import org.codehaus.groovy.parser.antlr4.util.StringUtil;
 import org.codehaus.groovy.runtime.IOGroovyMethods;
 import org.codehaus.groovy.syntax.Numbers;
 import org.codehaus.groovy.syntax.SyntaxException;
@@ -265,6 +266,32 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         return this.configureAST(new ConstantExpression(Numbers.parseDecimal(text), !text.startsWith("-")), ctx);
     }
+
+    @Override
+    public ConstantExpression visitStringLiteralAlt(StringLiteralAltContext ctx) {
+        String text = ctx.StringLiteral().getText();
+
+        int slashyType = text.startsWith("/") ? StringUtil.SLASHY :
+                text.startsWith("$/") ? StringUtil.DOLLAR_SLASHY : StringUtil.NONE_SLASHY;
+
+        if (text.startsWith("'''") || text.startsWith("\"\"\"")) {
+            text = StringUtil.removeCR(text); // remove CR in the multiline string
+
+            text = text.length() == 6 ? "" : text.substring(3, text.length() - 3);
+        } else if (text.startsWith("'") || text.startsWith("/") || text.startsWith("\"")) {
+            text = text.length() == 2 ? "" : text.substring(1, text.length() - 1);
+        } else if (text.startsWith("$/")) {
+            text = StringUtil.removeCR(text);
+
+            text = text.length() == 4 ? "" : text.substring(2, text.length() - 2);
+        }
+
+        //handle escapes.
+        text = StringUtil.replaceEscapes(text, slashyType);
+
+        return this.configureAST(new ConstantExpression(text, true), ctx);
+    }
+
 
     @Override
     public ConstantExpression visitBooleanLiteralAlt(BooleanLiteralAltContext ctx) {

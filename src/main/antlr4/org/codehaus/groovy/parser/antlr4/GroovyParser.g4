@@ -300,7 +300,6 @@ qualifiedName
 literal
     :   IntegerLiteral                                                                      #integerLiteralAlt
     |   FloatingPointLiteral                                                                #floatingPointLiteralAlt
-    |   CharacterLiteral                                                                    #charLiteralAlt
     |   StringLiteral                                                                       #stringLiteralAlt
     |   BooleanLiteral                                                                      #booleanLiteralAlt
     |   NullLiteral                                                                         #nullLiteralAlt

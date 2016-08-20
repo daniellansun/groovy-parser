@@ -312,33 +312,31 @@ BooleanLiteral
     |   'false'
     ;
 
-// §3.10.4 Character Literals
-
-CharacterLiteral
-    :   '\'' SingleCharacter '\''
-    |   '\'' EscapeSequence '\''
-    ;
-
-fragment
-SingleCharacter
-    :   ~['\\]
-    ;
 
 // §3.10.5 String Literals
 
 StringLiteral
-    :   '"' StringCharacters? '"'
+    :   '"'  DqStringCharacter*?     '"'
+    |   '\'' SqStringCharacter*?     '\''
+    |   '/'  SlashyStringCharacter+? '/'
     ;
 
 fragment
-StringCharacters
-    :   StringCharacter+
-    ;
-
-fragment
-StringCharacter
-    :   ~["\\]
+DqStringCharacter
+    :   ~["\\$]
     |   EscapeSequence
+    ;
+
+fragment
+SqStringCharacter
+    :   ~['\\]
+    |   EscapeSequence
+    ;
+
+fragment SlashyStringCharacter
+    :   SlashEscape
+    |   '$' { !GrammarPredicates.isFollowedByJavaLetterInGString(_input) }?
+    |    ~('/' | '$' | '\u0000' | '\n')
     ;
 
 // §3.10.6 Escape Sequences for Character and String Literals
@@ -348,7 +346,10 @@ EscapeSequence
     :   '\\' [btnfr"'\\]
     |   OctalEscape
     |   UnicodeEscape
+    |   DollarEscape
+    |   LineEscape
     ;
+
 
 fragment
 OctalEscape
@@ -365,6 +366,23 @@ UnicodeEscape
 fragment
 ZeroToThree
     :   [0-3]
+    ;
+
+// Groovy Escape Sequences
+
+fragment
+DollarEscape
+    :   '\\' DOLLAR
+    ;
+
+fragment
+LineEscape
+    :   '\\' '\r'? '\n'
+    ;
+
+fragment
+SlashEscape
+    :   '\\' '/'
     ;
 
 // §3.10.7 The Null Literal
@@ -389,6 +407,8 @@ SPACESHIP       : '<=>';
 IDENTICAL       : '===';
 NOT_IDENTICAL   : '!==';
 ARROW           : '->';
+
+fragment
 DOLLAR          : '$';
 
 

@@ -19,9 +19,10 @@
 package org.codehaus.groovy.parser.antlr4
 
 import org.codehaus.groovy.ast.ModuleNode
+import org.codehaus.groovy.ast.stmt.ExpressionStatement
 import org.codehaus.groovy.parser.AbstractParser
-import org.codehaus.groovy.parser.Antlr4Parser
 import org.codehaus.groovy.parser.Antlr2Parser
+import org.codehaus.groovy.parser.Antlr4Parser
 import org.codehaus.groovy.parser.antlr4.util.ASTComparatorCategory
 import org.codehaus.groovy.parser.antlr4.util.GroovySourceGenerator
 
@@ -72,6 +73,7 @@ class GroovyParserTest extends GroovyTestCase {
 
     void "test groovy core - Literal"() {
         test('core/Literal_01.groovy');
+        test('core/Literal_02.groovy', [ExpressionStatement]);
     }
 
     void "test groovy core - Expression"() {
@@ -80,6 +82,10 @@ class GroovyParserTest extends GroovyTestCase {
 
     static test(String path) {
         test(path, ASTComparatorCategory.DEFAULT_CONFIGURATION)
+    }
+
+    static test(String path, List ignoreClazzList) {
+        test(path, addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST))
     }
 
     static test(String path, conf) {
