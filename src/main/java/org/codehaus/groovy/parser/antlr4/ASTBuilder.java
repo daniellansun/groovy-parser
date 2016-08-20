@@ -77,7 +77,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         this.visit(ctx.packageDeclaration());
 
         ctx.statement().stream()
-                .map(e -> this.visit(e))
+                .map(this::visit)
                 .filter(e -> e instanceof Statement)
                 .forEach(e -> moduleNode.addStatement((Statement) e));
 
