@@ -345,9 +345,9 @@ fragment TsqStringCharacter
 
 // character in the slashy string. e.g. /a/
 fragment SlashyStringCharacter
-    :   ~[/$\u0000\n]
+    :   SlashEscape
     |   '$' { !GrammarPredicates.isFollowedByJavaLetterInGString(_input) }?
-    |    SlashEscape
+    |   ~[/$\n\u0000]
     ;
 
 // §3.10.6 Escape Sequences for Character and String Literals

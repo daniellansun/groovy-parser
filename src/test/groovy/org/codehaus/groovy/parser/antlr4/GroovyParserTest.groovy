@@ -74,6 +74,7 @@ class GroovyParserTest extends GroovyTestCase {
     void "test groovy core - Literal"() {
         test('core/Literal_01.groovy');
         test('core/Literal_02.groovy', [ExpressionStatement]);
+        test('core/Literal_03.groovy');
     }
 
     void "test groovy core - Expression"() {
