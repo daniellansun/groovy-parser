@@ -333,7 +333,7 @@ elementValue
     ;
 
 elementValueArrayInitializer
-    :   LBRACE (elementValue (COMMA elementValue)*)? (COMMA)? RBRACE
+    :   LBRACK (elementValue (COMMA elementValue)*)? (COMMA)? RBRACK
     ;
 
 annotationTypeDeclaration

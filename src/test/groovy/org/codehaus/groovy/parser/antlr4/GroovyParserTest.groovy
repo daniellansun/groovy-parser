@@ -67,6 +67,7 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/Annotation_06.groovy');
         test('core/Annotation_07.groovy');
         test('core/Annotation_08.groovy');
+        test('core/Annotation_09.groovy');
     }
 
     void "test groovy core - Literal"() {

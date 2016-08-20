@@ -42,9 +42,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.BitSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -197,7 +195,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Expression visitUnaryExprAlt(GroovyParser.UnaryExprAltContext ctx) {
+    public Expression visitUnaryExprAlt(UnaryExprAltContext ctx) {
         ExpressionContext expressionCtx = ctx.expression();
 
         switch (ctx.op.getType()) {
@@ -247,7 +245,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
 // primary {       --------------------------------------------------------------------
     @Override
-    public ConstantExpression visitLiteralPrmrAlt(GroovyParser.LiteralPrmrAltContext ctx) {
+    public ConstantExpression visitLiteralPrmrAlt(LiteralPrmrAltContext ctx) {
         return (ConstantExpression) this.visit(ctx.literal());
     }
 // } primary       --------------------------------------------------------------------
@@ -255,26 +253,26 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
 // literal {       --------------------------------------------------------------------
     @Override
-    public ConstantExpression visitIntegerLiteralAlt(GroovyParser.IntegerLiteralAltContext ctx) {
+    public ConstantExpression visitIntegerLiteralAlt(IntegerLiteralAltContext ctx) {
         String text = ctx.IntegerLiteral().getText();
 
         return this.configureAST(new ConstantExpression(Numbers.parseInteger(null, text), !text.startsWith("-")), ctx);
     }
 
     @Override
-    public ConstantExpression visitFloatingPointLiteralAlt(GroovyParser.FloatingPointLiteralAltContext ctx) {
+    public ConstantExpression visitFloatingPointLiteralAlt(FloatingPointLiteralAltContext ctx) {
         String text = ctx.FloatingPointLiteral().getText();
 
         return this.configureAST(new ConstantExpression(Numbers.parseDecimal(text), !text.startsWith("-")), ctx);
     }
 
     @Override
-    public ConstantExpression visitBooleanLiteralAlt(GroovyParser.BooleanLiteralAltContext ctx) {
+    public ConstantExpression visitBooleanLiteralAlt(BooleanLiteralAltContext ctx) {
         return this.configureAST(new ConstantExpression("true".equals(ctx.BooleanLiteral().getText()), true), ctx);
     }
 
     @Override
-    public ConstantExpression visitNullLiteralAlt(GroovyParser.NullLiteralAltContext ctx) {
+    public ConstantExpression visitNullLiteralAlt(NullLiteralAltContext ctx) {
         return this.configureAST(new ConstantExpression(null), ctx);
     }
 // } literal       --------------------------------------------------------------------
@@ -294,9 +292,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         AnnotationNode annotationNode = new AnnotationNode(ClassHelper.make(annotationName));
 
         if (asBoolean(ctx.elementValuePairs())) {
-            // TODO
+            this.visitElementValuePairs(ctx.elementValuePairs()).entrySet().stream().forEach(e -> {
+                annotationNode.addMember(e.getKey(), e.getValue());
+            });
         } else if (asBoolean(ctx.elementValue())) {
-            // TODO
+            annotationNode.addMember(VALUE_STR, this.visitElementValue(ctx.elementValue()));
         }
 
         return this.configureAST(annotationNode, ctx);
@@ -305,6 +305,36 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public String visitAnnotationName(AnnotationNameContext ctx) {
         return this.visitQualifiedName(ctx.qualifiedName());
+    }
+
+    @Override
+    public Map<String, Expression> visitElementValuePairs(ElementValuePairsContext ctx) {
+        return ctx.elementValuePair().stream()
+                .map(this::visitElementValuePair)
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+    }
+
+    @Override
+    public Pair<String, Expression> visitElementValuePair(ElementValuePairContext ctx) {
+        return new Pair<>(ctx.Identifier().getText(), this.visitElementValue(ctx.elementValue()));
+    }
+
+    @Override
+    public Expression visitElementValue(ElementValueContext ctx) {
+        if (asBoolean(ctx.expression())) {
+            return this.configureAST((Expression) this.visit(ctx.expression()), ctx);
+        } else if (asBoolean(ctx.annotation())) {
+            return this.configureAST(new AnnotationConstantExpression(this.visitAnnotation(ctx.annotation())), ctx);
+        } else if (asBoolean(ctx.elementValueArrayInitializer())) {
+            return this.configureAST(this.visitElementValueArrayInitializer(ctx.elementValueArrayInitializer()), ctx);
+        } else {
+            throw createParsingFailedException("Unsupported element value: " + ctx.getText(), ctx);
+        }
+    }
+
+    @Override
+    public ListExpression visitElementValueArrayInitializer(ElementValueArrayInitializerContext ctx) {
+        return this.configureAST(new ListExpression(ctx.elementValue().stream().map(this::visitElementValue).collect(Collectors.toList())), ctx);
     }
 
     @Override
@@ -465,6 +495,47 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return sw.toString();
     }
 
+    private static class Pair<K, V> {
+        private K key;
+        private V value;
+
+        public Pair(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public K getKey() {
+            return key;
+        }
+
+        public void setKey(K key) {
+            this.key = key;
+        }
+
+        public V getValue() {
+            return value;
+        }
+
+        public void setValue(V value) {
+            this.value = value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(key, value);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Pair))
+                return false;
+
+            Pair<?, ?> pair = (Pair<?, ?>) o;
+            return Objects.equals(this.key, pair.key) &&
+                    Objects.equals(this.value, pair.value);
+        }
+
+    }
 
     private final ModuleNode moduleNode;
     private final SourceUnit sourceUnit;
@@ -472,5 +543,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private final GroovyLangLexer lexer;
     private final GroovyLangParser parser;
     private static final Class<ImportNode> IMPORT_NODE_CLASS = ImportNode.class;
+    private static final String VALUE_STR = "value";
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 }
