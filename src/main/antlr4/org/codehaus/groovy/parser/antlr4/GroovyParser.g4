@@ -504,8 +504,10 @@ expression
     |   NEW creator                                                                         #createExprAlt
     |   LPAREN type RPAREN expression                                                       #castExprAlt
     |   expression (INC | DEC)                                                              #postfixExprAlt
-    |   (ADD | SUB | INC | DEC) expression                                                  #prefixExprAlt
-    |   (TILDE | BANG) expression                                                           #unaryExprAlt
+    |   (INC | DEC) expression                                                              #prefixExprAlt
+    |   op=(ADD | SUB) expression                                                           #unaryExprAlt
+    |   op=(TILDE | BANG) expression                                                        #unaryExprAlt
+    |   expression POWER expression                                                         #binaryExprAlt
     |   expression (MUL | DIV | MOD) expression                                             #binaryExprAlt
     |   expression (ADD | SUB) expression                                                   #binaryExprAlt
     |   expression (LT LT | GT GT GT | GT GT) expression                                    #binaryExprAlt
@@ -531,7 +533,7 @@ expression
         |   URSHIFT_ASSIGN
         |   LSHIFT_ASSIGN
         |   MOD_ASSIGN
-        |   STAR_STAR_ASSIGN
+        |   POWER_ASSIGN
         )
         expression                                                                          #assignExprAlt
     ;
@@ -540,7 +542,7 @@ primary
     :   LPAREN expression RPAREN                                                            #parenPrmrAlt
     |   THIS                                                                                #thisPrmrAlt
     |   SUPER                                                                               #superPrmrAlt
-    |   literal                                                                             #constantPrmrAlt
+    |   literal                                                                             #literalPrmrAlt
     |   Identifier                                                                          #identifierPrmrAlt
     |   type DOT CLASS                                                                      #classPrmrAlt
     |   VOID DOT CLASS                                                                      #classPrmrAlt

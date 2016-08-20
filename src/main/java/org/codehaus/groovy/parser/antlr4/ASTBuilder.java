@@ -24,11 +24,12 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.codehaus.groovy.ast.*;
-import org.codehaus.groovy.ast.expr.ConstantExpression;
-import org.codehaus.groovy.ast.expr.Expression;
+import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.ReturnStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
+import org.codehaus.groovy.control.CompilationFailedException;
+import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.runtime.IOGroovyMethods;
@@ -39,6 +40,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -192,12 +195,59 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public Expression visitPrimaryExprAlt(PrimaryExprAltContext ctx) {
         return (Expression) this.visit(ctx.primary());
     }
+
+    @Override
+    public Expression visitUnaryExprAlt(GroovyParser.UnaryExprAltContext ctx) {
+        ExpressionContext expressionCtx = ctx.expression();
+
+        switch (ctx.op.getType()) {
+            case ADD:
+                if (expressionCtx instanceof PrimaryExprAltContext) {
+                    return this.configureAST((ConstantExpression) this.visit(expressionCtx), ctx);
+                }
+
+                return this.configureAST(new UnaryPlusExpression((Expression) this.visit(expressionCtx)), ctx);
+            case SUB:
+                if (expressionCtx instanceof PrimaryExprAltContext) {
+                    ConstantExpression constantExpression = (ConstantExpression) this.visit(expressionCtx);
+
+                    Object value = constantExpression.getValue();
+
+                    if (value instanceof Integer) {
+                        value = -((Integer) value);
+                    } else if (value instanceof Long) {
+                        value = -((Long) value);
+                    } else if (value instanceof Float) {
+                        value = -((Float) value);
+                    } else if (value instanceof Double) {
+                        value = -((Double) value);
+                    } else if (value instanceof BigDecimal) {
+                        value = ((BigDecimal) value).negate();
+                    } else if (value instanceof BigInteger) {
+                        value = ((BigInteger) value).negate();
+                    } else {
+                        throw createParsingFailedException("Unexprected value: " + value, ctx);
+                    }
+
+                    return this.configureAST(new ConstantExpression(value, false), ctx);
+                }
+
+                return this.configureAST(new UnaryMinusExpression((Expression) this.visit(expressionCtx)), ctx);
+            case TILDE:
+                return this.configureAST(new BitwiseNegationExpression((Expression) this.visit(expressionCtx)), ctx);
+            case BANG:
+                return this.configureAST(new NotExpression((Expression) this.visit(expressionCtx)), ctx);
+            default:
+                throw createParsingFailedException("Unsupported unary operation: " + ctx.getText(), ctx);
+        }
+    }
+
 // } expression    --------------------------------------------------------------------
 
 
 // primary {       --------------------------------------------------------------------
     @Override
-    public ConstantExpression visitConstantPrmrAlt(GroovyParser.ConstantPrmrAltContext ctx) {
+    public ConstantExpression visitLiteralPrmrAlt(GroovyParser.LiteralPrmrAltContext ctx) {
         return (ConstantExpression) this.visit(ctx.literal());
     }
 // } primary       --------------------------------------------------------------------
@@ -337,6 +387,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         astNode.setLastColumnNumber(source.getLastColumnNumber());
 
         return astNode;
+    }
+
+    private CompilationFailedException createParsingFailedException(String msg, ParserRuleContext ctx) {
+        return new CompilationFailedException(
+                CompilePhase.PARSING.getPhaseNumber(),
+                this.sourceUnit,
+                new SyntaxException(msg,
+                        ctx.start.getLine(),
+                        ctx.start.getCharPositionInLine() + 1,
+                        ctx.stop.getLine(),
+                        ctx.stop.getCharPositionInLine() + 1 + ctx.stop.getText().length()));
     }
 
     private String readSourceCode(SourceUnit sourceUnit) {
