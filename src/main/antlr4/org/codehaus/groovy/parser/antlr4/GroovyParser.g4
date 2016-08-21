@@ -323,7 +323,11 @@ gstringPath
     ;
 
 closure
-    :   LBRACE nls (formalParameterList? nls ARROW nls)? (blockStatement sep)* RBRACE
+    :   LBRACE nls (formalParameterList? nls ARROW nls)? blockStatementsOpt RBRACE
+    ;
+
+blockStatementsOpt
+    :   blockStatement? (sep blockStatement)*
     ;
 
 // ANNOTATIONS
@@ -521,7 +525,6 @@ expression
     |   expression DOT explicitGenericInvocation                                            #invokeExprAlt
     |   expression LBRACK expression RBRACK                                                 #indexExprAlt
     |   expression LPAREN expressionList? RPAREN                                            #invokeExprAlt
-    |   NEW creator                                                                         #createExprAlt
     |   LPAREN type RPAREN expression                                                       #castExprAlt
     |   expression (INC | DEC)                                                              #postfixExprAlt
     |   (INC | DEC) expression                                                              #prefixExprAlt
@@ -559,12 +562,15 @@ expression
     ;
 
 primary
-    :   LPAREN expression RPAREN                                                            #parenPrmrAlt
+    :   Identifier                                                                          #identifierPrmrAlt
+    |   literal                                                                             #literalPrmrAlt
+    |   NEW creator                                                                         #newPrmrAlt
     |   THIS                                                                                #thisPrmrAlt
     |   SUPER                                                                               #superPrmrAlt
-    |   literal                                                                             #literalPrmrAlt
+    |   LPAREN expression RPAREN                                                            #parenPrmrAlt
+    |   closure                                                                             #closurePrmrAlt
+    // listOrMapConstructorExpression
     |   gstring                                                                             #gstringPrmrAlt
-    |   Identifier                                                                          #identifierPrmrAlt
     |   type DOT CLASS                                                                      #classPrmrAlt
     |   VOID DOT CLASS                                                                      #classPrmrAlt
     |   nonWildcardTypeArguments (explicitGenericInvocationSuffix | THIS arguments)         #invocationPrmrAlt

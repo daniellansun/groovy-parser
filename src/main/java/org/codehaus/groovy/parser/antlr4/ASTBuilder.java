@@ -26,6 +26,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.ReturnStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
@@ -358,7 +359,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 it = StringGroovyMethods.getAt(it, new IntRange(true, 0, -3)); // translate tailing """ to "
             } else if (it.endsWith("/$")) {
                 it = StringUtil.removeCR(it);
-                it = StringGroovyMethods.getAt(it, new IntRange(true, 0, -3)) + "\""; // translate tailing /$ to "
+                it = StringGroovyMethods.getAt(it, new IntRange(false, 0, -2)) + "\""; // translate tailing /$ to "
             }
 
             it = StringUtil.replaceEscapes(it, slashyType);
@@ -370,7 +371,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         List<Expression> values = ctx.gstringValue().stream()
-                .map(this::visitGstringValue)
+                .map(e -> {
+                    Expression expression = this.visitGstringValue(e);
+
+                    if (expression instanceof ClosureExpression && !asBoolean(e.closure().ARROW())) {
+                        return this.configureAST(new MethodCallExpression(expression, CALL_STR, new ArgumentListExpression()), e);
+                    }
+
+                    return expression;
+                })
                 .collect(Collectors.toList());
 
         StringBuilder verbatimText = new StringBuilder(ctx.getText().length());
@@ -408,7 +417,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         if (asBoolean(ctx.closure())) {
-            return null; // TODO
+            return this.configureAST(this.visitClosure(ctx.closure()), ctx);
         }
 
         throw createParsingFailedException("Unsupported gstring value: " + ctx.getText(), ctx);
@@ -429,6 +438,52 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(variableExpression, ctx);
     }
 // } gstring       --------------------------------------------------------------------
+
+
+    @Override
+    public ClosureExpression visitClosure(ClosureContext ctx) {
+        List<Parameter> parameterList = this.visitFormalParameterList(ctx.formalParameterList());
+        Statement code = this.visitBlockStatementsOpt(ctx.blockStatementsOpt());
+
+        return this.configureAST(new ClosureExpression(0 == parameterList.size() ? null : parameterList.toArray(new Parameter[0]), code), ctx);
+    }
+
+    @Override
+    public List<Parameter> visitFormalParameterList(GroovyParser.FormalParameterListContext ctx) {
+        List<Parameter> parameterList = new LinkedList<>();
+
+        return parameterList; // TODO
+    }
+
+    @Override
+    public BlockStatement visitBlockStatementsOpt(GroovyParser.BlockStatementsOptContext ctx) {
+        BlockStatement blockStatement = (BlockStatement) ctx.blockStatement().stream()
+                .map(this::visitBlockStatement)
+                .reduce(new BlockStatement(), (r, e) -> {
+                    ((BlockStatement) r).addStatement(e);
+                    return r;
+                });
+
+        return this.configureAST(blockStatement, ctx);
+    }
+
+
+    @Override
+    public Statement visitBlockStatement(GroovyParser.BlockStatementContext ctx) {
+        if (asBoolean(ctx.localVariableDeclarationStatement())) {
+            return null; // TODO
+        }
+
+        if (asBoolean(ctx.statement())) {
+            return this.configureAST((Statement) this.visit(ctx.statement()), ctx);
+        }
+
+        if (asBoolean(ctx.typeDeclaration())) {
+            return null; // TODO
+        }
+
+        throw createParsingFailedException("Unsupported block statement: " + ctx.getText(), ctx);
+    }
 
 
     @Override
@@ -704,6 +759,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private final GroovyLangParser parser;
     private static final Class<ImportNode> IMPORT_NODE_CLASS = ImportNode.class;
     private static final String VALUE_STR = "value";
-    public static final String DOLLAR_STR = "$";
+    private static final String DOLLAR_STR = "$";
+    private static final String CALL_STR = "call";
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 }

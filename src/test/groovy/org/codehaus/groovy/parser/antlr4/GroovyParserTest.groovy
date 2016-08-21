@@ -82,6 +82,12 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/GString_02.groovy');
     }
 
+    void "test groovy core - Closure"() {
+        test('core/Closure_01.groovy');
+        test('core/Closure_02.groovy');
+        test('core/Closure_03.groovy');
+    }
+
     void "test groovy core - Expression"() {
         test('core/Expression_01.groovy');
     }
