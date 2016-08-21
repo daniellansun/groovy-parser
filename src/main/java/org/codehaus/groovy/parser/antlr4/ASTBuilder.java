@@ -252,7 +252,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public GStringExpression visitGstringPrmrAlt(GroovyParser.GstringPrmrAltContext ctx) {
+    public GStringExpression visitGstringPrmrAlt(GstringPrmrAltContext ctx) {
         return (GStringExpression) this.visit(ctx.gstring());
     }
 // } primary       --------------------------------------------------------------------
@@ -312,7 +312,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     // gstring {       --------------------------------------------------------------------
     @Override
-    public GStringExpression visitGstring(GroovyParser.GstringContext ctx) {
+    public GStringExpression visitGstring(GstringContext ctx) {
         List<ConstantExpression> strings = new LinkedList<>();
 
         String begin = ctx.GStringBegin().getText();
@@ -394,13 +394,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Expression visitGstringValue(GroovyParser.GstringValueContext ctx) {
+    public Expression visitGstringValue(GstringValueContext ctx) {
         if (asBoolean(ctx.gstringPath())) {
             return this.configureAST(this.visitGstringPath(ctx.gstringPath()), ctx);
         }
 
-        if (asBoolean(ctx.expression())) {
-            return this.configureAST((Expression) this.visit(ctx.expression()), ctx);
+        if (asBoolean(ctx.LBRACE())) {
+            if (asBoolean(ctx.expression())) {
+                return this.configureAST((Expression) this.visit(ctx.expression()), ctx);
+            } else { // e.g. "${}"
+                return this.configureAST(new ConstantExpression(null), ctx);
+            }
         }
 
         if (asBoolean(ctx.closure())) {
@@ -411,7 +415,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Expression visitGstringPath(GroovyParser.GstringPathContext ctx) {
+    public Expression visitGstringPath(GstringPathContext ctx) {
         VariableExpression variableExpression = new VariableExpression(ctx.Identifier().getText());
 
         if (asBoolean(ctx.GStringPathPart())) {
