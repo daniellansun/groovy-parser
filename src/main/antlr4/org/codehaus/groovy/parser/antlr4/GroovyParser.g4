@@ -305,6 +305,27 @@ literal
     |   NullLiteral                                                                         #nullLiteralAlt
     ;
 
+
+// GSTRING
+
+gstring
+    :   GStringBegin gstringValue (GStringPart  gstringValue)* GStringEnd
+    ;
+
+gstringValue
+    :   gstringPath
+    |   LBRACE expression? RBRACE
+    |   closure
+    ;
+
+gstringPath
+    :   Identifier GStringPathPart*
+    ;
+
+closure
+    :   LBRACE nls (formalParameterList? nls ARROW nls)? (blockStatement sep)* RBRACE
+    ;
+
 // ANNOTATIONS
 
 annotationsOpt
@@ -542,6 +563,7 @@ primary
     |   THIS                                                                                #thisPrmrAlt
     |   SUPER                                                                               #superPrmrAlt
     |   literal                                                                             #literalPrmrAlt
+    |   gstring                                                                             #gstringPrmrAlt
     |   Identifier                                                                          #identifierPrmrAlt
     |   type DOT CLASS                                                                      #classPrmrAlt
     |   VOID DOT CLASS                                                                      #classPrmrAlt

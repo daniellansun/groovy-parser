@@ -41,11 +41,11 @@ lexer grammar GroovyLexer;
             this.lastTokenType = tokenType;
         }
 
-        /*
-        if (ROLLBACK_ONE == tokenType) {
+
+        if (RollBackOne == tokenType) {
             this.rollbackOneChar();
         }
-        */
+
 
         super.emit(token);
     }
@@ -55,6 +55,138 @@ lexer grammar GroovyLexer;
      */
     protected void rollbackOneChar() {}
 }
+
+
+// §3.10.5 String Literals
+
+StringLiteral
+    :   '"'      DqStringCharacter*?           '"'
+    |   '\''     SqStringCharacter*?           '\''
+    |   '/'      SlashyStringCharacter+?       '/'
+    |   '"""'    TdqStringCharacter*?          '"""'
+    |   '\'\'\'' TsqStringCharacter*?          '\'\'\''
+    |   '$/'     DollarSlashyStringCharacter+? '/$'
+    ;
+
+// Groovy gstring
+GStringBegin
+    :   '"' DqStringCharacter*? DOLLAR -> pushMode(DQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    ;
+TdqGStringBegin
+    :   '"""'   TdqStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(TDQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    ;
+SlashyGStringBegin
+    :   '/' SlashyStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    ;
+DollarSlashyGStringBegin
+    :   '$/' DollarSlashyStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(DOLLAR_SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    ;
+
+mode DQ_GSTRING_MODE;
+GStringEnd
+    :   '"'     -> popMode
+    ;
+GStringPart
+    :   DOLLAR  -> pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    ;
+GStringCharacter
+    :   DqStringCharacter -> more
+    ;
+
+mode TDQ_GSTRING_MODE;
+TdqGStringEnd
+    :   '"""'    -> type(GStringEnd), popMode
+    ;
+TdqGStringPart
+    :   DOLLAR   -> type(GStringPart), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    ;
+TdqGStringCharacter
+    :   TdqStringCharacter -> more
+    ;
+
+mode SLASHY_GSTRING_MODE;
+SlashyGStringEnd
+    :   '$'? '/'  -> type(GStringEnd), popMode
+    ;
+SlashyGStringPart
+    :   DOLLAR    -> type(GStringPart), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    ;
+SlashyGStringCharacter
+    :   SlashyStringCharacter -> more
+    ;
+
+mode DOLLAR_SLASHY_GSTRING_MODE;
+DollarSlashyGStringEnd
+    :   '/$'      -> type(GStringEnd), popMode
+    ;
+DollarSlashyGStringPart
+    :   DOLLAR    -> type(GStringPart), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    ;
+DollarSlashyGStringCharacter
+    :   DollarSlashyStringCharacter -> more
+    ;
+
+mode GSTRING_TYPE_SELECTOR_MODE;
+GStringLBrace
+    :   '{' -> type(LBRACE), popMode, pushMode(DEFAULT_MODE)
+    ;
+GStringIdentifier
+    :   IdentifierInGString -> type(Identifier), popMode, pushMode(GSTRING_PATH_MODE)
+    ;
+
+
+mode GSTRING_PATH_MODE;
+GStringPathPart
+    :   '.' IdentifierInGString
+    ;
+RollBackOne
+    :   . -> popMode, channel(HIDDEN)
+    ;
+
+
+mode DEFAULT_MODE;
+// character in the double quotation string. e.g. "a"
+fragment
+DqStringCharacter
+    :   ~["\\$]
+    |   EscapeSequence
+    ;
+
+// character in the single quotation string. e.g. 'a'
+fragment
+SqStringCharacter
+    :   ~['\\]
+    |   EscapeSequence
+    ;
+
+// character in the triple double quotation string. e.g. """a"""
+fragment TdqStringCharacter
+    :   ~["\\$]
+    |   '"' { !(_input.LA(1) == '"' && _input.LA(2) == '"') }?
+    |   EscapeSequence
+    ;
+
+// character in the triple single quotation string. e.g. '''a'''
+fragment TsqStringCharacter
+    :   ~['\\]
+    |   '\'' { !(_input.LA(1) == '\'' && _input.LA(2) == '\'') }?
+    |   EscapeSequence
+    ;
+
+// character in the slashy string. e.g. /a/
+fragment SlashyStringCharacter
+    :   SlashEscape
+    |   '$' { !GrammarPredicates.isFollowedByJavaLetterInGString(_input) }?
+    |   ~[/$\n\u0000]
+    ;
+
+// character in the collar slashy string. e.g. $/a/$
+fragment DollarSlashyStringCharacter
+    :   SlashEscape
+    |   '/' { _input.LA(1) != '$' }?
+    |   '$' { !GrammarPredicates.isFollowedByJavaLetterInGString(_input) }?
+    |   ~[/$\u0000]
+    ;
 
 // Groovy keywords
 AS            : 'as';
@@ -313,43 +445,6 @@ BooleanLiteral
     ;
 
 
-// §3.10.5 String Literals
-
-StringLiteral
-    :   '"'      DqStringCharacter*?     '"'
-    |   '\''     SqStringCharacter*?     '\''
-    |   '/'      SlashyStringCharacter+? '/'
-    |   '\'\'\'' TsqStringCharacter*?    '\'\'\''
-    ;
-
-// character in the double quotation string. e.g. "a"
-fragment
-DqStringCharacter
-    :   ~["\\$]
-    |   EscapeSequence
-    ;
-
-// character in the single quotation string. e.g. 'a'
-fragment
-SqStringCharacter
-    :   ~['\\]
-    |   EscapeSequence
-    ;
-
-// character in the triple single quotation string. e.g. '''a'''
-fragment TsqStringCharacter
-    :   ~['\\]
-    |   '\'' { !(_input.LA(1) == '\'' && _input.LA(2) == '\'') }?
-    |   EscapeSequence
-    ;
-
-// character in the slashy string. e.g. /a/
-fragment SlashyStringCharacter
-    :   SlashEscape
-    |   '$' { !GrammarPredicates.isFollowedByJavaLetterInGString(_input) }?
-    |   ~[/$\n\u0000]
-    ;
-
 // §3.10.6 Escape Sequences for Character and String Literals
 
 fragment
@@ -425,12 +520,12 @@ DOLLAR          : '$';
 
 // §3.11 Separators
 
-LPAREN          : '(';
-RPAREN          : ')';
-LBRACE          : '{';
-RBRACE          : '}';
-LBRACK          : '[';
-RBRACK          : ']';
+LPAREN          : '(' -> pushMode(DEFAULT_MODE);
+RPAREN          : ')' -> popMode;
+LBRACE          : '{' -> pushMode(DEFAULT_MODE);
+RBRACE          : '}' -> popMode;
+LBRACK          : '[' -> pushMode(DEFAULT_MODE);
+RBRACK          : ']' -> popMode;
 SEMI            : ';';
 COMMA           : ',';
 DOT             : '.';
@@ -480,6 +575,34 @@ URSHIFT_ASSIGN  : '>>>=';
 Identifier
     :   JavaLetter JavaLetterOrDigit*
     ;
+
+fragment
+IdentifierInGString
+    :   JavaLetterInGString JavaLetterOrDigitInGString*
+    ;
+
+fragment
+JavaLetterInGString
+    :   [a-zA-Z_] // these are the "java letters" below 0x7F, except for $
+    |   // covers all characters above 0x7F which are not a surrogate
+        ~[\u0000-\u007F\uD800-\uDBFF]
+        {Character.isJavaIdentifierStart(_input.LA(-1))}?
+    |   // covers UTF-16 surrogate pairs encodings for U+10000 to U+10FFFF
+        [\uD800-\uDBFF] [\uDC00-\uDFFF]
+        {Character.isJavaIdentifierStart(Character.toCodePoint((char)_input.LA(-2), (char)_input.LA(-1)))}?
+    ;
+
+fragment
+JavaLetterOrDigitInGString
+    :   [a-zA-Z0-9_] // these are the "java letters or digits" below 0x7F, except for $
+    |   // covers all characters above 0x7F which are not a surrogate
+        ~[\u0000-\u007F\uD800-\uDBFF]
+        {Character.isJavaIdentifierPart(_input.LA(-1))}?
+    |   // covers UTF-16 surrogate pairs encodings for U+10000 to U+10FFFF
+        [\uD800-\uDBFF] [\uDC00-\uDFFF]
+        {Character.isJavaIdentifierPart(Character.toCodePoint((char)_input.LA(-2), (char)_input.LA(-1)))}?
+    ;
+
 
 fragment
 JavaLetter

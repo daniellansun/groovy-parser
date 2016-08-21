@@ -18,6 +18,7 @@
  */
 package org.codehaus.groovy.parser.antlr4;
 
+import groovy.lang.IntRange;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -34,6 +35,7 @@ import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.parser.antlr4.util.StringUtil;
 import org.codehaus.groovy.runtime.IOGroovyMethods;
+import org.codehaus.groovy.runtime.StringGroovyMethods;
 import org.codehaus.groovy.syntax.Numbers;
 import org.codehaus.groovy.syntax.SyntaxException;
 
@@ -56,7 +58,6 @@ import static org.codehaus.groovy.runtime.DefaultGroovyMethods.*;
 public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements GroovyParserVisitor<Object> {
 
     public ASTBuilder(SourceUnit sourceUnit, ClassLoader classLoader) {
-        this.classLoader = classLoader;
         this.sourceUnit = sourceUnit;
         this.moduleNode = new ModuleNode(sourceUnit);
 
@@ -175,7 +176,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(importNode, ctx);
     }
 
-// statement {    --------------------------------------------------------------------
+    // statement {    --------------------------------------------------------------------
     @Override
     public ExpressionStatement visitExpressionStmtAlt(ExpressionStmtAltContext ctx) {
         return this.visitStatementExpression(ctx.statementExpression());
@@ -189,7 +190,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
 
-// expression {    --------------------------------------------------------------------
+    // expression {    --------------------------------------------------------------------
     @Override
     public Expression visitPrimaryExprAlt(PrimaryExprAltContext ctx) {
         return (Expression) this.visit(ctx.primary());
@@ -244,15 +245,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 // } expression    --------------------------------------------------------------------
 
 
-// primary {       --------------------------------------------------------------------
+    // primary {       --------------------------------------------------------------------
     @Override
     public ConstantExpression visitLiteralPrmrAlt(LiteralPrmrAltContext ctx) {
         return (ConstantExpression) this.visit(ctx.literal());
     }
+
+    @Override
+    public GStringExpression visitGstringPrmrAlt(GroovyParser.GstringPrmrAltContext ctx) {
+        return (GStringExpression) this.visit(ctx.gstring());
+    }
 // } primary       --------------------------------------------------------------------
 
 
-// literal {       --------------------------------------------------------------------
+    // literal {       --------------------------------------------------------------------
     @Override
     public ConstantExpression visitIntegerLiteralAlt(IntegerLiteralAltContext ctx) {
         String text = ctx.IntegerLiteral().getText();
@@ -304,6 +310,122 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 // } literal       --------------------------------------------------------------------
 
+    // gstring {       --------------------------------------------------------------------
+    @Override
+    public GStringExpression visitGstring(GroovyParser.GstringContext ctx) {
+        List<ConstantExpression> strings = new LinkedList<>();
+
+        String begin = ctx.GStringBegin().getText();
+        final int slashyType = begin.startsWith("/")
+                ? StringUtil.SLASHY
+                : begin.startsWith("$/") ? StringUtil.DOLLAR_SLASHY : StringUtil.NONE_SLASHY;
+
+        {
+            String it = begin;
+            if (it.startsWith("\"\"\"")) {
+                it = StringUtil.removeCR(it);
+                it = it.substring(2); // translate leading """ to "
+            } else if (it.startsWith("$/")) {
+                it = StringUtil.removeCR(it);
+                it = "\"" + it.substring(2); // translate leading $/ to "
+            }
+
+            it = StringUtil.replaceEscapes(it, slashyType);
+            it = (it.length() == 2)
+                    ? ""
+                    : StringGroovyMethods.getAt(it, new IntRange(true, 1, -2));
+
+            strings.add(this.configureAST(new ConstantExpression(it), ctx.GStringBegin()));
+        }
+
+        List<ConstantExpression> partStrings =
+                ctx.GStringPart().stream()
+                        .map(e -> {
+                            String it = e.getText();
+
+                            it = StringUtil.removeCR(it);
+                            it = StringUtil.replaceEscapes(it, slashyType);
+                            it = it.length() == 1 ? "" : StringGroovyMethods.getAt(it, new IntRange(true, 0, -2));
+
+                            return this.configureAST(new ConstantExpression(it), e);
+                        }).collect(Collectors.toList());
+        strings.addAll(partStrings);
+
+        {
+            String it = ctx.GStringEnd().getText();
+            if (it.endsWith("\"\"\"")) {
+                it = StringUtil.removeCR(it);
+                it = StringGroovyMethods.getAt(it, new IntRange(true, 0, -3)); // translate tailing """ to "
+            } else if (it.endsWith("/$")) {
+                it = StringUtil.removeCR(it);
+                it = StringGroovyMethods.getAt(it, new IntRange(true, 0, -3)) + "\""; // translate tailing /$ to "
+            }
+
+            it = StringUtil.replaceEscapes(it, slashyType);
+            it = (it.length() == 1)
+                    ? ""
+                    : StringGroovyMethods.getAt(it, new IntRange(true, 0, -2));
+
+            strings.add(this.configureAST(new ConstantExpression(it), ctx.GStringEnd()));
+        }
+
+        List<Expression> values = ctx.gstringValue().stream()
+                .map(this::visitGstringValue)
+                .collect(Collectors.toList());
+
+        StringBuilder verbatimText = new StringBuilder(ctx.getText().length());
+        for (int i = 0, n = strings.size(), s = values.size(); i < n; i++) {
+            verbatimText.append(strings.get(i).getValue());
+
+            if (i == s) {
+                continue;
+            }
+
+            Expression value = values.get(i);
+            if (null == value) {
+                continue;
+            }
+
+            verbatimText.append(DOLLAR_STR);
+            verbatimText.append(value.getText());
+        }
+
+        return this.configureAST(new GStringExpression(verbatimText.toString(), strings, values), ctx);
+    }
+
+    @Override
+    public Expression visitGstringValue(GroovyParser.GstringValueContext ctx) {
+        if (asBoolean(ctx.gstringPath())) {
+            return this.configureAST(this.visitGstringPath(ctx.gstringPath()), ctx);
+        }
+
+        if (asBoolean(ctx.expression())) {
+            return this.configureAST((Expression) this.visit(ctx.expression()), ctx);
+        }
+
+        if (asBoolean(ctx.closure())) {
+            return null; // TODO
+        }
+
+        throw createParsingFailedException("Unsupported gstring value: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public Expression visitGstringPath(GroovyParser.GstringPathContext ctx) {
+        VariableExpression variableExpression = new VariableExpression(ctx.Identifier().getText());
+
+        if (asBoolean(ctx.GStringPathPart())) {
+            Expression propertyExpression = ctx.GStringPathPart().stream()
+                    .map(e -> this.configureAST((Expression) new ConstantExpression(e.getText().substring(1)), e))
+                    .reduce(this.configureAST(variableExpression, ctx.Identifier()), (r, e) -> this.configureAST(new PropertyExpression(r, e), e));
+
+            return this.configureAST(propertyExpression, ctx);
+        }
+
+        return this.configureAST(variableExpression, ctx);
+    }
+// } gstring       --------------------------------------------------------------------
+
 
     @Override
     public List<AnnotationNode> visitAnnotationsOpt(AnnotationsOptContext ctx) {
@@ -350,13 +472,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public Expression visitElementValue(ElementValueContext ctx) {
         if (asBoolean(ctx.expression())) {
             return this.configureAST((Expression) this.visit(ctx.expression()), ctx);
-        } else if (asBoolean(ctx.annotation())) {
-            return this.configureAST(new AnnotationConstantExpression(this.visitAnnotation(ctx.annotation())), ctx);
-        } else if (asBoolean(ctx.elementValueArrayInitializer())) {
-            return this.configureAST(this.visitElementValueArrayInitializer(ctx.elementValueArrayInitializer()), ctx);
-        } else {
-            throw createParsingFailedException("Unsupported element value: " + ctx.getText(), ctx);
         }
+
+        if (asBoolean(ctx.annotation())) {
+            return this.configureAST(new AnnotationConstantExpression(this.visitAnnotation(ctx.annotation())), ctx);
+        }
+
+        if (asBoolean(ctx.elementValueArrayInitializer())) {
+            return this.configureAST(this.visitElementValueArrayInitializer(ctx.elementValueArrayInitializer()), ctx);
+        }
+
+        throw createParsingFailedException("Unsupported element value: " + ctx.getText(), ctx);
     }
 
     @Override
@@ -426,6 +552,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         astNode.setLastColumnNumber(stop.getCharPositionInLine() + 1 + stop.getText().length());
 
         return astNode;
+    }
+
+    private <T extends ASTNode> T configureAST(T astNode, TerminalNode terminalNode) {
+        return this.configureAST(astNode, terminalNode.getSymbol());
     }
 
     private <T extends ASTNode> T configureAST(T astNode, Token token) {
@@ -566,10 +696,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private final ModuleNode moduleNode;
     private final SourceUnit sourceUnit;
-    private final ClassLoader classLoader;
     private final GroovyLangLexer lexer;
     private final GroovyLangParser parser;
     private static final Class<ImportNode> IMPORT_NODE_CLASS = ImportNode.class;
     private static final String VALUE_STR = "value";
+    public static final String DOLLAR_STR = "$";
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 }
