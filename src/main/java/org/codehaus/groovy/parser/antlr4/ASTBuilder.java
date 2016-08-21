@@ -246,7 +246,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 // } expression    --------------------------------------------------------------------
 
 
-    // primary {       --------------------------------------------------------------------
+// primary {       --------------------------------------------------------------------
+    @Override
+    public VariableExpression visitIdentifierPrmrAlt(GroovyParser.IdentifierPrmrAltContext ctx) {
+        return this.configureAST(new VariableExpression(ctx.Identifier().getText()), ctx);
+    }
+
     @Override
     public ConstantExpression visitLiteralPrmrAlt(LiteralPrmrAltContext ctx) {
         return (ConstantExpression) this.visit(ctx.literal());
@@ -442,7 +447,9 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClosureExpression visitClosure(ClosureContext ctx) {
-        List<Parameter> parameterList = this.visitFormalParameterList(ctx.formalParameterList());
+        List<Parameter> parameterList = asBoolean(ctx.formalParameterList())
+                ? this.visitFormalParameterList(ctx.formalParameterList())
+                : new LinkedList<>();
         Statement code = this.visitBlockStatementsOpt(ctx.blockStatementsOpt());
 
         return this.configureAST(new ClosureExpression(0 == parameterList.size() ? null : parameterList.toArray(new Parameter[0]), code), ctx);
@@ -450,13 +457,91 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public List<Parameter> visitFormalParameterList(GroovyParser.FormalParameterListContext ctx) {
-        List<Parameter> parameterList = new LinkedList<>();
+        List<Parameter> parameterList =
+                ctx.formalParameter().stream()
+                        .map(this::visitFormalParameter)
+                        .collect(Collectors.toList());
 
-        return parameterList; // TODO
+        if (asBoolean(ctx.lastFormalParameter())) {
+            parameterList.add(this.visitLastFormalParameter(ctx.lastFormalParameter()));
+        }
+
+        return parameterList;
     }
 
     @Override
-    public BlockStatement visitBlockStatementsOpt(GroovyParser.BlockStatementsOptContext ctx) {
+    public Parameter visitFormalParameter(GroovyParser.FormalParameterContext ctx) {
+        return this.configureAST(
+                new Parameter(this.visitType(ctx.type()), this.visitVariableDeclaratorId(ctx.variableDeclaratorId())),
+                ctx);
+    }
+
+    @Override
+    public Parameter visitLastFormalParameter(GroovyParser.LastFormalParameterContext ctx) {
+        ClassNode classNode = this.visitType(ctx.type());
+
+        if (asBoolean(ctx.ELLIPSIS())) {
+            classNode = this.configureAST(classNode.makeArray(), classNode);
+        }
+
+        return this.configureAST(
+                new Parameter(classNode, this.visitVariableDeclaratorId(ctx.variableDeclaratorId())),
+                ctx);
+    }
+
+    @Override
+    public ClassNode visitType(GroovyParser.TypeContext ctx) {
+        ClassNode classNode = null;
+
+        if (asBoolean(ctx.classOrInterfaceType())) {
+            classNode = this.visitClassOrInterfaceType(ctx.classOrInterfaceType());
+
+            if (!asBoolean(ctx.LBRACK())) { // Groovy's bug? array's generics type will be ignored. e.g. List<String>[]... p
+                // TODO add generic type info here
+            }
+        }
+
+        if (asBoolean(ctx.primitiveType())) {
+            classNode = this.visitPrimitiveType(ctx.primitiveType());
+        }
+
+        if (asBoolean(ctx.LBRACK())) {
+            for (int i = 0, n = ctx.LBRACK().size(); i < n; i++) {
+                classNode = this.configureAST(classNode.makeArray(), classNode);
+            }
+        }
+
+        if (null == classNode) {
+            throw createParsingFailedException("Unsupported type: " + ctx.getText(), ctx);
+        }
+
+        return this.configureAST(classNode, ctx);
+    }
+
+    @Override
+    public ClassNode visitClassOrInterfaceType(ClassOrInterfaceTypeContext ctx) {
+        ClassNode classNode = ClassHelper.make(ctx.Identifier().stream().map(ParseTree::getText).collect(Collectors.joining(".")));
+
+        // TODO parse typeArguments
+
+        return this.configureAST(classNode, ctx);
+    }
+
+
+    @Override
+    public ClassNode visitPrimitiveType(PrimitiveTypeContext ctx) {
+        return this.configureAST(ClassHelper.make(ctx.getText()), ctx);
+    }
+
+
+    @Override
+    public String visitVariableDeclaratorId(VariableDeclaratorIdContext ctx) {
+        return ctx.Identifier().getText();
+    }
+
+
+    @Override
+    public BlockStatement visitBlockStatementsOpt(BlockStatementsOptContext ctx) {
         BlockStatement blockStatement = (BlockStatement) ctx.blockStatement().stream()
                 .map(this::visitBlockStatement)
                 .reduce(new BlockStatement(), (r, e) -> {
@@ -469,7 +554,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
 
     @Override
-    public Statement visitBlockStatement(GroovyParser.BlockStatementContext ctx) {
+    public Statement visitBlockStatement(BlockStatementContext ctx) {
         if (asBoolean(ctx.localVariableDeclarationStatement())) {
             return null; // TODO
         }

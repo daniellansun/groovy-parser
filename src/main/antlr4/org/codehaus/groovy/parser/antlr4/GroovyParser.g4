@@ -56,6 +56,7 @@ modifier
         |   SYNCHRONIZED
         |   TRANSIENT
         |   VOLATILE
+        |   DEF
         )
     ;
 
@@ -73,6 +74,7 @@ classOrInterfaceModifier
 
 variableModifier
     :   FINAL
+    |   DEF
     |   annotation
     ;
 
@@ -219,7 +221,7 @@ variableDeclarator
     ;
 
 variableDeclaratorId
-    :   Identifier (LBRACK RBRACK)*
+    :   Identifier
     ;
 
 variableInitializer
@@ -327,7 +329,7 @@ closure
     ;
 
 blockStatementsOpt
-    :   blockStatement? (sep blockStatement)*
+    :   blockStatement? (sep blockStatement)* sep?
     ;
 
 // ANNOTATIONS

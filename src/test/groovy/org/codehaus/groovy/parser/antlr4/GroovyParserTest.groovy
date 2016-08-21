@@ -19,6 +19,7 @@
 package org.codehaus.groovy.parser.antlr4
 
 import org.codehaus.groovy.ast.ModuleNode
+import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
 import org.codehaus.groovy.parser.AbstractParser
 import org.codehaus.groovy.parser.Antlr2Parser
@@ -86,6 +87,9 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/Closure_01.groovy');
         test('core/Closure_02.groovy');
         test('core/Closure_03.groovy');
+        test('core/Closure_04.groovy');
+        test('core/Closure_05.groovy', [Parameter]);
+        test('core/Closure_06.groovy', [Parameter]);
     }
 
     void "test groovy core - Expression"() {

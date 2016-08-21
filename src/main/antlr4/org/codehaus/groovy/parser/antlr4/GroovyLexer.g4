@@ -190,6 +190,7 @@ fragment DollarSlashyStringCharacter
 
 // Groovy keywords
 AS            : 'as';
+DEF           : 'def';
 IN            : 'in';
 
 // §3.9 Keywords
