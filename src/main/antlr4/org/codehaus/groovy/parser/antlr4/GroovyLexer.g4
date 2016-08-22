@@ -192,6 +192,7 @@ fragment DollarSlashyStringCharacter
 AS            : 'as';
 DEF           : 'def';
 IN            : 'in';
+TRAIT         : 'trait';
 
 // §3.9 Keywords
 

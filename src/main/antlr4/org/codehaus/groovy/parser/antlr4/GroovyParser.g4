@@ -243,7 +243,7 @@ type
     ;
 
 classOrInterfaceType
-    :   Identifier typeArguments? (DOT Identifier typeArguments? )*
+    :   qualifiedName typeArguments?
     ;
 
 primitiveType
