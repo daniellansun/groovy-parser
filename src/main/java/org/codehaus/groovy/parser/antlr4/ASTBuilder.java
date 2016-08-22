@@ -246,7 +246,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 // } expression    --------------------------------------------------------------------
 
 
-// primary {       --------------------------------------------------------------------
+    // primary {       --------------------------------------------------------------------
     @Override
     public VariableExpression visitIdentifierPrmrAlt(GroovyParser.IdentifierPrmrAltContext ctx) {
         return this.configureAST(new VariableExpression(ctx.Identifier().getText()), ctx);
@@ -457,10 +457,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public List<Parameter> visitFormalParameterList(GroovyParser.FormalParameterListContext ctx) {
-        List<Parameter> parameterList =
-                ctx.formalParameter().stream()
-                        .map(this::visitFormalParameter)
-                        .collect(Collectors.toList());
+        List<Parameter> parameterList = new LinkedList<>();
+
+        if (asBoolean(ctx.formalParameter())) {
+            parameterList.addAll(
+                    ctx.formalParameter().stream()
+                            .map(this::visitFormalParameter)
+                            .collect(Collectors.toList()));
+        }
 
         if (asBoolean(ctx.lastFormalParameter())) {
             parameterList.add(this.visitLastFormalParameter(ctx.lastFormalParameter()));

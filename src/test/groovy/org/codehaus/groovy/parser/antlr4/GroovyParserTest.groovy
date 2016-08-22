@@ -90,6 +90,7 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/Closure_04.groovy');
         test('core/Closure_05.groovy', [Parameter]);
         test('core/Closure_06.groovy', [Parameter]);
+        test('core/Closure_07.groovy', [Parameter]);
     }
 
     void "test groovy core - Expression"() {
@@ -117,7 +118,7 @@ class GroovyParserTest extends GroovyTestCase {
         long diffInMillis = newElapsedTime - oldElapsedTime;
 
         if (diffInMillis >= 500) {
-            log.warning "${path}\t\t\t\t\tdiff:${diffInMillis / 1000}ms,\tnew:${newElapsedTime / 1000}ms,\told:${oldElapsedTime / 1000}ms."
+            log.warning "${path}\t\t\t\t\tdiff:${diffInMillis / 1000}s,\tnew:${newElapsedTime / 1000}s,\told:${oldElapsedTime / 1000}s."
         }
 
     }

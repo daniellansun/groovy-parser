@@ -38,7 +38,7 @@ public class DfaInitializer {
     public DFA[] createDecisionToDFA() {
         DFA[] decisionToDFA = new DFA[atn.getNumberOfDecisions()];
 
-        for(int i = 0; i < decisionToDFA.length; ++i) {
+        for(int i = 0; i < decisionToDFA.length; i++) {
             decisionToDFA[i] = new DFA(atn.getDecisionState(i), i);
         }
 

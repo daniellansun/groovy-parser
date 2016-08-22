@@ -275,7 +275,7 @@ formalParameters
     ;
 
 formalParameterList
-    :   formalParameter (COMMA formalParameter)* (COMMA lastFormalParameter)?
+    :   formalParameter (COMMA nls formalParameter)* (COMMA nls lastFormalParameter)?
     |   lastFormalParameter
     ;
 
@@ -435,7 +435,6 @@ statement
     |   THROW expression sep                                                                #throwStmtAlt
     |   BREAK Identifier? sep                                                               #breakStmtAlt
     |   CONTINUE Identifier? sep                                                            #continueStmtAlt
-    |   sep                                                                                 #emptyStmtAlt
     |   statementExpression                                                                 #expressionStmtAlt
     |   Identifier COLON statement                                                          #labelStmtAlt
 
@@ -443,6 +442,7 @@ statement
     |   importDeclaration                                                                   #importStmtAlt
 
     |   typeDeclaration                                                                     #typeStmtAlt
+    |   sep                                                                                 #emptyStmtAlt
     ;
 
 catchClause
