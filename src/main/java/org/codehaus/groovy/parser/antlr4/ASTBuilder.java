@@ -39,6 +39,7 @@ import org.codehaus.groovy.runtime.IOGroovyMethods;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
 import org.codehaus.groovy.syntax.Numbers;
 import org.codehaus.groovy.syntax.SyntaxException;
+import org.objectweb.asm.Opcodes;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -475,29 +476,47 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Parameter visitFormalParameter(FormalParameterContext ctx) {
-        // TODO parse variableModifier
-
-        return this.configureAST(
-                new Parameter(this.visitType(ctx.type()), this.visitVariableDeclaratorId(ctx.variableDeclaratorId())),
-                ctx);
+        return this.processModifiersForParameter(
+                this.configureAST(
+                        new Parameter(this.visitType(ctx.type()), this.visitVariableDeclaratorId(ctx.variableDeclaratorId())),
+                        ctx), ctx.variableModifier());
     }
 
     @Override
     public Parameter visitLastFormalParameter(LastFormalParameterContext ctx) {
-        // TODO parse variableModifier
-
         ClassNode classNode = this.visitType(ctx.type());
 
         if (asBoolean(ctx.ELLIPSIS())) {
             classNode = this.configureAST(classNode.makeArray(), classNode);
         }
 
-        return this.configureAST(
-                new Parameter(classNode, this.visitVariableDeclaratorId(ctx.variableDeclaratorId())),
-                ctx);
+        return processModifiersForParameter(
+                this.configureAST(
+                        new Parameter(classNode, this.visitVariableDeclaratorId(ctx.variableDeclaratorId())),
+                        ctx), ctx.variableModifier());
     }
 
-// type {       --------------------------------------------------------------------
+    @Override
+    public ModifierNode visitVariableModifier(VariableModifierContext ctx) {
+        if (asBoolean(ctx.annotation())) {
+            return this.configureAST(new ModifierNode(this.visitAnnotation(ctx.annotation()), ctx.getText()), ctx);
+        }
+
+        Integer modifierType = null;
+        if (asBoolean(ctx.FINAL())) {
+            modifierType = ctx.FINAL().getSymbol().getType();
+        } else if (asBoolean(ctx.DEF())) {
+            modifierType = ctx.DEF().getSymbol().getType();
+        }
+
+        if (null != modifierType) {
+            return this.configureAST(new ModifierNode(modifierType, ctx.getText()), ctx);
+        }
+
+        throw createParsingFailedException("Unsupported variable modifier", ctx);
+    }
+
+    // type {       --------------------------------------------------------------------
     @Override
     public ClassNode visitType(TypeContext ctx) {
         ClassNode classNode = null;
@@ -562,7 +581,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             ClassNode classNode = this.visitType(ctx.type());
             if (asBoolean(ctx.EXTENDS())) {
-                upperBounds = new ClassNode[]{ classNode };
+                upperBounds = new ClassNode[]{classNode};
             } else if (asBoolean(ctx.SUPER())) {
                 lowerBound = classNode;
             }
@@ -708,6 +727,18 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return super.visit(tree);
     }
 
+    private Parameter processModifiersForParameter(Parameter parameter, List<VariableModifierContext> ctxList) {
+        ctxList.stream().map(this::visitVariableModifier).forEach(e -> {
+            parameter.setModifiers(parameter.getModifiers() | e.getOpCode());
+
+            if (e.isAnnotation()) {
+                parameter.addAnnotation(e.getAnnotationNode());
+            }
+        });
+
+        return parameter;
+    }
+
     private boolean isBlankScript(CompilationUnitContext ctx) {
         long blankCnt =
                 ctx.children.stream()
@@ -771,6 +802,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         return astNode;
     }
+
 
     private CompilationFailedException createParsingFailedException(String msg, ParserRuleContext ctx) {
         return createParsingFailedException(new SyntaxException(msg,
@@ -873,21 +905,128 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             this.value = value;
         }
 
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Pair<?, ?> pair = (Pair<?, ?>) o;
+            return Objects.equals(key, pair.key) &&
+                    Objects.equals(value, pair.value);
+        }
+
         @Override
         public int hashCode() {
             return Objects.hash(key, value);
         }
+    }
+
+    /**
+     * Represents a modifier, which is better to place in the package org.codehaus.groovy.ast
+     * <p>
+     * Created by Daniel.Sun on 2016/8/23.
+     */
+    private static class ModifierNode extends ASTNode {
+        private Integer type;
+        private Integer opCode; // opCode ASM opcode
+        private String text;
+        private AnnotationNode annotationNode;
+
+        public static final int ANNOTATION_TYPE = -999;
+        private static final Map<Integer, Integer> MAP = new HashMap<Integer, Integer>() {
+            {
+                put(ANNOTATION_TYPE, 0);
+                put(DEF, 0);
+
+                put(NATIVE, Opcodes.ACC_NATIVE);
+                put(SYNCHRONIZED, Opcodes.ACC_SYNCHRONIZED);
+                put(TRANSIENT, Opcodes.ACC_TRANSIENT);
+                put(VOLATILE, Opcodes.ACC_VOLATILE);
+
+                put(PUBLIC, Opcodes.ACC_PUBLIC);
+                put(PROTECTED, Opcodes.ACC_PROTECTED);
+                put(PRIVATE, Opcodes.ACC_PRIVATE);
+                put(STATIC, Opcodes.ACC_STATIC);
+                put(ABSTRACT, Opcodes.ACC_ABSTRACT);
+                put(FINAL, Opcodes.ACC_FINAL);
+                put(STRICTFP, Opcodes.ACC_STRICT);
+            }
+        };
+
+        public ModifierNode(Integer type) {
+            this.type = type;
+            this.opCode = MAP.get(type);
+
+            if (null == this.opCode) {
+                throw new IllegalArgumentException("Unsupported modifier type: " + type);
+            }
+        }
+
+        /**
+         * @param type the modifier type, which is same as the token type
+         * @param text text of the ast node
+         */
+        public ModifierNode(Integer type, String text) {
+            this(type);
+            this.text = text;
+        }
+
+        /**
+         * @param annotationNode the annotation node
+         * @param text           text of the ast node
+         */
+        public ModifierNode(AnnotationNode annotationNode, String text) {
+            this(ModifierNode.ANNOTATION_TYPE, text);
+            this.annotationNode = annotationNode;
+
+            if (null == annotationNode) {
+                throw new IllegalArgumentException("annotationNode can not be null");
+            }
+        }
+
+        public boolean isOp() {
+            return !this.isAnnotation() && !this.isDef();
+        }
+
+        public boolean isAnnotation() {
+            return Objects.equals(ANNOTATION_TYPE, this.type);
+        }
+
+        public boolean isDef() {
+            return Objects.equals(DEF, this.type);
+        }
+
+        public Integer getType() {
+            return type;
+        }
+
+        public Integer getOpCode() {
+            return opCode;
+        }
+
+        @Override
+        public String getText() {
+            return text;
+        }
+
+        public AnnotationNode getAnnotationNode() {
+            return annotationNode;
+        }
 
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof Pair))
-                return false;
-
-            Pair<?, ?> pair = (Pair<?, ?>) o;
-            return Objects.equals(this.key, pair.key) &&
-                    Objects.equals(this.value, pair.value);
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ModifierNode that = (ModifierNode) o;
+            return Objects.equals(type, that.type) &&
+                    Objects.equals(text, that.text) &&
+                    Objects.equals(annotationNode, that.annotationNode);
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(type, text, annotationNode);
+        }
     }
 
     private final ModuleNode moduleNode;

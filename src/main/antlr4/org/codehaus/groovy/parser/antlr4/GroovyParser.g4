@@ -280,11 +280,11 @@ formalParameterList
     ;
 
 formalParameter
-    :   variableModifier* type variableDeclaratorId
+    :   (variableModifier nls)* type variableDeclaratorId
     ;
 
 lastFormalParameter
-    :   variableModifier* type ELLIPSIS variableDeclaratorId
+    :   (variableModifier nls)* type ELLIPSIS variableDeclaratorId
     ;
 
 methodBody
