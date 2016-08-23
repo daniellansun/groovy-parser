@@ -476,24 +476,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Parameter visitFormalParameter(FormalParameterContext ctx) {
-        return this.processModifiersForParameter(
-                this.configureAST(
-                        new Parameter(this.visitType(ctx.type()), this.visitVariableDeclaratorId(ctx.variableDeclaratorId())),
-                        ctx), ctx.variableModifier());
+        return this.processFormalParameter(ctx, ctx.variableModifier(), ctx.type(), null, ctx.variableDeclaratorId());
     }
 
     @Override
     public Parameter visitLastFormalParameter(LastFormalParameterContext ctx) {
-        ClassNode classNode = this.visitType(ctx.type());
-
-        if (asBoolean(ctx.ELLIPSIS())) {
-            classNode = this.configureAST(classNode.makeArray(), classNode);
-        }
-
-        return processModifiersForParameter(
-                this.configureAST(
-                        new Parameter(classNode, this.visitVariableDeclaratorId(ctx.variableDeclaratorId())),
-                        ctx), ctx.variableModifier());
+        return this.processFormalParameter(ctx, ctx.variableModifier(), ctx.type(), ctx.ELLIPSIS(), ctx.variableDeclaratorId());
     }
 
     @Override
@@ -519,6 +507,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     // type {       --------------------------------------------------------------------
     @Override
     public ClassNode visitType(TypeContext ctx) {
+        if (null == ctx) {
+            return ClassHelper.OBJECT_TYPE;
+        }
+
         ClassNode classNode = null;
 
         if (asBoolean(ctx.classOrInterfaceType())) {
@@ -727,8 +719,23 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return super.visit(tree);
     }
 
-    private Parameter processModifiersForParameter(Parameter parameter, List<VariableModifierContext> ctxList) {
-        ctxList.stream().map(this::visitVariableModifier).forEach(e -> {
+    private Parameter processFormalParameter(ParserRuleContext ctx,
+                                             List<VariableModifierContext> variableModifierContextList,
+                                             TypeContext typeContext,
+                                             TerminalNode ellipsis,
+                                             VariableDeclaratorIdContext variableDeclaratorIdContext) {
+
+        ClassNode classNode = this.visitType(typeContext);
+
+        if (asBoolean(ellipsis)) {
+            classNode = this.configureAST(classNode.makeArray(), classNode);
+        }
+
+        Parameter parameter = this.configureAST(
+                new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext)),
+                ctx);
+
+        variableModifierContextList.stream().map(this::visitVariableModifier).forEach(e -> {
             parameter.setModifiers(parameter.getModifiers() | e.getOpCode());
 
             if (e.isAnnotation()) {
@@ -738,6 +745,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         return parameter;
     }
+
 
     private boolean isBlankScript(CompilationUnitContext ctx) {
         long blankCnt =

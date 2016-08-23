@@ -6,6 +6,9 @@
 
   def
           String m,
-  @Test2 final def String... n ->
+        final n,
+        def
+          o,
+  @Test2 final def String... z ->
     i
 }
