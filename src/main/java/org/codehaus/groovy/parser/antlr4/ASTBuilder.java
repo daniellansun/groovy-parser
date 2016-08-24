@@ -177,7 +177,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     // statement {    --------------------------------------------------------------------
     @Override
-    public AssertStatement visitAssertStmtAlt(GroovyParser.AssertStmtAltContext ctx) {
+    public AssertStatement visitAssertStmtAlt(AssertStmtAltContext ctx) {
         Expression conditionExpression = (Expression) this.visit(ctx.ce);
         BooleanExpression booleanExpression =
                 this.configureAST(
@@ -195,7 +195,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public IfStatement visitIfElseStmtAlt(GroovyParser.IfElseStmtAltContext ctx) {
+    public IfStatement visitIfElseStmtAlt(IfElseStmtAltContext ctx) {
         Expression conditionExpression = this.visitParExpression(ctx.parExpression());
         BooleanExpression booleanExpression =
                 this.configureAST(
@@ -209,7 +209,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public WhileStatement visitWhileStmtAlt(GroovyParser.WhileStmtAltContext ctx) {
+    public WhileStatement visitWhileStmtAlt(WhileStmtAltContext ctx) {
         Expression conditionExpression = this.visitParExpression(ctx.parExpression());
         BooleanExpression booleanExpression =
                 this.configureAST(
@@ -221,7 +221,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public SynchronizedStatement visitSynchronizedStmtAlt(GroovyParser.SynchronizedStmtAltContext ctx) {
+    public SynchronizedStatement visitSynchronizedStmtAlt(SynchronizedStmtAltContext ctx) {
         return this.configureAST(
                 new SynchronizedStatement(this.visitParExpression(ctx.parExpression()), this.visitBlock(ctx.block())),
                 ctx);
@@ -235,7 +235,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 // } statement    --------------------------------------------------------------------
 
     @Override
-    public Statement visitBlock(GroovyParser.BlockContext ctx) {
+    public Statement visitBlock(BlockContext ctx) {
         final BlockStatement block = new BlockStatement();
 
         if (!asBoolean(ctx)) {
@@ -255,7 +255,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     // expression {    --------------------------------------------------------------------
     @Override
-    public Expression visitParExpression(GroovyParser.ParExpressionContext ctx) {
+    public Expression visitParExpression(ParExpressionContext ctx) {
         return this.configureAST((Expression) this.visit(ctx.expression()), ctx);
     }
 
@@ -330,7 +330,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Expression visitParenPrmrAlt(GroovyParser.ParenPrmrAltContext ctx) {
+    public Expression visitParenPrmrAlt(ParenPrmrAltContext ctx) {
         return this.configureAST(this.visitParExpression(ctx.parExpression()), ctx);
     }
 
@@ -613,7 +613,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClassNode visitClassOrInterfaceType(ClassOrInterfaceTypeContext ctx) {
-        ClassNode classNode = ClassHelper.make(this.visitQualifiedName(ctx.qualifiedName()));
+        ClassNode classNode = ClassHelper.make(this.visitQualifiedClassName(ctx.qualifiedClassName()));
 
         if (asBoolean(ctx.typeArguments())) {
             classNode.setGenericsTypes(
@@ -777,6 +777,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 .collect(Collectors.joining(DOT_STR));
     }
 
+    @Override
+    public String visitQualifiedClassName(GroovyParser.QualifiedClassNameContext ctx) {
+        return this.visitQualifiedName(ctx.qualifiedName());
+    }
+
+
     /**
      * Visit tree safely, no NPE occurred when the tree is null.
      *
@@ -827,7 +833,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 || e instanceof PackageDeclarationContext
                                 || e instanceof SepContext
                                 || e instanceof ImportStmtAltContext
-                                || e instanceof TerminalNode && (((TerminalNode) e).getSymbol().getType() == GroovyLangParser.EOF)
+                                || e instanceof TerminalNode && (((TerminalNode) e).getSymbol().getType() == EOF)
                         ).count();
 
 

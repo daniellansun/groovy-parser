@@ -25,6 +25,10 @@
  */
 lexer grammar GroovyLexer;
 
+@header {
+    import static org.codehaus.groovy.parser.antlr4.GrammarPredicates.*;
+}
+
 @members {
     private long tokenIndex     = 0;
     private int  lastTokenType  = 0;
@@ -176,7 +180,7 @@ fragment TsqStringCharacter
 // character in the slashy string. e.g. /a/
 fragment SlashyStringCharacter
     :   SlashEscape
-    |   '$' { !GrammarPredicates.isFollowedByJavaLetterInGString(_input) }?
+    |   '$' { !isFollowedByJavaLetterInGString(_input) }?
     |   ~[/$\n\u0000]
     ;
 
@@ -184,7 +188,7 @@ fragment SlashyStringCharacter
 fragment DollarSlashyStringCharacter
     :   SlashEscape
     |   '/' { _input.LA(1) != '$' }?
-    |   '$' { !GrammarPredicates.isFollowedByJavaLetterInGString(_input) }?
+    |   '$' { !isFollowedByJavaLetterInGString(_input) }?
     |   ~[/$\u0000]
     ;
 
@@ -195,36 +199,68 @@ IN            : 'in';
 TRAIT         : 'trait';
 
 // §3.9 Keywords
+BuiltInPrimitiveType
+    :   BOOLEAN
+    |   CHAR
+    |   BYTE
+    |   SHORT
+    |   INT
+    |   LONG
+    |   FLOAT
+    |   DOUBLE
+    ;
 
 ABSTRACT      : 'abstract';
 ASSERT        : 'assert';
+
+fragment
 BOOLEAN       : 'boolean';
+
 BREAK         : 'break';
+
+fragment
 BYTE          : 'byte';
+
 CASE          : 'case';
 CATCH         : 'catch';
+
+fragment
 CHAR          : 'char';
+
 CLASS         : 'class';
 CONST         : 'const';
 CONTINUE      : 'continue';
 DEFAULT       : 'default';
 DO            : 'do';
+
+fragment
 DOUBLE        : 'double';
+
 ELSE          : 'else';
 ENUM          : 'enum';
 EXTENDS       : 'extends';
 FINAL         : 'final';
 FINALLY       : 'finally';
+
+fragment
 FLOAT         : 'float';
+
+
 FOR           : 'for';
 IF            : 'if';
 GOTO          : 'goto';
 IMPLEMENTS    : 'implements';
 IMPORT        : 'import';
 INSTANCEOF    : 'instanceof';
+
+fragment
 INT           : 'int';
+
 INTERFACE     : 'interface';
+
+fragment
 LONG          : 'long';
+
 NATIVE        : 'native';
 NEW           : 'new';
 PACKAGE       : 'package';
@@ -232,7 +268,11 @@ PRIVATE       : 'private';
 PROTECTED     : 'protected';
 PUBLIC        : 'public';
 RETURN        : 'return';
+
+fragment
 SHORT         : 'short';
+
+
 STATIC        : 'static';
 STRICTFP      : 'strictfp';
 SUPER         : 'super';

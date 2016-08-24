@@ -27,6 +27,10 @@ parser grammar GroovyParser;
 
 options { tokenVocab = GroovyLexer; }
 
+@header {
+    import org.codehaus.groovy.parser.antlr4.GrammarPredicates;
+}
+
 // starting point for parsing a groovy file
 compilationUnit
     :
@@ -243,18 +247,11 @@ type
     ;
 
 classOrInterfaceType
-    :   qualifiedName typeArguments?
+    :   qualifiedClassName typeArguments?
     ;
 
 primitiveType
-    :   BOOLEAN
-    |   CHAR
-    |   BYTE
-    |   SHORT
-    |   INT
-    |   LONG
-    |   FLOAT
-    |   DOUBLE
+    :   BuiltInPrimitiveType
     ;
 
 typeArguments
@@ -299,14 +296,24 @@ qualifiedName
     :   Identifier (DOT Identifier)*
     ;
 
+qualifiedClassName
+    :   { GrammarPredicates.isClassName(_input) }?<fail={"The first character of class name should be upper case"}>
+        qualifiedName
+    ;
+
 literal
     :   IntegerLiteral                                                                      #integerLiteralAlt
     |   FloatingPointLiteral                                                                #floatingPointLiteralAlt
     |   StringLiteral                                                                       #stringLiteralAlt
     |   BooleanLiteral                                                                      #booleanLiteralAlt
     |   NullLiteral                                                                         #nullLiteralAlt
+    |   classLiteral                                                                        #classLiteralAlt
     ;
 
+classLiteral
+    :   type (DOT CLASS)?
+    |   VOID (DOT CLASS)?
+    ;
 
 // GSTRING
 
@@ -575,8 +582,6 @@ primary
     |   parExpression                                                                       #parenPrmrAlt
     |   closure                                                                             #closurePrmrAlt
     // listOrMapConstructorExpression
-    |   type DOT CLASS                                                                      #classPrmrAlt
-    |   VOID DOT CLASS                                                                      #classPrmrAlt
     |   nonWildcardTypeArguments (explicitGenericInvocationSuffix | THIS arguments)         #invocationPrmrAlt
     ;
 
