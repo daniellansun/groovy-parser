@@ -505,7 +505,7 @@ forUpdate
 // EXPRESSIONS
 
 parExpression
-    :   LPAREN expression RPAREN
+    :   LPAREN nls expression nls RPAREN
     ;
 
 expressionList
@@ -568,13 +568,13 @@ expression
 primary
     :   Identifier                                                                          #identifierPrmrAlt
     |   literal                                                                             #literalPrmrAlt
+    |   gstring                                                                             #gstringPrmrAlt
     |   NEW creator                                                                         #newPrmrAlt
     |   THIS                                                                                #thisPrmrAlt
     |   SUPER                                                                               #superPrmrAlt
-    |   LPAREN expression RPAREN                                                            #parenPrmrAlt
+    |   parExpression                                                                       #parenPrmrAlt
     |   closure                                                                             #closurePrmrAlt
     // listOrMapConstructorExpression
-    |   gstring                                                                             #gstringPrmrAlt
     |   type DOT CLASS                                                                      #classPrmrAlt
     |   VOID DOT CLASS                                                                      #classPrmrAlt
     |   nonWildcardTypeArguments (explicitGenericInvocationSuffix | THIS arguments)         #invocationPrmrAlt

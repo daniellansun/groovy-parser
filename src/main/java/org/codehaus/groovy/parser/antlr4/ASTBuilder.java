@@ -321,13 +321,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ConstantExpression visitLiteralPrmrAlt(LiteralPrmrAltContext ctx) {
-        return (ConstantExpression) this.visit(ctx.literal());
+        return this.configureAST((ConstantExpression) this.visit(ctx.literal()), ctx);
     }
 
     @Override
     public GStringExpression visitGstringPrmrAlt(GstringPrmrAltContext ctx) {
-        return (GStringExpression) this.visit(ctx.gstring());
+        return this.configureAST((GStringExpression) this.visit(ctx.gstring()), ctx);
     }
+
+    @Override
+    public Expression visitParenPrmrAlt(GroovyParser.ParenPrmrAltContext ctx) {
+        return this.configureAST(this.visitParExpression(ctx.parExpression()), ctx);
+    }
+
+
 // } primary       --------------------------------------------------------------------
 
 
