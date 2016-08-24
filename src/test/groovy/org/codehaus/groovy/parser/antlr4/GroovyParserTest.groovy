@@ -20,6 +20,7 @@ package org.codehaus.groovy.parser.antlr4
 
 import org.codehaus.groovy.ast.ModuleNode
 import org.codehaus.groovy.ast.Parameter
+import org.codehaus.groovy.ast.stmt.AssertStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
 import org.codehaus.groovy.parser.AbstractParser
 import org.codehaus.groovy.parser.Antlr2Parser
@@ -101,6 +102,10 @@ class GroovyParserTest extends GroovyTestCase {
 
     void "test groovy core - Assert"() {
         test('core/Assert_01.groovy');
+    }
+
+    void "test groovy core - IfElse"() {
+        test('core/IfElse_01.groovy', [AssertStatement]);
     }
 
     static test(String path) {

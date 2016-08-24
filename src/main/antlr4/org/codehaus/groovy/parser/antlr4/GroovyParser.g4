@@ -422,8 +422,8 @@ localVariableDeclaration
 
 statement
     :   block                                                                               #blockStmtAlt
-    |   ASSERT ce=expression ((COLON | COMMA) nls me=expression)?                                     #assertStmtAlt
-    |   IF parExpression statement (ELSE statement)?                                        #ifElseStmtAlt
+    |   ASSERT ce=expression ((COLON | COMMA) nls me=expression)?                           #assertStmtAlt
+    |   IF parExpression nls tb=statement (nls ELSE nls fb=statement)?                            #ifElseStmtAlt
     |   FOR LPAREN forControl RPAREN statement                                              #forStmtAlt
     |   WHILE parExpression statement                                                       #whileStmtAlt
     |   DO statement WHILE parExpression sep                                                #doWhileStmtAlt
