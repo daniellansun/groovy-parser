@@ -209,6 +209,19 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public WhileStatement visitWhileStmtAlt(GroovyParser.WhileStmtAltContext ctx) {
+        Expression conditionExpression = this.visitParExpression(ctx.parExpression());
+        BooleanExpression booleanExpression =
+                this.configureAST(
+                        new BooleanExpression(conditionExpression), conditionExpression);
+
+        return this.configureAST(
+                new WhileStatement(booleanExpression, (Statement) this.visit(ctx.statement())),
+                ctx);
+    }
+
+
+    @Override
     public ExpressionStatement visitExpressionStmtAlt(ExpressionStmtAltContext ctx) {
         return this.visitStatementExpression(ctx.statementExpression());
     }

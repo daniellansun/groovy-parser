@@ -423,9 +423,9 @@ localVariableDeclaration
 statement
     :   block                                                                               #blockStmtAlt
     |   ASSERT ce=expression ((COLON | COMMA) nls me=expression)?                           #assertStmtAlt
-    |   IF parExpression nls tb=statement (nls ELSE nls fb=statement)?                            #ifElseStmtAlt
+    |   IF parExpression nls tb=statement (nls ELSE nls fb=statement)?                      #ifElseStmtAlt
     |   FOR LPAREN forControl RPAREN statement                                              #forStmtAlt
-    |   WHILE parExpression statement                                                       #whileStmtAlt
+    |   WHILE parExpression nls statement                                                   #whileStmtAlt
     |   DO statement WHILE parExpression sep                                                #doWhileStmtAlt
     |   TRY block (catchClause+ finallyBlock? | finallyBlock)                               #tryCatchStmtAlt
     |   TRY resourceSpecification block catchClause* finallyBlock?                          #tryResourceStmtAlt
