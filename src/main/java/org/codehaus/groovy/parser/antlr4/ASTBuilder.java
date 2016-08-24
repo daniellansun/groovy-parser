@@ -26,10 +26,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
-import org.codehaus.groovy.ast.stmt.BlockStatement;
-import org.codehaus.groovy.ast.stmt.ExpressionStatement;
-import org.codehaus.groovy.ast.stmt.ReturnStatement;
-import org.codehaus.groovy.ast.stmt.Statement;
+import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
@@ -179,6 +176,25 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     // statement {    --------------------------------------------------------------------
+    @Override
+    public AssertStatement visitAssertStmtAlt(GroovyParser.AssertStmtAltContext ctx) {
+        Expression conditionExpression = (Expression) this.visit(ctx.ce);
+        BooleanExpression booleanExpression =
+                this.configureAST(
+                        new BooleanExpression(conditionExpression), conditionExpression);
+
+        if (!asBoolean(ctx.me)) {
+            return this.configureAST(
+                    new AssertStatement(booleanExpression), ctx);
+        }
+
+        return this.configureAST(new AssertStatement(booleanExpression,
+                        (Expression) this.visit(ctx.me)),
+                ctx);
+
+    }
+
+
     @Override
     public ExpressionStatement visitExpressionStmtAlt(ExpressionStmtAltContext ctx) {
         return this.visitStatementExpression(ctx.statementExpression());

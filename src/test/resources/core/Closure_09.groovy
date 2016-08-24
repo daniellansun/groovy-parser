@@ -9,6 +9,8 @@
         final n,
         def
           o,
+        p, q,
+        r, s,
   @Test2 final def String... z ->
     i
 }
