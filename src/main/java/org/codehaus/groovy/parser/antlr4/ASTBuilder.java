@@ -463,7 +463,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
 
             Expression value = values.get(i);
-            if (null == value) {
+            if (!asBoolean(value)) {
                 continue;
             }
 
@@ -563,7 +563,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             modifierType = ctx.DEF().getSymbol().getType();
         }
 
-        if (null != modifierType) {
+        if (asBoolean((Object) modifierType)) {
             return this.configureAST(new ModifierNode(modifierType, ctx.getText()), ctx);
         }
 
@@ -573,7 +573,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     // type {       --------------------------------------------------------------------
     @Override
     public ClassNode visitType(TypeContext ctx) {
-        if (null == ctx) {
+        if (!asBoolean(ctx)) {
             return ClassHelper.OBJECT_TYPE;
         }
 
@@ -597,7 +597,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
         }
 
-        if (null == classNode) {
+        if (!asBoolean(classNode)) {
             throw createParsingFailedException("Unsupported type: " + ctx.getText(), ctx);
         }
 
@@ -778,7 +778,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
      */
     @Override
     public Object visit(ParseTree tree) {
-        if (null == tree) {
+        if (!asBoolean(tree)) {
             return null;
         }
 
@@ -840,10 +840,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
      * @return Modified astNode.
      */
     private <T extends ASTNode> T configureAST(T astNode, ParserRuleContext ctx) {
-        if (null == ctx) {
-            return astNode;
-        }
-
         Token start = ctx.getStart();
         Token stop = ctx.getStop();
 
@@ -1031,7 +1027,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             this.type = type;
             this.opCode = MAP.get(type);
 
-            if (null == this.opCode) {
+            if (!asBoolean((Object) this.opCode)) {
                 throw new IllegalArgumentException("Unsupported modifier type: " + type);
             }
         }
@@ -1053,7 +1049,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             this(ModifierNode.ANNOTATION_TYPE, text);
             this.annotationNode = annotationNode;
 
-            if (null == annotationNode) {
+            if (!asBoolean(annotationNode)) {
                 throw new IllegalArgumentException("annotationNode can not be null");
             }
         }
