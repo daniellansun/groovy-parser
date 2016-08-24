@@ -220,6 +220,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
+    @Override
+    public SynchronizedStatement visitSynchronizedStmtAlt(GroovyParser.SynchronizedStmtAltContext ctx) {
+        return this.configureAST(
+                new SynchronizedStatement(this.visitParExpression(ctx.parExpression()), this.visitBlock(ctx.block())),
+                ctx);
+    }
+
 
     @Override
     public ExpressionStatement visitExpressionStmtAlt(ExpressionStmtAltContext ctx) {
@@ -227,6 +234,18 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 // } statement    --------------------------------------------------------------------
 
+    @Override
+    public Statement visitBlock(GroovyParser.BlockContext ctx) {
+        final BlockStatement block = new BlockStatement();
+
+        if (!asBoolean(ctx)) {
+            return block;
+        }
+
+        ctx.blockStatement().stream().map(e -> (Statement) this.visit(e)).forEach(block::addStatement);
+
+        return this.configureAST(block, ctx);
+    }
 
     @Override
     public ExpressionStatement visitStatementExpression(StatementExpressionContext ctx) {

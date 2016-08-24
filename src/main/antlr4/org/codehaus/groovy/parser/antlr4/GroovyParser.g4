@@ -47,7 +47,7 @@ typeDeclaration
     |   classOrInterfaceModifier* enumDeclaration
     |   classOrInterfaceModifier* interfaceDeclaration
     |   classOrInterfaceModifier* annotationTypeDeclaration
-    |   sep
+    |   SEMI
     ;
 
 modifier
@@ -403,7 +403,7 @@ defaultValue
 // STATEMENTS / BLOCKS
 
 block
-    :   LBRACE blockStatement* RBRACE
+    :   LBRACE nls (blockStatement sep)* blockStatement? sep? RBRACE
     ;
 
 blockStatement
@@ -426,11 +426,11 @@ statement
     |   IF parExpression nls tb=statement (nls ELSE nls fb=statement)?                      #ifElseStmtAlt
     |   FOR LPAREN forControl RPAREN statement                                              #forStmtAlt
     |   WHILE parExpression nls statement                                                   #whileStmtAlt
-    |   DO statement WHILE parExpression sep                                                #doWhileStmtAlt
+//TODO    |   DO statement WHILE parExpression sep                                                #doWhileStmtAlt
     |   TRY block (catchClause+ finallyBlock? | finallyBlock)                               #tryCatchStmtAlt
-    |   TRY resourceSpecification block catchClause* finallyBlock?                          #tryResourceStmtAlt
+//TODO    |   TRY resourceSpecification block catchClause* finallyBlock?                          #tryResourceStmtAlt
     |   SWITCH parExpression LBRACE switchBlockStatementGroup* switchLabel* RBRACE          #switchStmtAlt
-    |   SYNCHRONIZED parExpression block                                                    #synchronizedStmtAlt
+    |   SYNCHRONIZED parExpression nls block                                                #synchronizedStmtAlt
     |   RETURN expression? sep                                                              #returnStmtAlt
     |   THROW expression sep                                                                #throwStmtAlt
     |   BREAK Identifier? sep                                                               #breakStmtAlt
@@ -442,7 +442,7 @@ statement
     |   importDeclaration                                                                   #importStmtAlt
 
     |   typeDeclaration                                                                     #typeStmtAlt
-    |   sep                                                                                 #emptyStmtAlt
+    |   SEMI                                                                                #emptyStmtAlt
     ;
 
 catchClause
@@ -457,6 +457,7 @@ finallyBlock
     :   FINALLY block
     ;
 
+/* TODO
 resourceSpecification
     :   LPAREN resources SEMI? RPAREN
     ;
@@ -468,6 +469,7 @@ resources
 resource
     :   variableModifier* classOrInterfaceType variableDeclaratorId ASSIGN expression
     ;
+*/
 
 /** Matches cases then statements, both of which are mandatory.
  *  To handle empty cases at the end, we add switchLabel* to statement.
