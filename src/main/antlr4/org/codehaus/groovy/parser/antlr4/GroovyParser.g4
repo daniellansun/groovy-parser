@@ -443,7 +443,7 @@ statement
     |   SWITCH parExpression LBRACE switchBlockStatementGroup* switchLabel* RBRACE          #switchStmtAlt
     |   SYNCHRONIZED parExpression nls block                                                #synchronizedStmtAlt
     |   RETURN (nls expression)??                                                           #returnStmtAlt
-    |   THROW expression sep                                                                #throwStmtAlt
+    |   THROW expression                                                                    #throwStmtAlt
     |   BREAK Identifier? sep                                                               #breakStmtAlt
     |   CONTINUE Identifier? sep                                                            #continueStmtAlt
     |   statementExpression                                                                 #expressionStmtAlt
