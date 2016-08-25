@@ -301,15 +301,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         ExpressionContext expressionCtx = ctx.expression();
 
         switch (ctx.op.getType()) {
-            case ADD:
-                if (expressionCtx instanceof PrimaryExprAltContext) {
+            case ADD: {
+                Expression expression = (Expression) this.visit(expressionCtx);
+
+                if (expression instanceof ConstantExpression) {
                     return this.configureAST((ConstantExpression) this.visit(expressionCtx), ctx);
                 }
 
-                return this.configureAST(new UnaryPlusExpression((Expression) this.visit(expressionCtx)), ctx);
-            case SUB:
-                if (expressionCtx instanceof PrimaryExprAltContext) {
-                    ConstantExpression constantExpression = (ConstantExpression) this.visit(expressionCtx);
+                return this.configureAST(new UnaryPlusExpression(expression), ctx);
+            }
+            case SUB: {
+                Expression expression = (Expression) this.visit(expressionCtx);
+
+                if (expression instanceof ConstantExpression) {
+                    ConstantExpression constantExpression = (ConstantExpression) expression;
 
                     Object value = constantExpression.getValue();
 
@@ -332,7 +337,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     return this.configureAST(new ConstantExpression(value, false), ctx);
                 }
 
-                return this.configureAST(new UnaryMinusExpression((Expression) this.visit(expressionCtx)), ctx);
+                return this.configureAST(new UnaryMinusExpression(expression), ctx);
+            }
             case TILDE:
                 return this.configureAST(new BitwiseNegationExpression((Expression) this.visit(expressionCtx)), ctx);
             case BANG:

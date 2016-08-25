@@ -22,5 +22,6 @@ package core;
 import java.util.*
 import java.math.BigDecimal;
 import java.io.*
+import java.sql.Blob as Bb
 import static java.lang.Math.*;
-import static java.lang.Math.pow
+import static java.lang.Math.pow as pw
