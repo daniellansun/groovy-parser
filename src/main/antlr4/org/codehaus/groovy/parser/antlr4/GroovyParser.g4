@@ -447,7 +447,7 @@ statement
     |   BREAK Identifier? sep                                                               #breakStmtAlt
     |   CONTINUE Identifier? sep                                                            #continueStmtAlt
     |   statementExpression                                                                 #expressionStmtAlt
-    |   Identifier COLON statement                                                          #labelStmtAlt
+    |   Identifier COLON nls statement                                                      #labelStmtAlt
 
     // Import statement.  Can be used in any scope.  Has "import x as y" also.
     |   importDeclaration                                                                   #importStmtAlt

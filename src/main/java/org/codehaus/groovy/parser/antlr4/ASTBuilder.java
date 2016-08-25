@@ -255,6 +255,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
+    @Override
+    public Statement visitLabelStmtAlt(GroovyParser.LabelStmtAltContext ctx) {
+        Statement statement = (Statement) this.visit(ctx.statement());
+
+        statement.setStatementLabel(ctx.Identifier().getText());
+
+        return statement; // this.configureAST(statement, ctx);
+    }
+
 // } statement    --------------------------------------------------------------------
 
     @Override
