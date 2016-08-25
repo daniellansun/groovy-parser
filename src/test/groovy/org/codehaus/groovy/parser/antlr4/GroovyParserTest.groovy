@@ -94,6 +94,7 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/Closure_07.groovy', [Parameter]);
         test('core/Closure_08.groovy', [Parameter]);
         test('core/Closure_09.groovy', [Parameter]);
+        test('core/Closure_10.groovy', [Parameter]);
     }
 
     void "test groovy core - Expression"() {
@@ -127,12 +128,13 @@ class GroovyParserTest extends GroovyTestCase {
     }
 
     static test(String path, conf) {
-        AbstractParser antlr2Parser = new Antlr2Parser()
         AbstractParser antlr4Parser = new Antlr4Parser()
+        AbstractParser antlr2Parser = new Antlr2Parser()
 
         File file = new File("$RESOURCES_PATH/$path");
-        def (oldAST, oldElapsedTime) = profile { antlr2Parser.parse(file) }
         def (newAST, newElapsedTime) = profile { antlr4Parser.parse(file) }
+        def (oldAST, oldElapsedTime) = profile { antlr2Parser.parse(file) }
+
 
         assertAST(newAST, oldAST, conf);
 

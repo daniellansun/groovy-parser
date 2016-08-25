@@ -242,8 +242,8 @@ enumConstantName
     ;
 
 type
-    :   classOrInterfaceType (LBRACK RBRACK)*
-    |   primitiveType (LBRACK RBRACK)*
+    :   primitiveType (LBRACK RBRACK)*
+    |   classOrInterfaceType (LBRACK RBRACK)*
     ;
 
 classOrInterfaceType
@@ -297,8 +297,11 @@ qualifiedName
     ;
 
 qualifiedClassName
-    :   { GrammarPredicates.isClassName(_input) }?<fail={"The first character of class name should be upper case"}>
-        qualifiedName
+    :   (Identifier DOT)* upperCaseIdentifier["The first character of class name should be upper case."]
+    ;
+
+upperCaseIdentifier[String msg]
+    :   id=Identifier {GrammarPredicates.isUpperCase($id)}?<fail={$msg}>
     ;
 
 literal
@@ -311,8 +314,8 @@ literal
     ;
 
 classLiteral
-    :   type (DOT CLASS)?
-    |   VOID (DOT CLASS)?
+    :   VOID (DOT CLASS)?
+    |   type (DOT CLASS)?
     ;
 
 // GSTRING

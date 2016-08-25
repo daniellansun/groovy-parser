@@ -45,6 +45,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -70,7 +71,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     public ModuleNode buildAST() {
-        return (ModuleNode) this.visit(parser.compilationUnit());
+        try {
+            return (ModuleNode) this.visit(parser.compilationUnit());
+        } catch (CompilationFailedException e) {
+            LOGGER.log(Level.SEVERE, "Failed to build AST", e);
+
+            throw e;
+        }
     }
 
     @Override
@@ -778,10 +785,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public String visitQualifiedClassName(GroovyParser.QualifiedClassNameContext ctx) {
-        return this.visitQualifiedName(ctx.qualifiedName());
+    public String visitQualifiedClassName(QualifiedClassNameContext ctx) {
+        String upperCaseName = this.visitUpperCaseIdentifier(ctx.upperCaseIdentifier());
+
+        if (asBoolean(ctx.Identifier())) {
+            return ctx.Identifier().stream().map(e -> e.getText()).collect(Collectors.joining("."))
+                    + "."
+                    + upperCaseName;
+        }
+
+        return upperCaseName;
     }
 
+    @Override
+    public String visitUpperCaseIdentifier(UpperCaseIdentifierContext ctx) {
+        return ctx.Identifier().getText();
+    }
 
     /**
      * Visit tree safely, no NPE occurred when the tree is null.

@@ -20,9 +20,8 @@ package org.codehaus.groovy.parser.antlr4;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.TokenStream;
 
-import static org.codehaus.groovy.parser.antlr4.GroovyParser.DOT;
+import static org.codehaus.groovy.parser.antlr4.GroovyParser.Identifier;
 
 /**
  * Created by Daniel.Sun on 2016/8/20.
@@ -54,19 +53,11 @@ public class GrammarPredicates {
         return false;
     }
 
-    public static boolean isClassName(TokenStream nameOrPath) {
-        return isClassName(nameOrPath, 1);
-    }
+    public static boolean isUpperCase(Token x) {
+        if (x == null || x.getType() != Identifier)
+            return false;  // cannot happen?
 
-    public static boolean isClassName(TokenStream nameOrPath, int nextPosition) {
-        int index = nextPosition;
-        Token token = nameOrPath.LT(index);
-
-        while (DOT == nameOrPath.LT(index + 1).getType()) {
-            index += 2;
-            token = nameOrPath.LT(index);
-        }
-
-        return Character.isUpperCase(token.getText().codePointAt(0));
+        String xtext = x.getText();
+        return (xtext.length() > 0 && Character.isUpperCase(xtext.charAt(0)));
     }
 }
