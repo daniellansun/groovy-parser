@@ -362,6 +362,7 @@ elementValuePair
     :   Identifier ASSIGN elementValue
     ;
 
+// TODO verify the potential performance issue because rule expression contains sub-rule assignments(https://github.com/antlr/grammars-v4/issues/215)
 elementValue
     :   expression
     |   annotation
@@ -441,7 +442,7 @@ statement
 //TODO    |   TRY resourceSpecification block catchClause* finallyBlock?                          #tryResourceStmtAlt
     |   SWITCH parExpression LBRACE switchBlockStatementGroup* switchLabel* RBRACE          #switchStmtAlt
     |   SYNCHRONIZED parExpression nls block                                                #synchronizedStmtAlt
-    |   RETURN expression? sep                                                              #returnStmtAlt
+    |   RETURN (nls expression)??                                                           #returnStmtAlt
     |   THROW expression sep                                                                #throwStmtAlt
     |   BREAK Identifier? sep                                                               #breakStmtAlt
     |   CONTINUE Identifier? sep                                                            #continueStmtAlt

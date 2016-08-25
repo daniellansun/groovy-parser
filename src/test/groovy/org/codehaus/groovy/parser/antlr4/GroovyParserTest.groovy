@@ -118,6 +118,10 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/Synchronized_01.groovy');
     }
 
+    void "test groovy core - Return"() {
+        test('core/Return_01.groovy');
+    }
+
     // ************************************************************
     static test(String path) {
         test(path, ASTComparatorCategory.DEFAULT_CONFIGURATION)

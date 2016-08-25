@@ -239,6 +239,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public ExpressionStatement visitExpressionStmtAlt(ExpressionStmtAltContext ctx) {
         return this.visitStatementExpression(ctx.statementExpression());
     }
+
+    @Override
+    public ReturnStatement visitReturnStmtAlt(GroovyParser.ReturnStmtAltContext ctx) {
+        return this.configureAST(new ReturnStatement(asBoolean(ctx.expression())
+                ? (Expression) this.visit(ctx.expression())
+                : new ConstantExpression(null)), ctx);
+    }
+
 // } statement    --------------------------------------------------------------------
 
     @Override
