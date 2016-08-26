@@ -693,11 +693,7 @@ WS  :  [ \t\u000C]+     -> skip
     ;
 
 // Inside (...) and [...] but not {...}, ignore newlines.
-NL_IGNORED
-    : '\r'? '\n' { this.isInsideParens() }? -> skip
-    ;
-
-NL  : '\r'? '\n'
+NL  : '\r'? '\n' { if (this.isInsideParens()) this.setChannel(Token.HIDDEN_CHANNEL); }
     ;
 
 // groovydoc comments
