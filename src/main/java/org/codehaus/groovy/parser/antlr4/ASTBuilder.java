@@ -228,6 +228,71 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public TryCatchStatement visitTryCatchStmtAlt(GroovyParser.TryCatchStmtAltContext ctx) {
+        TryCatchStatement tryCatchStatement =
+                new TryCatchStatement((Statement) this.visit(ctx.block()),
+                        this.visitFinallyBlock(ctx.finallyBlock()));
+
+
+        ctx.catchClause().stream().map(this::visitCatchClause)
+                .reduce(new LinkedList<CatchStatement>(), (r, e) -> {
+                    r.addAll(e); // merge several LinkedList<CatchStatement> instances into one LinkedList<CatchStatement> instance
+                    return r;
+                })
+                .forEach(tryCatchStatement::addCatch);
+
+        return this.configureAST(tryCatchStatement, ctx);
+    }
+
+    /**
+     * Multi-catch(1..*) clause will be unpacked to several normal catch clauses, so the return type is List
+     *
+     * @param ctx the parse tree
+     * @return
+     */
+    @Override
+    public List<CatchStatement> visitCatchClause(GroovyParser.CatchClauseContext ctx) {
+        // FIXME Groovy will ignore variableModifier of parameter in the catch clause
+        // In order to make the new parser behave same with the old one, we do not process variableModifier*
+
+        return this.visitCatchType(ctx.catchType()).stream()
+                .map(e -> this.configureAST(
+                        new CatchStatement(
+                                // FIXME The old parser does not set location info for the parameter of the catch clause.
+                                // we could make it better
+                                //this.configureAST(new Parameter(e, ctx.Identifier().getText()), ctx.Identifier()),
+
+                                new Parameter(e, ctx.Identifier().getText()),
+                                this.visitBlock(ctx.block())),
+                        ctx.block()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ClassNode> visitCatchType(GroovyParser.CatchTypeContext ctx) {
+        if (!asBoolean(ctx)) {
+            return Arrays.asList(ClassHelper.OBJECT_TYPE);
+        }
+
+        return ctx.qualifiedClassName().stream()
+                .map(this::visitQualifiedClassName)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public Statement visitFinallyBlock(GroovyParser.FinallyBlockContext ctx) {
+        if (!asBoolean(ctx)) {
+            return EmptyStatement.INSTANCE;
+        }
+
+        return this.configureAST(
+                this.createBlockStatement((Statement) this.visit(ctx.block())),
+                ctx);
+    }
+
+
+    @Override
     public SynchronizedStatement visitSynchronizedStmtAlt(SynchronizedStmtAltContext ctx) {
         return this.configureAST(
                 new SynchronizedStatement(this.visitParExpression(ctx.parExpression()), this.visitBlock(ctx.block())),
@@ -286,15 +351,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Statement visitBlock(BlockContext ctx) {
-        final BlockStatement block = new BlockStatement();
-
         if (!asBoolean(ctx)) {
-            return block;
+            return this.createBlockStatement();
         }
 
-        ctx.blockStatement().stream().map(e -> (Statement) this.visit(e)).forEach(block::addStatement);
-
-        return this.configureAST(block, ctx);
+        return this.configureAST(
+                this.createBlockStatement(
+                        ctx.blockStatement().stream()
+                                .map(e -> (Statement) this.visit(e))
+                                .collect(Collectors.toList())),
+                ctx);
     }
 
     @Override
@@ -669,7 +735,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClassNode visitClassOrInterfaceType(ClassOrInterfaceTypeContext ctx) {
-        ClassNode classNode = ClassHelper.make(this.visitQualifiedClassName(ctx.qualifiedClassName()));
+        ClassNode classNode = this.visitQualifiedClassName(ctx.qualifiedClassName());
 
         if (asBoolean(ctx.typeArguments())) {
             classNode.setGenericsTypes(
@@ -731,17 +797,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return ctx.Identifier().getText();
     }
 
-
     @Override
     public BlockStatement visitBlockStatementsOpt(BlockStatementsOptContext ctx) {
-        BlockStatement blockStatement = (BlockStatement) ctx.blockStatement().stream()
-                .map(this::visitBlockStatement)
-                .reduce(new BlockStatement(), (r, e) -> {
-                    ((BlockStatement) r).addStatement(e);
-                    return r;
-                });
-
-        return this.configureAST(blockStatement, ctx);
+        return this.configureAST(
+                this.createBlockStatement(
+                        ctx.blockStatement().stream()
+                                .map(this::visitBlockStatement).collect(Collectors.toList())),
+                ctx);
     }
 
 
@@ -834,16 +896,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public String visitQualifiedClassName(QualifiedClassNameContext ctx) {
+    public ClassNode visitQualifiedClassName(QualifiedClassNameContext ctx) {
         String upperCaseName = this.visitUpperCaseIdentifier(ctx.upperCaseIdentifier());
 
         if (asBoolean(ctx.Identifier())) {
-            return ctx.Identifier().stream().map(e -> e.getText()).collect(Collectors.joining("."))
+            return ClassHelper.make(ctx.Identifier().stream().map(e -> e.getText()).collect(Collectors.joining("."))
                     + "."
-                    + upperCaseName;
+                    + upperCaseName);
         }
 
-        return upperCaseName;
+        return ClassHelper.make(upperCaseName);
     }
 
     @Override
@@ -893,6 +955,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return parameter;
     }
 
+    private BlockStatement createBlockStatement(Statement... statements) {
+        return this.createBlockStatement(Arrays.asList(statements));
+    }
+
+    private BlockStatement createBlockStatement(List<Statement> statementList) {
+        return (BlockStatement) statementList.stream()
+                .reduce(new BlockStatement(), (r, e) -> {
+                    ((BlockStatement) r).addStatement(e);
+                    return r;
+                });
+    }
 
     private boolean isBlankScript(CompilationUnitContext ctx) {
         long blankCnt =

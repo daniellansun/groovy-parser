@@ -114,6 +114,10 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/While_01.groovy');
     }
 
+    void "test groovy core - TryCatch"() {
+        test('core/TryCatch_01.groovy');
+    }
+
     void "test groovy core - Synchronized"() {
         test('core/Synchronized_01.groovy');
     }

@@ -438,7 +438,7 @@ statement
     |   FOR LPAREN forControl RPAREN statement                                              #forStmtAlt
     |   WHILE parExpression nls statement                                                   #whileStmtAlt
 //TODO    |   DO statement WHILE parExpression sep                                                #doWhileStmtAlt
-    |   TRY block (catchClause+ finallyBlock? | finallyBlock)                               #tryCatchStmtAlt
+    |   TRY nls block ((nls catchClause)+ (nls finallyBlock)? | nls finallyBlock)                               #tryCatchStmtAlt
 //TODO    |   TRY resourceSpecification block catchClause* finallyBlock?                          #tryResourceStmtAlt
     |   SWITCH parExpression LBRACE switchBlockStatementGroup* switchLabel* RBRACE          #switchStmtAlt
     |   SYNCHRONIZED parExpression nls block                                                #synchronizedStmtAlt
@@ -457,15 +457,15 @@ statement
     ;
 
 catchClause
-    :   CATCH LPAREN variableModifier* catchType Identifier RPAREN block
+    :   CATCH LPAREN variableModifier* catchType? Identifier RPAREN nls block
     ;
 
 catchType
-    :   qualifiedName (BITOR qualifiedName)*
+    :   qualifiedClassName (BITOR qualifiedClassName)*
     ;
 
 finallyBlock
-    :   FINALLY block
+    :   FINALLY nls block
     ;
 
 /* TODO
