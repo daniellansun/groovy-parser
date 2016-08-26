@@ -271,7 +271,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public List<ClassNode> visitCatchType(GroovyParser.CatchTypeContext ctx) {
         if (!asBoolean(ctx)) {
-            return Arrays.asList(ClassHelper.OBJECT_TYPE);
+            return Collections.singletonList(ClassHelper.OBJECT_TYPE);
         }
 
         return ctx.qualifiedClassName().stream()

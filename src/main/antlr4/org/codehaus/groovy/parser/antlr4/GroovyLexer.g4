@@ -27,6 +27,8 @@ lexer grammar GroovyLexer;
 
 @header {
     import static org.codehaus.groovy.parser.antlr4.GrammarPredicates.*;
+    import java.util.Deque;
+    import java.util.ArrayDeque;
 }
 
 @members {
@@ -41,15 +43,13 @@ lexer grammar GroovyLexer;
         this.tokenIndex++;
 
         int tokenType = token.getType();
-        if (NL != tokenType) { // newline should be ignored
+        if (Token.DEFAULT_CHANNEL == token.getChannel()) {
             this.lastTokenType = tokenType;
         }
-
 
         if (RollBackOne == tokenType) {
             this.rollbackOneChar();
         }
-
 
         super.emit(token);
     }
@@ -58,6 +58,17 @@ lexer grammar GroovyLexer;
      * just a hook, which will be overrided by GroovyLangLexer
      */
     protected void rollbackOneChar() {}
+
+    private int parenLevel = 0; // just track the parentheses and brackets
+    private void enterParen() {
+        this.parenLevel++;
+    }
+    private void exitParen() {
+        this.parenLevel--;
+    }
+    private boolean isInsideParens() {
+        return 0 != this.parenLevel;
+    }
 }
 
 
@@ -562,12 +573,12 @@ DOLLAR          : '$';
 
 // §3.11 Separators
 
-LPAREN          : '(' -> pushMode(DEFAULT_MODE);
-RPAREN          : ')' -> popMode;
+LPAREN          : '(' { this.enterParen();  } -> pushMode(DEFAULT_MODE);
+RPAREN          : ')' { this.exitParen();   } -> popMode;
 LBRACE          : '{' -> pushMode(DEFAULT_MODE);
 RBRACE          : '}' -> popMode;
-LBRACK          : '[' -> pushMode(DEFAULT_MODE);
-RBRACK          : ']' -> popMode;
+LBRACK          : '[' { this.enterParen();  } -> pushMode(DEFAULT_MODE);
+RBRACK          : ']' { this.exitParen();   } -> popMode;
 SEMI            : ';';
 COMMA           : ',';
 DOT             : '.';
@@ -679,6 +690,11 @@ ELLIPSIS : '...';
 // Whitespace and comments
 //
 WS  :  [ \t\u000C]+     -> skip
+    ;
+
+// Inside (...) and [...] but not {...}, ignore newlines.
+NL_IGNORED
+    : '\r'? '\n' { this.isInsideParens() }? -> skip
     ;
 
 NL  : '\r'? '\n'

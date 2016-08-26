@@ -1,3 +1,5 @@
+import java.sql.SQLException
+
 try {
     assert true;
 } finally {
@@ -7,6 +9,13 @@ try {
 try {
     assert true;
 } catch(Exception e) {
+    assert false;
+}
+
+try {
+    assert true;
+} catch(Exception
+            e) {
     assert false;
 }
 
@@ -90,5 +99,14 @@ try {
 try {
     assert true;
 } catch(NullPointerException | IOException e) {
+    assert false;
+}
+
+try {
+    assert true;
+} catch(NullPointerException |
+        IOException |
+        SQLException
+                e) {
     assert false;
 }

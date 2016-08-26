@@ -516,7 +516,7 @@ forUpdate
 // EXPRESSIONS
 
 parExpression
-    :   LPAREN nls expression nls RPAREN
+    :   LPAREN expression RPAREN
     ;
 
 expressionList
