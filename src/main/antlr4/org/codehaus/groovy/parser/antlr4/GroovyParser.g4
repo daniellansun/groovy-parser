@@ -442,10 +442,10 @@ statement
 //TODO    |   TRY resourceSpecification block catchClause* finallyBlock?                          #tryResourceStmtAlt
     |   SWITCH parExpression LBRACE switchBlockStatementGroup* switchLabel* RBRACE          #switchStmtAlt
     |   SYNCHRONIZED parExpression nls block                                                #synchronizedStmtAlt
-    |   RETURN (nls expression)??                                                           #returnStmtAlt
+    |   RETURN expression?                                                                  #returnStmtAlt
     |   THROW expression                                                                    #throwStmtAlt
-    |   BREAK Identifier? sep                                                               #breakStmtAlt
-    |   CONTINUE Identifier? sep                                                            #continueStmtAlt
+    |   BREAK Identifier?                                                                   #breakStmtAlt
+    |   CONTINUE Identifier?                                                                #continueStmtAlt
     |   statementExpression                                                                 #expressionStmtAlt
     |   Identifier COLON nls statement                                                      #labelStmtAlt
 

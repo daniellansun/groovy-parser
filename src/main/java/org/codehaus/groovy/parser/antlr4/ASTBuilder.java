@@ -264,6 +264,24 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return statement; // this.configureAST(statement, ctx);
     }
 
+    @Override
+    public BreakStatement visitBreakStmtAlt(GroovyParser.BreakStmtAltContext ctx) {
+        String label = asBoolean(ctx.Identifier())
+                ? ctx.Identifier().getText()
+                : null;
+
+        return this.configureAST(new BreakStatement(label), ctx);
+    }
+
+    @Override
+    public ContinueStatement visitContinueStmtAlt(GroovyParser.ContinueStmtAltContext ctx) {
+        String label = asBoolean(ctx.Identifier())
+                ? ctx.Identifier().getText()
+                : null;
+
+        return this.configureAST(new ContinueStatement(label), ctx);
+    }
+
 // } statement    --------------------------------------------------------------------
 
     @Override
@@ -734,7 +752,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         if (asBoolean(ctx.statement())) {
-            return this.configureAST((Statement) this.visit(ctx.statement()), ctx);
+            return (Statement) this.visit(ctx.statement()); //this.configureAST((Statement) this.visit(ctx.statement()), ctx);
         }
 
         if (asBoolean(ctx.typeDeclaration())) {
