@@ -27,6 +27,7 @@ import org.codehaus.groovy.parser.Antlr2Parser
 import org.codehaus.groovy.parser.Antlr4Parser
 import org.codehaus.groovy.parser.antlr4.util.ASTComparatorCategory
 import org.codehaus.groovy.parser.antlr4.util.GroovySourceGenerator
+import org.codehaus.groovy.syntax.Token
 
 /**
  * Created by Daniel.Sun on 2016/8/14.
@@ -136,6 +137,10 @@ class GroovyParserTest extends GroovyTestCase {
 
     void "test groovy core - Label"() {
         test('core/Label_01.groovy');
+    }
+
+    void "test groovy core - LocalVariableDeclaration"() {
+        test('core/LocalVariableDeclaration_01.groovy', [Token]); // [class org.codehaus.groovy.syntax.Token][startLine]:: 9 != 8
     }
     // ************************************************************
     static test(String path) {

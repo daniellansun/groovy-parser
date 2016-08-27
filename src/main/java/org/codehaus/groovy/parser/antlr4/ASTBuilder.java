@@ -36,6 +36,7 @@ import org.codehaus.groovy.runtime.IOGroovyMethods;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
 import org.codehaus.groovy.syntax.Numbers;
 import org.codehaus.groovy.syntax.SyntaxException;
+import org.codehaus.groovy.syntax.Types;
 import org.objectweb.asm.Opcodes;
 
 import java.io.BufferedReader;
@@ -87,7 +88,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         ctx.statement().stream()
                 .map(this::visit)
                 .filter(e -> e instanceof Statement)
-                .forEach(e -> moduleNode.addStatement((Statement) e));
+                .forEach(e -> {
+                    if (e instanceof DeclarationStatementList) {
+                        ((DeclarationStatementList) e).getDeclarationStatements().forEach(moduleNode::addStatement);
+                    } else {
+                        moduleNode.addStatement((Statement) e);
+                    }
+                });
 
         // if groovy source file only contains blank(including EOF), add "return null" to the AST
         if (this.isBlankScript(ctx)) {
@@ -382,7 +389,103 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(new ContinueStatement(label), ctx);
     }
 
+    @Override
+    public Statement visitLocalVariableDeclarationStmtAlt(GroovyParser.LocalVariableDeclarationStmtAltContext ctx) {
+        return this.configureAST(this.visitLocalVariableDeclaration(ctx.localVariableDeclaration()), ctx);
+    }
+
 // } statement    --------------------------------------------------------------------
+
+    @Override
+    public DeclarationStatementList visitLocalVariableDeclaration(GroovyParser.LocalVariableDeclarationContext ctx) {
+        List<ModifierNode> modifierNodeList =
+                ctx.variableModifier().stream()
+                        .map(this::visitVariableModifier)
+                        .collect(Collectors.toList());
+
+        ClassNode classNode = this.visitType(ctx.type());
+        List<DeclarationExpression> declarationExpressionList = this.visitVariableDeclarators(ctx.variableDeclarators());
+
+        declarationExpressionList.stream().forEach(e -> {
+            DeclarationExpression declarationExpression = (DeclarationExpression) e;
+
+            VariableExpression veDTO = (VariableExpression) declarationExpression.getLeftExpression();
+
+            VariableExpression variableExpression =
+                    this.configureAST(
+                            new VariableExpression(
+                                    veDTO.getName(),
+                                    classNode),
+                            veDTO);
+
+            ModifierManager modifierManager = new ModifierManager(modifierNodeList);
+            modifierManager.processVariableExpression(variableExpression);
+
+            declarationExpression.setLeftExpression(variableExpression);
+
+            modifierManager.processDeclarationExpression(declarationExpression);
+        });
+
+        int size = declarationExpressionList.size();
+        if (size > 0) {
+            DeclarationExpression declarationExpression = declarationExpressionList.get(0);
+
+            if (1 == size) {
+                this.configureAST(declarationExpression, ctx);
+            } else {
+                // Tweak start of first declaration
+                declarationExpression.setLineNumber(ctx.getStart().getLine());
+                declarationExpression.setColumnNumber(ctx.getStart().getCharPositionInLine() + 1);
+            }
+        }
+
+        return this.configureAST(new DeclarationStatementList(declarationExpressionList), ctx);
+    }
+
+    @Override
+    public List<DeclarationExpression> visitVariableDeclarators(GroovyParser.VariableDeclaratorsContext ctx) {
+        return ctx.variableDeclarator().stream().map(this::visitVariableDeclarator).collect(Collectors.toList());
+    }
+
+    @Override
+    public DeclarationExpression visitVariableDeclarator(GroovyParser.VariableDeclaratorContext ctx) {
+        org.codehaus.groovy.syntax.Token token;
+        if (asBoolean(ctx.ASSIGN())) {
+            token = createGroovyToken(ctx.ASSIGN().getSymbol(), Types.ASSIGN);
+        } else {
+            token = new org.codehaus.groovy.syntax.Token(Types.ASSIGN, "=", ctx.start.getLine(), 1);
+        }
+
+        return this.configureAST(
+                new DeclarationExpression(
+                        this.configureAST(
+                                new VariableExpression( // Act as a DTO
+                                        this.visitVariableDeclaratorId(ctx.variableDeclaratorId()),
+                                        ClassHelper.OBJECT_TYPE
+                                ),
+                                ctx.variableDeclaratorId()),
+                        token,
+                        this.visitVariableInitializer(ctx.variableInitializer())),
+                ctx);
+    }
+
+    @Override
+    public Expression visitVariableInitializer(GroovyParser.VariableInitializerContext ctx) {
+        if (!asBoolean(ctx)) {
+            return new EmptyExpression();
+        }
+
+        if (asBoolean(ctx.arrayInitializer())) {
+            return null; // TODO
+        }
+
+        if (asBoolean(ctx.expression())) {
+            return this.configureAST((Expression) this.visit(ctx.expression()), ctx);
+        }
+
+        throw createParsingFailedException("Unsupported variable initializer: " + ctx.getText(), ctx);
+    }
+
 
     @Override
     public Statement visitBlock(BlockContext ctx) {
@@ -844,7 +947,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Statement visitBlockStatement(BlockStatementContext ctx) {
-        if (asBoolean(ctx.localVariableDeclarationStatement())) {
+        if (asBoolean(ctx.localVariableDeclaration())) {
             return null; // TODO
         }
 
@@ -979,15 +1082,21 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext)),
                 ctx);
 
-        variableModifierContextList.stream().map(this::visitVariableModifier).forEach(e -> {
-            parameter.setModifiers(parameter.getModifiers() | e.getOpCode());
-
-            if (e.isAnnotation()) {
-                parameter.addAnnotation(e.getAnnotationNode());
-            }
-        });
+        new ModifierManager(variableModifierContextList.stream()
+                .map(this::visitVariableModifier)
+                .collect(Collectors.toList()))
+                .processParameter(parameter);
 
         return parameter;
+    }
+
+
+    private org.codehaus.groovy.syntax.Token createGroovyToken(Token token, int type) {
+        if (null == token) {
+            throw new IllegalArgumentException("token should not be null");
+        }
+
+        return new org.codehaus.groovy.syntax.Token(type, token.getText(), token.getLine(), token.getCharPositionInLine());
     }
 
     private BlockStatement createBlockStatement(Statement... statements) {
@@ -1139,6 +1248,21 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return sw.toString();
     }
 
+    private class DeclarationStatementList extends Statement {
+        private List<ExpressionStatement> declarationStatements;
+
+        public DeclarationStatementList(List<DeclarationExpression> declarations) {
+            this.declarationStatements =
+                    declarations.stream()
+                            .map(e -> configureAST(new ExpressionStatement(e), e))
+                            .collect(Collectors.toList());
+        }
+
+        public List<ExpressionStatement> getDeclarationStatements() {
+            return this.declarationStatements;
+        }
+    }
+
     private static class Pair<K, V> {
         private K key;
         private V value;
@@ -1181,13 +1305,55 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     /**
+     * Process modifiers for AST nodes
+     * <p>
+     * Created by Daniel.Sun on 2016/8/27.
+     */
+    private static class ModifierManager {
+        private List<ModifierNode> modifierNodeList;
+
+        public ModifierManager(List<ModifierNode> modifierNodeList) {
+            this.modifierNodeList = modifierNodeList;
+        }
+
+        public List<AnnotationNode> getAnnotations() {
+            return modifierNodeList.stream()
+                    .filter(ModifierNode::isAnnotation)
+                    .map(ModifierNode::getAnnotationNode)
+                    .collect(Collectors.toList());
+        }
+
+        public void processParameter(Parameter parameter) {
+            modifierNodeList.forEach(e -> {
+                parameter.setModifiers(parameter.getModifiers() | e.getOpCode());
+
+                if (e.isAnnotation()) {
+                    parameter.addAnnotation(e.getAnnotationNode());
+                }
+            });
+        }
+
+        public void processVariableExpression(VariableExpression ve) {
+            modifierNodeList.forEach(e -> {
+                ve.setModifiers(ve.getModifiers() | e.getOpCode());
+
+                // local variable does not attach annotations
+            });
+        }
+
+        public void processDeclarationExpression(DeclarationExpression de) {
+            this.getAnnotations().forEach(de::addAnnotation);
+        }
+    }
+
+    /**
      * Represents a modifier, which is better to place in the package org.codehaus.groovy.ast
      * <p>
      * Created by Daniel.Sun on 2016/8/23.
      */
     private static class ModifierNode extends ASTNode {
         private Integer type;
-        private Integer opCode; // opCode ASM opcode
+        private Integer opCode; // ASM opcode
         private String text;
         private AnnotationNode annotationNode;
 

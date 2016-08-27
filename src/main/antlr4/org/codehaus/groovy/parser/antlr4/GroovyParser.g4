@@ -217,11 +217,11 @@ genericInterfaceMethodDeclaration
     ;
 
 variableDeclarators
-    :   variableDeclarator (COMMA variableDeclarator)*
+    :   variableDeclarator (COMMA nls variableDeclarator)*
     ;
 
 variableDeclarator
-    :   variableDeclaratorId (ASSIGN variableInitializer)?
+    :   variableDeclaratorId (ASSIGN nls variableInitializer)?
     ;
 
 variableDeclaratorId
@@ -418,27 +418,24 @@ block
     ;
 
 blockStatement
-    :   localVariableDeclarationStatement
+    :   localVariableDeclaration
     |   statement
     |   typeDeclaration
     ;
 
-localVariableDeclarationStatement
-    :    localVariableDeclaration SEMI
-    ;
-
 localVariableDeclaration
-    :   variableModifier* type variableDeclarators
+    :   (variableModifier nls)* type variableDeclarators
+    |   (variableModifier nls)+ type? variableDeclarators
     ;
 
 statement
     :   block                                                                               #blockStmtAlt
     |   ASSERT ce=expression ((COLON | COMMA) nls me=expression)?                           #assertStmtAlt
     |   IF parExpression nls tb=statement (nls ELSE nls fb=statement)?                      #ifElseStmtAlt
-    |   FOR LPAREN forControl RPAREN nls statement                                              #forStmtAlt
+    |   FOR LPAREN forControl RPAREN nls statement                                          #forStmtAlt
     |   WHILE parExpression nls statement                                                   #whileStmtAlt
 //TODO    |   DO statement WHILE parExpression sep                                                #doWhileStmtAlt
-    |   TRY nls block ((nls catchClause)+ (nls finallyBlock)? | nls finallyBlock)                               #tryCatchStmtAlt
+    |   TRY nls block ((nls catchClause)+ (nls finallyBlock)? | nls finallyBlock)           #tryCatchStmtAlt
 //TODO    |   TRY resourceSpecification block catchClause* finallyBlock?                          #tryResourceStmtAlt
     |   SWITCH parExpression LBRACE switchBlockStatementGroup* switchLabel* RBRACE          #switchStmtAlt
     |   SYNCHRONIZED parExpression nls block                                                #synchronizedStmtAlt
@@ -446,18 +443,20 @@ statement
     |   THROW expression                                                                    #throwStmtAlt
     |   BREAK Identifier?                                                                   #breakStmtAlt
     |   CONTINUE Identifier?                                                                #continueStmtAlt
-    |   statementExpression                                                                 #expressionStmtAlt
     |   Identifier COLON nls statement                                                      #labelStmtAlt
 
     // Import statement.  Can be used in any scope.  Has "import x as y" also.
     |   importDeclaration                                                                   #importStmtAlt
 
     |   typeDeclaration                                                                     #typeStmtAlt
+    |   localVariableDeclaration                                                            #localVariableDeclarationStmtAlt
+    |   statementExpression                                                                 #expressionStmtAlt
+
     |   SEMI                                                                                #emptyStmtAlt
     ;
 
 catchClause
-    :   CATCH LPAREN variableModifier* catchType? Identifier RPAREN nls block
+    :   CATCH LPAREN (variableModifier nls)* catchType? Identifier RPAREN nls block
     ;
 
 catchType
@@ -506,7 +505,7 @@ forInit
     ;
 
 enhancedForControl
-    :   variableModifier* type? variableDeclaratorId (COLON | IN) expression
+    :   (variableModifier nls)* type? variableDeclaratorId (COLON | IN) expression
     ;
 
 forUpdate
