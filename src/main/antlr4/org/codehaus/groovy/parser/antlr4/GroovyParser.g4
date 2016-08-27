@@ -435,7 +435,7 @@ statement
     :   block                                                                               #blockStmtAlt
     |   ASSERT ce=expression ((COLON | COMMA) nls me=expression)?                           #assertStmtAlt
     |   IF parExpression nls tb=statement (nls ELSE nls fb=statement)?                      #ifElseStmtAlt
-    |   FOR LPAREN forControl RPAREN statement                                              #forStmtAlt
+    |   FOR LPAREN forControl RPAREN nls statement                                              #forStmtAlt
     |   WHILE parExpression nls statement                                                   #whileStmtAlt
 //TODO    |   DO statement WHILE parExpression sep                                                #doWhileStmtAlt
     |   TRY nls block ((nls catchClause)+ (nls finallyBlock)? | nls finallyBlock)                               #tryCatchStmtAlt
@@ -506,7 +506,7 @@ forInit
     ;
 
 enhancedForControl
-    :   variableModifier* type variableDeclaratorId COLON expression
+    :   variableModifier* type? variableDeclaratorId (COLON | IN) expression
     ;
 
 forUpdate

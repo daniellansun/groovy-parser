@@ -216,6 +216,41 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public ForStatement visitForStmtAlt(GroovyParser.ForStmtAltContext ctx) {
+        Pair<Parameter, Expression> controlPair = this.visitForControl(ctx.forControl());
+
+        return this.configureAST(
+                new ForStatement(controlPair.getKey(), controlPair.getValue(), (Statement) this.visit(ctx.statement())),
+                ctx);
+    }
+
+    @Override
+    public Pair<Parameter, Expression> visitForControl(GroovyParser.ForControlContext ctx) {
+        if (asBoolean(ctx.enhancedForControl())) { // e.g. for(int i in 0..<10) {}
+            return this.visitEnhancedForControl(ctx.enhancedForControl());
+        }
+
+        if (asBoolean(ctx.SEMI())) { // e.g. for(int i = 0; i < 10; i++) {}
+            return null; // TODO
+        }
+
+        throw createParsingFailedException("Unsupported for control: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public Pair<Parameter, Expression> visitEnhancedForControl(GroovyParser.EnhancedForControlContext ctx) {
+        Parameter parameter = this.configureAST(
+                new Parameter(this.visitType(ctx.type()), this.visitVariableDeclaratorId(ctx.variableDeclaratorId())),
+                ctx.variableDeclaratorId());
+
+        // FIXME Groovy will ignore variableModifier of parameter in the for control
+        // In order to make the new parser behave same with the old one, we do not process variableModifier*
+
+        return new Pair<>(parameter, (Expression) this.visit(ctx.expression()));
+    }
+
+
+    @Override
     public WhileStatement visitWhileStmtAlt(WhileStmtAltContext ctx) {
         Expression conditionExpression = this.visitParExpression(ctx.parExpression());
         BooleanExpression booleanExpression =
