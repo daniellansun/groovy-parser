@@ -89,8 +89,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 .map(this::visit)
                 .filter(e -> e instanceof Statement)
                 .forEach(e -> {
-                    if (e instanceof DeclarationStatementList) {
-                        ((DeclarationStatementList) e).getDeclarationStatements().forEach(moduleNode::addStatement);
+                    if (e instanceof DeclarationListStatement) {
+                        ((DeclarationListStatement) e).getDeclarationStatements().forEach(moduleNode::addStatement);
                     } else {
                         moduleNode.addStatement((Statement) e);
                     }
@@ -397,7 +397,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 // } statement    --------------------------------------------------------------------
 
     @Override
-    public DeclarationStatementList visitLocalVariableDeclaration(GroovyParser.LocalVariableDeclarationContext ctx) {
+    public DeclarationListStatement visitLocalVariableDeclaration(GroovyParser.LocalVariableDeclarationContext ctx) {
         List<ModifierNode> modifierNodeList =
                 ctx.variableModifier().stream()
                         .map(this::visitVariableModifier)
@@ -439,7 +439,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
         }
 
-        return this.configureAST(new DeclarationStatementList(declarationExpressionList), ctx);
+        return this.configureAST(new DeclarationListStatement(declarationExpressionList), ctx);
     }
 
     @Override
@@ -1248,10 +1248,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return sw.toString();
     }
 
-    private class DeclarationStatementList extends Statement {
+    private class DeclarationListStatement extends Statement {
         private List<ExpressionStatement> declarationStatements;
 
-        public DeclarationStatementList(List<DeclarationExpression> declarations) {
+        public DeclarationListStatement(List<DeclarationExpression> declarations) {
             this.declarationStatements =
                     declarations.stream()
                             .map(e -> configureAST(new ExpressionStatement(e), e))
