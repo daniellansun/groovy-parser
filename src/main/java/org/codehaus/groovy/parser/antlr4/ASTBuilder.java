@@ -240,17 +240,9 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(ctx.SEMI())) { // e.g. for(int i = 0; i < 10; i++) {}
             ClosureListExpression closureListExpression = new ClosureListExpression();
 
-            if (asBoolean(ctx.forInit())) {
-                closureListExpression.addExpression(this.visitForInit(ctx.forInit()));
-            }
-
-            if (asBoolean(ctx.expression())) {
-                closureListExpression.addExpression((Expression) this.visit(ctx.expression()));
-            }
-
-            if (asBoolean(ctx.forUpdate())) {
-                closureListExpression.addExpression(this.visitForUpdate(ctx.forUpdate()));
-            }
+            closureListExpression.addExpression(this.visitForInit(ctx.forInit()));
+            closureListExpression.addExpression(asBoolean(ctx.expression()) ? (Expression) this.visit(ctx.expression()) : EmptyExpression.INSTANCE);
+            closureListExpression.addExpression(this.visitForUpdate(ctx.forUpdate()));
 
             return new Pair<>(ForStatement.FOR_LOOP_DUMMY, closureListExpression);
         }
@@ -260,6 +252,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitForInit(ForInitContext ctx) {
+        if (!asBoolean(ctx)) {
+            return EmptyExpression.INSTANCE;
+        }
+
         if (asBoolean(ctx.localVariableDeclaration())) {
             DeclarationListStatement declarationListStatement = this.visitLocalVariableDeclaration(ctx.localVariableDeclaration());
 
@@ -281,6 +277,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitForUpdate(ForUpdateContext ctx) {
+        if (!asBoolean(ctx)) {
+            return EmptyExpression.INSTANCE;
+        }
+
         return this.configureAST((Expression) this.visit(ctx.expression()), ctx);
     }
 
@@ -513,7 +513,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Expression visitVariableInitializer(VariableInitializerContext ctx) {
         if (!asBoolean(ctx)) {
-            return new EmptyExpression();
+            return EmptyExpression.INSTANCE;
         }
 
         if (asBoolean(ctx.arrayInitializer())) {

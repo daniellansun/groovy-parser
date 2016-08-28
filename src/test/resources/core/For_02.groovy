@@ -10,3 +10,6 @@ for (int i = 0;
      false)
 {
 }
+for(;;) {
+
+}
