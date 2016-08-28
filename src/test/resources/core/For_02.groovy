@@ -13,3 +13,12 @@ for (int i = 0;
 for(;;) {
 
 }
+for(int i = 0;;) {
+
+}
+for(;true;) {
+
+}
+for(;;false) {
+
+}
