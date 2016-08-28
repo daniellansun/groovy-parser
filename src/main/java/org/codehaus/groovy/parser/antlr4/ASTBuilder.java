@@ -223,7 +223,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public ForStatement visitForStmtAlt(GroovyParser.ForStmtAltContext ctx) {
+    public ForStatement visitForStmtAlt(ForStmtAltContext ctx) {
         Pair<Parameter, Expression> controlPair = this.visitForControl(ctx.forControl());
 
         return this.configureAST(
@@ -232,20 +232,61 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Pair<Parameter, Expression> visitForControl(GroovyParser.ForControlContext ctx) {
+    public Pair<Parameter, Expression> visitForControl(ForControlContext ctx) {
         if (asBoolean(ctx.enhancedForControl())) { // e.g. for(int i in 0..<10) {}
             return this.visitEnhancedForControl(ctx.enhancedForControl());
         }
 
         if (asBoolean(ctx.SEMI())) { // e.g. for(int i = 0; i < 10; i++) {}
-            return null; // TODO
+            ClosureListExpression closureListExpression = new ClosureListExpression();
+
+            if (asBoolean(ctx.forInit())) {
+                closureListExpression.addExpression(this.visitForInit(ctx.forInit()));
+            }
+
+            if (asBoolean(ctx.expression())) {
+                closureListExpression.addExpression((Expression) this.visit(ctx.expression()));
+            }
+
+            if (asBoolean(ctx.forUpdate())) {
+                closureListExpression.addExpression(this.visitForUpdate(ctx.forUpdate()));
+            }
+
+            return new Pair<>(ForStatement.FOR_LOOP_DUMMY, closureListExpression);
         }
 
         throw createParsingFailedException("Unsupported for control: " + ctx.getText(), ctx);
     }
 
     @Override
-    public Pair<Parameter, Expression> visitEnhancedForControl(GroovyParser.EnhancedForControlContext ctx) {
+    public Expression visitForInit(ForInitContext ctx) {
+        if (asBoolean(ctx.localVariableDeclaration())) {
+            DeclarationListStatement declarationListStatement = this.visitLocalVariableDeclaration(ctx.localVariableDeclaration());
+
+            List<?> declarationExpressionList = declarationListStatement.getDeclarationExpressions();
+
+            if (declarationExpressionList.size() == 1) {
+                return this.configureAST((Expression) declarationExpressionList.get(0), ctx);
+            } else {
+                return this.configureAST(new ClosureListExpression((List<Expression>) declarationExpressionList), ctx);
+            }
+        }
+
+        if (asBoolean(ctx.expression())) {
+            return this.configureAST((Expression) this.visit(ctx.expression()), ctx);
+        }
+
+        throw createParsingFailedException("Unsupported for init: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public Expression visitForUpdate(ForUpdateContext ctx) {
+        return this.configureAST((Expression) this.visit(ctx.expression()), ctx);
+    }
+
+
+    @Override
+    public Pair<Parameter, Expression> visitEnhancedForControl(EnhancedForControlContext ctx) {
         Parameter parameter = this.configureAST(
                 new Parameter(this.visitType(ctx.type()), this.visitVariableDeclaratorId(ctx.variableDeclaratorId())),
                 ctx.variableDeclaratorId());
@@ -270,7 +311,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public TryCatchStatement visitTryCatchStmtAlt(GroovyParser.TryCatchStmtAltContext ctx) {
+    public TryCatchStatement visitTryCatchStmtAlt(TryCatchStmtAltContext ctx) {
         TryCatchStatement tryCatchStatement =
                 new TryCatchStatement((Statement) this.visit(ctx.block()),
                         this.visitFinallyBlock(ctx.finallyBlock()));
@@ -293,7 +334,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
      * @return
      */
     @Override
-    public List<CatchStatement> visitCatchClause(GroovyParser.CatchClauseContext ctx) {
+    public List<CatchStatement> visitCatchClause(CatchClauseContext ctx) {
         // FIXME Groovy will ignore variableModifier of parameter in the catch clause
         // In order to make the new parser behave same with the old one, we do not process variableModifier*
 
@@ -311,7 +352,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public List<ClassNode> visitCatchType(GroovyParser.CatchTypeContext ctx) {
+    public List<ClassNode> visitCatchType(CatchTypeContext ctx) {
         if (!asBoolean(ctx)) {
             return Collections.singletonList(ClassHelper.OBJECT_TYPE);
         }
@@ -323,7 +364,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
 
     @Override
-    public Statement visitFinallyBlock(GroovyParser.FinallyBlockContext ctx) {
+    public Statement visitFinallyBlock(FinallyBlockContext ctx) {
         if (!asBoolean(ctx)) {
             return EmptyStatement.INSTANCE;
         }
@@ -348,7 +389,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public ReturnStatement visitReturnStmtAlt(GroovyParser.ReturnStmtAltContext ctx) {
+    public ReturnStatement visitReturnStmtAlt(ReturnStmtAltContext ctx) {
         return this.configureAST(new ReturnStatement(asBoolean(ctx.expression())
                         ? (Expression) this.visit(ctx.expression())
                         : new ConstantExpression(null)),
@@ -356,14 +397,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public ThrowStatement visitThrowStmtAlt(GroovyParser.ThrowStmtAltContext ctx) {
+    public ThrowStatement visitThrowStmtAlt(ThrowStmtAltContext ctx) {
         return this.configureAST(
                 new ThrowStatement((Expression) this.visit(ctx.expression())),
                 ctx);
     }
 
     @Override
-    public Statement visitLabelStmtAlt(GroovyParser.LabelStmtAltContext ctx) {
+    public Statement visitLabelStmtAlt(LabelStmtAltContext ctx) {
         Statement statement = (Statement) this.visit(ctx.statement());
 
         statement.setStatementLabel(ctx.Identifier().getText());
@@ -372,7 +413,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public BreakStatement visitBreakStmtAlt(GroovyParser.BreakStmtAltContext ctx) {
+    public BreakStatement visitBreakStmtAlt(BreakStmtAltContext ctx) {
         String label = asBoolean(ctx.Identifier())
                 ? ctx.Identifier().getText()
                 : null;
@@ -381,7 +422,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public ContinueStatement visitContinueStmtAlt(GroovyParser.ContinueStmtAltContext ctx) {
+    public ContinueStatement visitContinueStmtAlt(ContinueStmtAltContext ctx) {
         String label = asBoolean(ctx.Identifier())
                 ? ctx.Identifier().getText()
                 : null;
@@ -390,14 +431,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Statement visitLocalVariableDeclarationStmtAlt(GroovyParser.LocalVariableDeclarationStmtAltContext ctx) {
+    public Statement visitLocalVariableDeclarationStmtAlt(LocalVariableDeclarationStmtAltContext ctx) {
         return this.configureAST(this.visitLocalVariableDeclaration(ctx.localVariableDeclaration()), ctx);
     }
 
 // } statement    --------------------------------------------------------------------
 
     @Override
-    public DeclarationListStatement visitLocalVariableDeclaration(GroovyParser.LocalVariableDeclarationContext ctx) {
+    public DeclarationListStatement visitLocalVariableDeclaration(LocalVariableDeclarationContext ctx) {
         List<ModifierNode> modifierNodeList =
                 ctx.variableModifier().stream()
                         .map(this::visitVariableModifier)
@@ -443,12 +484,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public List<DeclarationExpression> visitVariableDeclarators(GroovyParser.VariableDeclaratorsContext ctx) {
+    public List<DeclarationExpression> visitVariableDeclarators(VariableDeclaratorsContext ctx) {
         return ctx.variableDeclarator().stream().map(this::visitVariableDeclarator).collect(Collectors.toList());
     }
 
     @Override
-    public DeclarationExpression visitVariableDeclarator(GroovyParser.VariableDeclaratorContext ctx) {
+    public DeclarationExpression visitVariableDeclarator(VariableDeclaratorContext ctx) {
         org.codehaus.groovy.syntax.Token token;
         if (asBoolean(ctx.ASSIGN())) {
             token = createGroovyToken(ctx.ASSIGN().getSymbol(), Types.ASSIGN);
@@ -470,7 +511,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Expression visitVariableInitializer(GroovyParser.VariableInitializerContext ctx) {
+    public Expression visitVariableInitializer(VariableInitializerContext ctx) {
         if (!asBoolean(ctx)) {
             return new EmptyExpression();
         }
@@ -1260,6 +1301,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         public List<ExpressionStatement> getDeclarationStatements() {
             return this.declarationStatements;
+        }
+
+        public List<DeclarationExpression> getDeclarationExpressions() {
+            return this.declarationStatements.stream()
+                    .map(e -> (DeclarationExpression) e.getExpression())
+                    .collect(Collectors.toList());
         }
     }
 

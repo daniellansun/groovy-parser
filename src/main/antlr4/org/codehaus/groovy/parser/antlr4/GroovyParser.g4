@@ -501,16 +501,17 @@ forControl
 
 forInit
     :   localVariableDeclaration
-    |   expressionList
+    |   expression
+    ;
+
+forUpdate
+    :   expression
     ;
 
 enhancedForControl
     :   (variableModifier nls)* type? variableDeclaratorId (COLON | IN) expression
     ;
 
-forUpdate
-    :   expressionList
-    ;
 
 // EXPRESSIONS
 
