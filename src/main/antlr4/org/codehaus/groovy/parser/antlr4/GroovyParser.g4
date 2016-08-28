@@ -364,9 +364,9 @@ elementValuePair
 
 // TODO verify the potential performance issue because rule expression contains sub-rule assignments(https://github.com/antlr/grammars-v4/issues/215)
 elementValue
-    :   expression
+    :   elementValueArrayInitializer
     |   annotation
-    |   elementValueArrayInitializer
+    |   expression
     ;
 
 elementValueArrayInitializer
@@ -585,8 +585,30 @@ primary
     |   SUPER                                                                               #superPrmrAlt
     |   parExpression                                                                       #parenPrmrAlt
     |   closure                                                                             #closurePrmrAlt
-    // listOrMapConstructorExpression
+    |   list                                                                                #listPrmrAlt
+    |   map                                                                                 #mapPrmrAlt
     |   nonWildcardTypeArguments (explicitGenericInvocationSuffix | THIS arguments)         #invocationPrmrAlt
+    ;
+
+list
+    :   LBRACK expressionList? COMMA? RBRACK
+    ;
+
+map
+    :   LBRACK mapEntryList? COMMA? RBRACK
+    ;
+
+mapEntryList
+    :   mapEntry (COMMA mapEntry)*
+    ;
+
+mapEntry
+    :   mapEntryLabel COLON expression
+    ;
+
+mapEntryLabel
+    :   keywords
+    |   primary
     ;
 
 creator
@@ -653,3 +675,58 @@ sep :   SEMI NL*
     |   NL+ (SEMI NL*)*
     ;
 
+keywords
+    :   ABSTRACT
+    |   AS
+    |   ASSERT
+    |   BREAK
+    |   CASE
+    |   CATCH
+    |   CLASS
+    |   CONST
+    |   CONTINUE
+    |   DEF
+    |   DEFAULT
+    |   DO
+    |   ELSE
+    |   ENUM
+    |   EXTENDS
+    |   FINAL
+    |   FINALLY
+    |   FOR
+    |   GOTO
+    |   IF
+    |   IMPLEMENTS
+    |   IMPORT
+    |   IN
+    |   INSTANCEOF
+    |   INTERFACE
+    |   NATIVE
+    |   NEW
+    |   PACKAGE
+    |   RETURN
+    |   STATIC
+    |   STRICTFP
+    |   SUPER
+    |   SWITCH
+    |   SYNCHRONIZED
+    |   THIS
+    |   THREADSAFE
+    |   THROW
+    |   THROWS
+    |   TRANSIENT
+    |   TRAIT
+    |   TRY
+    |   VOLATILE
+    |   WHILE
+
+    |   NullLiteral
+    |   BooleanLiteral
+
+    |   BuiltInPrimitiveType
+    |   VOID
+
+    |   PUBLIC
+    |   PROTECTED
+    |   PRIVATE
+    ;

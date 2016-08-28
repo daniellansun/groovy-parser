@@ -635,8 +635,29 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(this.visitParExpression(ctx.parExpression()), ctx);
     }
 
+    @Override
+    public ListExpression visitListPrmrAlt(ListPrmrAltContext ctx) {
+        return this.configureAST(
+                this.visitList(ctx.list()),
+                ctx);
+    }
 
 // } primary       --------------------------------------------------------------------
+
+    @Override
+    public ListExpression visitList(ListContext ctx) {
+        return this.configureAST(
+                new ListExpression(
+                        this.visitExpressionList(ctx.expressionList())),
+                ctx);
+    }
+
+    @Override
+    public List<Expression> visitExpressionList(ExpressionListContext ctx) {
+        return ctx.expression().stream()
+                .map(e -> (Expression) this.visit(e))
+                .collect(Collectors.toList());
+    }
 
 
     // literal {       --------------------------------------------------------------------

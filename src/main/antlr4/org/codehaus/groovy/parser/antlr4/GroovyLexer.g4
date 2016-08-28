@@ -208,6 +208,7 @@ AS            : 'as';
 DEF           : 'def';
 IN            : 'in';
 TRAIT         : 'trait';
+THREADSAFE    : 'threadsafe';
 
 // §3.9 Keywords
 BuiltInPrimitiveType
