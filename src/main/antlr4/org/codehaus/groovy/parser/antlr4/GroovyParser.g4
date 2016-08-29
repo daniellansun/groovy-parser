@@ -555,10 +555,10 @@ expression
     |   op=(INC | DEC | ADD | SUB) expression                                               #unaryAddExprAlt
 
     // multiplication/division/modulo (level 4)
-    |   expression (MUL | DIV | MOD) expression                                             #multiplicativeExprAlt
+    |   left=expression op=(MUL | DIV | MOD) nls right=expression                           #multiplicativeExprAlt
 
     // binary addition/subtraction (level 5)
-    |   left=expression op=(ADD | SUB) nls right=expression                                                   #additiveExprAlt
+    |   left=expression op=(ADD | SUB) nls right=expression                                 #additiveExprAlt
 
     // bit shift expressions (level 6)
     |   expression

@@ -636,9 +636,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public Expression visitMultiplicativeExprAlt(MultiplicativeExprAltContext ctx) {
+        return this.configureAST(
+                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                ctx);
+    }
+
+    @Override
     public Expression visitAdditiveExprAlt(AdditiveExprAltContext ctx) {
         return this.configureAST(
-                new BinaryExpression((Expression) this.visit(ctx.left), this.createGroovyToken(ctx.op), (Expression) this.visit(ctx.right)),
+                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
                 ctx);
     }
 
@@ -1188,6 +1195,41 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return parameter;
     }
 
+    private BinaryExpression createBinaryExpression(ExpressionContext left, Token op, ExpressionContext right) {
+        return new BinaryExpression((Expression) this.visit(left), this.createGroovyToken(op), (Expression) this.visit(right));
+    }
+
+    private BlockStatement createBlockStatement(Statement... statements) {
+        return this.createBlockStatement(Arrays.asList(statements));
+    }
+
+    private BlockStatement createBlockStatement(List<Statement> statementList) {
+        return (BlockStatement) statementList.stream()
+                .reduce(new BlockStatement(), (r, e) -> {
+                    ((BlockStatement) r).addStatement(e);
+                    return r;
+                });
+    }
+
+    private boolean isBlankScript(CompilationUnitContext ctx) {
+        long blankCnt =
+                ctx.children.stream()
+                        .filter(e -> e instanceof NlsContext
+                                || e instanceof PackageDeclarationContext
+                                || e instanceof SepContext
+                                || e instanceof ImportStmtAltContext
+                                || e instanceof TerminalNode && (((TerminalNode) e).getSymbol().getType() == EOF)
+                        ).count();
+
+
+        return blankCnt == ctx.children.size();
+    }
+
+    private void addEmptyReturnStatement() {
+        moduleNode.addStatement(new ReturnStatement(new ConstantExpression(null)));
+    }
+
+
     private org.codehaus.groovy.syntax.Token createGroovyTokenByType(Token token, int type) {
         if (null == token) {
             throw new IllegalArgumentException("token should not be null");
@@ -1225,35 +1267,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         );
     }
 
-    private BlockStatement createBlockStatement(Statement... statements) {
-        return this.createBlockStatement(Arrays.asList(statements));
-    }
-
-    private BlockStatement createBlockStatement(List<Statement> statementList) {
-        return (BlockStatement) statementList.stream()
-                .reduce(new BlockStatement(), (r, e) -> {
-                    ((BlockStatement) r).addStatement(e);
-                    return r;
-                });
-    }
-
-    private boolean isBlankScript(CompilationUnitContext ctx) {
-        long blankCnt =
-                ctx.children.stream()
-                        .filter(e -> e instanceof NlsContext
-                                || e instanceof PackageDeclarationContext
-                                || e instanceof SepContext
-                                || e instanceof ImportStmtAltContext
-                                || e instanceof TerminalNode && (((TerminalNode) e).getSymbol().getType() == EOF)
-                        ).count();
-
-
-        return blankCnt == ctx.children.size();
-    }
-
-    private void addEmptyReturnStatement() {
-        moduleNode.addStatement(new ReturnStatement(new ConstantExpression(null)));
-    }
 
     /**
      * Sets location(lineNumber, colNumber, lastLineNumber, lastColumnNumber) for node using standard context information.
