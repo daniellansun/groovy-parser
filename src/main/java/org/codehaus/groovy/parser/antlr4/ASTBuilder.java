@@ -654,6 +654,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public List<Expression> visitExpressionList(ExpressionListContext ctx) {
+        if (!asBoolean(ctx)) {
+            return Collections.EMPTY_LIST;
+        }
+
         return ctx.expression().stream()
                 .map(e -> (Expression) this.visit(e))
                 .collect(Collectors.toList());
