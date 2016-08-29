@@ -533,6 +533,7 @@ constantExpression
 
 expression
     :   primary                                                                             #primaryExprAlt
+    |   nonWildcardTypeArguments (explicitGenericInvocationSuffix | THIS arguments)         #invokeExprAlt
     |   expression DOT Identifier                                                           #accessExprAlt
     |   expression DOT THIS                                                                 #accessExprAlt
     |   expression DOT NEW nonWildcardTypeArguments? innerCreator                           #createExprAlt
@@ -540,24 +541,65 @@ expression
     |   expression DOT explicitGenericInvocation                                            #invokeExprAlt
     |   expression LBRACK expression RBRACK                                                 #indexExprAlt
     |   expression LPAREN expressionList? RPAREN                                            #invokeExprAlt
-    |   LPAREN type RPAREN expression                                                       #castExprAlt
+
+    // qualified names, array expressions, method invocation, post inc/dec (level 1)
     |   expression (INC | DEC)                                                              #postfixExprAlt
-    |   (INC | DEC) expression                                                              #prefixExprAlt
-    |   op=(ADD | SUB) expression                                                           #unaryExprAlt
-    |   op=(TILDE | BANG) expression                                                        #unaryExprAlt
-    |   expression POWER expression                                                         #binaryExprAlt
-    |   expression (MUL | DIV | MOD) expression                                             #binaryExprAlt
-    |   expression (ADD | SUB) expression                                                   #binaryExprAlt
-    |   expression (LT LT | GT GT GT | GT GT) expression                                    #binaryExprAlt
-    |   expression (LE | GE | GT | LT) expression                                           #binaryExprAlt
-    |   expression INSTANCEOF type                                                          #binaryExprAlt
-    |   expression (EQUAL | NOTEQUAL) expression                                            #binaryExprAlt
-    |   expression BITAND expression                                                        #binaryExprAlt
-    |   expression XOR expression                                                           #binaryExprAlt
-    |   expression BITOR expression                                                         #binaryExprAlt
-    |   expression AND expression                                                           #binaryExprAlt
-    |   expression OR expression                                                            #binaryExprAlt
-    |   <assoc=right> expression QUESTION expression COLON expression                       #ternaryExprAlt
+
+    // ~(BNOT)/!(LNOT)/(type casting) (level 1)
+    |   (BITNOT | NOT | (LPAREN type RPAREN)) expression                                    #unaryNotExprAlt
+
+    // math power operator (**) (level 2)
+    |   expression POWER expression                                                         #powerExprAlt
+
+    // ++(prefix)/--(prefix)/+(unary)/-(unary) (level 3)
+    |   op=(INC | DEC | ADD | SUB) expression                                               #unaryAddExprAlt
+
+    // multiplication/division/modulo (level 4)
+    |   expression (MUL | DIV | MOD) expression                                             #multiplicativeExprAlt
+
+    // binary addition/subtraction (level 5)
+    |   expression (ADD | SUB) expression                                                   #additiveExprAlt
+
+    // bit shift expressions (level 6)
+    |   expression
+        (    (LT LT | GT GT GT | GT GT)
+        |    RANGE_INCLUSIVE
+        |    RANGE_EXCLUSIVE
+        )
+        expression                                                                          #shiftExprAlt
+
+    // boolean relational expressions (level 7)
+    |   expression (    (LE | GE | GT | LT | IN) expression
+                   |    (AS | INSTANCEOF) type
+                   )                                                                        #relationalExprAlt
+
+    // equality/inequality (==/!=) (level 8)
+    |   expression (EQUAL | NOTEQUAL) expression                                            #equalityExprAlt
+
+    // regex find and match (=~ and ==~) (level 8.5)
+    // jez: moved =~ closer to precedence of == etc, as...
+    // 'if (foo =~ "a.c")' is very close in intent to 'if (foo == "abc")'
+    | expression (REGEX_FIND | REGEX_MATCH) expression                                      #regexExprAlt
+
+    // bitwise or non-short-circuiting and (&)  (level 9)
+    |   expression BITAND expression                                                        #andExprAlt
+
+    // exclusive or (^)  (level 10)
+    |   expression XOR expression                                                           #exclusiveOrExprAlt
+
+    // bitwise or non-short-circuiting or (|)  (level 11)
+    |   expression BITOR expression                                                         #inclusiveOrExprAlt
+
+    // logical and (&&)  (level 12)
+    |   expression AND expression                                                           #logicalAndExprAlt
+
+    // logical or (||)  (level 13)
+    |   expression OR expression                                                            #logicalOrExprAlt
+
+    // conditional test (level 14)
+    |   <assoc=right> expression (QUESTION expression COLON | ELVIS) expression             #conditionalExprAlt
+
+    // assignment expression (level 15)
     |   <assoc=right> expression
         (   ASSIGN
         |   ADD_ASSIGN
@@ -573,7 +615,7 @@ expression
         |   MOD_ASSIGN
         |   POWER_ASSIGN
         )
-        expression                                                                          #assignExprAlt
+        expression                                                                          #assignmentExprAlt
     ;
 
 primary
@@ -587,7 +629,6 @@ primary
     |   closure                                                                             #closurePrmrAlt
     |   list                                                                                #listPrmrAlt
     |   map                                                                                 #mapPrmrAlt
-    |   nonWildcardTypeArguments (explicitGenericInvocationSuffix | THIS arguments)         #invocationPrmrAlt
     ;
 
 list
@@ -599,7 +640,7 @@ locals[boolean empty = true]
         )?
         (
             COMMA
-            { !$empty }?<fail={"Empty list should not contain any comma(,)"}>
+            { !$empty }?<fail={"Empty list constructor should not contain any comma(,)"}>
         )?
         RBRACK
     ;

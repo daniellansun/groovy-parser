@@ -492,7 +492,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public DeclarationExpression visitVariableDeclarator(VariableDeclaratorContext ctx) {
         org.codehaus.groovy.syntax.Token token;
         if (asBoolean(ctx.ASSIGN())) {
-            token = createGroovyToken(ctx.ASSIGN().getSymbol(), Types.ASSIGN);
+            token = createGroovyTokenByType(ctx.ASSIGN().getSymbol(), Types.ASSIGN);
         } else {
             token = new org.codehaus.groovy.syntax.Token(Types.ASSIGN, "=", ctx.start.getLine(), 1);
         }
@@ -559,8 +559,31 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return (Expression) this.visit(ctx.primary());
     }
 
+
     @Override
-    public Expression visitUnaryExprAlt(UnaryExprAltContext ctx) {
+    public Expression visitUnaryNotExprAlt(UnaryNotExprAltContext ctx) {
+        if (asBoolean(ctx.NOT())) {
+            return this.configureAST(
+                    new NotExpression((Expression) this.visit(ctx.expression())),
+                    ctx);
+        }
+
+        if (asBoolean(ctx.BITNOT())) {
+            return this.configureAST(
+                    new BitwiseNegationExpression((Expression) this.visit(ctx.expression())),
+                    ctx);
+        }
+
+        if (asBoolean(ctx.LPAREN())) { // TODO cast
+            return null;
+        }
+
+        throw createParsingFailedException("Unsupported unary expression: " + ctx.getText(), ctx);
+    }
+
+
+    @Override
+    public Expression visitUnaryAddExprAlt(UnaryAddExprAltContext ctx) {
         ExpressionContext expressionCtx = ctx.expression();
 
         switch (ctx.op.getType()) {
@@ -602,10 +625,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
                 return this.configureAST(new UnaryMinusExpression(expression), ctx);
             }
-            case TILDE:
-                return this.configureAST(new BitwiseNegationExpression((Expression) this.visit(expressionCtx)), ctx);
-            case BANG:
-                return this.configureAST(new NotExpression((Expression) this.visit(expressionCtx)), ctx);
+
+            case INC:
+            case DEC:
+                return this.configureAST(new PrefixExpression(this.createGroovyToken(ctx.op), (Expression) this.visit(ctx.expression())), ctx);
+
             default:
                 throw createParsingFailedException("Unsupported unary operation: " + ctx.getText(), ctx);
         }
@@ -1156,13 +1180,41 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return parameter;
     }
 
-
-    private org.codehaus.groovy.syntax.Token createGroovyToken(Token token, int type) {
+    private org.codehaus.groovy.syntax.Token createGroovyTokenByType(Token token, int type) {
         if (null == token) {
             throw new IllegalArgumentException("token should not be null");
         }
 
         return new org.codehaus.groovy.syntax.Token(type, token.getText(), token.getLine(), token.getCharPositionInLine());
+    }
+
+    private org.codehaus.groovy.syntax.Token createGroovyToken(TerminalNode node) {
+        return this.createGroovyToken(node, 1);
+    }
+
+    private org.codehaus.groovy.syntax.Token createGroovyToken(Token token) {
+        return this.createGroovyToken(token, 1);
+    }
+
+    /**
+     * @param node
+     * @param cardinality Used for handling GT ">" operator, which can be repeated to give bitwise shifts >> or >>>
+     * @return
+     */
+    private org.codehaus.groovy.syntax.Token createGroovyToken(TerminalNode node, int cardinality) {
+        return this.createGroovyToken(node.getSymbol(), cardinality);
+    }
+
+    private org.codehaus.groovy.syntax.Token createGroovyToken(Token token, int cardinality) {
+        String text = StringGroovyMethods.multiply((CharSequence) token.getText(), cardinality);
+        return new org.codehaus.groovy.syntax.Token(
+                "..<".equals(token.getText()) || "..".equals(token.getText())
+                        ? Types.RANGE_OPERATOR
+                        : Types.lookup(text, Types.ANY),
+                text,
+                token.getLine(),
+                token.getCharPositionInLine() + 1
+        );
     }
 
     private BlockStatement createBlockStatement(Statement... statements) {
