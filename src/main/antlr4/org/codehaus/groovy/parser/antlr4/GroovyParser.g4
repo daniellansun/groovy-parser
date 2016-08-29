@@ -558,7 +558,7 @@ expression
     |   expression (MUL | DIV | MOD) expression                                             #multiplicativeExprAlt
 
     // binary addition/subtraction (level 5)
-    |   expression (ADD | SUB) expression                                                   #additiveExprAlt
+    |   left=expression op=(ADD | SUB) nls right=expression                                                   #additiveExprAlt
 
     // bit shift expressions (level 6)
     |   expression
