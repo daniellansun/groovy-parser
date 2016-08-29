@@ -35,6 +35,10 @@ public abstract class AbstractParser {
     private static final Logger LOGGER = Logger.getLogger(AbstractParser.class.getName());
 
     public ModuleNode parse(File file) {
+        if (null == file || !file.exists()) {
+            throw new IllegalArgumentException(file + " does not exist.");
+        }
+
         try {
             CompilerConfiguration configuration = this.getCompilerConfiguration();
             SourceUnit sourceUnit = new SourceUnit(file, configuration, new GroovyClassLoader(), new ErrorCollector(configuration));

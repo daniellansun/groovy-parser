@@ -591,7 +591,17 @@ primary
     ;
 
 list
-    :   LBRACK expressionList? COMMA? RBRACK
+locals[boolean empty = true]
+    :   LBRACK
+        (
+            expressionList
+            { $empty = false; }
+        )?
+        (
+            COMMA
+            { !$empty }?<fail={"Empty list should not contain any comma(,)"}>
+        )?
+        RBRACK
     ;
 
 map
