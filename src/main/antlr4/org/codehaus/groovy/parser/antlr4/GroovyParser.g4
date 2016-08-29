@@ -597,25 +597,14 @@ expression
     |   expression OR expression                                                            #logicalOrExprAlt
 
     // conditional test (level 14)
-    |   <assoc=right> expression (QUESTION expression COLON | ELVIS) expression             #conditionalExprAlt
+    |   <assoc=right> expression
+        (   QUESTION expression COLON
+        |   ELVIS
+        )
+        expression                                                                          #conditionalExprAlt
 
     // assignment expression (level 15)
-    |   <assoc=right> expression
-        (   ASSIGN
-        |   ADD_ASSIGN
-        |   SUB_ASSIGN
-        |   MUL_ASSIGN
-        |   DIV_ASSIGN
-        |   AND_ASSIGN
-        |   OR_ASSIGN
-        |   XOR_ASSIGN
-        |   RSHIFT_ASSIGN
-        |   URSHIFT_ASSIGN
-        |   LSHIFT_ASSIGN
-        |   MOD_ASSIGN
-        |   POWER_ASSIGN
-        )
-        expression                                                                          #assignmentExprAlt
+    |   <assoc=right> expression assignmentOperator expression                              #assignmentExprAlt
     ;
 
 primary
@@ -724,6 +713,22 @@ nls :   NL*
 
 sep :   SEMI NL*
     |   NL+ (SEMI NL*)*
+    ;
+
+assignmentOperator
+    :   ASSIGN
+    |   ADD_ASSIGN
+    |   SUB_ASSIGN
+    |   MUL_ASSIGN
+    |   DIV_ASSIGN
+    |   AND_ASSIGN
+    |   OR_ASSIGN
+    |   XOR_ASSIGN
+    |   RSHIFT_ASSIGN
+    |   URSHIFT_ASSIGN
+    |   LSHIFT_ASSIGN
+    |   MOD_ASSIGN
+    |   POWER_ASSIGN
     ;
 
 keywords
