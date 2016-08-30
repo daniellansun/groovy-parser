@@ -532,15 +532,7 @@ constantExpression
     ;
 
 expression
-    :   primary                                                                             #primaryExprAlt
-    |   nonWildcardTypeArguments (explicitGenericInvocationSuffix | THIS arguments)         #invokeExprAlt
-    |   expression DOT Identifier                                                           #accessExprAlt
-    |   expression DOT THIS                                                                 #accessExprAlt
-    |   expression DOT NEW nonWildcardTypeArguments? innerCreator                           #createExprAlt
-    |   expression DOT SUPER superSuffix                                                    #superExprAlt
-    |   expression DOT explicitGenericInvocation                                            #invokeExprAlt
-    |   expression LBRACK expression RBRACK                                                 #indexExprAlt
-    |   expression LPAREN expressionList? RPAREN                                            #invokeExprAlt
+    :   pathExpression                                                                      #pathExprAlt
 
     // qualified names, array expressions, method invocation, post inc/dec (level 1)
     |   expression (INC | DEC)                                                              #postfixExprAlt
@@ -607,6 +599,81 @@ expression
     |   <assoc=right> expression assignmentOperator expression                              #assignmentExprAlt
     ;
 
+
+/**
+ *  A "path expression" is a name or other primary, possibly qualified by various
+ *  forms of dot, and/or followed by various kinds of brackets.
+ *  It can be used for value or assigned to, or else further qualified, indexed, or called.
+ *  It is called a "path" because it looks like a linear path through a data structure.
+ *  Examples:  x.y, x?.y, x*.y, x.@y; x[], x[y], x[y,z]; x(), x(y), x(y,z); x{s}; a.b[n].c(x).d{s}
+ *  (Compare to a C lvalue, or LeftHandSide in the JLS section 15.26.)
+ *  General expressions are built up from path expressions, using operators like '+' and '='.
+ */
+pathExpression
+    :   primary pathElement* // TODO support command expression
+    ;
+
+pathElement
+    :   nls
+        ( SPREAD_DOT     // Spread operator:  x*.y  ===  x?.collect{it.y}
+        | OPTIONAL_DOT   // Optional-null operator:  x?.y  === (x==null)?null:x.y
+        | MEMBER_POINTER // Member pointer operator: foo.&y == foo.metaClass.getMethodPointer(foo, "y")
+        | DOT            // The all-powerful dot.
+        )
+        nls
+        nonWildcardTypeArguments? namePart
+
+    |   arguments
+
+    // Can always append a block, as foo{bar}
+    |   closure
+
+    // Element selection is always an option, too.
+    // In Groovy, the stuff between brackets is a general argument list,
+    // since the bracket operator is transformed into a method call.
+    |   indexPropertyArgs
+    ;
+
+/**
+ *  This is the grammar for what can follow a dot:  x.a, x.@a, x.&a, x.'a', etc.
+ */
+namePart
+    :
+        AT? // foo.@bar selects the field (or attribute), not property
+        (   Identifier
+
+        // foo.'bar' is in all ways same as foo.bar, except that bar can have an arbitrary spelling
+        |   StringLiteral
+
+        |   dynamicMemberName
+
+        // Definition:  a.{foo} === {with(a) {foo}}
+        // May cover some path expression use-cases previously handled by dynamic scoping (closure delegates).
+        |   block
+
+        // let's allow common keywords as property names
+        |   keywords
+        )
+    ;
+
+/**
+ *  If a dot is followed by a parenthesized or quoted expression, the member is computed dynamically,
+ *  and the member selection is done only at runtime.  This forces a statically unchecked member access.
+ */
+dynamicMemberName
+    :   parExpression
+    |   gstring
+    ;
+
+/** An expression may be followed by [...].
+ *  Unlike Java, these brackets may contain a general argument list,
+ *  which is passed to the array element operator, which can make of it what it wants.
+ *  The brackets may also be empty, as in T[].  This is how Groovy names array types.
+ */
+indexPropertyArgs
+    :   LBRACK expressionList RBRACK
+    ;
+
 primary
     :   Identifier                                                                          #identifierPrmrAlt
     |   literal                                                                             #literalPrmrAlt
@@ -661,10 +728,6 @@ createdName
     |   primitiveType
     ;
 
-innerCreator
-    :   Identifier nonWildcardTypeArgumentsOrDiamond? classCreatorRest
-    ;
-
 arrayCreatorRest
     :   LBRACK
         (   RBRACK (LBRACK RBRACK)* arrayInitializer
@@ -674,10 +737,6 @@ arrayCreatorRest
 
 classCreatorRest
     :   arguments classBody?
-    ;
-
-explicitGenericInvocation
-    :   nonWildcardTypeArguments explicitGenericInvocationSuffix
     ;
 
 nonWildcardTypeArguments
@@ -699,20 +758,9 @@ superSuffix
     |   DOT Identifier arguments?
     ;
 
-explicitGenericInvocationSuffix
-    :   SUPER superSuffix
-    |   Identifier arguments
-    ;
-
+// TODO support labeled argument
 arguments
     :   LPAREN expressionList? RPAREN
-    ;
-
-nls :   NL*
-    ;
-
-sep :   SEMI NL*
-    |   NL+ (SEMI NL*)*
     ;
 
 assignmentOperator
@@ -785,4 +833,11 @@ keywords
     |   PUBLIC
     |   PROTECTED
     |   PRIVATE
+    ;
+
+nls :   NL*
+    ;
+
+sep :   SEMI NL*
+    |   NL+ (SEMI NL*)*
     ;
