@@ -596,7 +596,22 @@ expression
         expression                                                                          #conditionalExprAlt
 
     // assignment expression (level 15)
-    |   <assoc=right> expression assignmentOperator expression                              #assignmentExprAlt
+    |   <assoc=right> left=expression
+                        op=(   ASSIGN
+                           |   ADD_ASSIGN
+                           |   SUB_ASSIGN
+                           |   MUL_ASSIGN
+                           |   DIV_ASSIGN
+                           |   AND_ASSIGN
+                           |   OR_ASSIGN
+                           |   XOR_ASSIGN
+                           |   RSHIFT_ASSIGN
+                           |   URSHIFT_ASSIGN
+                           |   LSHIFT_ASSIGN
+                           |   MOD_ASSIGN
+                           |   POWER_ASSIGN
+                           ) nls
+                     right=expression                                                        #assignmentExprAlt
     ;
 
 
@@ -763,21 +778,6 @@ arguments
     :   LPAREN expressionList? RPAREN
     ;
 
-assignmentOperator
-    :   ASSIGN
-    |   ADD_ASSIGN
-    |   SUB_ASSIGN
-    |   MUL_ASSIGN
-    |   DIV_ASSIGN
-    |   AND_ASSIGN
-    |   OR_ASSIGN
-    |   XOR_ASSIGN
-    |   RSHIFT_ASSIGN
-    |   URSHIFT_ASSIGN
-    |   LSHIFT_ASSIGN
-    |   MOD_ASSIGN
-    |   POWER_ASSIGN
-    ;
 
 keywords
     :   ABSTRACT

@@ -562,6 +562,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitPathExpression(PathExpressionContext ctx) {
+        // TODO parse pathElement
+
         return this.configureAST((Expression) this.visit(ctx.primary()), ctx);
     }
 
@@ -654,6 +656,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
+
+    @Override
+    public Expression visitAssignmentExprAlt(AssignmentExprAltContext ctx) {
+        return this.configureAST(
+                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                ctx);
+    }
 
 // } expression    --------------------------------------------------------------------
 
