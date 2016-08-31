@@ -589,11 +589,11 @@ expression
     |   expression OR expression                                                            #logicalOrExprAlt
 
     // conditional test (level 14)
-    |   <assoc=right> expression
-        (   QUESTION expression COLON
-        |   ELVIS
+    |   <assoc=right> con=expression
+        (   nls QUESTION nls tb=expression nls COLON nls
+        |   nls ELVIS nls
         )
-        expression                                                                          #conditionalExprAlt
+        fb=expression                                                                       #conditionalExprAlt
 
     // assignment expression (level 15)
     |   <assoc=right> left=expression

@@ -656,6 +656,23 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
+    @Override
+    public Expression visitConditionalExprAlt(ConditionalExprAltContext ctx) {
+        if (asBoolean(ctx.ELVIS())) { // e.g. a == 6 ?: 0
+            return this.configureAST(
+                    new ElvisOperatorExpression((Expression) this.visit(ctx.con), (Expression) this.visit(ctx.fb)),
+                    ctx);
+        }
+
+        return this.configureAST(
+                new TernaryExpression(
+                        this.configureAST(new BooleanExpression((Expression) this.visit(ctx.con)),
+                                ctx.con),
+                        (Expression) this.visit(ctx.tb),
+                        (Expression) this.visit(ctx.fb)),
+                ctx);
+    }
+
 
     @Override
     public Expression visitAssignmentExprAlt(AssignmentExprAltContext ctx) {
