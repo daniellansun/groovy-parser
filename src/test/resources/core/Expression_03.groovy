@@ -8,8 +8,10 @@
         6 +
         ++c +
         'a' +
-        2 -
-        3
+        2 *
+        3 +
+        a++ -
+        a--
 String[] codes = [
         className + '.' + propertyName + '.typeMismatch.error',
         className + '.' + propertyName + '.typeMismatch',
@@ -30,3 +32,4 @@ String[] codes = [
         3
 
 1 + 2 * 3 - 4 / 5 + 6 % 7 - 8 ** 9
+

@@ -535,10 +535,10 @@ expression
     :   pathExpression                                                                      #pathExprAlt
 
     // qualified names, array expressions, method invocation, post inc/dec (level 1)
-    |   expression (INC | DEC)                                                              #postfixExprAlt
+    |   expression op=(INC | DEC)                                                           #postfixExprAlt
 
     // ~(BNOT)/!(LNOT)/(type casting) (level 1)
-    |   (BITNOT nls | NOT nls | (LPAREN type RPAREN)) expression                                    #unaryNotExprAlt
+    |   (BITNOT nls | NOT nls | (LPAREN type RPAREN)) expression                            #unaryNotExprAlt
 
     // math power operator (**) (level 2)
     |   left=expression op=POWER nls right=expression                                       #powerExprAlt

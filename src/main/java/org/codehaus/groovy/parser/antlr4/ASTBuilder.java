@@ -568,6 +568,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public PostfixExpression visitPostfixExprAlt(PostfixExprAltContext ctx) {
+        return this.configureAST(
+                new PostfixExpression((Expression) this.visit(ctx.expression()), createGroovyToken(ctx.op)),
+                ctx);
+    }
+
+    @Override
     public Expression visitUnaryNotExprAlt(UnaryNotExprAltContext ctx) {
         if (asBoolean(ctx.NOT())) {
             return this.configureAST(
@@ -687,7 +694,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         return this.configureAST(
-                    new BinaryExpression(left, op, right),
+                new BinaryExpression(left, op, right),
                 ctx);
     }
 
