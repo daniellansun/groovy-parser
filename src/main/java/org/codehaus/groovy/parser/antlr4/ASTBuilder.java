@@ -657,6 +657,36 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public Expression visitRelationalExprAlt(RelationalExprAltContext ctx) {
+        switch (ctx.op.getType()) {
+            case AS:
+                return this.configureAST(
+                        CastExpression.asExpression(this.visitType(ctx.type()), (Expression) this.visit(ctx.left)),
+                        ctx);
+
+            case INSTANCEOF:
+                return this.configureAST(
+                        new BinaryExpression((Expression) this.visit(ctx.left),
+                                this.createGroovyToken(ctx.op),
+                                this.configureAST(new ClassExpression(this.visitType(ctx.type())), ctx.type())),
+                        ctx);
+
+            case LE:
+            case GE:
+            case GT:
+            case LT:
+            case IN:
+                return this.configureAST(
+                        this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                        ctx);
+
+            default:
+                throw createParsingFailedException("Unsupported relational expression: " + ctx.getText(), ctx);
+        }
+    }
+
+
+    @Override
     public BinaryExpression visitEqualityExprAlt(EqualityExprAltContext ctx) {
         return this.configureAST(
                 this.createBinaryExpression(ctx.left, ctx.op, ctx.right),

@@ -561,9 +561,8 @@ expression
         expression                                                                          #shiftExprAlt
 
     // boolean relational expressions (level 7)
-    |   expression (    (LE | GE | GT | LT | IN) expression
-                   |    (AS | INSTANCEOF) type
-                   )                                                                        #relationalExprAlt
+    |   left=expression op=(AS | INSTANCEOF) nls type                                       #relationalExprAlt
+    |   left=expression op=(LE | GE | GT | LT | IN) nls right=expression                    #relationalExprAlt
 
     // equality/inequality (==/!=) (level 8)
     |   left=expression
