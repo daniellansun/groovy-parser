@@ -672,6 +672,7 @@ namePart
 
         |   dynamicMemberName
 
+        // PROPOSAL, DECIDE:  Is this inline form of the 'with' statement useful?
         // Definition:  a.{foo} === {with(a) {foo}}
         // May cover some path expression use-cases previously handled by dynamic scoping (closure delegates).
         |   block
