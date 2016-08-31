@@ -581,8 +581,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     ctx);
         }
 
-        if (asBoolean(ctx.LPAREN())) { // TODO cast
-            return null;
+        if (asBoolean(ctx.LPAREN())) { // e.g. (String) 'abc'
+            return this.configureAST(
+                    new CastExpression(this.visitType(ctx.type()), (Expression) this.visit(ctx.expression())),
+                    ctx);
         }
 
         throw createParsingFailedException("Unsupported unary expression: " + ctx.getText(), ctx);

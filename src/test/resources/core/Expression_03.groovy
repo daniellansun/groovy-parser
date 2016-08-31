@@ -10,12 +10,12 @@
         'a' +
         2 -
         3
-[
+String[] codes = [
         className + '.' + propertyName + '.typeMismatch.error',
         className + '.' + propertyName + '.typeMismatch',
         classAsPropertyName + '.' + propertyName + '.typeMismatch.error',
         classAsPropertyName + '.' + propertyName + '.typeMismatch'
-]
+] as String[]
 
 1 * 2 / 3 % 4
 1 *
