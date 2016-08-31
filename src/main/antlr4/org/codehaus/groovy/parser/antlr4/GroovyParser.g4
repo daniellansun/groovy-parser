@@ -553,12 +553,16 @@ expression
     |   left=expression op=(ADD | SUB) nls right=expression                                 #additiveExprAlt
 
     // bit shift expressions (level 6)
-    |   expression
-        (    (LT LT | GT GT GT | GT GT)
-        |    RANGE_INCLUSIVE
-        |    RANGE_EXCLUSIVE
-        )
-        expression                                                                          #shiftExprAlt
+    |   left=expression
+            (           (   dlOp=LT LT
+                        |   tgOp=GT GT GT
+                        |   dgOp=GT GT
+                        )
+            |   rangeOp=(    RANGE_INCLUSIVE
+                        |    RANGE_EXCLUSIVE
+                        )
+            ) nls
+        right=expression                                                                    #shiftExprAlt
 
     // boolean relational expressions (level 7)
     |   left=expression op=(AS | INSTANCEOF) nls type                                       #relationalExprAlt
@@ -783,7 +787,6 @@ superSuffix
 arguments
     :   LPAREN expressionList? RPAREN
     ;
-
 
 keywords
     :   ABSTRACT

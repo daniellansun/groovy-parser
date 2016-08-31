@@ -657,6 +657,33 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public Expression visitShiftExprAlt(ShiftExprAltContext ctx) {
+        Expression left = (Expression) this.visit(ctx.left);
+        Expression right = (Expression) this.visit(ctx.right);
+
+        if (asBoolean(ctx.rangeOp)) {
+            return this.configureAST(new RangeExpression(left, right, !ctx.rangeOp.getText().endsWith("<")), ctx);
+        }
+
+        org.codehaus.groovy.syntax.Token op = null;
+
+        if (asBoolean(ctx.dlOp)) {
+            op = this.createGroovyToken(ctx.dlOp, 2);
+        } else if (asBoolean(ctx.dgOp)) {
+            op = this.createGroovyToken(ctx.dgOp, 2);
+        } else if (asBoolean(ctx.tgOp)) {
+            op = this.createGroovyToken(ctx.tgOp, 3);
+        } else {
+            throw createParsingFailedException("Unsupported shift expression: " + ctx.getText(), ctx);
+        }
+
+        return this.configureAST(
+                    new BinaryExpression(left, op, right),
+                ctx);
+    }
+
+
+    @Override
     public Expression visitRelationalExprAlt(RelationalExprAltContext ctx) {
         switch (ctx.op.getType()) {
             case AS:
