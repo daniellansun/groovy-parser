@@ -574,13 +574,13 @@ expression
     | expression (REGEX_FIND | REGEX_MATCH) expression                                      #regexExprAlt
 
     // bitwise or non-short-circuiting and (&)  (level 9)
-    |   expression BITAND expression                                                        #andExprAlt
+    |   left=expression op=BITAND nls right=expression                                      #andExprAlt
 
     // exclusive or (^)  (level 10)
-    |   expression XOR expression                                                           #exclusiveOrExprAlt
+    |   left=expression op=XOR nls right=expression                                         #exclusiveOrExprAlt
 
     // bitwise or non-short-circuiting or (|)  (level 11)
-    |   expression BITOR expression                                                         #inclusiveOrExprAlt
+    |   left=expression op=BITOR nls right=expression                                       #inclusiveOrExprAlt
 
     // logical and (&&)  (level 12)
     |   left=expression op=AND nls right=expression                                         #logicalAndExprAlt
