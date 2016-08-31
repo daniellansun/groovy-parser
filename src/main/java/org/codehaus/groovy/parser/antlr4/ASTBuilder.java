@@ -588,6 +588,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         throw createParsingFailedException("Unsupported unary expression: " + ctx.getText(), ctx);
     }
 
+    @Override
+    public BinaryExpression visitPowerExprAlt(PowerExprAltContext ctx) {
+        return this.configureAST(
+                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                ctx);
+    }
+
 
     @Override
     public Expression visitUnaryAddExprAlt(UnaryAddExprAltContext ctx) {

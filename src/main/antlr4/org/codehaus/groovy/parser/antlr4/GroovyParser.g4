@@ -541,7 +541,7 @@ expression
     |   (BITNOT | NOT | (LPAREN type RPAREN)) expression                                    #unaryNotExprAlt
 
     // math power operator (**) (level 2)
-    |   expression POWER expression                                                         #powerExprAlt
+    |   left=expression op=POWER nls right=expression                                       #powerExprAlt
 
     // ++(prefix)/--(prefix)/+(unary)/-(unary) (level 3)
     |   op=(INC | DEC | ADD | SUB) expression                                               #unaryAddExprAlt
