@@ -643,52 +643,56 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Expression visitMultiplicativeExprAlt(MultiplicativeExprAltContext ctx) {
+    public BinaryExpression visitMultiplicativeExprAlt(MultiplicativeExprAltContext ctx) {
         return this.configureAST(
                 this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
                 ctx);
     }
 
     @Override
-    public Expression visitAdditiveExprAlt(AdditiveExprAltContext ctx) {
+    public BinaryExpression visitAdditiveExprAlt(AdditiveExprAltContext ctx) {
         return this.configureAST(
                 this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
                 ctx);
     }
 
     @Override
-    public Expression visitAndExprAlt(GroovyParser.AndExprAltContext ctx) {
-        return this.configureAST(
-                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
-                ctx);
-    }
-
-
-    @Override
-    public Expression visitExclusiveOrExprAlt(GroovyParser.ExclusiveOrExprAltContext ctx) {
-        return this.configureAST(
-                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
-                ctx);
-    }
-
-
-    @Override
-    public Expression visitInclusiveOrExprAlt(GroovyParser.InclusiveOrExprAltContext ctx) {
-        return this.configureAST(
-                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
-                ctx);
-    }
-
-
-    @Override
-    public Expression visitLogicalAndExprAlt(LogicalAndExprAltContext ctx) {
+    public BinaryExpression visitRegexExprAlt(RegexExprAltContext ctx) {
         return this.configureAST(
                 this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
                 ctx);
     }
 
     @Override
-    public Expression visitLogicalOrExprAlt(LogicalOrExprAltContext ctx) {
+    public BinaryExpression visitAndExprAlt(AndExprAltContext ctx) {
+        return this.configureAST(
+                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                ctx);
+    }
+
+    @Override
+    public BinaryExpression visitExclusiveOrExprAlt(ExclusiveOrExprAltContext ctx) {
+        return this.configureAST(
+                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                ctx);
+    }
+
+    @Override
+    public BinaryExpression visitInclusiveOrExprAlt(InclusiveOrExprAltContext ctx) {
+        return this.configureAST(
+                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                ctx);
+    }
+
+    @Override
+    public BinaryExpression visitLogicalAndExprAlt(LogicalAndExprAltContext ctx) {
+        return this.configureAST(
+                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                ctx);
+    }
+
+    @Override
+    public BinaryExpression visitLogicalOrExprAlt(LogicalOrExprAltContext ctx) {
         return this.configureAST(
                 this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
                 ctx);
@@ -713,7 +717,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
 
     @Override
-    public Expression visitAssignmentExprAlt(AssignmentExprAltContext ctx) {
+    public BinaryExpression visitAssignmentExprAlt(AssignmentExprAltContext ctx) {
         return this.configureAST(
                 this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
                 ctx);

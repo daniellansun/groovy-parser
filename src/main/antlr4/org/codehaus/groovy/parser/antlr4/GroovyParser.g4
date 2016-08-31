@@ -571,7 +571,7 @@ expression
     // regex find and match (=~ and ==~) (level 8.5)
     // jez: moved =~ closer to precedence of == etc, as...
     // 'if (foo =~ "a.c")' is very close in intent to 'if (foo == "abc")'
-    | expression (REGEX_FIND | REGEX_MATCH) expression                                      #regexExprAlt
+    |   left=expression op=(REGEX_FIND | REGEX_MATCH) nls right=expression                  #regexExprAlt
 
     // bitwise or non-short-circuiting and (&)  (level 9)
     |   left=expression op=BITAND nls right=expression                                      #andExprAlt
