@@ -566,7 +566,14 @@ expression
                    )                                                                        #relationalExprAlt
 
     // equality/inequality (==/!=) (level 8)
-    |   expression (EQUAL | NOTEQUAL) expression                                            #equalityExprAlt
+    |   left=expression
+            op=(    IDENTICAL
+               |    NOT_IDENTICAL
+               |    EQUAL
+               |    NOTEQUAL
+               |    SPACESHIP
+               ) nls
+        right=expression                                                                    #equalityExprAlt
 
     // regex find and match (=~ and ==~) (level 8.5)
     // jez: moved =~ closer to precedence of == etc, as...

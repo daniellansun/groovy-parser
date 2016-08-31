@@ -657,6 +657,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public BinaryExpression visitEqualityExprAlt(EqualityExprAltContext ctx) {
+        return this.configureAST(
+                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                ctx);
+    }
+
+    @Override
     public BinaryExpression visitRegexExprAlt(RegexExprAltContext ctx) {
         return this.configureAST(
                 this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
