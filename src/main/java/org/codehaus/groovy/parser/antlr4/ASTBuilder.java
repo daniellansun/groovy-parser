@@ -657,6 +657,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public Expression visitLogicalAndExprAlt(LogicalAndExprAltContext ctx) {
+        return this.configureAST(
+                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                ctx);
+    }
+
+    @Override
+    public Expression visitLogicalOrExprAlt(LogicalOrExprAltContext ctx) {
+        return this.configureAST(
+                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                ctx);
+    }
+
+    @Override
     public Expression visitConditionalExprAlt(ConditionalExprAltContext ctx) {
         if (asBoolean(ctx.ELVIS())) { // e.g. a == 6 ?: 0
             return this.configureAST(

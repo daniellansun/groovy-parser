@@ -583,10 +583,10 @@ expression
     |   expression BITOR expression                                                         #inclusiveOrExprAlt
 
     // logical and (&&)  (level 12)
-    |   expression AND expression                                                           #logicalAndExprAlt
+    |   left=expression op=AND nls right=expression                                         #logicalAndExprAlt
 
     // logical or (||)  (level 13)
-    |   expression OR expression                                                            #logicalOrExprAlt
+    |   left=expression op=OR nls right=expression                                          #logicalOrExprAlt
 
     // conditional test (level 14)
     |   <assoc=right> con=expression
