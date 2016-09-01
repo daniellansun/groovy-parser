@@ -552,23 +552,24 @@ NullLiteral
 
 // Groovy Operators
 
-RANGE_INCLUSIVE : '..';
-RANGE_EXCLUSIVE : '..<';
-SPREAD_DOT      : '*.';
-OPTIONAL_DOT    : '?.';
-ELVIS           : '?:';
-MEMBER_POINTER  : '.&';
-REGEX_FIND      : '=~';
-REGEX_MATCH     : '==~';
-POWER           : '**';
-POWER_ASSIGN    : '**=';
-SPACESHIP       : '<=>';
-IDENTICAL       : '===';
-NOT_IDENTICAL   : '!==';
-ARROW           : '->';
+RANGE_INCLUSIVE     : '..';
+RANGE_EXCLUSIVE     : '..<';
+SPREAD_DOT          : '*.';
+OPTIONAL_DOT        : '?.';
+ELVIS               : '?:';
+MEMBER_POINTER      : '.&';
+ATTRIBUTE_POINTER   : '.@';
+REGEX_FIND          : '=~';
+REGEX_MATCH         : '==~';
+POWER               : '**';
+POWER_ASSIGN        : '**=';
+SPACESHIP           : '<=>';
+IDENTICAL           : '===';
+NOT_IDENTICAL       : '!==';
+ARROW               : '->';
 
 fragment
-DOLLAR          : '$';
+DOLLAR              : '$';
 
 
 // §3.11 Separators

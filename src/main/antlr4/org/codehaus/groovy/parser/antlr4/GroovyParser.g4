@@ -640,10 +640,11 @@ pathExpression
 
 pathElement
     :   nls
-        ( SPREAD_DOT     // Spread operator:  x*.y  ===  x?.collect{it.y}
-        | OPTIONAL_DOT   // Optional-null operator:  x?.y  === (x==null)?null:x.y
-        | MEMBER_POINTER // Member pointer operator: foo.&y == foo.metaClass.getMethodPointer(foo, "y")
-        | DOT            // The all-powerful dot.
+        ( SPREAD_DOT        // Spread operator:  x*.y  ===  x?.collect{it.y}
+        | OPTIONAL_DOT      // Optional-null operator:  x?.y  === (x==null)?null:x.y
+        | MEMBER_POINTER    // Member pointer operator: foo.&y == foo.metaClass.getMethodPointer(foo, "y")
+        | ATTRIBUTE_POINTER // Attribute pointer operator: foo.@bar selects the field (or attribute), not property
+        | DOT               // The all-powerful dot.
         )
         nls
         nonWildcardTypeArguments? namePart
@@ -664,7 +665,6 @@ pathElement
  */
 namePart
     :
-        AT? // foo.@bar selects the field (or attribute), not property
         (   Identifier
 
         // foo.'bar' is in all ways same as foo.bar, except that bar can have an arbitrary spelling

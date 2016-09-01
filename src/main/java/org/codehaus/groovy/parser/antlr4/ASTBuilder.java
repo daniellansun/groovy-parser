@@ -551,7 +551,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     // expression {    --------------------------------------------------------------------
     @Override
     public Expression visitParExpression(ParExpressionContext ctx) {
-        return this.configureAST((Expression) this.visit(ctx.expression()), ctx);
+        Expression expression = this.configureAST((Expression) this.visit(ctx.expression()), ctx);
+
+        expression.putNodeMetaData(INSIDE_PARENTHESES, true);
+
+        return expression;
     }
 
 
@@ -608,21 +612,21 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Expression visitUnaryAddExprAlt(UnaryAddExprAltContext ctx) {
         ExpressionContext expressionCtx = ctx.expression();
+        Expression expression = (Expression) this.visit(expressionCtx);
+
+        Boolean insidePar = expression.getNodeMetaData(INSIDE_PARENTHESES);
+        insidePar = !asBoolean((Object) insidePar) ? false : insidePar;
 
         switch (ctx.op.getType()) {
             case ADD: {
-                Expression expression = (Expression) this.visit(expressionCtx);
-
-                if (expression instanceof ConstantExpression) {
+                if (expression instanceof ConstantExpression && !asBoolean(insidePar)) {
                     return this.configureAST((ConstantExpression) this.visit(expressionCtx), ctx);
                 }
 
                 return this.configureAST(new UnaryPlusExpression(expression), ctx);
             }
             case SUB: {
-                Expression expression = (Expression) this.visit(expressionCtx);
-
-                if (expression instanceof ConstantExpression) {
+                if (expression instanceof ConstantExpression && !asBoolean(insidePar)) {
                     ConstantExpression constantExpression = (ConstantExpression) expression;
 
                     Object value = constantExpression.getValue();
@@ -651,7 +655,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             case INC:
             case DEC:
-                return this.configureAST(new PrefixExpression(this.createGroovyToken(ctx.op), (Expression) this.visit(ctx.expression())), ctx);
+                return this.configureAST(new PrefixExpression(this.createGroovyToken(ctx.op), expression), ctx);
 
             default:
                 throw createParsingFailedException("Unsupported unary operation: " + ctx.getText(), ctx);
@@ -906,7 +910,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public ConstantExpression visitNullLiteralAlt(NullLiteralAltContext ctx) {
         return this.configureAST(new ConstantExpression(null), ctx);
     }
+
+    @Override
+    public PropertyExpression visitClassLiteralAlt(ClassLiteralAltContext ctx) {
+        return this.configureAST(this.visitClassLiteral(ctx.classLiteral()), ctx);
+    }
+
 // } literal       --------------------------------------------------------------------
+
+
+    @Override
+    public PropertyExpression visitClassLiteral(GroovyParser.ClassLiteralContext ctx) {
+        return null; // TODO
+    }
+
 
     // gstring {       --------------------------------------------------------------------
     @Override
@@ -1763,5 +1780,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String VALUE_STR = "value";
     private static final String DOLLAR_STR = "$";
     private static final String CALL_STR = "call";
+    private static final String INSIDE_PARENTHESES = "_INSIDE_PARENTHESES";
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 }
