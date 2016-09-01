@@ -301,7 +301,7 @@ qualifiedClassName
     ;
 
 upperCaseIdentifier[String msg]
-    :   id=Identifier {GrammarPredicates.isUpperCase($id)}?<fail={$msg}>
+    :   id=Identifier { GrammarPredicates.isUpperCase($id) }?<fail={$msg}>
     ;
 
 literal
@@ -310,13 +310,16 @@ literal
     |   StringLiteral                                                                       #stringLiteralAlt
     |   BooleanLiteral                                                                      #booleanLiteralAlt
     |   NullLiteral                                                                         #nullLiteralAlt
-    |   classLiteral                                                                        #classLiteralAlt
+//    |   classLiteral                                                                        #classLiteralAlt
     ;
 
+/*
 classLiteral
     :   VOID (DOT CLASS)?
     |   type (DOT CLASS)?
     ;
+*/
+
 
 // GSTRING
 
@@ -640,11 +643,10 @@ pathExpression
 
 pathElement
     :   nls
-        ( SPREAD_DOT        // Spread operator:  x*.y  ===  x?.collect{it.y}
-        | OPTIONAL_DOT      // Optional-null operator:  x?.y  === (x==null)?null:x.y
+        ( SPREAD_DOT AT?       // Spread operator:  x*.y  ===  x?.collect{it.y}
+        | OPTIONAL_DOT AT?     // Optional-null operator:  x?.y  === (x==null)?null:x.y
         | MEMBER_POINTER    // Member pointer operator: foo.&y == foo.metaClass.getMethodPointer(foo, "y")
-        | ATTRIBUTE_POINTER // Attribute pointer operator: foo.@bar selects the field (or attribute), not property
-        | DOT               // The all-powerful dot.
+        | DOT AT?              // The all-powerful dot.
         )
         nls
         nonWildcardTypeArguments? namePart

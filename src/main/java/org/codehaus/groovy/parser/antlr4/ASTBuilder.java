@@ -911,19 +911,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(new ConstantExpression(null), ctx);
     }
 
+    /*
     @Override
     public PropertyExpression visitClassLiteralAlt(ClassLiteralAltContext ctx) {
         return this.configureAST(this.visitClassLiteral(ctx.classLiteral()), ctx);
     }
+    */
 
 // } literal       --------------------------------------------------------------------
 
 
+    /*
     @Override
     public PropertyExpression visitClassLiteral(GroovyParser.ClassLiteralContext ctx) {
-        return null; // TODO
+        return null; // class literal will be treated as path expression, so the node will not be visited
     }
-
+    */
 
     // gstring {       --------------------------------------------------------------------
     @Override

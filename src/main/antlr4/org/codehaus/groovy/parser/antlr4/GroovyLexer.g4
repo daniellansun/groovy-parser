@@ -558,7 +558,6 @@ SPREAD_DOT          : '*.';
 OPTIONAL_DOT        : '?.';
 ELVIS               : '?:';
 MEMBER_POINTER      : '.&';
-ATTRIBUTE_POINTER   : '.@';
 REGEX_FIND          : '=~';
 REGEX_MATCH         : '==~';
 POWER               : '**';
