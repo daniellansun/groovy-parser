@@ -7,7 +7,21 @@ person?.child
 person?.@child
 person*.child
 person*.@child
-person*.child*.@child?.child?.@child.child.@name.&length
+person.'name'
+person.@'name'
+person?.'name'
+person?.@'name'
+person*.'child'
+person*.@'child'
+person.&'sayHello'
+person.new
+person.@new
+person?.new
+person?.@new
+person*.new
+person*.@new
+person.&new
+person*.child*.@child?.child?.@child.child.'child'.@name.class.&equals
 
 person
 *.

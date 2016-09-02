@@ -640,6 +640,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public Expression visitNamePart(NamePartContext ctx) {
         if (asBoolean(ctx.Identifier())) {
             return this.configureAST(new ConstantExpression(ctx.Identifier().getText()), ctx);
+        } else if (asBoolean(ctx.StringLiteral())) {
+            return this.configureAST(this.cleanStringLiteral(ctx.StringLiteral().getText()), ctx);
         } else if (asBoolean(ctx.keywords())) {
             return this.configureAST(new ConstantExpression(ctx.keywords().getText()), ctx);
         }
@@ -975,29 +977,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(new ConstantExpression(Numbers.parseDecimal(text), !text.startsWith(SUB_STR)), ctx);
     }
 
+
     @Override
     public ConstantExpression visitStringLiteralAlt(StringLiteralAltContext ctx) {
-        String text = ctx.StringLiteral().getText();
-
-        int slashyType = text.startsWith("/") ? StringUtil.SLASHY :
-                text.startsWith("$/") ? StringUtil.DOLLAR_SLASHY : StringUtil.NONE_SLASHY;
-
-        if (text.startsWith("'''") || text.startsWith("\"\"\"")) {
-            text = StringUtil.removeCR(text); // remove CR in the multiline string
-
-            text = text.length() == 6 ? "" : text.substring(3, text.length() - 3);
-        } else if (text.startsWith("'") || text.startsWith("/") || text.startsWith("\"")) {
-            text = text.length() == 2 ? "" : text.substring(1, text.length() - 1);
-        } else if (text.startsWith("$/")) {
-            text = StringUtil.removeCR(text);
-
-            text = text.length() == 4 ? "" : text.substring(2, text.length() - 2);
-        }
-
-        //handle escapes.
-        text = StringUtil.replaceEscapes(text, slashyType);
-
-        return this.configureAST(new ConstantExpression(text, true), ctx);
+        return this.configureAST(
+                this.cleanStringLiteral(ctx.StringLiteral().getText()),
+                ctx);
     }
 
 
@@ -1502,6 +1487,27 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         moduleNode.addStatement(new ReturnStatement(new ConstantExpression(null)));
     }
 
+    private ConstantExpression cleanStringLiteral(String text) {
+        int slashyType = text.startsWith("/") ? StringUtil.SLASHY :
+                text.startsWith("$/") ? StringUtil.DOLLAR_SLASHY : StringUtil.NONE_SLASHY;
+
+        if (text.startsWith("'''") || text.startsWith("\"\"\"")) {
+            text = StringUtil.removeCR(text); // remove CR in the multiline string
+
+            text = text.length() == 6 ? "" : text.substring(3, text.length() - 3);
+        } else if (text.startsWith("'") || text.startsWith("/") || text.startsWith("\"")) {
+            text = text.length() == 2 ? "" : text.substring(1, text.length() - 1);
+        } else if (text.startsWith("$/")) {
+            text = StringUtil.removeCR(text);
+
+            text = text.length() == 4 ? "" : text.substring(2, text.length() - 2);
+        }
+
+        //handle escapes.
+        text = StringUtil.replaceEscapes(text, slashyType);
+
+        return new ConstantExpression(text, true);
+    }
 
     private org.codehaus.groovy.syntax.Token createGroovyTokenByType(Token token, int type) {
         if (null == token) {
