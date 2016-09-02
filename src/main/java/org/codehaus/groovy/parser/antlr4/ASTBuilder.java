@@ -1160,6 +1160,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         Parameter[] parameters = asBoolean(ctx.formalParameterList())
                 ? this.visitFormalParameterList(ctx.formalParameterList())
                 : null;
+
+        if (!asBoolean(ctx.ARROW())) {
+            parameters = Parameter.EMPTY_ARRAY;
+        }
+
         Statement code = this.visitBlockStatementsOpt(ctx.blockStatementsOpt());
 
         return this.configureAST(new ClosureExpression(parameters, code), ctx);

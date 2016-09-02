@@ -1,4 +1,5 @@
 @Test1(12)
+@Test1(@Test1)
 @Test2(v=6)
 @Test3(v1=6, v2=8, v3=10)
 @Test4([1, 2, 3])

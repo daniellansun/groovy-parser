@@ -54,7 +54,7 @@ class GroovySourceGenerator {
                 }, null, it)
             }
 
-            return out.toString();
+            return out.toString().replaceAll(/([\w_$]+)@[0-9a-z]+/, '$1@<hashcode>');
         } finally {
             out.close();
         }
