@@ -709,13 +709,12 @@ pathElement
     :   nls
 
         // AT: foo.@bar selects the field (or attribute), not property
-        ( SPREAD_DOT AT?        // Spread operator:  x*.y  ===  x?.collect{it.y}
-        | OPTIONAL_DOT AT?      // Optional-null operator:  x?.y  === (x==null)?null:x.y
-        | MEMBER_POINTER        // Member pointer operator: foo.&y == foo.metaClass.getMethodPointer(foo, "y")
-        | DOT AT?               // The all-powerful dot.
+        ( SPREAD_DOT nls (AT | nonWildcardTypeArguments)?       // Spread operator:  x*.y  ===  x?.collect{it.y}
+        | OPTIONAL_DOT nls (AT | nonWildcardTypeArguments)?     // Optional-null operator:  x?.y  === (x==null)?null:x.y
+        | MEMBER_POINTER nls                                    // Member pointer operator: foo.&y == foo.metaClass.getMethodPointer(foo, "y")
+        | DOT nls (AT | nonWildcardTypeArguments)?              // The all-powerful dot.
         )
-        nls
-        nonWildcardTypeArguments? namePart
+        namePart
 
     |   arguments
 

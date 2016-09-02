@@ -8,3 +8,19 @@ person?.@child
 person*.child
 person*.@child
 person*.child*.@child?.child?.@child.child.@name.&length
+
+person
+*.
+child
+*.
+@child
+?.
+child
+?.
+@child
+.
+child
+        .
+@name
+.&
+length
