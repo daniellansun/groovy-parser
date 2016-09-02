@@ -50,3 +50,8 @@ def (a2, int b2) = [1, 2]
 def (u, v) = [1, 2]
 
 def (int c2, String d2, java.lang.Double e2) = [1, '2', 3.3D]
+
+def cc = {
+        String bb = 'Test'
+        return bb;
+}

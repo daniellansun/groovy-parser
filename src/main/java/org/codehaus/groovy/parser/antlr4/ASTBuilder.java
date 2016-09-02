@@ -374,6 +374,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
+    @Override
+    public SwitchStatement visitSwitchStmtAlt(SwitchStmtAltContext ctx) {
+        return null; // TODO
+    }
+
 
     @Override
     public SynchronizedStatement visitSynchronizedStmtAlt(SynchronizedStmtAltContext ctx) {
@@ -1378,7 +1383,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Statement visitBlockStatement(BlockStatementContext ctx) {
         if (asBoolean(ctx.localVariableDeclaration())) {
-            return null; // TODO
+            return this.configureAST(this.visitLocalVariableDeclaration(ctx.localVariableDeclaration()), ctx);
         }
 
         if (asBoolean(ctx.statement())) {
@@ -1531,8 +1536,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private BlockStatement createBlockStatement(List<Statement> statementList) {
         return (BlockStatement) statementList.stream()
                 .reduce(new BlockStatement(), (r, e) -> {
-                    ((BlockStatement) r).addStatement(e);
-                    return r;
+                    BlockStatement blockStatement = (BlockStatement) r;
+
+                    if (e instanceof DeclarationListStatement) {
+                        ((DeclarationListStatement) e).getDeclarationStatements().forEach(blockStatement::addStatement);
+                    } else {
+                        blockStatement.addStatement(e);
+                    }
+
+                    return blockStatement;
                 });
     }
 
