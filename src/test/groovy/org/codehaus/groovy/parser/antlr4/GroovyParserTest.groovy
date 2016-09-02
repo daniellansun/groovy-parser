@@ -100,7 +100,6 @@ class GroovyParserTest extends GroovyTestCase {
 
     void "test groovy core - List"() {
         test('core/List_01.groovy');
-        fail('fail/List_01.groovy');
     }
 
     void "test groovy core - Expression"() {
@@ -161,31 +160,6 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/LocalVariableDeclaration_01.groovy', [Token]); // [class org.codehaus.groovy.syntax.Token][startLine]:: 9 != 8
     }
     // ************************************************************
-    static fail(String path) {
-        fail(path, ASTComparatorCategory.DEFAULT_CONFIGURATION)
-    }
-
-    static fail(String path, List ignoreClazzList) {
-        fail(path, addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST))
-    }
-
-    static fail(String path, conf) {
-        AbstractParser antlr4Parser = new Antlr4Parser()
-        AbstractParser antlr2Parser = new Antlr2Parser()
-
-        File file = new File("$RESOURCES_PATH/$path");
-        def (newAST, newElapsedTime) = profile { antlr4Parser.parse(file) }
-        def (oldAST, oldElapsedTime) = profile { antlr2Parser.parse(file) }
-
-        assert (newAST == null || newAST.context.errorCollector.hasErrors()) &&
-                (oldAST == null || oldAST.context.errorCollector.hasErrors())
-
-        long diffInMillis = newElapsedTime - oldElapsedTime;
-
-        if (diffInMillis >= 500) {
-            log.warning "${path}\t\t\t\t\tdiff:${diffInMillis / 1000}s,\tnew:${newElapsedTime / 1000}s,\told:${oldElapsedTime / 1000}s."
-        }
-    }
 
     static test(String path) {
         test(path, ASTComparatorCategory.DEFAULT_CONFIGURATION)

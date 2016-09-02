@@ -21,6 +21,8 @@ package org.codehaus.groovy.parser.antlr4;
 import org.antlr.v4.runtime.atn.ATN;
 import org.antlr.v4.runtime.dfa.DFA;
 
+import java.util.Arrays;
+
 /**
  * Created by Daniel.Sun on 2016/8/14.
  */
@@ -38,9 +40,7 @@ public class DfaInitializer {
     public DFA[] createDecisionToDFA() {
         DFA[] decisionToDFA = new DFA[atn.getNumberOfDecisions()];
 
-        for(int i = 0; i < decisionToDFA.length; i++) {
-            decisionToDFA[i] = new DFA(atn.getDecisionState(i), i);
-        }
+        Arrays.setAll(decisionToDFA, i -> new DFA(atn.getDecisionState(i), i));
 
         return decisionToDFA;
     }

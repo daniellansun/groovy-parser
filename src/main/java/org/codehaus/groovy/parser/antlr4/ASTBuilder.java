@@ -1344,7 +1344,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return super.visit(tree);
     }
 
-    private Parameter processFormalParameter(ParserRuleContext ctx,
+    private Parameter processFormalParameter(GroovyParserRuleContext ctx,
                                              List<VariableModifierContext> variableModifierContextList,
                                              TypeContext typeContext,
                                              TerminalNode ellipsis,
@@ -1449,7 +1449,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
      * @param ctx     Context from which information is obtained.
      * @return Modified astNode.
      */
-    private <T extends ASTNode> T configureAST(T astNode, ParserRuleContext ctx) {
+    private <T extends ASTNode> T configureAST(T astNode, GroovyParserRuleContext ctx) {
         Token start = ctx.getStart();
         Token stop = ctx.getStop();
 
@@ -1484,7 +1484,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
 
-    private CompilationFailedException createParsingFailedException(String msg, ParserRuleContext ctx) {
+    private CompilationFailedException createParsingFailedException(String msg, GroovyParserRuleContext ctx) {
         return createParsingFailedException(new SyntaxException(msg,
                 ctx.start.getLine(),
                 ctx.start.getCharPositionInLine() + 1,

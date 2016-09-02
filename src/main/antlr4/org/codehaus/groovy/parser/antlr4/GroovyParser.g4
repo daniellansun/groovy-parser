@@ -25,10 +25,74 @@
  */
 parser grammar GroovyParser;
 
-options { tokenVocab = GroovyLexer; }
+options {
+    tokenVocab = GroovyLexer;
+    contextSuperClass = GroovyParserRuleContext;
+}
 
 @header {
     import org.codehaus.groovy.parser.antlr4.GrammarPredicates;
+    import org.codehaus.groovy.GroovyBugError;
+    import java.util.Map;
+    import org.codehaus.groovy.util.ListHashMap;
+}
+
+@members {
+    public static class GroovyParserRuleContext extends ParserRuleContext {
+        private Map metaDataMap = null;
+
+        public GroovyParserRuleContext() {}
+
+        public GroovyParserRuleContext(ParserRuleContext parent, int invokingStateNumber) {
+            super(parent, invokingStateNumber);
+        }
+
+        /**
+         * Gets the node meta data.
+         *
+         * @param key - the meta data key
+         * @return the node meta data value for this key
+         */
+        public <T> T getNodeMetaData(Object key) {
+            if (metaDataMap == null) {
+                return (T) null;
+            }
+            return (T) metaDataMap.get(key);
+        }
+
+        /**
+         * Sets the node meta data.
+         *
+         * @param key - the meta data key
+         * @param value - the meta data value
+         * @throws GroovyBugError if key is null or there is already meta
+         *                        data under that key
+         */
+        public void setNodeMetaData(Object key, Object value) {
+            if (key==null) throw new GroovyBugError("Tried to set meta data with null key on "+this+".");
+            if (metaDataMap == null) {
+                metaDataMap = new ListHashMap();
+            }
+            Object old = metaDataMap.put(key,value);
+            if (old!=null) throw new GroovyBugError("Tried to overwrite existing meta data "+this+".");
+        }
+
+        /**
+         * Sets the node meta data but allows overwriting values.
+         *
+         * @param key   - the meta data key
+         * @param value - the meta data value
+         * @return the old node meta data value for this key
+         * @throws GroovyBugError if key is null
+         */
+        public Object putNodeMetaData(Object key, Object value) {
+            if (key == null) throw new GroovyBugError("Tried to set meta data with null key on " + this + ".");
+            if (metaDataMap == null) {
+                metaDataMap = new ListHashMap();
+            }
+            return metaDataMap.put(key, value);
+        }
+    }
 }
 
 // starting point for parsing a groovy file
