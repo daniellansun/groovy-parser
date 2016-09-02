@@ -298,7 +298,7 @@ variableInitializer
     ;
 
 arrayInitializer
-    :   LBRACE (variableInitializer (COMMA variableInitializer)* (COMMA)? )? RBRACE
+    :   LBRACK (variableInitializer (COMMA variableInitializer)* (COMMA)? )? RBRACK
     ;
 
 enumConstantName
@@ -493,6 +493,15 @@ blockStatement
 localVariableDeclaration
     :   (variableModifier nls)* type variableDeclarators
     |   (variableModifier nls)+ type? variableDeclarators
+    |   (variableModifier nls)+ typeNamePairs ASSIGN nls variableInitializer
+    ;
+
+typeNamePairs
+    :   LPAREN typeNamePair (COMMA typeNamePair)* RPAREN
+    ;
+
+typeNamePair
+    :   type? variableDeclaratorId
     ;
 
 statement

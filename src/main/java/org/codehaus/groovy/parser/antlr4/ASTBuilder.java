@@ -288,7 +288,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Pair<Parameter, Expression> visitEnhancedForControl(EnhancedForControlContext ctx) {
         Parameter parameter = this.configureAST(
-                new Parameter(this.visitType(ctx.type()), this.visitVariableDeclaratorId(ctx.variableDeclaratorId())),
+                new Parameter(this.visitType(ctx.type()), this.visitVariableDeclaratorId(ctx.variableDeclaratorId()).getText()),
                 ctx.variableDeclaratorId());
 
         // FIXME Groovy will ignore variableModifier of parameter in the for control
@@ -439,18 +439,43 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public DeclarationListStatement visitLocalVariableDeclaration(LocalVariableDeclarationContext ctx) {
-        List<ModifierNode> modifierNodeList =
-                ctx.variableModifier().stream()
+        ModifierManager modifierManager =
+                new ModifierManager(ctx.variableModifier().stream()
                         .map(this::visitVariableModifier)
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toList()));
+
+        if (asBoolean(ctx.typeNamePairs())) { // e.g. def (int a, int b) = [1, 2]
+            if (!modifierManager.exists(DEF)) {
+                throw createParsingFailedException("keyword def is required to declare tuple, e.g. def (int a, int b) = [1, 2]", ctx);
+            }
+
+            return this.configureAST(
+                    new DeclarationListStatement(
+                            this.configureAST(
+                                    modifierManager.processDeclarationExpression(
+                                            new DeclarationExpression(
+                                                    new ArgumentListExpression(
+                                                            this.visitTypeNamePairs(ctx.typeNamePairs()).stream()
+                                                                    .peek(e -> modifierManager.processVariableExpression((VariableExpression) e))
+                                                                    .collect(Collectors.toList())
+                                                    ),
+                                                    this.createGroovyTokenByType(ctx.ASSIGN().getSymbol(), Types.ASSIGN),
+                                                    this.visitVariableInitializer(ctx.variableInitializer())
+                                            )
+                                    ),
+                                    ctx
+                            )
+                    ),
+                    ctx
+            );
+        }
 
         ClassNode classNode = this.visitType(ctx.type());
         List<DeclarationExpression> declarationExpressionList = this.visitVariableDeclarators(ctx.variableDeclarators());
 
         declarationExpressionList.stream().forEach(e -> {
-            DeclarationExpression declarationExpression = (DeclarationExpression) e;
 
-            VariableExpression veDTO = (VariableExpression) declarationExpression.getLeftExpression();
+            VariableExpression veDTO = (VariableExpression) e.getLeftExpression();
 
             VariableExpression variableExpression =
                     this.configureAST(
@@ -459,12 +484,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                     classNode),
                             veDTO);
 
-            ModifierManager modifierManager = new ModifierManager(modifierNodeList);
+
             modifierManager.processVariableExpression(variableExpression);
 
-            declarationExpression.setLeftExpression(variableExpression);
+            e.setLeftExpression(variableExpression);
 
-            modifierManager.processDeclarationExpression(declarationExpression);
+            modifierManager.processDeclarationExpression(e);
         });
 
         int size = declarationExpressionList.size();
@@ -481,6 +506,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         return this.configureAST(new DeclarationListStatement(declarationExpressionList), ctx);
+    }
+
+    @Override
+    public List<Expression> visitTypeNamePairs(TypeNamePairsContext ctx) {
+        return ctx.typeNamePair().stream().map(this::visitTypeNamePair).collect(Collectors.toList());
+    }
+
+    @Override
+    public VariableExpression visitTypeNamePair(TypeNamePairContext ctx) {
+        return this.configureAST(
+                new VariableExpression(
+                        this.visitVariableDeclaratorId(ctx.variableDeclaratorId()).getText(),
+                        this.visitType(ctx.type())),
+                ctx);
     }
 
     @Override
@@ -501,7 +540,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 new DeclarationExpression(
                         this.configureAST(
                                 new VariableExpression( // Act as a DTO
-                                        this.visitVariableDeclaratorId(ctx.variableDeclaratorId()),
+                                        this.visitVariableDeclaratorId(ctx.variableDeclaratorId()).getText(),
                                         ClassHelper.OBJECT_TYPE
                                 ),
                                 ctx.variableDeclaratorId()),
@@ -517,7 +556,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         if (asBoolean(ctx.arrayInitializer())) {
-            return null; // TODO
+            return this.configureAST(this.visitArrayInitializer(ctx.arrayInitializer()), ctx);
         }
 
         if (asBoolean(ctx.expression())) {
@@ -525,6 +564,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         throw createParsingFailedException("Unsupported variable initializer: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public ListExpression visitArrayInitializer(ArrayInitializerContext ctx) {
+        return this.configureAST(
+                new ListExpression(
+                        ctx.variableInitializer().stream()
+                                .map(this::visitVariableInitializer)
+                                .collect(Collectors.toList())),
+                ctx);
     }
 
 
@@ -1312,8 +1361,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 // } type       --------------------------------------------------------------------
 
     @Override
-    public String visitVariableDeclaratorId(VariableDeclaratorIdContext ctx) {
-        return ctx.Identifier().getText();
+    public VariableExpression visitVariableDeclaratorId(VariableDeclaratorIdContext ctx) {
+        return this.configureAST(new VariableExpression(ctx.Identifier().getText()), ctx);
     }
 
     @Override
@@ -1460,7 +1509,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         Parameter parameter = this.configureAST(
-                new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext)),
+                new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext).getText()),
                 ctx);
 
         new ModifierManager(variableModifierContextList.stream()
@@ -1687,6 +1736,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private class DeclarationListStatement extends Statement {
         private List<ExpressionStatement> declarationStatements;
 
+        public DeclarationListStatement(DeclarationExpression... declarations) {
+            this(Arrays.asList(declarations));
+        }
+
         public DeclarationListStatement(List<DeclarationExpression> declarations) {
             this.declarationStatements =
                     declarations.stream()
@@ -1765,7 +1818,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     .collect(Collectors.toList());
         }
 
-        public void processParameter(Parameter parameter) {
+        public boolean exists(int modifierType) {
+            return modifierNodeList.stream().anyMatch(e -> modifierType == e.getType());
+        }
+
+        public Parameter processParameter(Parameter parameter) {
             modifierNodeList.forEach(e -> {
                 parameter.setModifiers(parameter.getModifiers() | e.getOpCode());
 
@@ -1773,18 +1830,24 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     parameter.addAnnotation(e.getAnnotationNode());
                 }
             });
+
+            return parameter;
         }
 
-        public void processVariableExpression(VariableExpression ve) {
+        public VariableExpression processVariableExpression(VariableExpression ve) {
             modifierNodeList.forEach(e -> {
                 ve.setModifiers(ve.getModifiers() | e.getOpCode());
 
                 // local variable does not attach annotations
             });
+
+            return ve;
         }
 
-        public void processDeclarationExpression(DeclarationExpression de) {
+        public DeclarationExpression processDeclarationExpression(DeclarationExpression de) {
             this.getAnnotations().forEach(de::addAnnotation);
+
+            return de;
         }
     }
 
