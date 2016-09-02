@@ -573,9 +573,23 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         .map(this::visitPathElement)
                         .reduce(primaryExpr, (r, e) -> {
 
-                            if (e instanceof PropertyExpression) {
+                            if (e instanceof AttributeExpression) {
+                                AttributeExpression dto = (AttributeExpression) e;
+                                AttributeExpression attributeExpression = new AttributeExpression(r, dto.getProperty(), dto.isSafe());
+
+                                attributeExpression.setSpreadSafe(dto.isSpreadSafe());
+
+                                return this.configureAST(attributeExpression, e);
+                            } else if (e instanceof PropertyExpression) {
+                                PropertyExpression dto = (PropertyExpression) e;
+                                PropertyExpression propertyExpression = new PropertyExpression(r, dto.getProperty(), dto.isSafe());
+
+                                propertyExpression.setSpreadSafe(dto.isSpreadSafe());
+
+                                return this.configureAST(propertyExpression, e);
+                            } else if (e instanceof MethodPointerExpression) {
                                 return this.configureAST(
-                                        new PropertyExpression(r, ((PropertyExpression) e).getProperty()),
+                                        new MethodPointerExpression(r, ((MethodPointerExpression) e).getMethodName()),
                                         e);
                             }
 
@@ -592,9 +606,29 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             if (asBoolean(ctx.DOT())) {
                 if (asBoolean(ctx.AT())) { // e.g. obj.@a
+                    return this.configureAST(new AttributeExpression(null, namePartExpr), ctx); // act as a DTO
+                } else { // e.g. obj.p
+                    return this.configureAST(new PropertyExpression(null, namePartExpr), ctx); // act as a DTO
+                }
+            } else if (asBoolean(ctx.OPTIONAL_DOT())) {
+                if (asBoolean(ctx.AT())) { // e.g. obj?.@p
+                    return this.configureAST(new AttributeExpression(null, namePartExpr, true), ctx); // act as a DTO
+                } else { // e.g. obj?.p
+                    return this.configureAST(new PropertyExpression(null, namePartExpr, true), ctx); // act as a DTO
+                }
+            } else if (asBoolean(ctx.MEMBER_POINTER())) { // e.g. obj.&m
+                return this.configureAST(new MethodPointerExpression(null, namePartExpr), ctx); // act as a DTO
+            } else if (asBoolean(ctx.SPREAD_DOT())) {
+                if (asBoolean(ctx.AT())) { // e.g. obj*.@p
+                    AttributeExpression attributeExpression = new AttributeExpression(null, namePartExpr, true);
+                    attributeExpression.setSpreadSafe(true);
 
-                } else { // e.g. obj.a
-                    return new PropertyExpression(null, namePartExpr); // act as a DTO
+                    return this.configureAST(attributeExpression, ctx); // act as a DTO
+                } else { // e.g. obj*.p
+                    PropertyExpression propertyExpression = new PropertyExpression(null, namePartExpr, true);
+                    propertyExpression.setSpreadSafe(true);
+
+                    return this.configureAST(propertyExpression, ctx); // act as a DTO
                 }
             }
         }
@@ -896,7 +930,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         String text;
         if (asBoolean(ctx.VOID())) {
             text = ctx.VOID().getText();
-        } else if(asBoolean(ctx.BuiltInPrimitiveType())) {
+        } else if (asBoolean(ctx.BuiltInPrimitiveType())) {
             text = ctx.BuiltInPrimitiveType().getText();
         } else {
             throw createParsingFailedException("Unsupported built-in type: " + ctx, ctx);

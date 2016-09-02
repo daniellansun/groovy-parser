@@ -1,0 +1,10 @@
+person.@name
+person.child.@name
+person.@name.count
+person.&sayHello
+person.child.&sayHello
+person?.child
+person?.@child
+person*.child
+person*.@child
+person*.child*.@child?.child?.@child.child.@name.&length
