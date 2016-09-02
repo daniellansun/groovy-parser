@@ -404,7 +404,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Statement visitLabelStmtAlt(LabelStmtAltContext ctx) {
+    public Statement visitLabeledStmtAlt(LabeledStmtAltContext ctx) {
         Statement statement = (Statement) this.visit(ctx.statement());
 
         statement.setStatementLabel(ctx.Identifier().getText());
@@ -566,10 +566,53 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitPathExpression(PathExpressionContext ctx) {
-        // TODO parse pathElement
+        Expression primaryExpr = this.configureAST((Expression) this.visit(ctx.primary()), ctx);
 
-        return this.configureAST((Expression) this.visit(ctx.primary()), ctx);
+        Expression expression =
+                ctx.pathElement().stream()
+                        .map(this::visitPathElement)
+                        .reduce(primaryExpr, (r, e) -> {
+
+                            if (e instanceof PropertyExpression) {
+                                return this.configureAST(
+                                        new PropertyExpression(r, ((PropertyExpression) e).getProperty()),
+                                        e);
+                            }
+
+                            return r;
+                        });
+
+        return this.configureAST(expression, ctx);
     }
+
+    @Override
+    public Expression visitPathElement(PathElementContext ctx) {
+        if (asBoolean(ctx.namePart())) {
+            Expression namePartExpr = this.visitNamePart(ctx.namePart());
+
+            if (asBoolean(ctx.DOT())) {
+                if (asBoolean(ctx.AT())) { // e.g. obj.@a
+
+                } else { // e.g. obj.a
+                    return new PropertyExpression(null, namePartExpr); // act as a DTO
+                }
+            }
+        }
+
+        return null; // TODO
+    }
+
+    @Override
+    public Expression visitNamePart(NamePartContext ctx) {
+        if (asBoolean(ctx.Identifier())) {
+            return this.configureAST(new ConstantExpression(ctx.Identifier().getText()), ctx);
+        } else if (asBoolean(ctx.keywords())) {
+            return this.configureAST(new ConstantExpression(ctx.keywords().getText()), ctx);
+        }
+
+        return null; // TODO
+    }
+
 
     @Override
     public PostfixExpression visitPostfixExprAlt(PostfixExprAltContext ctx) {
@@ -838,7 +881,30 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
+    @Override
+    public VariableExpression visitTypePrmrAlt(GroovyParser.TypePrmrAltContext ctx) {
+        return this.configureAST(
+                this.visitBuiltInType(ctx.builtInType()),
+                ctx);
+    }
+
+
 // } primary       --------------------------------------------------------------------
+
+    @Override
+    public VariableExpression visitBuiltInType(GroovyParser.BuiltInTypeContext ctx) {
+        String text;
+        if (asBoolean(ctx.VOID())) {
+            text = ctx.VOID().getText();
+        } else if(asBoolean(ctx.BuiltInPrimitiveType())) {
+            text = ctx.BuiltInPrimitiveType().getText();
+        } else {
+            throw createParsingFailedException("Unsupported built-in type: " + ctx, ctx);
+        }
+
+        return this.configureAST(new VariableExpression(text), ctx);
+    }
+
 
     @Override
     public ListExpression visitList(ListContext ctx) {

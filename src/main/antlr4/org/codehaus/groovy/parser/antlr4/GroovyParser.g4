@@ -31,10 +31,10 @@ options {
 }
 
 @header {
-    import org.codehaus.groovy.parser.antlr4.GrammarPredicates;
-    import org.codehaus.groovy.GroovyBugError;
     import java.util.Map;
     import org.codehaus.groovy.util.ListHashMap;
+    import org.codehaus.groovy.parser.antlr4.GrammarPredicates;
+    import org.codehaus.groovy.GroovyBugError;
 }
 
 @members {
@@ -510,7 +510,7 @@ statement
     |   THROW expression                                                                    #throwStmtAlt
     |   BREAK Identifier?                                                                   #breakStmtAlt
     |   CONTINUE Identifier?                                                                #continueStmtAlt
-    |   Identifier COLON nls statement                                                      #labelStmtAlt
+    |   Identifier COLON nls statement                                                      #labeledStmtAlt
 
     // Import statement.  Can be used in any scope.  Has "import x as y" also.
     |   importDeclaration                                                                   #importStmtAlt
@@ -707,10 +707,12 @@ pathExpression
 
 pathElement
     :   nls
-        ( SPREAD_DOT AT?       // Spread operator:  x*.y  ===  x?.collect{it.y}
-        | OPTIONAL_DOT AT?     // Optional-null operator:  x?.y  === (x==null)?null:x.y
-        | MEMBER_POINTER    // Member pointer operator: foo.&y == foo.metaClass.getMethodPointer(foo, "y")
-        | DOT AT?              // The all-powerful dot.
+
+        // AT: foo.@bar selects the field (or attribute), not property
+        ( SPREAD_DOT AT?        // Spread operator:  x*.y  ===  x?.collect{it.y}
+        | OPTIONAL_DOT AT?      // Optional-null operator:  x?.y  === (x==null)?null:x.y
+        | MEMBER_POINTER        // Member pointer operator: foo.&y == foo.metaClass.getMethodPointer(foo, "y")
+        | DOT AT?               // The all-powerful dot.
         )
         nls
         nonWildcardTypeArguments? namePart
@@ -738,10 +740,12 @@ namePart
 
         |   dynamicMemberName
 
+        /* just a PROPOSAL, which has not been implemented yet!
         // PROPOSAL, DECIDE:  Is this inline form of the 'with' statement useful?
         // Definition:  a.{foo} === {with(a) {foo}}
         // May cover some path expression use-cases previously handled by dynamic scoping (closure delegates).
         |   block
+        */
 
         // let's allow common keywords as property names
         |   keywords
@@ -777,6 +781,7 @@ primary
     |   closure                                                                             #closurePrmrAlt
     |   list                                                                                #listPrmrAlt
     |   map                                                                                 #mapPrmrAlt
+    |   builtInType                                                                         #typePrmrAlt
     ;
 
 list
@@ -853,6 +858,11 @@ superSuffix
 // TODO support labeled argument
 arguments
     :   LPAREN expressionList? RPAREN
+    ;
+
+builtInType
+    :   BuiltInPrimitiveType
+    |   VOID
     ;
 
 keywords
