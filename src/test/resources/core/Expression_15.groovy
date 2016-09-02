@@ -21,7 +21,21 @@ person?.@new
 person*.new
 person*.@new
 person.&new
-person*.child*.@child?.child?.@child.child.'child'.@name.class.&equals
+person."$name"
+person.@"$name"
+person?."$name"
+person?.@"$name"
+person*."$name"
+person*.@"$name"
+person.&"$methodName"
+person.("$firstname" + "$lastname")
+person.@("$firstname" + "$lastname")
+person?.("$firstname" + "$lastname")
+person?.@("$firstname" + "$lastname")
+person*.("$firstname" + "$lastname")
+person*.@("$firstname" + "$lastname")
+person.&("$method" + "$name")
+person*.child*.@child?.child?.@child.child.'child'."$child".('chi' + 'ld').@name.class.&equals
 
 person
 *.

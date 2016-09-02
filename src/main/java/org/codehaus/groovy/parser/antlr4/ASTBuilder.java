@@ -642,11 +642,24 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return this.configureAST(new ConstantExpression(ctx.Identifier().getText()), ctx);
         } else if (asBoolean(ctx.StringLiteral())) {
             return this.configureAST(this.cleanStringLiteral(ctx.StringLiteral().getText()), ctx);
+        } else if (asBoolean(ctx.dynamicMemberName())) {
+            return this.configureAST(this.visitDynamicMemberName(ctx.dynamicMemberName()), ctx);
         } else if (asBoolean(ctx.keywords())) {
             return this.configureAST(new ConstantExpression(ctx.keywords().getText()), ctx);
         }
 
-        return null; // TODO
+        throw createParsingFailedException("Unsupported name part: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public Expression visitDynamicMemberName(GroovyParser.DynamicMemberNameContext ctx) {
+        if (asBoolean(ctx.parExpression())) {
+            return this.configureAST(this.visitParExpression(ctx.parExpression()), ctx);
+        } else if (asBoolean(ctx.gstring())) {
+            return this.configureAST(this.visitGstring(ctx.gstring()), ctx);
+        }
+
+        throw createParsingFailedException("Unsupported dynamic member name: " + ctx.getText(), ctx);
     }
 
 
