@@ -1071,6 +1071,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public VariableExpression visitThisPrmrAlt(ThisPrmrAltContext ctx) {
+        return this.configureAST(new VariableExpression(ctx.THIS().getText()), ctx);
+    }
+
+    @Override
+    public VariableExpression visitSuperPrmrAlt(SuperPrmrAltContext ctx) {
+        return this.configureAST(new VariableExpression(ctx.SUPER().getText()), ctx);
+    }
+
+
+    @Override
     public Expression visitParenPrmrAlt(ParenPrmrAltContext ctx) {
         return this.configureAST(this.visitParExpression(ctx.parExpression()), ctx);
     }
@@ -1793,6 +1804,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         node.getLastColumnNumber()));
     }
 
+    /*
     private CompilationFailedException createParsingFailedException(String msg, Token token) {
         return createParsingFailedException(
                 new SyntaxException(msg,
@@ -1801,6 +1813,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         token.getLine(),
                         token.getCharPositionInLine() + 1 + token.getText().length()));
     }
+    */
 
     private CompilationFailedException createParsingFailedException(Exception e) {
         return new CompilationFailedException(
@@ -1860,6 +1873,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         });
     }
 
+
     private String createExceptionMessage(Throwable t) {
         StringWriter sw = new StringWriter();
 
@@ -1869,6 +1883,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         return sw.toString();
     }
+
 
     private class DeclarationListStatement extends Statement {
         private List<ExpressionStatement> declarationStatements;
