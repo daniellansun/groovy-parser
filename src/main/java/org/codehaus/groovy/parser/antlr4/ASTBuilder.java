@@ -376,7 +376,105 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public SwitchStatement visitSwitchStmtAlt(SwitchStmtAltContext ctx) {
-        return null; // TODO
+        List<Statement> statementList =
+                ctx.switchBlockStatementGroup().stream()
+                        .map(this::visitSwitchBlockStatementGroup)
+                        .reduce(new LinkedList<>(), (r, e) -> {
+                            r.addAll(e);
+                            return r;
+                        });
+
+        List<CaseStatement> caseStatementList = new LinkedList<>();
+        List<Statement> defaultStatementList = new LinkedList<>();
+
+        statementList.stream().forEach(e -> {
+            if (e instanceof CaseStatement) {
+                caseStatementList.add((CaseStatement) e);
+            } else if (asBoolean((Object) e.getNodeMetaData(IS_SWITCH_DEFAULT))
+                    && (Boolean) e.getNodeMetaData(IS_SWITCH_DEFAULT)) {
+                defaultStatementList.add(e);
+            }
+        });
+
+        int defaultStatementListSize = defaultStatementList.size();
+        if (defaultStatementListSize > 1) {
+            throw createParsingFailedException("switch statement should have only one default case, which should appear at last", defaultStatementList.get(0));
+        }
+
+        if (defaultStatementListSize > 0 && last(statementList) instanceof CaseStatement) {
+            throw createParsingFailedException("default case should appear at last", defaultStatementList.get(0));
+        }
+
+        return this.configureAST(
+                new SwitchStatement(
+                        this.visitParExpression(ctx.parExpression()),
+                        caseStatementList,
+                        defaultStatementListSize == 0 ? EmptyStatement.INSTANCE : defaultStatementList.get(0)
+                ),
+                ctx);
+    }
+
+    @Override
+    @SuppressWarnings({"unchecked"})
+    public List<Statement> visitSwitchBlockStatementGroup(SwitchBlockStatementGroupContext ctx) {
+        int labelCnt = ctx.switchLabel().size();
+        List<Token> firstLabelHolder = new ArrayList<>(1);
+
+        return (List<Statement>) ctx.switchLabel().stream()
+                .map(e -> (Object) this.visitSwitchLabel(e))
+                .reduce(new ArrayList<Statement>(4), (r, e) -> {
+                    List<Statement> statementList = (List<Statement>) r;
+                    Pair<Token, Expression> pair = (Pair<Token, Expression>) e;
+
+                    boolean isLast = labelCnt - 1 == statementList.size();
+
+                    switch (pair.getKey().getType()) {
+                        case CASE: {
+                            if (!asBoolean(statementList)) {
+                                firstLabelHolder.add(pair.getKey());
+                            }
+
+                            statementList.add(
+                                    this.configureAST(
+                                            new CaseStatement(
+                                                    pair.getValue(),
+
+                                                    // check whether processing the last label. if yes, block statement should be attached.
+                                                    isLast ? this.visitBlockStatements(ctx.blockStatements())
+                                                            : EmptyStatement.INSTANCE
+                                            ),
+                                            firstLabelHolder.get(0)));
+
+                            break;
+                        }
+                        case DEFAULT: {
+
+                            BlockStatement blockStatement = this.visitBlockStatements(ctx.blockStatements());
+                            blockStatement.putNodeMetaData(IS_SWITCH_DEFAULT, true);
+
+                            statementList.add(
+                                    // this.configureAST(blockStatement, pair.getKey())
+                                    blockStatement
+                            );
+
+                            break;
+                        }
+                    }
+
+                    return statementList;
+                });
+
+    }
+
+    @Override
+    public Pair<Token, Expression> visitSwitchLabel(SwitchLabelContext ctx) {
+        if (asBoolean(ctx.CASE())) {
+            return new Pair<>(ctx.CASE().getSymbol(), (Expression) this.visit(ctx.expression()));
+        } else if (asBoolean(ctx.DEFAULT())) {
+            return new Pair<>(ctx.DEFAULT().getSymbol(), EmptyExpression.INSTANCE);
+        }
+
+        throw createParsingFailedException("Unsupported switch label: " + ctx.getText(), ctx);
     }
 
 
@@ -1379,6 +1477,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
+    @Override
+    public BlockStatement visitBlockStatements(BlockStatementsContext ctx) {
+        return this.configureAST(
+                this.createBlockStatement(
+                        ctx.blockStatement().stream()
+                                .map(this::visitBlockStatement).collect(Collectors.toList())),
+                ctx);
+    }
+
 
     @Override
     public Statement visitBlockStatement(BlockStatementContext ctx) {
@@ -1669,11 +1776,30 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
 
     private CompilationFailedException createParsingFailedException(String msg, GroovyParserRuleContext ctx) {
-        return createParsingFailedException(new SyntaxException(msg,
-                ctx.start.getLine(),
-                ctx.start.getCharPositionInLine() + 1,
-                ctx.stop.getLine(),
-                ctx.stop.getCharPositionInLine() + 1 + ctx.stop.getText().length()));
+        return createParsingFailedException(
+                new SyntaxException(msg,
+                        ctx.start.getLine(),
+                        ctx.start.getCharPositionInLine() + 1,
+                        ctx.stop.getLine(),
+                        ctx.stop.getCharPositionInLine() + 1 + ctx.stop.getText().length()));
+    }
+
+    private CompilationFailedException createParsingFailedException(String msg, ASTNode node) {
+        return createParsingFailedException(
+                new SyntaxException(msg,
+                        node.getLineNumber(),
+                        node.getColumnNumber(),
+                        node.getLastLineNumber(),
+                        node.getLastColumnNumber()));
+    }
+
+    private CompilationFailedException createParsingFailedException(String msg, Token token) {
+        return createParsingFailedException(
+                new SyntaxException(msg,
+                        token.getLine(),
+                        token.getCharPositionInLine() + 1,
+                        token.getLine(),
+                        token.getCharPositionInLine() + 1 + token.getText().length()));
     }
 
     private CompilationFailedException createParsingFailedException(Exception e) {
@@ -1995,5 +2121,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String DOLLAR_STR = "$";
     private static final String CALL_STR = "call";
     private static final String INSIDE_PARENTHESES = "_INSIDE_PARENTHESES";
+    private static final String IS_SWITCH_DEFAULT = "_IS_SWITCH_DEFAULT";
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 }

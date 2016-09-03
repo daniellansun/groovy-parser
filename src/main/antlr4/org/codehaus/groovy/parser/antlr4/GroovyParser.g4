@@ -409,6 +409,10 @@ blockStatementsOpt
     :   blockStatement? (sep blockStatement)* sep?
     ;
 
+blockStatements
+    :   blockStatement (sep blockStatement)* sep?
+    ;
+
 // ANNOTATIONS
 
 annotationsOpt
@@ -513,7 +517,7 @@ statement
 //TODO    |   DO statement WHILE parExpression sep                                                #doWhileStmtAlt
     |   TRY nls block ((nls catchClause)+ (nls finallyBlock)? | nls finallyBlock)           #tryCatchStmtAlt
 //TODO    |   TRY resourceSpecification block catchClause* finallyBlock?                          #tryResourceStmtAlt
-    |   SWITCH parExpression LBRACE switchBlockStatementGroup* switchLabel* RBRACE          #switchStmtAlt
+    |   SWITCH parExpression nls LBRACE nls switchBlockStatementGroup* nls RBRACE           #switchStmtAlt
     |   SYNCHRONIZED parExpression nls block                                                #synchronizedStmtAlt
     |   RETURN expression?                                                                  #returnStmtAlt
     |   THROW expression                                                                    #throwStmtAlt
@@ -561,12 +565,11 @@ resource
  *  To handle empty cases at the end, we add switchLabel* to statement.
  */
 switchBlockStatementGroup
-    :   switchLabel+ blockStatement+
+    :   (switchLabel nls)+ blockStatements
     ;
 
 switchLabel
-    :   CASE constantExpression COLON
-    |   CASE enumConstantName COLON
+    :   CASE expression COLON
     |   DEFAULT COLON
     ;
 
@@ -600,10 +603,6 @@ expressionList
     ;
 
 statementExpression
-    :   expression
-    ;
-
-constantExpression
     :   expression
     ;
 

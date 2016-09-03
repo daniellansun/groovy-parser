@@ -40,6 +40,10 @@ class SyntaxErrorTest extends GroovyTestCase {
         fail('fail/List_01.groovy');
     }
 
+    void "test groovy core - Switch"() {
+        fail('fail/Switch_01.groovy');
+    }
+
     void "test groovy core - LocalVariableDeclaration"() {
         fail('fail/LocalVariableDeclaration_01.groovy');
     }
