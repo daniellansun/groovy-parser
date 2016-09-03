@@ -288,7 +288,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Pair<Parameter, Expression> visitEnhancedForControl(EnhancedForControlContext ctx) {
         Parameter parameter = this.configureAST(
-                new Parameter(this.visitType(ctx.type()), this.visitVariableDeclaratorId(ctx.variableDeclaratorId()).getText()),
+                new Parameter(this.visitType(ctx.type()), this.visitVariableDeclaratorId(ctx.variableDeclaratorId()).getName()),
                 ctx.variableDeclaratorId());
 
         // FIXME Groovy will ignore variableModifier of parameter in the for control
@@ -522,7 +522,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public VariableExpression visitTypeNamePair(TypeNamePairContext ctx) {
         return this.configureAST(
                 new VariableExpression(
-                        this.visitVariableDeclaratorId(ctx.variableDeclaratorId()).getText(),
+                        this.visitVariableDeclaratorId(ctx.variableDeclaratorId()).getName(),
                         this.visitType(ctx.type())),
                 ctx);
     }
@@ -545,7 +545,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 new DeclarationExpression(
                         this.configureAST(
                                 new VariableExpression( // Act as a DTO
-                                        this.visitVariableDeclaratorId(ctx.variableDeclaratorId()).getText(),
+                                        this.visitVariableDeclaratorId(ctx.variableDeclaratorId()).getName(),
                                         ClassHelper.OBJECT_TYPE
                                 ),
                                 ctx.variableDeclaratorId()),
@@ -1513,16 +1513,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             classNode = this.configureAST(classNode.makeArray(), classNode);
         }
 
-        Parameter parameter = this.configureAST(
-                new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext).getText()),
-                ctx);
-
-        new ModifierManager(variableModifierContextList.stream()
-                .map(this::visitVariableModifier)
-                .collect(Collectors.toList()))
-                .processParameter(parameter);
-
-        return parameter;
+        return new ModifierManager(
+                variableModifierContextList.stream()
+                        .map(this::visitVariableModifier)
+                        .collect(Collectors.toList()))
+                .processParameter(
+                        this.configureAST(
+                                new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext).getName()),
+                                ctx)
+                );
     }
 
     private BinaryExpression createBinaryExpression(ExpressionContext left, Token op, ExpressionContext right) {
