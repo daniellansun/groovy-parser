@@ -412,7 +412,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public Statement visitLabeledStmtAlt(LabeledStmtAltContext ctx) {
         Statement statement = (Statement) this.visit(ctx.statement());
 
-        statement.setStatementLabel(ctx.Identifier().getText());
+        statement.addStatementLabel(ctx.Identifier().getText());
 
         return statement; // this.configureAST(statement, ctx);
     }
@@ -1760,6 +1760,19 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         public List<ExpressionStatement> getDeclarationStatements() {
+            List<String> declarationListStatementLabels = this.getStatementLabels();
+
+            this.declarationStatements.stream().forEach(e -> {
+                if (asBoolean((Object) declarationListStatementLabels)) {
+                    // clear existing statement labels before setting labels
+                    if (asBoolean((Object) e.getStatementLabels())) {
+                        e.getStatementLabels().clear();
+                    }
+
+                    declarationListStatementLabels.stream().forEach(e::addStatementLabel);
+                }
+            });
+
             return this.declarationStatements;
         }
 
