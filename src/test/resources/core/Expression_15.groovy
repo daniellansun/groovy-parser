@@ -35,7 +35,10 @@ person?.@("$firstname" + "$lastname")
 person*.("$firstname" + "$lastname")
 person*.@("$firstname" + "$lastname")
 person.&("$method" + "$name")
-person*.child*.@child?.child?.@child.child.'child'."$child".('chi' + 'ld').@name.class.&equals
+
+a.b?.c[1, 2, 3]*.d
+a[1, *[2, 3]]*.b
+a[*[2, 3]]*.b
 
 person
 *.
@@ -52,3 +55,6 @@ child
 @name
 .&
 length
+
+person*.child[1, 2 + 6, *[3, 4]]*.@child?.child?.@child.child.'child'."$child".('chi' + 'ld').@name.class.&equals
+

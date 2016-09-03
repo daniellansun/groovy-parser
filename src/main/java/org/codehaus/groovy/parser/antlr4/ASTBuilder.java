@@ -743,6 +743,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 return this.configureAST(
                                         new MethodPointerExpression(r, ((MethodPointerExpression) e).getMethodName()),
                                         e);
+                            } else if (e instanceof BinaryExpression) {
+                                BinaryExpression dto = (BinaryExpression) e;
+
+                                return this.configureAST(
+                                        new BinaryExpression(r, dto.getOperation(), dto.getRightExpression()),
+                                        e);
                             }
 
                             return r;
@@ -783,10 +789,32 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     return this.configureAST(propertyExpression, ctx); // act as a DTO
                 }
             }
+        } else if (asBoolean(ctx.indexPropertyArgs())) { // e.g. list[1, 3, 5]
+            Pair<Token, ListExpression> pair = this.visitIndexPropertyArgs(ctx.indexPropertyArgs());
+
+            return this.configureAST(
+                    new BinaryExpression(null, createGroovyToken(pair.getKey()), pair.getValue()),
+                    ctx);
         }
 
         return null; // TODO
     }
+
+    @Override
+    public Pair<Token, ListExpression> visitIndexPropertyArgs(IndexPropertyArgsContext ctx) {
+        List<Expression> expressionList = this.visitExpressionList(ctx.expressionList());
+        ListExpression listExpression = new ListExpression(expressionList);
+
+        if (expressionList.size() == 1
+                && expressionList.get(0) instanceof SpreadExpression) {
+            listExpression.setWrapped(false);
+        } else {
+            listExpression.setWrapped(true);
+        }
+
+        return new Pair<>(ctx.LBRACK().getSymbol(), this.configureAST(listExpression, ctx));
+    }
+
 
     @Override
     public Expression visitNamePart(NamePartContext ctx) {
@@ -804,7 +832,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Expression visitDynamicMemberName(GroovyParser.DynamicMemberNameContext ctx) {
+    public Expression visitDynamicMemberName(DynamicMemberNameContext ctx) {
         if (asBoolean(ctx.parExpression())) {
             return this.configureAST(this.visitParExpression(ctx.parExpression()), ctx);
         } else if (asBoolean(ctx.gstring())) {
@@ -1098,7 +1126,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
 
     @Override
-    public VariableExpression visitTypePrmrAlt(GroovyParser.TypePrmrAltContext ctx) {
+    public VariableExpression visitTypePrmrAlt(TypePrmrAltContext ctx) {
         return this.configureAST(
                 this.visitBuiltInType(ctx.builtInType()),
                 ctx);
@@ -1108,21 +1136,21 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 // } primary       --------------------------------------------------------------------
 
     @Override
-    public MapExpression visitMap(GroovyParser.MapContext ctx) {
+    public MapExpression visitMap(MapContext ctx) {
         return this.configureAST(
                 new MapExpression(this.visitMapEntryList(ctx.mapEntryList())),
                 ctx);
     }
 
     @Override
-    public List<MapEntryExpression> visitMapEntryList(GroovyParser.MapEntryListContext ctx) {
+    public List<MapEntryExpression> visitMapEntryList(MapEntryListContext ctx) {
         return ctx.mapEntry().stream()
                 .map(this::visitMapEntry)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public MapEntryExpression visitMapEntry(GroovyParser.MapEntryContext ctx) {
+    public MapEntryExpression visitMapEntry(MapEntryContext ctx) {
         Expression keyExpr;
         Expression valueExpr = (Expression) this.visit(ctx.expression());
 
@@ -1140,7 +1168,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Expression visitMapEntryLabel(GroovyParser.MapEntryLabelContext ctx) {
+    public Expression visitMapEntryLabel(MapEntryLabelContext ctx) {
         if (asBoolean(ctx.keywords())) {
             return this.configureAST(this.visitKeywords(ctx.keywords()), ctx);
         } else if (asBoolean(ctx.primary())) {
@@ -1161,13 +1189,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public ConstantExpression visitKeywords(GroovyParser.KeywordsContext ctx) {
+    public ConstantExpression visitKeywords(KeywordsContext ctx) {
         return this.configureAST(new ConstantExpression(ctx.getText()), ctx);
     }
 
 
     @Override
-    public VariableExpression visitBuiltInType(GroovyParser.BuiltInTypeContext ctx) {
+    public VariableExpression visitBuiltInType(BuiltInTypeContext ctx) {
         String text;
         if (asBoolean(ctx.VOID())) {
             text = ctx.VOID().getText();
@@ -1195,9 +1223,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return Collections.EMPTY_LIST;
         }
 
-        return ctx.expression().stream()
-                .map(e -> (Expression) this.visit(e))
+        return ctx.expressionListElement().stream()
+                .map(e -> this.visitExpressionListElement(e))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Expression visitExpressionListElement(ExpressionListElementContext ctx) {
+        Expression expression = (Expression) this.visit(ctx.expression());
+
+        if (asBoolean(ctx.MUL())) {
+            return this.configureAST(new SpreadExpression(expression), ctx);
+        }
+
+        return this.configureAST(expression, ctx);
     }
 
 
@@ -1247,7 +1286,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     /*
     @Override
-    public PropertyExpression visitClassLiteral(GroovyParser.ClassLiteralContext ctx) {
+    public PropertyExpression visitClassLiteral(ClassLiteralContext ctx) {
         return null; // class literal will be treated as path expression, so the node will not be visited
     }
     */

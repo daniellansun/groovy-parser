@@ -599,7 +599,11 @@ parExpression
     ;
 
 expressionList
-    :   expression (COMMA expression)*
+    :   expressionListElement (COMMA expressionListElement)*
+    ;
+
+expressionListElement
+    :   MUL? expression
     ;
 
 statementExpression
