@@ -852,14 +852,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
-
     @Override
     public Expression visitUnaryAddExprAlt(UnaryAddExprAltContext ctx) {
         ExpressionContext expressionCtx = ctx.expression();
         Expression expression = (Expression) this.visit(expressionCtx);
 
-        Boolean insidePar = expression.getNodeMetaData(INSIDE_PARENTHESES);
-        insidePar = !asBoolean((Object) insidePar) ? false : insidePar;
+        Boolean insidePar = this.isInsidePars(expression);
 
         switch (ctx.op.getType()) {
             case ADD: {
@@ -1094,6 +1092,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public MapExpression visitMapPrmrAlt(MapPrmrAltContext ctx) {
+        return this.configureAST(this.visitMap(ctx.map()), ctx);
+    }
+
+
+    @Override
     public VariableExpression visitTypePrmrAlt(GroovyParser.TypePrmrAltContext ctx) {
         return this.configureAST(
                 this.visitBuiltInType(ctx.builtInType()),
@@ -1102,6 +1106,65 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
 
 // } primary       --------------------------------------------------------------------
+
+    @Override
+    public MapExpression visitMap(GroovyParser.MapContext ctx) {
+        return this.configureAST(
+                new MapExpression(this.visitMapEntryList(ctx.mapEntryList())),
+                ctx);
+    }
+
+    @Override
+    public List<MapEntryExpression> visitMapEntryList(GroovyParser.MapEntryListContext ctx) {
+        return ctx.mapEntry().stream()
+                .map(this::visitMapEntry)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public MapEntryExpression visitMapEntry(GroovyParser.MapEntryContext ctx) {
+        Expression keyExpr;
+        Expression valueExpr = (Expression) this.visit(ctx.expression());
+
+        if (asBoolean(ctx.MUL())) {
+            keyExpr = this.configureAST(new SpreadMapExpression(valueExpr), ctx);
+        } else if (asBoolean(ctx.mapEntryLabel())) {
+            keyExpr = this.visitMapEntryLabel(ctx.mapEntryLabel());
+        } else {
+            throw createParsingFailedException("Unsupported map entry: " + ctx.getText(), ctx);
+        }
+
+        return this.configureAST(
+                new MapEntryExpression(keyExpr, valueExpr),
+                ctx);
+    }
+
+    @Override
+    public Expression visitMapEntryLabel(GroovyParser.MapEntryLabelContext ctx) {
+        if (asBoolean(ctx.keywords())) {
+            return this.configureAST(this.visitKeywords(ctx.keywords()), ctx);
+        } else if (asBoolean(ctx.primary())) {
+            Expression expression = (Expression) this.visit(ctx.primary());
+
+            // if the key is variable and not inside parentheses, convert it to a constant, e.g. [a:1, b:2]
+            if (expression instanceof VariableExpression && !this.isInsidePars(expression)) {
+                expression =
+                        this.configureAST(
+                                new ConstantExpression(((VariableExpression) expression).getName()),
+                                expression);
+            }
+
+            return this.configureAST(expression, ctx);
+        }
+
+        throw createParsingFailedException("Unsupported map entry label: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public ConstantExpression visitKeywords(GroovyParser.KeywordsContext ctx) {
+        return this.configureAST(new ConstantExpression(ctx.getText()), ctx);
+    }
+
 
     @Override
     public VariableExpression visitBuiltInType(GroovyParser.BuiltInTypeContext ctx) {
@@ -1703,6 +1766,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         text = StringUtil.replaceEscapes(text, slashyType);
 
         return new ConstantExpression(text, true);
+    }
+
+    private boolean isInsidePars(ASTNode node) {
+        Boolean insidePar = node.getNodeMetaData(INSIDE_PARENTHESES);
+        return !asBoolean((Object) insidePar) ? false : insidePar;
     }
 
     private org.codehaus.groovy.syntax.Token createGroovyTokenByType(Token token, int type) {

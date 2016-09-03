@@ -815,6 +815,7 @@ mapEntryList
 
 mapEntry
     :   mapEntryLabel COLON expression
+    |   MUL COLON expression
     ;
 
 mapEntryLabel
