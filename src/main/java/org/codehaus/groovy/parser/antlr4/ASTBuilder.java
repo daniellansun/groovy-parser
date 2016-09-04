@@ -1862,10 +1862,24 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         Token start = ctx.getStart();
         Token stop = ctx.getStop();
 
+        String stopText = stop.getText();
+        int stopTextLength = 0;
+        int newLineCnt = 0;
+        if (asBoolean((Object) stopText)) {
+            stopTextLength = stopText.length();
+            newLineCnt = (int) stopText.chars().filter(e -> '\n' == e).count();
+        }
+
         astNode.setLineNumber(start.getLine());
         astNode.setColumnNumber(start.getCharPositionInLine() + 1);
-        astNode.setLastLineNumber(stop.getLine());
-        astNode.setLastColumnNumber(stop.getCharPositionInLine() + 1 + stop.getText().length());
+
+        if (0 == newLineCnt) {
+            astNode.setLastLineNumber(stop.getLine());
+            astNode.setLastColumnNumber(stop.getCharPositionInLine() + 1 + stop.getText().length());
+        } else { // e.g. GStringEnd contains newlines, we should fix the location info
+            astNode.setLastLineNumber(stop.getLine() + newLineCnt);
+            astNode.setLastColumnNumber(stopTextLength - stopText.lastIndexOf('\n'));
+        }
 
         return astNode;
     }
