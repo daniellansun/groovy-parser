@@ -781,7 +781,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(ctx.arguments())) {
             if (baseExpr instanceof AttributeExpression) { // e.g. obj.@a(1, 2)
                 AttributeExpression attributeExpression = (AttributeExpression) baseExpr;
-                // TODO
+                attributeExpression.setSpreadSafe(false); // whether attributeExpression is spread safe or not, we must reset it as false
+
+                MethodCallExpression methodCallExpression =
+                        new MethodCallExpression(
+                                attributeExpression,
+                                CALL_STR,
+                                this.visitArguments(ctx.arguments())
+                        );
+
+                return this.configureAST(methodCallExpression, ctx);
             }
 
             if (baseExpr instanceof PropertyExpression) { // e.g. obj.a(1, 2)
