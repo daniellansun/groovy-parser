@@ -76,6 +76,16 @@ a(1, 2)
 obj.a(x: 1, y: 2)
 a(x: 1, y: 2)
 
+
+String[] codes = [
+        className + '.' + propertyName + '.typeMismatch.error',
+        className + '.' + propertyName + '.typeMismatch',
+        classAsPropertyName + '.' + propertyName + '.typeMismatch.error',
+        classAsPropertyName + '.' + propertyName + '.typeMismatch',
+        bindingResult.resolveMessageCodes('typeMismatch', propertyName)
+].flatten() as String[]
+
+
 person*.child[1, 2 + 6, *[3, 4]]*.@child?.child?.@child.child.getChild().getChild(1, 2).getChild(name: 'a', age: 2).'child'."$child".('chi' + 'ld').@name.class.&equals
 
 
