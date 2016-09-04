@@ -9,6 +9,8 @@ cache:
     - $HOME/.gradle/wrapper/
 before_install:
   - chmod +x gradlew
+before_script:
+  - ./gradlew --version
 script: travis_wait 10 ./gradlew -Dfile.encoding=UTF-8 test jacocoTestReport
 after_success:
   - ./gradlew coveralls
