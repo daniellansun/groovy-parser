@@ -70,6 +70,12 @@ obj.a
     ?.c()
     *.d()
 
-person*.child[1, 2 + 6, *[3, 4]]*.@child?.child?.@child.child.getChild().'child'."$child".('chi' + 'ld').@name.class.&equals
+obj.a(1, 2)
+a(1, 2)
+
+obj.a(x: 1, y: 2)
+a(x: 1, y: 2)
+
+person*.child[1, 2 + 6, *[3, 4]]*.@child?.child?.@child.child.getChild().getChild(1, 2).getChild(name: 'a', age: 2).'child'."$child".('chi' + 'ld').@name.class.&equals
 
 

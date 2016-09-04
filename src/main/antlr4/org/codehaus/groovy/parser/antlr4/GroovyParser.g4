@@ -867,9 +867,8 @@ superSuffix
     |   DOT Identifier arguments?
     ;
 
-// TODO support labeled argument
 arguments
-    :   LPAREN expressionList? RPAREN
+    :   LPAREN (expressionList | mapEntryList)? RPAREN
     ;
 
 builtInType

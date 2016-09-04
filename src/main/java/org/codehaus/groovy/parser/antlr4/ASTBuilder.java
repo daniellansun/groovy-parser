@@ -829,6 +829,24 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitArguments(ArgumentsContext ctx) {
+
+        if (asBoolean(ctx.expressionList())) { // e.g. arguments like  1, 2
+            return this.configureAST(
+                    new ArgumentListExpression(
+                            this.visitExpressionList(ctx.expressionList())),
+                    ctx);
+        }
+
+        if (asBoolean(ctx.mapEntryList())) { // e.g. arguments like  x: 1, y: 2
+            return this.configureAST(
+                    new TupleExpression(
+                            this.configureAST(
+                                    new NamedArgumentListExpression(
+                                            this.visitMapEntryList(ctx.mapEntryList())),
+                                    ctx)),
+                    ctx);
+        }
+
         return this.configureAST(new ArgumentListExpression(), ctx);
     }
 
