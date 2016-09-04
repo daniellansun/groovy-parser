@@ -743,32 +743,34 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             if (asBoolean(ctx.DOT())) {
                 if (asBoolean(ctx.AT())) { // e.g. obj.@a
-                    return this.configureAST(new AttributeExpression(baseExpr, namePartExpr), ctx); // act as a DTO
+                    return this.configureAST(new AttributeExpression(baseExpr, namePartExpr), ctx);
                 } else { // e.g. obj.p
-                    return this.configureAST(new PropertyExpression(baseExpr, namePartExpr), ctx); // act as a DTO
+                    return this.configureAST(new PropertyExpression(baseExpr, namePartExpr), ctx);
                 }
             } else if (asBoolean(ctx.OPTIONAL_DOT())) {
-                if (asBoolean(ctx.AT())) { // e.g. obj?.@p
-                    return this.configureAST(new AttributeExpression(baseExpr, namePartExpr, true), ctx); // act as a DTO
+                if (asBoolean(ctx.AT())) { // e.g. obj?.@a
+                    return this.configureAST(new AttributeExpression(baseExpr, namePartExpr, true), ctx);
                 } else { // e.g. obj?.p
-                    return this.configureAST(new PropertyExpression(baseExpr, namePartExpr, true), ctx); // act as a DTO
+                    return this.configureAST(new PropertyExpression(baseExpr, namePartExpr, true), ctx);
                 }
             } else if (asBoolean(ctx.MEMBER_POINTER())) { // e.g. obj.&m
-                return this.configureAST(new MethodPointerExpression(baseExpr, namePartExpr), ctx); // act as a DTO
+                return this.configureAST(new MethodPointerExpression(baseExpr, namePartExpr), ctx);
             } else if (asBoolean(ctx.SPREAD_DOT())) {
-                if (asBoolean(ctx.AT())) { // e.g. obj*.@p
+                if (asBoolean(ctx.AT())) { // e.g. obj*.@a
                     AttributeExpression attributeExpression = new AttributeExpression(baseExpr, namePartExpr, true);
                     attributeExpression.setSpreadSafe(true);
 
-                    return this.configureAST(attributeExpression, ctx); // act as a DTO
+                    return this.configureAST(attributeExpression, ctx);
                 } else { // e.g. obj*.p
                     PropertyExpression propertyExpression = new PropertyExpression(baseExpr, namePartExpr, true);
                     propertyExpression.setSpreadSafe(true);
 
-                    return this.configureAST(propertyExpression, ctx); // act as a DTO
+                    return this.configureAST(propertyExpression, ctx);
                 }
             }
-        } else if (asBoolean(ctx.indexPropertyArgs())) { // e.g. list[1, 3, 5]
+        }
+
+        if (asBoolean(ctx.indexPropertyArgs())) { // e.g. list[1, 3, 5]
             Pair<Token, ListExpression> pair = this.visitIndexPropertyArgs(ctx.indexPropertyArgs());
 
             return this.configureAST(
@@ -776,7 +778,58 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     ctx);
         }
 
+        if (asBoolean(ctx.arguments())) {
+            if (baseExpr instanceof AttributeExpression) { // e.g. obj.@a(1, 2)
+                AttributeExpression attributeExpression = (AttributeExpression) baseExpr;
+                // TODO
+            }
+
+            if (baseExpr instanceof PropertyExpression) { // e.g. obj.a(1, 2)
+                PropertyExpression propertyExpression = (PropertyExpression) baseExpr;
+
+                MethodCallExpression methodCallExpression =
+                        new MethodCallExpression(
+                                propertyExpression.getObjectExpression(),
+                                propertyExpression.getProperty(),
+                                this.visitArguments(ctx.arguments())
+                        );
+
+                methodCallExpression.setImplicitThis(false);
+                methodCallExpression.setSafe(propertyExpression.isSafe());
+                methodCallExpression.setSpreadSafe(propertyExpression.isSpreadSafe());
+
+                // method call obj*.m(): "safe"(false) and "spreadSafe"(true)
+                // property access obj*.p: "safe"(true) and "spreadSafe"(true)
+                // so we have to reset safe here.
+                if (propertyExpression.isSpreadSafe()) {
+                    methodCallExpression.setSafe(false);
+                }
+
+                return this.configureAST(methodCallExpression, ctx);
+            }
+
+
+            // e.g. m()
+            MethodCallExpression methodCallExpression =
+                    new MethodCallExpression(
+                            VariableExpression.THIS_EXPRESSION,
+
+                            (baseExpr instanceof VariableExpression)
+                                    ? this.createConstantExpression((VariableExpression) baseExpr)
+                                    : baseExpr,
+
+                            this.visitArguments(ctx.arguments())
+                    );
+
+            return this.configureAST(methodCallExpression, ctx);
+        }
+
         return null; // TODO
+    }
+
+    @Override
+    public Expression visitArguments(ArgumentsContext ctx) {
+        return this.configureAST(new ArgumentListExpression(), ctx);
     }
 
     @Override
@@ -1721,6 +1774,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext).getName()),
                                 ctx)
                 );
+    }
+
+    private ConstantExpression createConstantExpression(VariableExpression variableExpression) {
+        return this.configureAST(new ConstantExpression(variableExpression.getName()), variableExpression);
     }
 
     private BinaryExpression createBinaryExpression(ExpressionContext left, Token op, ExpressionContext right) {

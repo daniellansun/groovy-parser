@@ -56,5 +56,20 @@ child
 .&
 length
 
-person*.child[1, 2 + 6, *[3, 4]]*.@child?.child?.@child.child.'child'."$child".('chi' + 'ld').@name.class.&equals
+a.b()
+a.'b'()
+a."$b"()
+a?.b()
+a*.b()
+a()
+'a'()
+"$a"()
+
+obj.a
+    .b()
+    ?.c()
+    *.d()
+
+person*.child[1, 2 + 6, *[3, 4]]*.@child?.child?.@child.child.getChild().'child'."$child".('chi' + 'ld').@name.class.&equals
+
 
