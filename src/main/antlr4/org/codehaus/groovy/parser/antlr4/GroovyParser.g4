@@ -611,9 +611,8 @@ statementExpression
     ;
 
 expression
-    :   pathExpression                                                                      #pathExprAlt
-
     // qualified names, array expressions, method invocation, post inc/dec (level 1)
+    :   pathExpression                                                                      #pathExprAlt
     |   expression op=(INC | DEC)                                                           #postfixExprAlt
 
     // ~(BNOT)/!(LNOT)/(type casting) (level 1)

@@ -10,4 +10,5 @@ cache:
 before_install:
   - chmod +x gradlew
 script: travis_wait 10 ./gradlew -Dfile.encoding=UTF-8 test
-
+after_success:
+  - ./gradlew jacocoTestReport coveralls

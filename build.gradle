@@ -30,6 +30,11 @@ buildscript {
     }
 }
 
+plugins {
+    id 'com.github.kt3k.coveralls' version '2.6.3'
+    id 'jacoco'
+}
+
 group 'com.groovyhelp'
 version '1.0-SNAPSHOT'
 
@@ -105,13 +110,6 @@ sourceSets.main.resources.srcDirs += file("$antlr4Source");
 sourceSets.main.java.srcDirs += file("$srcMain/groovy-sources");
 sourceSets.test.java.srcDirs += file("$srcTest/groovy-sources");
 
-test {
-    if (JavaVersion.current().isJava8Compatible()) {
-        jvmArgs '-ea', "-Xms256m", "-Xmx512m"
-    } else {
-        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-XX:PermSize=64m", "-XX:MaxPermSize=192m"
-    }
-}
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.14.1'
@@ -126,4 +124,30 @@ task groovyConsole(type: JavaExec, dependsOn:[classes]) {
 
     main = 'org.codehaus.groovy.parser.antlr4.ui.GroovyConsole'
     classpath = sourceSets.main.runtimeClasspath
+}
+
+test {
+    if (JavaVersion.current().isJava8Compatible()) {
+        jvmArgs '-ea', "-Xms256m", "-Xmx512m"
+    } else {
+        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-XX:PermSize=64m", "-XX:MaxPermSize=192m"
+    }
+}
+
+
+jacoco {
+    toolVersion = '0.7.6.201602180812'
+}
+
+jacocoTestReport {
+    group = 'Reporting'
+    description = 'Generate Jacoco coverage reports after running tests.'
+    additionalSourceDirs = project.files(sourceSets.main.allSource.srcDirs)
+    sourceDirectories = project.files(sourceSets.main.allSource.srcDirs)
+    classDirectories =  project.files(sourceSets.main.output)
+    reports {
+        xml.enabled = true
+        csv.enabled = false
+        html.enabled = true
+    }
 }

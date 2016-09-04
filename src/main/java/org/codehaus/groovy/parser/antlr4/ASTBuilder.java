@@ -737,6 +737,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Expression visitPathElement(PathElementContext ctx) {
         Expression baseExpr = ctx.getNodeMetaData(PATH_EXPRESSION_BASE_EXPR);
+        Objects.requireNonNull(baseExpr, "baseExpr is required!");
 
         if (asBoolean(ctx.namePart())) {
             Expression namePartExpr = this.visitNamePart(ctx.namePart());
