@@ -721,37 +721,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         Expression primaryExpr = this.configureAST((Expression) this.visit(ctx.primary()), ctx);
 
         Expression expression =
-                ctx.pathElement().stream()
-                        .map(this::visitPathElement)
+                (Expression) ctx.pathElement().stream()
+                        .map(e -> (Object) e)
                         .reduce(primaryExpr, (r, e) -> {
+                            PathElementContext pathElementContext = (PathElementContext) e;
 
-                            if (e instanceof AttributeExpression) {
-                                AttributeExpression dto = (AttributeExpression) e;
-                                AttributeExpression attributeExpression = new AttributeExpression(r, dto.getProperty(), dto.isSafe());
+                            pathElementContext.putNodeMetaData(PATH_EXPRESSION_BASE_EXPR, r);
 
-                                attributeExpression.setSpreadSafe(dto.isSpreadSafe());
-
-                                return this.configureAST(attributeExpression, e);
-                            } else if (e instanceof PropertyExpression) {
-                                PropertyExpression dto = (PropertyExpression) e;
-                                PropertyExpression propertyExpression = new PropertyExpression(r, dto.getProperty(), dto.isSafe());
-
-                                propertyExpression.setSpreadSafe(dto.isSpreadSafe());
-
-                                return this.configureAST(propertyExpression, e);
-                            } else if (e instanceof MethodPointerExpression) {
-                                return this.configureAST(
-                                        new MethodPointerExpression(r, ((MethodPointerExpression) e).getMethodName()),
-                                        e);
-                            } else if (e instanceof BinaryExpression) {
-                                BinaryExpression dto = (BinaryExpression) e;
-
-                                return this.configureAST(
-                                        new BinaryExpression(r, dto.getOperation(), dto.getRightExpression()),
-                                        e);
-                            }
-
-                            return r;
+                            return this.visitPathElement(pathElementContext);
                         });
 
         return this.configureAST(expression, ctx);
@@ -759,31 +736,33 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitPathElement(PathElementContext ctx) {
+        Expression baseExpr = ctx.getNodeMetaData(PATH_EXPRESSION_BASE_EXPR);
+
         if (asBoolean(ctx.namePart())) {
             Expression namePartExpr = this.visitNamePart(ctx.namePart());
 
             if (asBoolean(ctx.DOT())) {
                 if (asBoolean(ctx.AT())) { // e.g. obj.@a
-                    return this.configureAST(new AttributeExpression(null, namePartExpr), ctx); // act as a DTO
+                    return this.configureAST(new AttributeExpression(baseExpr, namePartExpr), ctx); // act as a DTO
                 } else { // e.g. obj.p
-                    return this.configureAST(new PropertyExpression(null, namePartExpr), ctx); // act as a DTO
+                    return this.configureAST(new PropertyExpression(baseExpr, namePartExpr), ctx); // act as a DTO
                 }
             } else if (asBoolean(ctx.OPTIONAL_DOT())) {
                 if (asBoolean(ctx.AT())) { // e.g. obj?.@p
-                    return this.configureAST(new AttributeExpression(null, namePartExpr, true), ctx); // act as a DTO
+                    return this.configureAST(new AttributeExpression(baseExpr, namePartExpr, true), ctx); // act as a DTO
                 } else { // e.g. obj?.p
-                    return this.configureAST(new PropertyExpression(null, namePartExpr, true), ctx); // act as a DTO
+                    return this.configureAST(new PropertyExpression(baseExpr, namePartExpr, true), ctx); // act as a DTO
                 }
             } else if (asBoolean(ctx.MEMBER_POINTER())) { // e.g. obj.&m
-                return this.configureAST(new MethodPointerExpression(null, namePartExpr), ctx); // act as a DTO
+                return this.configureAST(new MethodPointerExpression(baseExpr, namePartExpr), ctx); // act as a DTO
             } else if (asBoolean(ctx.SPREAD_DOT())) {
                 if (asBoolean(ctx.AT())) { // e.g. obj*.@p
-                    AttributeExpression attributeExpression = new AttributeExpression(null, namePartExpr, true);
+                    AttributeExpression attributeExpression = new AttributeExpression(baseExpr, namePartExpr, true);
                     attributeExpression.setSpreadSafe(true);
 
                     return this.configureAST(attributeExpression, ctx); // act as a DTO
                 } else { // e.g. obj*.p
-                    PropertyExpression propertyExpression = new PropertyExpression(null, namePartExpr, true);
+                    PropertyExpression propertyExpression = new PropertyExpression(baseExpr, namePartExpr, true);
                     propertyExpression.setSpreadSafe(true);
 
                     return this.configureAST(propertyExpression, ctx); // act as a DTO
@@ -793,7 +772,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             Pair<Token, ListExpression> pair = this.visitIndexPropertyArgs(ctx.indexPropertyArgs());
 
             return this.configureAST(
-                    new BinaryExpression(null, createGroovyToken(pair.getKey()), pair.getValue()),
+                    new BinaryExpression(baseExpr, createGroovyToken(pair.getKey()), pair.getValue()),
                     ctx);
         }
 
@@ -2256,7 +2235,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String VALUE_STR = "value";
     private static final String DOLLAR_STR = "$";
     private static final String CALL_STR = "call";
+    private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
+
+    // keys for meta data
     private static final String INSIDE_PARENTHESES = "_INSIDE_PARENTHESES";
     private static final String IS_SWITCH_DEFAULT = "_IS_SWITCH_DEFAULT";
-    private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
+    private static final String PATH_EXPRESSION_BASE_EXPR = "_PATH_EXPRESSION_BASE_EXPR";
 }
