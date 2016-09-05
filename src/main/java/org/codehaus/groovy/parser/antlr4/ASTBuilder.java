@@ -49,6 +49,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.codehaus.groovy.parser.antlr4.GroovyParser.*;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.*;
@@ -842,6 +843,70 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                     : baseExpr,
 
                             this.visitArguments(ctx.arguments())
+                    );
+
+            return this.configureAST(methodCallExpression, ctx);
+        }
+
+        if (asBoolean(ctx.closure())) {
+            ClosureExpression closureExpression = this.visitClosure(ctx.closure());
+
+            if (baseExpr instanceof MethodCallExpression) {
+                MethodCallExpression methodCallExpression = (MethodCallExpression) baseExpr;
+                Expression argumentsExpression = methodCallExpression.getArguments();
+
+                if (argumentsExpression instanceof ArgumentListExpression) { // normal arguments, e.g. 1, 2
+                    ArgumentListExpression argumentListExpression = (ArgumentListExpression) argumentsExpression;
+                    argumentListExpression.getExpressions().add(closureExpression);
+
+                    return this.configureAST(methodCallExpression, ctx);
+                }
+
+                if (argumentsExpression instanceof TupleExpression) { // named arguments, e.g. x: 1, y: 2
+                    TupleExpression tupleExpression = (TupleExpression) argumentsExpression;
+                    NamedArgumentListExpression namedArgumentListExpression = (NamedArgumentListExpression) tupleExpression.getExpression(0);
+
+                    if (asBoolean(tupleExpression.getExpressions())) {
+                        methodCallExpression.setArguments(
+                                this.configureAST(
+                                        new ArgumentListExpression(
+                                                Stream.of(
+                                                        this.configureAST(
+                                                                new MapExpression(namedArgumentListExpression.getMapEntryExpressions()),
+                                                                namedArgumentListExpression
+                                                        ),
+                                                        closureExpression
+                                                ).collect(Collectors.toList())
+                                        ),
+                                        tupleExpression
+                                )
+                        );
+                    } else {
+                        // the branch should never reach, because named arguments must not be empty
+                        methodCallExpression.setArguments(
+                                this.configureAST(
+                                        new ArgumentListExpression(closureExpression),
+                                        tupleExpression));
+                    }
+
+
+                    return this.configureAST(methodCallExpression, ctx);
+                }
+
+            }
+
+            // e.g.  m { return 1; }
+            MethodCallExpression methodCallExpression =
+                    new MethodCallExpression(
+                            VariableExpression.THIS_EXPRESSION,
+
+                            (baseExpr instanceof VariableExpression)
+                                    ? this.createConstantExpression((VariableExpression) baseExpr)
+                                    : baseExpr,
+
+                            this.configureAST(
+                                    new ArgumentListExpression(closureExpression),
+                                    closureExpression)
                     );
 
             return this.configureAST(methodCallExpression, ctx);

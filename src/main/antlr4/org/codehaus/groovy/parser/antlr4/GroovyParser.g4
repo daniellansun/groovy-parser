@@ -730,7 +730,7 @@ pathElement
     |   arguments
 
     // Can always append a block, as foo{bar}
-    |   closure
+    |   nls closure
 
     // Element selection is always an option, too.
     // In Groovy, the stuff between brackets is a general argument list,
