@@ -610,7 +610,7 @@ statementExpression
     :   expression
     ;
 
-expression
+expression // TODO support command expression
     // qualified names, array expressions, method invocation, post inc/dec (level 1)
     :   pathExpression                                                                      #pathExprAlt
     |   expression op=(INC | DEC)                                                           #postfixExprAlt
@@ -713,7 +713,7 @@ expression
  *  General expressions are built up from path expressions, using operators like '+' and '='.
  */
 pathExpression
-    :   primary pathElement* // TODO support command expression
+    :   primary pathElement*
     ;
 
 pathElement

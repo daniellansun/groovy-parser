@@ -781,6 +781,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         if (asBoolean(ctx.arguments())) {
+            Expression argumentsExpr = this.visitArguments(ctx.arguments());
+
             if (baseExpr instanceof AttributeExpression) { // e.g. obj.@a(1, 2)
                 AttributeExpression attributeExpression = (AttributeExpression) baseExpr;
                 attributeExpression.setSpreadSafe(false); // whether attributeExpression is spread safe or not, we must reset it as false
@@ -789,7 +791,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         new MethodCallExpression(
                                 attributeExpression,
                                 CALL_STR,
-                                this.visitArguments(ctx.arguments())
+                                argumentsExpr
                         );
 
                 return this.configureAST(methodCallExpression, ctx);
@@ -802,7 +804,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         new MethodCallExpression(
                                 propertyExpression.getObjectExpression(),
                                 propertyExpression.getProperty(),
-                                this.visitArguments(ctx.arguments())
+                                argumentsExpr
                         );
 
                 methodCallExpression.setImplicitThis(false);
@@ -825,7 +827,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         new MethodCallExpression(
                                 baseExpr,
                                 CALL_STR,
-                                this.visitArguments(ctx.arguments())
+                                argumentsExpr
                         );
 
                 methodCallExpression.setImplicitThis(false);
@@ -834,14 +836,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
 
 
-            if (baseExpr instanceof VariableExpression) {
+            if (baseExpr instanceof VariableExpression) { // void and primitive type AST node must be an instance of VariableExpression
                 String baseExprText = baseExpr.getText();
                 if ("void".equals(baseExprText)) { // e.g. void()
                     MethodCallExpression methodCallExpression =
                             new MethodCallExpression(
                                     this.createConstantExpression((VariableExpression) baseExpr),
                                     CALL_STR,
-                                    this.visitArguments(ctx.arguments())
+                                    argumentsExpr
                             );
 
                     methodCallExpression.setImplicitThis(false);
@@ -861,7 +863,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                     ? this.createConstantExpression((VariableExpression) baseExpr)
                                     : baseExpr,
 
-                            this.visitArguments(ctx.arguments())
+                            argumentsExpr
                     );
 
             return this.configureAST(methodCallExpression, ctx);
