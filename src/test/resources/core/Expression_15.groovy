@@ -94,4 +94,3 @@ String[] codes = [
 
 person*.child[1, 2 + 6, *[3, 4]]*.@child*.@child()?.@child().@child()?.child?.@child.child.getChild().getChild(1, 2).getChild(name: 'a', age: 2).'child'."$child".('chi' + 'ld').@name.class.&equals
 
-
