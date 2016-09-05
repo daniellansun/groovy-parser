@@ -833,6 +833,25 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 return this.configureAST(methodCallExpression, ctx);
             }
 
+
+            if (baseExpr instanceof VariableExpression) {
+                String baseExprText = baseExpr.getText();
+                if ("void".equals(baseExprText)) { // e.g. void()
+                    MethodCallExpression methodCallExpression =
+                            new MethodCallExpression(
+                                    this.createConstantExpression((VariableExpression) baseExpr),
+                                    CALL_STR,
+                                    this.visitArguments(ctx.arguments())
+                            );
+
+                    methodCallExpression.setImplicitThis(false);
+
+                    return this.configureAST(methodCallExpression, ctx);
+                } else if(PRIMITIVE_TYPE_SET.contains(baseExprText)) { // e.g. int(), long(), float(), etc.
+                    throw createParsingFailedException("Primitive type literal: " + baseExprText + " cannot be used as a method name", ctx);
+                }
+            }
+
             // e.g. m()
             MethodCallExpression methodCallExpression =
                     new MethodCallExpression(
@@ -912,7 +931,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return this.configureAST(methodCallExpression, ctx);
         }
 
-        return null; // TODO
+        throw createParsingFailedException("Unsupported path element: " + ctx.getText(), ctx);
     }
 
     @Override
@@ -2398,6 +2417,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String VALUE_STR = "value";
     private static final String DOLLAR_STR = "$";
     private static final String CALL_STR = "call";
+    private static final Set<String> PRIMITIVE_TYPE_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("boolean", "char", "byte", "short", "int", "long", "float", "double")));
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 
     // keys for meta data
