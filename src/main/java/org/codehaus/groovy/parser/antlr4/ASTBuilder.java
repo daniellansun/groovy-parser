@@ -849,13 +849,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     methodCallExpression.setImplicitThis(false);
 
                     return this.configureAST(methodCallExpression, ctx);
-                } else if(PRIMITIVE_TYPE_SET.contains(baseExprText)) { // e.g. int(), long(), float(), etc.
+                } else if (PRIMITIVE_TYPE_SET.contains(baseExprText)) { // e.g. int(), long(), float(), etc.
                     throw createParsingFailedException("Primitive type literal: " + baseExprText + " cannot be used as a method name", ctx);
                 }
             }
 
             // e.g. 1(), 1.1()
-            if(baseExpr instanceof ConstantExpression && isTrue(baseExpr, IS_NUMERIC)) {
+            if (baseExpr instanceof ConstantExpression && isTrue(baseExpr, IS_NUMERIC)) {
                 MethodCallExpression methodCallExpression =
                         new MethodCallExpression(baseExpr, CALL_STR, argumentsExpr);
                 methodCallExpression.setImplicitThis(false);
@@ -927,7 +927,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
 
             // e.g. 1 {}, 1.1 {}
-            if(baseExpr instanceof ConstantExpression && isTrue(baseExpr, IS_NUMERIC)) {
+            if (baseExpr instanceof ConstantExpression && isTrue(baseExpr, IS_NUMERIC)) {
                 MethodCallExpression methodCallExpression =
                         new MethodCallExpression(
                                 baseExpr,
@@ -1058,13 +1058,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     ctx);
         }
 
-        if (asBoolean(ctx.LPAREN())) { // e.g. (String) 'abc'
-            return this.configureAST(
-                    new CastExpression(this.visitType(ctx.type()), (Expression) this.visit(ctx.expression())),
-                    ctx);
-        }
-
         throw createParsingFailedException("Unsupported unary expression: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public CastExpression visitCastExprAlt(CastExprAltContext ctx) {
+        return this.configureAST(
+                new CastExpression(this.visitType(ctx.type()), (Expression) this.visit(ctx.expression())),
+                ctx);
     }
 
     @Override
