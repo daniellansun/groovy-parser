@@ -854,7 +854,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 }
             }
 
-            // e.g. 1(), -1()
+            // e.g. 1(), 1.1()
             if(baseExpr instanceof ConstantExpression && isTrue(baseExpr, IS_NUMERIC)) {
                 MethodCallExpression methodCallExpression =
                         new MethodCallExpression(baseExpr, CALL_STR, argumentsExpr);
@@ -965,7 +965,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitArguments(ArgumentsContext ctx) {
+        if (!asBoolean(ctx.argumentList())) {
+            return this.configureAST(new ArgumentListExpression(), ctx);
+        }
 
+        return this.configureAST(this.visitArgumentList(ctx.argumentList()), ctx);
+    }
+
+    @Override
+    public Expression visitArgumentList(ArgumentListContext ctx) {
         if (asBoolean(ctx.expressionList())) { // e.g. arguments like  1, 2
             return this.configureAST(
                     new ArgumentListExpression(
@@ -983,7 +991,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     ctx);
         }
 
-        return this.configureAST(new ArgumentListExpression(), ctx);
+        throw createParsingFailedException("Unsupported argument list: " + ctx.getText(), ctx);
     }
 
     @Override

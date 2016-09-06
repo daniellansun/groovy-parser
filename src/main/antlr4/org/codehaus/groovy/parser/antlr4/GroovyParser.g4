@@ -867,7 +867,12 @@ superSuffix
     ;
 
 arguments
-    :   LPAREN (expressionList | mapEntryList)? RPAREN
+    :   LPAREN argumentList? RPAREN
+    ;
+
+argumentList
+    :   expressionList
+    |   mapEntryList
     ;
 
 builtInType
