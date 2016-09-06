@@ -24,6 +24,7 @@ import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;
@@ -391,8 +392,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         statementList.stream().forEach(e -> {
             if (e instanceof CaseStatement) {
                 caseStatementList.add((CaseStatement) e);
-            } else if (asBoolean((Object) e.getNodeMetaData(IS_SWITCH_DEFAULT))
-                    && (Boolean) e.getNodeMetaData(IS_SWITCH_DEFAULT)) {
+            } else if (isTrue(e, IS_SWITCH_DEFAULT)) {
                 defaultStatementList.add(e);
             }
         });
@@ -706,7 +706,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public Expression visitParExpression(ParExpressionContext ctx) {
         Expression expression = this.configureAST((Expression) this.visit(ctx.expression()), ctx);
 
-        expression.putNodeMetaData(INSIDE_PARENTHESES, true);
+        expression.putNodeMetaData(IS_INSIDE_PARENTHESES, true);
 
         return expression;
     }
@@ -854,6 +854,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 }
             }
 
+            // e.g. 1(), -1()
+            if(baseExpr instanceof ConstantExpression && isTrue(baseExpr, IS_NUMERIC)) {
+                MethodCallExpression methodCallExpression =
+                        new MethodCallExpression(baseExpr, CALL_STR, argumentsExpr);
+                methodCallExpression.setImplicitThis(false);
+
+                return this.configureAST(methodCallExpression, ctx);
+            }
+
             // e.g. m()
             MethodCallExpression methodCallExpression =
                     new MethodCallExpression(
@@ -865,6 +874,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
                             argumentsExpr
                     );
+
 
             return this.configureAST(methodCallExpression, ctx);
         }
@@ -916,6 +926,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             }
 
+            // e.g. 1 {}, 1.1 {}
+            if(baseExpr instanceof ConstantExpression && isTrue(baseExpr, IS_NUMERIC)) {
+                MethodCallExpression methodCallExpression =
+                        new MethodCallExpression(
+                                baseExpr,
+                                CALL_STR,
+                                this.configureAST(
+                                        new ArgumentListExpression(closureExpression),
+                                        closureExpression
+                                )
+                        );
+                methodCallExpression.setImplicitThis(false);
+
+                return this.configureAST(methodCallExpression, ctx);
+            }
+
             // e.g.  m { return 1; }
             MethodCallExpression methodCallExpression =
                     new MethodCallExpression(
@@ -929,6 +955,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                     new ArgumentListExpression(closureExpression),
                                     closureExpression)
                     );
+
 
             return this.configureAST(methodCallExpression, ctx);
         }
@@ -1044,18 +1071,18 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         ExpressionContext expressionCtx = ctx.expression();
         Expression expression = (Expression) this.visit(expressionCtx);
 
-        Boolean insidePar = this.isInsidePars(expression);
+        Boolean insidePar = isTrue(expression, IS_INSIDE_PARENTHESES);
 
         switch (ctx.op.getType()) {
             case ADD: {
-                if (expression instanceof ConstantExpression && !asBoolean(insidePar)) {
+                if (expression instanceof ConstantExpression && !insidePar) {
                     return this.configureAST((ConstantExpression) this.visit(expressionCtx), ctx);
                 }
 
                 return this.configureAST(new UnaryPlusExpression(expression), ctx);
             }
             case SUB: {
-                if (expression instanceof ConstantExpression && !asBoolean(insidePar)) {
+                if (expression instanceof ConstantExpression && !insidePar) {
                     ConstantExpression constantExpression = (ConstantExpression) expression;
 
                     Object value = constantExpression.getValue();
@@ -1334,7 +1361,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             Expression expression = (Expression) this.visit(ctx.primary());
 
             // if the key is variable and not inside parentheses, convert it to a constant, e.g. [a:1, b:2]
-            if (expression instanceof VariableExpression && !this.isInsidePars(expression)) {
+            if (expression instanceof VariableExpression && !isTrue(expression, IS_INSIDE_PARENTHESES)) {
                 expression =
                         this.configureAST(
                                 new ConstantExpression(((VariableExpression) expression).getName()),
@@ -1404,14 +1431,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public ConstantExpression visitIntegerLiteralAlt(IntegerLiteralAltContext ctx) {
         String text = ctx.IntegerLiteral().getText();
 
-        return this.configureAST(new ConstantExpression(Numbers.parseInteger(null, text), !text.startsWith(SUB_STR)), ctx);
+        ConstantExpression constantExpression = new ConstantExpression(Numbers.parseInteger(null, text), !text.startsWith(SUB_STR));
+        constantExpression.putNodeMetaData(IS_NUMERIC, true);
+
+        return this.configureAST(constantExpression, ctx);
     }
 
     @Override
     public ConstantExpression visitFloatingPointLiteralAlt(FloatingPointLiteralAltContext ctx) {
         String text = ctx.FloatingPointLiteral().getText();
 
-        return this.configureAST(new ConstantExpression(Numbers.parseDecimal(text), !text.startsWith(SUB_STR)), ctx);
+        ConstantExpression constantExpression = new ConstantExpression(Numbers.parseDecimal(text), !text.startsWith(SUB_STR));
+        constantExpression.putNodeMetaData(IS_NUMERIC, true);
+
+        return this.configureAST(constantExpression, ctx);
     }
 
 
@@ -1970,11 +2003,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return new ConstantExpression(text, true);
     }
 
-    private boolean isInsidePars(ASTNode node) {
-        Boolean insidePar = node.getNodeMetaData(INSIDE_PARENTHESES);
-        return !asBoolean((Object) insidePar) ? false : insidePar;
-    }
-
     private org.codehaus.groovy.syntax.Token createGroovyTokenByType(Token token, int type) {
         if (null == token) {
             throw new IllegalArgumentException("token should not be null");
@@ -1983,9 +2011,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return new org.codehaus.groovy.syntax.Token(type, token.getText(), token.getLine(), token.getCharPositionInLine());
     }
 
+    /*
     private org.codehaus.groovy.syntax.Token createGroovyToken(TerminalNode node) {
         return this.createGroovyToken(node, 1);
     }
+    */
 
     private org.codehaus.groovy.syntax.Token createGroovyToken(Token token) {
         return this.createGroovyToken(token, 1);
@@ -2030,7 +2060,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         int newLineCnt = 0;
         if (asBoolean((Object) stopText)) {
             stopTextLength = stopText.length();
-            newLineCnt = (int) stopText.chars().filter(e -> '\n' == e).count();
+            newLineCnt = (int) StringUtil.countChar(stopText, '\n');
         }
 
         astNode.setLineNumber(start.getLine());
@@ -2069,6 +2099,19 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return astNode;
     }
 
+    private boolean isTrue(ASTNode node, String key) {
+        Object nmd = node.getNodeMetaData(key);
+
+        if (null == nmd) {
+            return false;
+        }
+
+        if (!(nmd instanceof Boolean)) {
+            throw new GroovyBugError(node + " node meta data[" + key + "] is not an instance of Boolean");
+        }
+
+        return (Boolean) nmd;
+    }
 
     private CompilationFailedException createParsingFailedException(String msg, GroovyParserRuleContext ctx) {
         return createParsingFailedException(
@@ -2423,7 +2466,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 
     // keys for meta data
-    private static final String INSIDE_PARENTHESES = "_INSIDE_PARENTHESES";
+    private static final String IS_INSIDE_PARENTHESES = "_IS_INSIDE_PARENTHESES";
     private static final String IS_SWITCH_DEFAULT = "_IS_SWITCH_DEFAULT";
+    private static final String IS_NUMERIC = "_IS_NUMERIC";
     private static final String PATH_EXPRESSION_BASE_EXPR = "_PATH_EXPRESSION_BASE_EXPR";
 }

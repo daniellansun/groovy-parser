@@ -122,4 +122,7 @@ public class StringUtil {
         return text.replace("\r\n", "\n");
     }
 
+	public static long countChar(String text, char c) {
+		return text.chars().filter(e -> c == e).count();
+	}
 }
