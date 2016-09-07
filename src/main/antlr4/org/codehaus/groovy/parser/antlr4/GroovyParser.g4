@@ -187,7 +187,7 @@ interfaceDeclaration
     ;
 
 typeList
-    :   type (COMMA type)*
+    :   type (COMMA nls type)*
     ;
 
 classBody
@@ -319,12 +319,12 @@ primitiveType
     ;
 
 typeArguments
-    :   LT typeArgument (COMMA typeArgument)* GT
+    :   LT nls typeArgument (COMMA nls typeArgument)* nls GT
     ;
 
 typeArgument
     :   type
-    |   QUESTION ((EXTENDS | SUPER) type)?
+    |   QUESTION ((EXTENDS | SUPER) nls type)?
     ;
 
 qualifiedNameList
@@ -849,7 +849,7 @@ classCreatorRest
     ;
 
 nonWildcardTypeArguments
-    :   LT typeList GT
+    :   LT nls typeList nls GT
     ;
 
 typeArgumentsOrDiamond

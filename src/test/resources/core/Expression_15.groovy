@@ -83,6 +83,20 @@ a?.@b(1, 2, 3)
 a*.@b()
 a*.@b(1, 2, 3)
 
+a.<Integer>b(1, 2)
+
+a
+        .
+<Integer>b(1, 2)
+
+a.<Integer, String>b(1, '2')
+a?.<Integer, String>b(1, '2')
+a*.<Integer, String>b(1, '2')
+obj?.a*.<
+        Integer,
+        String
+        >b(1, '2')
+
 String[] codes = [
         className + '.' + propertyName + '.typeMismatch.error',
         className + '.' + propertyName + '.typeMismatch',

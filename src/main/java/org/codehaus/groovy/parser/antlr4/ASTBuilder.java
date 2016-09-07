@@ -742,29 +742,40 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         if (asBoolean(ctx.namePart())) {
             Expression namePartExpr = this.visitNamePart(ctx.namePart());
+            GenericsType[] genericsTypes = this.visitNonWildcardTypeArguments(ctx.nonWildcardTypeArguments());
+
 
             if (asBoolean(ctx.DOT())) {
                 if (asBoolean(ctx.AT())) { // e.g. obj.@a
                     return this.configureAST(new AttributeExpression(baseExpr, namePartExpr), ctx);
                 } else { // e.g. obj.p
-                    return this.configureAST(new PropertyExpression(baseExpr, namePartExpr), ctx);
+                    PropertyExpression propertyExpression = new PropertyExpression(baseExpr, namePartExpr);
+                    propertyExpression.putNodeMetaData(PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES, genericsTypes);
+
+                    return this.configureAST(propertyExpression, ctx);
                 }
             } else if (asBoolean(ctx.OPTIONAL_DOT())) {
                 if (asBoolean(ctx.AT())) { // e.g. obj?.@a
                     return this.configureAST(new AttributeExpression(baseExpr, namePartExpr, true), ctx);
                 } else { // e.g. obj?.p
-                    return this.configureAST(new PropertyExpression(baseExpr, namePartExpr, true), ctx);
+                    PropertyExpression propertyExpression = new PropertyExpression(baseExpr, namePartExpr, true);
+                    propertyExpression.putNodeMetaData(PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES, genericsTypes);
+
+                    return this.configureAST(propertyExpression, ctx);
                 }
             } else if (asBoolean(ctx.MEMBER_POINTER())) { // e.g. obj.&m
                 return this.configureAST(new MethodPointerExpression(baseExpr, namePartExpr), ctx);
             } else if (asBoolean(ctx.SPREAD_DOT())) {
                 if (asBoolean(ctx.AT())) { // e.g. obj*.@a
                     AttributeExpression attributeExpression = new AttributeExpression(baseExpr, namePartExpr, true);
+
                     attributeExpression.setSpreadSafe(true);
 
                     return this.configureAST(attributeExpression, ctx);
                 } else { // e.g. obj*.p
                     PropertyExpression propertyExpression = new PropertyExpression(baseExpr, namePartExpr, true);
+                    propertyExpression.putNodeMetaData(PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES, genericsTypes);
+
                     propertyExpression.setSpreadSafe(true);
 
                     return this.configureAST(propertyExpression, ctx);
@@ -817,6 +828,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 if (propertyExpression.isSpreadSafe()) {
                     methodCallExpression.setSafe(false);
                 }
+
+                // if the generics types meta data is not empty, it is a generic method call, e.g. obj.<Integer>a(1, 2)
+                methodCallExpression.setGenericsTypes(
+                        baseExpr.getNodeMetaData(PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES));
 
                 return this.configureAST(methodCallExpression, ctx);
             }
@@ -961,6 +976,23 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         throw createParsingFailedException("Unsupported path element: " + ctx.getText(), ctx);
+    }
+
+
+    @Override
+    public GenericsType[] visitNonWildcardTypeArguments(NonWildcardTypeArgumentsContext ctx) {
+        if (!asBoolean(ctx)) {
+            return null;
+        }
+
+        return this.visitTypeList(ctx.typeList());
+    }
+
+    @Override
+    public GenericsType[] visitTypeList(TypeListContext ctx) {
+        return ctx.type().stream()
+                .map(this::createGenericsType)
+                .toArray(GenericsType[]::new);
     }
 
     @Override
@@ -1764,12 +1796,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             return this.configureAST(genericsType, ctx);
         } else if (asBoolean(ctx.type())) {
-            return this.configureAST(new GenericsType(this.visitType(ctx.type())), ctx);
+            return this.configureAST(this.createGenericsType(ctx.type()), ctx);
         }
 
         throw createParsingFailedException("Unsupported type argument: " + ctx.getText(), ctx);
     }
-
 
     @Override
     public ClassNode visitPrimitiveType(PrimitiveTypeContext ctx) {
@@ -1943,6 +1974,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext).getName()),
                                 ctx)
                 );
+    }
+
+
+    private GenericsType createGenericsType(TypeContext ctx) {
+        return this.configureAST(new GenericsType(this.visitType(ctx)), ctx);
     }
 
     private ConstantExpression createConstantExpression(VariableExpression variableExpression) {
@@ -2479,4 +2515,5 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String IS_SWITCH_DEFAULT = "_IS_SWITCH_DEFAULT";
     private static final String IS_NUMERIC = "_IS_NUMERIC";
     private static final String PATH_EXPRESSION_BASE_EXPR = "_PATH_EXPRESSION_BASE_EXPR";
+    private static final String PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES = "_PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES";
 }
