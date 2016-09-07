@@ -594,6 +594,10 @@ enhancedForControl
 
 // EXPRESSIONS
 
+castParExpression
+    :   LPAREN type RPAREN
+    ;
+
 parExpression
     :   LPAREN expression RPAREN
     ;
@@ -617,7 +621,7 @@ expression // TODO support command expression
 
     // ~(BNOT)/!(LNOT)/(type casting) (level 1)
     |   (BITNOT | NOT) nls expression                                                       #unaryNotExprAlt
-    |   (LPAREN type RPAREN) expression                                                     #castExprAlt
+    |   castParExpression expression                                                        #castExprAlt
 
     // math power operator (**) (level 2)
     |   left=expression op=POWER nls right=expression                                       #powerExprAlt

@@ -702,6 +702,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
 
     // expression {    --------------------------------------------------------------------
+
+    @Override
+    public ClassNode visitCastParExpression(CastParExpressionContext ctx) {
+        return this.visitType(ctx.type());
+    }
+
     @Override
     public Expression visitParExpression(ParExpressionContext ctx) {
         Expression expression = this.configureAST((Expression) this.visit(ctx.expression()), ctx);
@@ -1096,8 +1102,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public CastExpression visitCastExprAlt(CastExprAltContext ctx) {
         return this.configureAST(
-                new CastExpression(this.visitType(ctx.type()), (Expression) this.visit(ctx.expression())),
-                ctx);
+                new CastExpression(
+                        this.visitCastParExpression(ctx.castParExpression()),
+                        (Expression) this.visit(ctx.expression())
+                ),
+                ctx
+        );
     }
 
     @Override
