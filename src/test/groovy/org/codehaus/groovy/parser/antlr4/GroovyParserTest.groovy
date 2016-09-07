@@ -172,6 +172,10 @@ class GroovyParserTest extends GroovyTestCase {
     void "test groovy core - LocalVariableDeclaration"() {
         test('core/LocalVariableDeclaration_01.groovy', [Token]); // [class org.codehaus.groovy.syntax.Token][startLine]:: 9 != 8
     }
+
+    void "test groovy core - Command"() {
+        test('core/Command_01.groovy');
+    }
     // ************************************************************
 
     static test(String path) {

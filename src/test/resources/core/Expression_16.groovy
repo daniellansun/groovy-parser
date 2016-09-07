@@ -16,3 +16,6 @@ void(x: 1, y: 2)
 void(x: 1, y: 2) {
 
 }
+
+use(String) {
+}

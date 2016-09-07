@@ -489,7 +489,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ExpressionStatement visitExpressionStmtAlt(ExpressionStmtAltContext ctx) {
-        return this.visitStatementExpression(ctx.statementExpression());
+        return (ExpressionStatement) this.visit(ctx.statementExpression());
     }
 
     @Override
@@ -695,9 +695,68 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
+
     @Override
-    public ExpressionStatement visitStatementExpression(StatementExpressionContext ctx) {
+    public ExpressionStatement visitNormalExprAlt(NormalExprAltContext ctx) {
         return this.configureAST(new ExpressionStatement((Expression) this.visit(ctx.expression())), ctx);
+    }
+
+    @Override
+    public ExpressionStatement visitCommandExprAlt(CommandExprAltContext ctx) {
+        return this.configureAST(new ExpressionStatement(this.visitCommandExpression(ctx.commandExpression())), ctx);
+    }
+
+    @Override
+    public Expression visitCommandExpression(CommandExpressionContext ctx) {
+        Expression baseExpr = (Expression) this.visit(ctx.expression());
+
+        // TODO refactor the duplicated code(pathElement)
+        if (baseExpr instanceof PropertyExpression) { // e.g. obj.a 1, 2
+            PropertyExpression propertyExpression = (PropertyExpression) baseExpr;
+
+            MethodCallExpression methodCallExpression =
+                    new MethodCallExpression(
+                            propertyExpression.getObjectExpression(),
+                            propertyExpression.getProperty(),
+                            this.visitArgumentList(ctx.argumentList())
+                    );
+
+            methodCallExpression.setImplicitThis(false);
+            methodCallExpression.setSafe(propertyExpression.isSafe());
+            methodCallExpression.setSpreadSafe(propertyExpression.isSpreadSafe());
+
+            // method call obj*.m(): "safe"(false) and "spreadSafe"(true)
+            // property access obj*.p: "safe"(true) and "spreadSafe"(true)
+            // so we have to reset safe here.
+            if (propertyExpression.isSpreadSafe()) {
+                methodCallExpression.setSafe(false);
+            }
+
+            // if the generics types meta data is not empty, it is a generic method call, e.g. obj.<Integer>a(1, 2)
+            methodCallExpression.setGenericsTypes(
+                    baseExpr.getNodeMetaData(PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES));
+
+            return this.configureAST(methodCallExpression, ctx);
+        }
+
+        // TODO support more senarios, e.g. a 1 b 2 c; obj.a 1 b 2 c; etc.
+
+
+        // TODO refactor the duplicated code(pathElement)
+        // e.g. m 1, 2
+        MethodCallExpression methodCallExpression =
+                new MethodCallExpression(
+                        VariableExpression.THIS_EXPRESSION,
+
+                        (baseExpr instanceof VariableExpression)
+                                ? this.createConstantExpression((VariableExpression) baseExpr)
+                                : baseExpr,
+
+                        this.visitArgumentList(ctx.argumentList())
+                );
+
+
+        return this.configureAST(methodCallExpression, ctx);
     }
 
 

@@ -610,11 +610,21 @@ expressionListElement
     :   MUL? expression
     ;
 
+/**
+ *  In order to resolve the syntactic ambiguities, e.g. (String)'abc' can be parsed as a cast expression or a parentheses-less method call(method name: (String), arguments: 'abc')
+ *      try to match expression first.
+ *  If it is not a normal expression, then try to match the command expression
+ */
 statementExpression
-    :   expression
+    :   expression                          #normalExprAlt
+    |   commandExpression                   #commandExprAlt
     ;
 
-expression // TODO support command expression
+commandExpression
+    :   expression argumentList?
+    ;
+
+expression
     // qualified names, array expressions, method invocation, post inc/dec (level 1)
     :   pathExpression                                                                      #pathExprAlt
     |   expression op=(INC | DEC)                                                           #postfixExprAlt
