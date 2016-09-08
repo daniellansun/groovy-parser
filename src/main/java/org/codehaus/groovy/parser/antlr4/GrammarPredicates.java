@@ -19,9 +19,6 @@
 package org.codehaus.groovy.parser.antlr4;
 
 import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.Token;
-
-import static org.codehaus.groovy.parser.antlr4.GroovyParser.Identifier;
 
 /**
  * Created by Daniel.Sun on 2016/8/20.
@@ -53,11 +50,4 @@ public class GrammarPredicates {
         return false;
     }
 
-    public static boolean isUpperCase(Token x) {
-        if (x == null || x.getType() != Identifier)
-            return false;  // cannot happen?
-
-        String xtext = x.getText();
-        return (xtext.length() > 0 && Character.isUpperCase(xtext.charAt(0)));
-    }
 }
