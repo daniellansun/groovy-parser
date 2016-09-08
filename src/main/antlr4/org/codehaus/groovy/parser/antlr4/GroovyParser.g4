@@ -107,7 +107,7 @@ packageDeclaration
     ;
 
 importDeclaration
-    :   annotationsOpt IMPORT STATIC? qualifiedName (DOT MUL | AS Identifier)?
+    :   annotationsOpt IMPORT STATIC? qualifiedName (DOT MUL | AS identifier)?
     ;
 
 typeDeclaration
@@ -147,7 +147,7 @@ variableModifier
     ;
 
 classDeclaration
-    :   CLASS Identifier typeParameters?
+    :   CLASS ClassName typeParameters?
         (EXTENDS type)?
         (IMPLEMENTS typeList)?
         classBody
@@ -158,7 +158,7 @@ typeParameters
     ;
 
 typeParameter
-    :   Identifier (EXTENDS typeBound)?
+    :   identifier (EXTENDS typeBound)?
     ;
 
 typeBound
@@ -166,7 +166,7 @@ typeBound
     ;
 
 enumDeclaration
-    :   ENUM Identifier (IMPLEMENTS typeList)?
+    :   ENUM ClassName (IMPLEMENTS typeList)?
         LBRACE enumConstants? COMMA? enumBodyDeclarations? RBRACE
     ;
 
@@ -175,7 +175,7 @@ enumConstants
     ;
 
 enumConstant
-    :   annotation* Identifier arguments? classBody?
+    :   annotation* identifier arguments? classBody?
     ;
 
 enumBodyDeclarations
@@ -183,7 +183,7 @@ enumBodyDeclarations
     ;
 
 interfaceDeclaration
-    :   INTERFACE Identifier typeParameters? (EXTENDS typeList)? interfaceBody
+    :   INTERFACE ClassName typeParameters? (EXTENDS typeList)? interfaceBody
     ;
 
 typeList
@@ -222,8 +222,8 @@ memberDeclaration
    for invalid return type after parsing.
  */
 methodDeclaration
-    :   (type|VOID) Identifier formalParameters (LBRACK RBRACK)*
-        (THROWS qualifiedNameList)?
+    :   (type|VOID) identifier formalParameters (LBRACK RBRACK)*
+        (THROWS qualifiedClassNameList)?
         (   methodBody
         |   SEMI
         )
@@ -234,7 +234,7 @@ genericMethodDeclaration
     ;
 
 constructorDeclaration
-    :   Identifier formalParameters (THROWS qualifiedNameList)?
+    :   ClassName formalParameters (THROWS qualifiedClassNameList)?
         constructorBody
     ;
 
@@ -266,13 +266,13 @@ constDeclaration
     ;
 
 constantDeclarator
-    :   Identifier (LBRACK RBRACK)* ASSIGN variableInitializer
+    :   identifier (LBRACK RBRACK)* ASSIGN variableInitializer
     ;
 
 // see matching of [] comment in methodDeclaratorRest
 interfaceMethodDeclaration
-    :   (type|VOID) Identifier formalParameters (LBRACK RBRACK)*
-        (THROWS qualifiedNameList)?
+    :   (type|VOID) identifier formalParameters (LBRACK RBRACK)*
+        (THROWS qualifiedClassNameList)?
         SEMI
     ;
 
@@ -289,7 +289,7 @@ variableDeclarator
     ;
 
 variableDeclaratorId
-    :   Identifier
+    :   identifier
     ;
 
 variableInitializer
@@ -302,7 +302,7 @@ arrayInitializer
     ;
 
 enumConstantName
-    :   Identifier
+    :   identifier
     ;
 
 type
@@ -327,8 +327,8 @@ typeArgument
     |   QUESTION ((EXTENDS | SUPER) nls type)?
     ;
 
-qualifiedNameList
-    :   qualifiedName (COMMA qualifiedName)*
+qualifiedClassNameList
+    :   qualifiedClassName (COMMA qualifiedClassName)*
     ;
 
 formalParameters
@@ -357,15 +357,11 @@ constructorBody
     ;
 
 qualifiedName
-    :   Identifier (DOT Identifier)*
+    :   identifier (DOT identifier)*
     ;
 
 qualifiedClassName
-    :   (Identifier DOT)* upperCaseIdentifier["The first character of class name should be upper case."]
-    ;
-
-upperCaseIdentifier[String msg]
-    :   id=Identifier { GrammarPredicates.isUpperCase($id) }?<fail={$msg}>
+    :   (Identifier DOT)* ClassName
     ;
 
 literal
@@ -398,7 +394,7 @@ gstringValue
     ;
 
 gstringPath
-    :   Identifier GStringPathPart*
+    :   identifier GStringPathPart*
     ;
 
 closure
@@ -423,14 +419,14 @@ annotation
     :   AT annotationName ( LPAREN ( elementValuePairs | elementValue )? RPAREN )?
     ;
 
-annotationName : qualifiedName ;
+annotationName : qualifiedClassName ;
 
 elementValuePairs
     :   elementValuePair (COMMA elementValuePair)*
     ;
 
 elementValuePair
-    :   Identifier ASSIGN elementValue
+    :   identifier ASSIGN elementValue
     ;
 
 // TODO verify the potential performance issue because rule expression contains sub-rule assignments(https://github.com/antlr/grammars-v4/issues/215)
@@ -445,7 +441,7 @@ elementValueArrayInitializer
     ;
 
 annotationTypeDeclaration
-    :   AT INTERFACE Identifier annotationTypeBody
+    :   AT INTERFACE ClassName annotationTypeBody
     ;
 
 annotationTypeBody
@@ -471,7 +467,7 @@ annotationMethodOrConstantRest
     ;
 
 annotationMethodRest
-    :   Identifier LPAREN RPAREN defaultValue?
+    :   identifier LPAREN RPAREN defaultValue?
     ;
 
 annotationConstantRest
@@ -521,9 +517,9 @@ statement
     |   SYNCHRONIZED parExpression nls block                                                #synchronizedStmtAlt
     |   RETURN expression?                                                                  #returnStmtAlt
     |   THROW expression                                                                    #throwStmtAlt
-    |   BREAK Identifier?                                                                   #breakStmtAlt
-    |   CONTINUE Identifier?                                                                #continueStmtAlt
-    |   Identifier COLON nls statement                                                      #labeledStmtAlt
+    |   BREAK identifier?                                                                   #breakStmtAlt
+    |   CONTINUE identifier?                                                                #continueStmtAlt
+    |   identifier COLON nls statement                                                      #labeledStmtAlt
 
     // Import statement.  Can be used in any scope.  Has "import x as y" also.
     |   importDeclaration                                                                   #importStmtAlt
@@ -536,7 +532,7 @@ statement
     ;
 
 catchClause
-    :   CATCH LPAREN (variableModifier nls)* catchType? Identifier RPAREN nls block
+    :   CATCH LPAREN (variableModifier nls)* catchType? identifier RPAREN nls block
     ;
 
 catchType
@@ -758,7 +754,7 @@ pathElement
  */
 namePart
     :
-        (   Identifier
+        (   identifier
 
         // foo.'bar' is in all ways same as foo.bar, except that bar can have an arbitrary spelling
         |   StringLiteral
@@ -796,7 +792,7 @@ indexPropertyArgs
     ;
 
 primary
-    :   Identifier                                                                          #identifierPrmrAlt
+    :   identifier                                                                          #identifierPrmrAlt
     |   literal                                                                             #literalPrmrAlt
     |   gstring                                                                             #gstringPrmrAlt
     |   NEW creator                                                                         #newPrmrAlt
@@ -847,7 +843,7 @@ creator
     ;
 
 createdName
-    :   Identifier typeArgumentsOrDiamond? (DOT Identifier typeArgumentsOrDiamond?)*
+    :   ClassName typeArgumentsOrDiamond? (DOT ClassName typeArgumentsOrDiamond?)*
     |   primitiveType
     ;
 
@@ -878,7 +874,7 @@ nonWildcardTypeArgumentsOrDiamond
 
 superSuffix
     :   arguments
-    |   DOT Identifier arguments?
+    |   DOT identifier arguments?
     ;
 
 arguments
@@ -888,6 +884,11 @@ arguments
 argumentList
     :   expressionList
     |   mapEntryList
+    ;
+
+identifier
+    :   Identifier
+    |   ClassName
     ;
 
 builtInType

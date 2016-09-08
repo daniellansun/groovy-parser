@@ -624,6 +624,9 @@ URSHIFT_ASSIGN  : '>>>=';
 
 
 // §3.8 Identifiers (must appear after all keywords in the grammar)
+ClassName
+    :   [A-Z] JavaLetterOrDigit*
+    ;
 
 Identifier
     :   JavaLetter JavaLetterOrDigit*

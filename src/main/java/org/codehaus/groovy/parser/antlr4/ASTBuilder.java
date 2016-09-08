@@ -129,7 +129,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         boolean hasStatic = asBoolean(ctx.STATIC());
         boolean hasStar = asBoolean(ctx.MUL());
-        boolean hasAlias = asBoolean(ctx.Identifier());
+        boolean hasAlias = asBoolean(ctx.identifier());
 
         List<AnnotationNode> annotationNodeList = this.visitAnnotationsOpt(ctx.annotationsOpt());
 
@@ -143,7 +143,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
                 importNode = last(moduleNode.getStaticStarImports().values());
             } else { // e.g. import static java.lang.Math.pow
-                List<TerminalNode> identifierList = new LinkedList<>(ctx.qualifiedName().Identifier());
+                List<GroovyParserRuleContext> identifierList = new LinkedList<>(ctx.qualifiedName().identifier());
                 String name = pop(identifierList).getText();
                 ClassNode classNode =
                         ClassHelper.make(
@@ -151,7 +151,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                         .map(ParseTree::getText)
                                         .collect(Collectors.joining(DOT_STR)));
                 String alias = hasAlias
-                        ? ctx.Identifier().getText()
+                        ? ctx.identifier().getText()
                         : name;
 
                 moduleNode.addStaticImport(classNode, name, alias, annotationNodeList);
@@ -167,10 +167,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 importNode = last(moduleNode.getStarImports());
             } else { // e.g. import java.util.Map
                 String qualifiedName = this.visitQualifiedName(ctx.qualifiedName());
-                String name = last(ctx.qualifiedName().Identifier()).getText();
+                String name = last(ctx.qualifiedName().identifier()).getText();
                 ClassNode classNode = ClassHelper.make(qualifiedName);
                 String alias = hasAlias
-                        ? ctx.Identifier().getText()
+                        ? ctx.identifier().getText()
                         : name;
 
                 moduleNode.addImport(alias, classNode, annotationNodeList);
@@ -347,7 +347,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 // we could make it better
                                 //this.configureAST(new Parameter(e, ctx.Identifier().getText()), ctx.Identifier()),
 
-                                new Parameter(e, ctx.Identifier().getText()),
+                                new Parameter(e, ctx.identifier().getText()),
                                 this.visitBlock(ctx.block())),
                         ctx.block()))
                 .collect(Collectors.toList());
@@ -511,15 +511,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public Statement visitLabeledStmtAlt(LabeledStmtAltContext ctx) {
         Statement statement = (Statement) this.visit(ctx.statement());
 
-        statement.addStatementLabel(ctx.Identifier().getText());
+        statement.addStatementLabel(ctx.identifier().getText());
 
         return statement; // this.configureAST(statement, ctx);
     }
 
     @Override
     public BreakStatement visitBreakStmtAlt(BreakStmtAltContext ctx) {
-        String label = asBoolean(ctx.Identifier())
-                ? ctx.Identifier().getText()
+        String label = asBoolean(ctx.identifier())
+                ? ctx.identifier().getText()
                 : null;
 
         return this.configureAST(new BreakStatement(label), ctx);
@@ -527,8 +527,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ContinueStatement visitContinueStmtAlt(ContinueStmtAltContext ctx) {
-        String label = asBoolean(ctx.Identifier())
-                ? ctx.Identifier().getText()
+        String label = asBoolean(ctx.identifier())
+                ? ctx.identifier().getText()
                 : null;
 
         return this.configureAST(new ContinueStatement(label), ctx);
@@ -1047,8 +1047,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitNamePart(NamePartContext ctx) {
-        if (asBoolean(ctx.Identifier())) {
-            return this.configureAST(new ConstantExpression(ctx.Identifier().getText()), ctx);
+        if (asBoolean(ctx.identifier())) {
+            return this.configureAST(new ConstantExpression(ctx.identifier().getText()), ctx);
         } else if (asBoolean(ctx.StringLiteral())) {
             return this.configureAST(this.cleanStringLiteral(ctx.StringLiteral().getText()), ctx);
         } else if (asBoolean(ctx.dynamicMemberName())) {
@@ -1317,7 +1317,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     // primary {       --------------------------------------------------------------------
     @Override
     public VariableExpression visitIdentifierPrmrAlt(IdentifierPrmrAltContext ctx) {
-        return this.configureAST(new VariableExpression(ctx.Identifier().getText()), ctx);
+        return this.configureAST(new VariableExpression(ctx.identifier().getText()), ctx);
     }
 
     @Override
@@ -1427,6 +1427,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(new ConstantExpression(ctx.getText()), ctx);
     }
 
+    /*
+    @Override
+    public VariableExpression visitIdentifier(IdentifierContext ctx) {
+        return this.configureAST(new VariableExpression(ctx.getText()), ctx);
+    }
+    */
 
     @Override
     public VariableExpression visitBuiltInType(BuiltInTypeContext ctx) {
@@ -1645,12 +1651,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitGstringPath(GstringPathContext ctx) {
-        VariableExpression variableExpression = new VariableExpression(ctx.Identifier().getText());
+        VariableExpression variableExpression = new VariableExpression(ctx.identifier().getText());
 
         if (asBoolean(ctx.GStringPathPart())) {
             Expression propertyExpression = ctx.GStringPathPart().stream()
                     .map(e -> this.configureAST((Expression) new ConstantExpression(e.getText().substring(1)), e))
-                    .reduce(this.configureAST(variableExpression, ctx.Identifier()), (r, e) -> this.configureAST(new PropertyExpression(r, e), e));
+                    .reduce(this.configureAST(variableExpression, ctx.identifier()), (r, e) -> this.configureAST(new PropertyExpression(r, e), e));
 
             return this.configureAST(propertyExpression, ctx);
         }
@@ -1817,7 +1823,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public VariableExpression visitVariableDeclaratorId(VariableDeclaratorIdContext ctx) {
-        return this.configureAST(new VariableExpression(ctx.Identifier().getText()), ctx);
+        return this.configureAST(new VariableExpression(ctx.identifier().getText()), ctx);
     }
 
     @Override
@@ -1883,7 +1889,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public String visitAnnotationName(AnnotationNameContext ctx) {
-        return this.visitQualifiedName(ctx.qualifiedName());
+        return this.visitQualifiedClassName(ctx.qualifiedClassName()).getName();
     }
 
     @Override
@@ -1895,7 +1901,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Pair<String, Expression> visitElementValuePair(ElementValuePairContext ctx) {
-        return new Pair<>(ctx.Identifier().getText(), this.visitElementValue(ctx.elementValue()));
+        return new Pair<>(ctx.identifier().getText(), this.visitElementValue(ctx.elementValue()));
     }
 
     @Override
@@ -1922,27 +1928,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public String visitQualifiedName(QualifiedNameContext ctx) {
-        return ctx.Identifier().stream()
+        return ctx.identifier().stream()
                 .map(ParseTree::getText)
                 .collect(Collectors.joining(DOT_STR));
     }
 
     @Override
     public ClassNode visitQualifiedClassName(QualifiedClassNameContext ctx) {
-        String upperCaseName = this.visitUpperCaseIdentifier(ctx.upperCaseIdentifier());
+        String className = ctx.ClassName().getText();
 
         if (asBoolean(ctx.Identifier())) {
             return ClassHelper.make(ctx.Identifier().stream().map(e -> e.getText()).collect(Collectors.joining("."))
                     + "."
-                    + upperCaseName);
+                    + className);
         }
 
-        return ClassHelper.make(upperCaseName);
-    }
-
-    @Override
-    public String visitUpperCaseIdentifier(UpperCaseIdentifierContext ctx) {
-        return ctx.Identifier().getText();
+        return ClassHelper.make(className);
     }
 
     /**
