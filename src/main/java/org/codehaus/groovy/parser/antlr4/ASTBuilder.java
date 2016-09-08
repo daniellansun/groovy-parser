@@ -710,51 +710,19 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public Expression visitCommandExpression(CommandExpressionContext ctx) {
         Expression baseExpr = (Expression) this.visit(ctx.expression());
 
-        // TODO refactor the duplicated code(pathElement)
         if (baseExpr instanceof PropertyExpression) { // e.g. obj.a 1, 2
-            PropertyExpression propertyExpression = (PropertyExpression) baseExpr;
-
             MethodCallExpression methodCallExpression =
-                    new MethodCallExpression(
-                            propertyExpression.getObjectExpression(),
-                            propertyExpression.getProperty(),
-                            this.visitArgumentList(ctx.argumentList())
-                    );
-
-            methodCallExpression.setImplicitThis(false);
-            methodCallExpression.setSafe(propertyExpression.isSafe());
-            methodCallExpression.setSpreadSafe(propertyExpression.isSpreadSafe());
-
-            // method call obj*.m(): "safe"(false) and "spreadSafe"(true)
-            // property access obj*.p: "safe"(true) and "spreadSafe"(true)
-            // so we have to reset safe here.
-            if (propertyExpression.isSpreadSafe()) {
-                methodCallExpression.setSafe(false);
-            }
-
-            // if the generics types meta data is not empty, it is a generic method call, e.g. obj.<Integer>a(1, 2)
-            methodCallExpression.setGenericsTypes(
-                    baseExpr.getNodeMetaData(PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES));
+                    this.createMethodCallExpression(
+                            (PropertyExpression) baseExpr, this.visitArgumentList(ctx.argumentList()));
 
             return this.configureAST(methodCallExpression, ctx);
         }
 
         // TODO support more senarios, e.g. a 1 b 2 c; obj.a 1 b 2 c; etc.
 
-
-        // TODO refactor the duplicated code(pathElement)
         // e.g. m 1, 2
         MethodCallExpression methodCallExpression =
-                new MethodCallExpression(
-                        VariableExpression.THIS_EXPRESSION,
-
-                        (baseExpr instanceof VariableExpression)
-                                ? this.createConstantExpression((VariableExpression) baseExpr)
-                                : baseExpr,
-
-                        this.visitArgumentList(ctx.argumentList())
-                );
-
+                this.createMethodCallExpression(baseExpr, this.visitArgumentList(ctx.argumentList()));
 
         return this.configureAST(methodCallExpression, ctx);
     }
@@ -874,29 +842,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
 
             if (baseExpr instanceof PropertyExpression) { // e.g. obj.a(1, 2)
-                PropertyExpression propertyExpression = (PropertyExpression) baseExpr;
-
                 MethodCallExpression methodCallExpression =
-                        new MethodCallExpression(
-                                propertyExpression.getObjectExpression(),
-                                propertyExpression.getProperty(),
-                                argumentsExpr
-                        );
-
-                methodCallExpression.setImplicitThis(false);
-                methodCallExpression.setSafe(propertyExpression.isSafe());
-                methodCallExpression.setSpreadSafe(propertyExpression.isSpreadSafe());
-
-                // method call obj*.m(): "safe"(false) and "spreadSafe"(true)
-                // property access obj*.p: "safe"(true) and "spreadSafe"(true)
-                // so we have to reset safe here.
-                if (propertyExpression.isSpreadSafe()) {
-                    methodCallExpression.setSafe(false);
-                }
-
-                // if the generics types meta data is not empty, it is a generic method call, e.g. obj.<Integer>a(1, 2)
-                methodCallExpression.setGenericsTypes(
-                        baseExpr.getNodeMetaData(PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES));
+                        this.createMethodCallExpression((PropertyExpression) baseExpr, argumentsExpr);
 
                 return this.configureAST(methodCallExpression, ctx);
             }
@@ -945,16 +892,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             // e.g. m()
             MethodCallExpression methodCallExpression =
-                    new MethodCallExpression(
-                            VariableExpression.THIS_EXPRESSION,
-
-                            (baseExpr instanceof VariableExpression)
-                                    ? this.createConstantExpression((VariableExpression) baseExpr)
-                                    : baseExpr,
-
-                            argumentsExpr
-                    );
-
+                    this.createMethodCallExpression(baseExpr, argumentsExpr);
 
             return this.configureAST(methodCallExpression, ctx);
         }
@@ -2020,6 +1958,50 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         return super.visit(tree);
+    }
+
+
+    // e.g. obj.a(1, 2) or obj.a 1, 2
+    private MethodCallExpression createMethodCallExpression(PropertyExpression propertyExpression, Expression arguments) {
+        MethodCallExpression methodCallExpression =
+                new MethodCallExpression(
+                        propertyExpression.getObjectExpression(),
+                        propertyExpression.getProperty(),
+                        arguments
+                );
+
+        methodCallExpression.setImplicitThis(false);
+        methodCallExpression.setSafe(propertyExpression.isSafe());
+        methodCallExpression.setSpreadSafe(propertyExpression.isSpreadSafe());
+
+        // method call obj*.m(): "safe"(false) and "spreadSafe"(true)
+        // property access obj*.p: "safe"(true) and "spreadSafe"(true)
+        // so we have to reset safe here.
+        if (propertyExpression.isSpreadSafe()) {
+            methodCallExpression.setSafe(false);
+        }
+
+        // if the generics types meta data is not empty, it is a generic method call, e.g. obj.<Integer>a(1, 2)
+        methodCallExpression.setGenericsTypes(
+                propertyExpression.getNodeMetaData(PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES));
+
+        return methodCallExpression;
+    }
+
+    // e.g. m(1, 2) or m 1, 2
+    private MethodCallExpression createMethodCallExpression(Expression baseExpr, Expression arguments) {
+        MethodCallExpression methodCallExpression =
+                new MethodCallExpression(
+                        VariableExpression.THIS_EXPRESSION,
+
+                        (baseExpr instanceof VariableExpression)
+                                ? this.createConstantExpression((VariableExpression) baseExpr)
+                                : baseExpr,
+
+                        arguments
+                );
+
+        return methodCallExpression;
     }
 
     private Parameter processFormalParameter(GroovyParserRuleContext ctx,
