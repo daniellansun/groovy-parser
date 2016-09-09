@@ -860,7 +860,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         if (asBoolean(ctx.indexPropertyArgs())) { // e.g. list[1, 3, 5]
-            Pair<Token, ListExpression> pair = this.visitIndexPropertyArgs(ctx.indexPropertyArgs());
+            Pair<Token, Expression> pair = this.visitIndexPropertyArgs(ctx.indexPropertyArgs());
 
             return this.configureAST(
                     new BinaryExpression(baseExpr, createGroovyToken(pair.getKey()), pair.getValue()),
@@ -1018,6 +1018,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 return this.configureAST(methodCallExpression, ctx);
             }
 
+
+            if (baseExpr instanceof PropertyExpression) {
+                PropertyExpression propertyExpression = (PropertyExpression) baseExpr;
+
+                MethodCallExpression methodCallExpression =
+                        this.createMethodCallExpression(
+                                propertyExpression,
+                                this.configureAST(
+                                        new ArgumentListExpression(closureExpression),
+                                        closureExpression
+                                )
+                        );
+
+                return this.configureAST(methodCallExpression, ctx);
+            }
+
             // e.g.  m { return 1; }
             MethodCallExpression methodCallExpression =
                     new MethodCallExpression(
@@ -1088,18 +1104,29 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Pair<Token, ListExpression> visitIndexPropertyArgs(IndexPropertyArgsContext ctx) {
+    public Pair<Token, Expression> visitIndexPropertyArgs(IndexPropertyArgsContext ctx) {
         List<Expression> expressionList = this.visitExpressionList(ctx.expressionList());
-        ListExpression listExpression = new ListExpression(expressionList);
+        Expression indexExpr;
 
-        if (expressionList.size() == 1
-                && expressionList.get(0) instanceof SpreadExpression) {
-            listExpression.setWrapped(false);
+        if (expressionList.size() == 1) {
+            Expression expr = expressionList.get(0);
+
+            if (expr instanceof SpreadExpression) {
+                ListExpression listExpression = new ListExpression(expressionList);
+                listExpression.setWrapped(false);
+
+                indexExpr = listExpression;
+            } else {
+                indexExpr = expr;
+            }
         } else {
+            ListExpression listExpression = new ListExpression(expressionList);
             listExpression.setWrapped(true);
+
+            indexExpr = listExpression;
         }
 
-        return new Pair<>(ctx.LBRACK().getSymbol(), this.configureAST(listExpression, ctx));
+        return new Pair<>(ctx.LBRACK().getSymbol(), this.configureAST(indexExpr, ctx));
     }
 
 

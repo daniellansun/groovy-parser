@@ -211,6 +211,7 @@ class GroovyParserTest extends GroovyTestCase {
         ASTComparatorCategory.apply(conf) {
             assert ast1 == ast2
         }
+
         assert genSrc(ast1) == genSrc(ast2)
     }
 
