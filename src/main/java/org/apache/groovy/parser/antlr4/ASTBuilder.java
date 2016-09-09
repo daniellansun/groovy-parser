@@ -1111,15 +1111,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (expressionList.size() == 1) {
             Expression expr = expressionList.get(0);
 
-            if (expr instanceof SpreadExpression) {
+            if (expr instanceof SpreadExpression) { // e.g. a[*[1, 2]]
                 ListExpression listExpression = new ListExpression(expressionList);
                 listExpression.setWrapped(false);
 
                 indexExpr = listExpression;
-            } else {
+            } else { // e.g. a[1]
                 indexExpr = expr;
             }
-        } else {
+        } else { // e.g. a[1, 2]
             ListExpression listExpression = new ListExpression(expressionList);
             listExpression.setWrapped(true);
 
