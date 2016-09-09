@@ -708,23 +708,77 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitCommandExpression(CommandExpressionContext ctx) {
-        Expression baseExpr = (Expression) this.visit(ctx.expression());
+        Expression baseExpr = this.visitPathExpression(ctx.pathExpression());
+        Expression arguments = this.visitArgumentList(ctx.argumentList());
 
+        MethodCallExpression methodCallExpression;
         if (baseExpr instanceof PropertyExpression) { // e.g. obj.a 1, 2
-            MethodCallExpression methodCallExpression =
+            methodCallExpression =
                     this.createMethodCallExpression(
-                            (PropertyExpression) baseExpr, this.visitArgumentList(ctx.argumentList()));
+                            (PropertyExpression) baseExpr, arguments);
 
+        } else { // e.g. m 1, 2
+            methodCallExpression =
+                    this.createMethodCallExpression(baseExpr, arguments);
+        }
+
+        if (!asBoolean(ctx.commandArgument())) {
             return this.configureAST(methodCallExpression, ctx);
         }
 
-        // TODO support more senarios, e.g. a 1 b 2 c; obj.a 1 b 2 c; etc.
+        return this.configureAST(
+                (Expression) ctx.commandArgument().stream()
+                        .map(e -> (Object) e)
+                        .reduce(this.configureAST(methodCallExpression, arguments),
+                                (r, e) -> {
+                                    CommandArgumentContext commandArgumentContext = (CommandArgumentContext) e;
+                                    commandArgumentContext.putNodeMetaData(CMD_EXPRESSION_BASE_EXPR, r);
 
-        // e.g. m 1, 2
-        MethodCallExpression methodCallExpression =
-                this.createMethodCallExpression(baseExpr, this.visitArgumentList(ctx.argumentList()));
+                                    return this.visitCommandArgument(commandArgumentContext);
+                                }
+                        ),
+                ctx);
+    }
 
-        return this.configureAST(methodCallExpression, ctx);
+    @Override
+    public Expression visitCommandArgument(CommandArgumentContext ctx) {
+        // e.g. x y a b     we call "x y" as the base expression
+        Expression baseExpr = ctx.getNodeMetaData(CMD_EXPRESSION_BASE_EXPR);
+
+        Expression primaryExpr = (Expression) this.visit(ctx.primary());
+
+        if (asBoolean(ctx.argumentList())) { // e.g. x y a b
+            if (baseExpr instanceof PropertyExpression) { // the branch should never reach, because a.b.c will be parsed as a path expression, not a method call
+                throw createParsingFailedException("Unsupported command argument: " + ctx.getText(), ctx);
+            }
+
+            // the following code will process "a b" of "x y a b"
+            MethodCallExpression methodCallExpression =
+                    new MethodCallExpression(
+                            baseExpr,
+                            this.createConstantExpression(primaryExpr),
+                            this.visitArgumentList(ctx.argumentList())
+                    );
+            methodCallExpression.setImplicitThis(false);
+
+            return this.configureAST(methodCallExpression, ctx);
+        } else if (asBoolean(ctx.pathElement())) { // e.g. x y a.b
+            Expression pathExpression =
+                    this.createPathExpression(
+                            this.configureAST(
+                                    new PropertyExpression(baseExpr, this.createConstantExpression(primaryExpr)),
+                                    primaryExpr
+                            ),
+                            ctx.pathElement()
+                    );
+
+            return this.configureAST(pathExpression, ctx);
+        }
+
+        // e.g. x y a
+        return this.configureAST(
+                new PropertyExpression(baseExpr, this.createConstantExpression(primaryExpr)),
+                primaryExpr);
     }
 
 
@@ -752,20 +806,9 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitPathExpression(PathExpressionContext ctx) {
-        Expression primaryExpr = this.configureAST((Expression) this.visit(ctx.primary()), ctx);
-
-        Expression expression =
-                (Expression) ctx.pathElement().stream()
-                        .map(e -> (Object) e)
-                        .reduce(primaryExpr, (r, e) -> {
-                            PathElementContext pathElementContext = (PathElementContext) e;
-
-                            pathElementContext.putNodeMetaData(PATH_EXPRESSION_BASE_EXPR, r);
-
-                            return this.visitPathElement(pathElementContext);
-                        });
-
-        return this.configureAST(expression, ctx);
+        return this.configureAST(
+                this.createPathExpression((Expression) this.visit(ctx.primary()), ctx.pathElement()),
+                ctx);
     }
 
     @Override
@@ -862,6 +905,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 return this.configureAST(methodCallExpression, ctx);
             }
 
+            // e.g. m()()
+            if (baseExpr instanceof MethodCallExpression) {
+                MethodCallExpression methodCallExpression =
+                        new MethodCallExpression(
+                                baseExpr,
+                                CALL_STR,
+                                argumentsExpr
+                        );
+
+                methodCallExpression.setImplicitThis(false);
+
+                return this.configureAST(methodCallExpression, ctx);
+            }
+
 
             if (baseExpr instanceof VariableExpression) { // void and primitive type AST node must be an instance of VariableExpression
                 String baseExprText = baseExpr.getText();
@@ -889,6 +946,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
                 return this.configureAST(methodCallExpression, ctx);
             }
+
 
             // e.g. m()
             MethodCallExpression methodCallExpression =
@@ -1001,7 +1059,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Expression visitArguments(ArgumentsContext ctx) {
         if (!asBoolean(ctx.argumentList())) {
-            return this.configureAST(new ArgumentListExpression(), ctx);
+            return ArgumentListExpression.EMPTY_ARGUMENTS;
         }
 
         return this.configureAST(this.visitArgumentList(ctx.argumentList()), ctx);
@@ -2028,13 +2086,26 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 );
     }
 
+    private Expression createPathExpression(Expression primaryExpr, List<PathElementContext> pathElementContextList) {
+        return (Expression) pathElementContextList.stream()
+                .map(e -> (Object) e)
+                .reduce(primaryExpr,
+                        (r, e) -> {
+                            PathElementContext pathElementContext = (PathElementContext) e;
+
+                            pathElementContext.putNodeMetaData(PATH_EXPRESSION_BASE_EXPR, r);
+
+                            return this.visitPathElement(pathElementContext);
+                        }
+                );
+    }
 
     private GenericsType createGenericsType(TypeContext ctx) {
         return this.configureAST(new GenericsType(this.visitType(ctx)), ctx);
     }
 
-    private ConstantExpression createConstantExpression(VariableExpression variableExpression) {
-        return this.configureAST(new ConstantExpression(variableExpression.getName()), variableExpression);
+    private ConstantExpression createConstantExpression(Expression expression) {
+        return this.configureAST(new ConstantExpression(expression.getText()), expression);
     }
 
     private BinaryExpression createBinaryExpression(ExpressionContext left, Token op, ExpressionContext right) {
@@ -2566,6 +2637,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String IS_INSIDE_PARENTHESES = "_IS_INSIDE_PARENTHESES";
     private static final String IS_SWITCH_DEFAULT = "_IS_SWITCH_DEFAULT";
     private static final String IS_NUMERIC = "_IS_NUMERIC";
+
     private static final String PATH_EXPRESSION_BASE_EXPR = "_PATH_EXPRESSION_BASE_EXPR";
     private static final String PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES = "_PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES";
+    private static final String CMD_EXPRESSION_BASE_EXPR = "_CMD_EXPRESSION_BASE_EXPR";
 }

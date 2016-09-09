@@ -624,10 +624,6 @@ statementExpression
     |   commandExpression                   #commandExprAlt
     ;
 
-commandExpression
-    :   expression argumentList?
-    ;
-
 expression
     // qualified names, array expressions, method invocation, post inc/dec (level 1)
     :   pathExpression                                                                      #pathExprAlt
@@ -721,6 +717,30 @@ expression
                      right=expression                                                        #assignmentExprAlt
     ;
 
+commandExpression
+    :   pathExpression argumentList? commandArgument*
+    ;
+
+commandArgument
+    :   primary
+        // what follows is either a normal argument, parens,
+        // an appended block, an index operation, or nothing
+        // parens (a b already processed):
+        //      a b c() d e -> a(b).c().d(e)
+        //      a b c()() d e -> a(b).c().call().d(e)
+        // index (a b already processed):
+        //      a b c[x] d e -> a(b).c[x].d(e)
+        //      a b c[x][y] d e -> a(b).c[x][y].d(e)
+        // block (a b already processed):
+        //      a b c {x} d e -> a(b).c({x}).d(e)
+        //
+        // parens/block completes method call
+        // index makes method call to property get with index
+        //
+        (   pathElement+
+        |   argumentList
+        )?
+    ;
 
 /**
  *  A "path expression" is a name or other primary, possibly qualified by various
