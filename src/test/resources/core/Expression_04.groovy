@@ -13,7 +13,7 @@ here %= sometimes
 water ^= oil
 a &= that
 
-
+a = b *= c += d %= e f g h
 
 a =
         b =

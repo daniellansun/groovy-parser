@@ -714,7 +714,8 @@ expression
                            |   MOD_ASSIGN
                            |   POWER_ASSIGN
                            ) nls
-                     right=expression                                                        #assignmentExprAlt
+                     (re=expression | rc=commandExpression)                                 #assignmentExprAlt
+
     ;
 
 commandExpression
