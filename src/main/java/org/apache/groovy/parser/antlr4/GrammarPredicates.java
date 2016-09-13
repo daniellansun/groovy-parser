@@ -64,6 +64,7 @@ public class GrammarPredicates {
         int tokenType = ts.LA(-1);
 
         // FIXME         ((int)) 1        => 'int'.call(1)
-        return !(RPAREN == tokenType || RBRACE == tokenType);
+        // FIXME         a[0] 1           => a[0].call(1)
+        return !(RPAREN == tokenType || RBRACE == tokenType || RBRACK == tokenType);
     }
 }

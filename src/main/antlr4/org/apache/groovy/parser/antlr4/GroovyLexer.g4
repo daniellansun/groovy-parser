@@ -37,6 +37,10 @@ lexer grammar GroovyLexer;
     import static org.apache.groovy.parser.antlr4.GrammarPredicates.*;
     import java.util.Deque;
     import java.util.ArrayDeque;
+    import java.util.Set;
+    import java.util.HashSet;
+    import java.util.Collections;
+    import java.util.Arrays;
 }
 
 @members {
@@ -62,20 +66,31 @@ lexer grammar GroovyLexer;
         super.emit(token);
     }
 
+    private static final Set<Integer> REGEX_CHECK_SET =
+                                            Collections.unmodifiableSet(
+                                                new HashSet<>(Arrays.asList(Identifier, NullLiteral, BooleanLiteral, THIS, RPAREN, RBRACK, RBRACE, IntegerLiteral, FloatingPointLiteral, StringLiteral, GStringEnd)));
+    private boolean isRegexAllowed() {
+        if (REGEX_CHECK_SET.contains(this.lastTokenType)) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * just a hook, which will be overrided by GroovyLangLexer
      */
     protected void rollbackOneChar() {}
 
-    private int parenLevel = 0; // just track the parentheses and brackets
+    private int nestLevel = 0; // just track the parentheses and brackets
     private void enterParen() {
-        this.parenLevel++;
+        this.nestLevel++;
     }
     private void exitParen() {
-        this.parenLevel--;
+        this.nestLevel--;
     }
     private boolean isInsideParens() {
-        return 0 != this.parenLevel;
+        return 0 != this.nestLevel;
     }
 }
 
@@ -85,7 +100,10 @@ lexer grammar GroovyLexer;
 StringLiteral
     :   '"'      DqStringCharacter*?           '"'
     |   '\''     SqStringCharacter*?           '\''
-    |   '/'      SlashyStringCharacter+?       '/'
+
+    |   '/'      { this.isRegexAllowed() }?
+                 SlashyStringCharacter+?       '/'
+
     |   '"""'    TdqStringCharacter*?          '"""'
     |   '\'\'\'' TsqStringCharacter*?          '\'\'\''
     |   '$/'     DollarSlashyStringCharacter+? '/$'
@@ -99,7 +117,7 @@ TdqGStringBegin
     :   '"""'   TdqStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(TDQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 SlashyGStringBegin
-    :   '/' SlashyStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    :   '/' { this.isRegexAllowed() }? SlashyStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 DollarSlashyGStringBegin
     :   '$/' DollarSlashyStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(DOLLAR_SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
