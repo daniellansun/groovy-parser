@@ -663,8 +663,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return this.configureAST(this.visitArrayInitializer(ctx.arrayInitializer()), ctx);
         }
 
-        if (asBoolean(ctx.expression())) {
-            return this.configureAST((Expression) this.visit(ctx.expression()), ctx);
+        if (asBoolean(ctx.statementExpression())) {
+            return this.configureAST(
+                    ((ExpressionStatement) this.visit(ctx.statementExpression())).getExpression(),
+                    ctx);
         }
 
         throw createParsingFailedException("Unsupported variable initializer: " + ctx.getText(), ctx);
@@ -714,12 +716,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         MethodCallExpression methodCallExpression;
         if (baseExpr instanceof PropertyExpression) { // e.g. obj.a 1, 2
             methodCallExpression =
-                    this.createMethodCallExpression(
-                            (PropertyExpression) baseExpr, arguments);
+                    this.configureAST(
+                            this.createMethodCallExpression(
+                                    (PropertyExpression) baseExpr, arguments),
+                            arguments);
 
+        } else if (baseExpr instanceof MethodCallExpression) { // e.g. m {} a  OR  m(...) a
+            if (asBoolean(arguments)) {
+                throw new GroovyBugError("When baseExpr is a instance of MethodCallExpression, which should follow NO argumentList");
+            }
+
+            methodCallExpression = (MethodCallExpression) baseExpr;
         } else { // e.g. m 1, 2
             methodCallExpression =
-                    this.createMethodCallExpression(baseExpr, arguments);
+                    this.configureAST(
+                            this.createMethodCallExpression(baseExpr, arguments),
+                            arguments);
         }
 
         if (!asBoolean(ctx.commandArgument())) {
@@ -729,7 +741,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(
                 (Expression) ctx.commandArgument().stream()
                         .map(e -> (Object) e)
-                        .reduce(this.configureAST(methodCallExpression, arguments),
+                        .reduce(methodCallExpression,
                                 (r, e) -> {
                                     CommandArgumentContext commandArgumentContext = (CommandArgumentContext) e;
                                     commandArgumentContext.putNodeMetaData(CMD_EXPRESSION_BASE_EXPR, r);
@@ -777,8 +789,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         // e.g. x y a
         return this.configureAST(
-                new PropertyExpression(baseExpr, this.createConstantExpression(primaryExpr)),
-                primaryExpr);
+                new PropertyExpression(
+                        baseExpr,
+                        primaryExpr instanceof GStringExpression
+                                ? primaryExpr
+                                : this.createConstantExpression(primaryExpr)
+                ),
+                primaryExpr
+        );
     }
 
 
@@ -1083,6 +1101,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitArgumentList(ArgumentListContext ctx) {
+        if (!asBoolean(ctx)) {
+            return null;
+        }
+
         if (asBoolean(ctx.expressionList())) { // e.g. arguments like  1, 2
             return this.configureAST(
                     new ArgumentListExpression(
@@ -1388,18 +1410,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
-
     @Override
     public BinaryExpression visitAssignmentExprAlt(AssignmentExprAltContext ctx) {
-        if (asBoolean(ctx.rc)) {
-            return this.configureAST(
-                    new BinaryExpression((Expression) this.visit(ctx.left), this.createGroovyToken(ctx.op), this.visitCommandExpression(ctx.rc)),
-                    ctx);
-        }
-
         return this.configureAST(
-                this.createBinaryExpression(ctx.left, ctx.op, ctx.re),
-                ctx);
+                new BinaryExpression(
+                        (Expression) this.visit(ctx.left),
+                        this.createGroovyToken(ctx.op),
+                        ((ExpressionStatement) this.visit(ctx.right)).getExpression()),
+                ctx
+        );
     }
 
 // } expression    --------------------------------------------------------------------

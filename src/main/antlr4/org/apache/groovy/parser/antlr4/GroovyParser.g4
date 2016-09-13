@@ -302,7 +302,7 @@ variableDeclaratorId
 
 variableInitializer
     :   arrayInitializer
-    |   expression
+    |   statementExpression
     ;
 
 arrayInitializer
@@ -714,12 +714,20 @@ expression
                            |   MOD_ASSIGN
                            |   POWER_ASSIGN
                            ) nls
-                     (re=expression | rc=commandExpression)                                 #assignmentExprAlt
+                     right=statementExpression                                              #assignmentExprAlt
 
     ;
 
 commandExpression
-    :   pathExpression argumentList? commandArgument*
+    :   pathExpression
+        (
+            { GrammarPredicates.isFollowingMethodName(_input) }?
+            argumentList
+        |
+            /* if pathExpression is a method call, no need to have any more arguments */
+        )
+
+        commandArgument*
     ;
 
 commandArgument

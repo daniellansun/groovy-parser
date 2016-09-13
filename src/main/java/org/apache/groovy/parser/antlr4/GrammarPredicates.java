@@ -19,6 +19,9 @@
 package org.apache.groovy.parser.antlr4;
 
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.TokenStream;
+
+import static org.apache.groovy.parser.antlr4.GroovyParser.*;
 
 /**
  * Created by Daniel.Sun on 2016/8/20.
@@ -50,4 +53,17 @@ public class GrammarPredicates {
         return false;
     }
 
+    /**
+     * Check whether following a method name of command expression.
+     * Method name should not end with RPAREN and RBRACE
+     *
+     * @param ts the token stream
+     * @return
+     */
+    public static boolean isFollowingMethodName(TokenStream ts) {
+        int tokenType = ts.LA(-1);
+
+        // FIXME         ((int)) 1        => 'int'.call(1)
+        return !(RPAREN == tokenType || RBRACE == tokenType);
+    }
 }

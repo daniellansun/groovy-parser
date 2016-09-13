@@ -13,6 +13,7 @@ here %= sometimes
 water ^= oil
 a &= that
 
+a = e f g h
 a = b *= c += d %= e f g h
 
 a =
@@ -29,5 +30,6 @@ a =
                                                                                         here %=
                                                                                                 water ^=
                                                                                                         a &=
-                                                                                                                that
+                                                                                                                that =
+                                                                                                                        x y z
 
