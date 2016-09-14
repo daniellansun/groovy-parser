@@ -5,3 +5,5 @@
 ~
         1
 (String)'abc'
+(int) obj.someMethod()
+(int) (obj.someMethod())

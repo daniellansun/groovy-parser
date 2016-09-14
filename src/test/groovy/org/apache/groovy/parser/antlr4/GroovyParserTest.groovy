@@ -179,6 +179,7 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/Command_02.groovy');
         test('core/Command_03.groovy');
         test('core/Command_04.groovy', [ExpressionStatement]);
+        test('core/Command_05.groovy');
     }
     // ************************************************************
 

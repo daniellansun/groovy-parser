@@ -625,13 +625,14 @@ statementExpression
     ;
 
 expression
-    // qualified names, array expressions, method invocation, post inc/dec (level 1)
-    :   pathExpression                                                                      #pathExprAlt
+    // qualified names, array expressions, method invocation, post inc/dec, type casting (level 1)
+    // The cast expression must put first to resovle the ambiguities between type casting and call on parentheses expression, e.g. (int)(1 / 2)
+    :   castParExpression expression                                                        #castExprAlt
+    |   pathExpression                                                                      #pathExprAlt
     |   expression op=(INC | DEC)                                                           #postfixExprAlt
 
-    // ~(BNOT)/!(LNOT)/(type casting) (level 1)
+    // ~(BNOT)/!(LNOT) (level 1)
     |   (BITNOT | NOT) nls expression                                                       #unaryNotExprAlt
-    |   castParExpression expression                                                        #castExprAlt
 
     // math power operator (**) (level 2)
     |   left=expression op=POWER nls right=expression                                       #powerExprAlt
