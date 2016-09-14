@@ -803,9 +803,9 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(
                 new PropertyExpression(
                         baseExpr,
-                        primaryExpr instanceof GStringExpression
-                                ? primaryExpr
-                                : this.createConstantExpression(primaryExpr)
+                        primaryExpr instanceof VariableExpression
+                                ? this.createConstantExpression(primaryExpr)
+                                : primaryExpr
                 ),
                 primaryExpr
         );
@@ -955,7 +955,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 if ("void".equals(baseExprText)) { // e.g. void()
                     MethodCallExpression methodCallExpression =
                             new MethodCallExpression(
-                                    this.createConstantExpression((VariableExpression) baseExpr),
+                                    this.createConstantExpression(baseExpr),
                                     CALL_STR,
                                     argumentsExpr
                             );
@@ -968,19 +968,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 }
             }
 
-            // e.g. 1(), 1.1()
-            if (baseExpr instanceof ConstantExpression && isTrue(baseExpr, IS_NUMERIC)) {
+            if (baseExpr instanceof VariableExpression
+                    || baseExpr instanceof GStringExpression
+                    || (baseExpr instanceof ConstantExpression && isTrue(baseExpr, IS_STRING))) { // e.g. m(), "$m"(), "m"()
+
                 MethodCallExpression methodCallExpression =
-                        new MethodCallExpression(baseExpr, CALL_STR, argumentsExpr);
-                methodCallExpression.setImplicitThis(false);
+                        this.createMethodCallExpression(baseExpr, argumentsExpr);
 
                 return this.configureAST(methodCallExpression, ctx);
             }
 
-
-            // e.g. m()
+            // e.g. 1(), 1.1(), ((int) 1 / 2)(1, 2)
             MethodCallExpression methodCallExpression =
-                    this.createMethodCallExpression(baseExpr, argumentsExpr);
+                    new MethodCallExpression(baseExpr, CALL_STR, argumentsExpr);
+            methodCallExpression.setImplicitThis(false);
 
             return this.configureAST(methodCallExpression, ctx);
         }
@@ -2232,7 +2233,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         //handle escapes.
         text = StringUtil.replaceEscapes(text, slashyType);
 
-        return new ConstantExpression(text, true);
+        ConstantExpression constantExpression = new ConstantExpression(text, true);
+        constantExpression.putNodeMetaData(IS_STRING, true);
+
+        return constantExpression;
     }
 
     private org.codehaus.groovy.syntax.Token createGroovyTokenByType(Token token, int type) {
@@ -2701,6 +2705,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String IS_INSIDE_PARENTHESES = "_IS_INSIDE_PARENTHESES";
     private static final String IS_SWITCH_DEFAULT = "_IS_SWITCH_DEFAULT";
     private static final String IS_NUMERIC = "_IS_NUMERIC";
+    private static final String IS_STRING = "_IS_STRING";
 
     private static final String PATH_EXPRESSION_BASE_EXPR = "_PATH_EXPRESSION_BASE_EXPR";
     private static final String PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES = "_PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES";
