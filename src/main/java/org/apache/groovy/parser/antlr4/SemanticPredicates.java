@@ -19,14 +19,11 @@
 package org.apache.groovy.parser.antlr4;
 
 import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.TokenStream;
-
-import static org.apache.groovy.parser.antlr4.GroovyParser.*;
 
 /**
  * Created by Daniel.Sun on 2016/8/20.
  */
-public class GrammarPredicates {
+public class SemanticPredicates {
     public static boolean isFollowedByJavaLetterInGString(CharStream cs) {
         int c1 = cs.LA(1);
         String str1 = String.valueOf((char) c1);
@@ -55,16 +52,12 @@ public class GrammarPredicates {
 
     /**
      * Check whether following a method name of command expression.
-     * Method name should not end with RPAREN and RBRACE
+     * Method name should not end with "2: arguments" and "3: closure"
      *
-     * @param ts the token stream
+     * @param t the type of pathExpression
      * @return
      */
-    public static boolean isFollowingMethodName(TokenStream ts) {
-        int tokenType = ts.LA(-1);
-
-        // FIXME         ((int)) 1        => 'int'.call(1)
-        // FIXME         a[0] 1           => a[0].call(1)
-        return !(RPAREN == tokenType || RBRACE == tokenType || RBRACK == tokenType);
+    public static boolean isFollowingMethodName(int t) {
+        return !(2 == t || 3 == t);
     }
 }

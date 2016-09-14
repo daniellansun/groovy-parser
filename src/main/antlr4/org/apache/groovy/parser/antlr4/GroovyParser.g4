@@ -41,7 +41,7 @@ options {
 @header {
     import java.util.Map;
     import org.codehaus.groovy.util.ListHashMap;
-    import org.apache.groovy.parser.antlr4.GrammarPredicates;
+    import org.apache.groovy.parser.antlr4.SemanticPredicates;
     import org.codehaus.groovy.GroovyBugError;
 }
 
@@ -721,7 +721,7 @@ expression
 commandExpression
     :   pathExpression
         (
-            { GrammarPredicates.isFollowingMethodName(_input) }?
+            { SemanticPredicates.isFollowingMethodName($pathExpression.t) }?
             argumentList
         |
             /* if pathExpression is a method call, no need to have any more arguments */
@@ -759,12 +759,14 @@ commandArgument
  *  Examples:  x.y, x?.y, x*.y, x.@y; x[], x[y], x[y,z]; x(), x(y), x(y,z); x{s}; a.b[n].c(x).d{s}
  *  (Compare to a C lvalue, or LeftHandSide in the JLS section 15.26.)
  *  General expressions are built up from path expressions, using operators like '+' and '='.
+ *
+ *  t   0: primary, 1: namePart, 2: arguments, 3: closure, 4: indexPropertyArgs
  */
-pathExpression
-    :   primary pathElement*
+pathExpression returns [int t]
+    :   primary (pathElement { $t = $pathElement.t; })*
     ;
 
-pathElement
+pathElement returns [int t]
     :   nls
 
         // AT: foo.@bar selects the field (or attribute), not property
@@ -774,16 +776,20 @@ pathElement
         | DOT nls (AT | nonWildcardTypeArguments)?              // The all-powerful dot.
         )
         namePart
+        { $t = 1; }
 
     |   arguments
+        { $t = 2; }
 
     // Can always append a block, as foo{bar}
     |   nls closure
+        { $t = 3; }
 
     // Element selection is always an option, too.
     // In Groovy, the stuff between brackets is a general argument list,
     // since the bracket operator is transformed into a method call.
     |   indexPropertyArgs
+        { $t = 4; }
     ;
 
 /**

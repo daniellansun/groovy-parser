@@ -34,7 +34,7 @@
 lexer grammar GroovyLexer;
 
 @header {
-    import static org.apache.groovy.parser.antlr4.GrammarPredicates.*;
+    import static org.apache.groovy.parser.antlr4.SemanticPredicates.*;
     import java.util.Deque;
     import java.util.ArrayDeque;
     import java.util.Set;
