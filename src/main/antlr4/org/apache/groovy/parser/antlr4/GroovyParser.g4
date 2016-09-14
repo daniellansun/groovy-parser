@@ -628,8 +628,7 @@ expression
     // qualified names, array expressions, method invocation, post inc/dec, type casting (level 1)
     // The cast expression must put first to resovle the ambiguities between type casting and call on parentheses expression, e.g. (int)(1 / 2)
     :   castParExpression expression                                                        #castExprAlt
-    |   pathExpression                                                                      #pathExprAlt
-    |   expression op=(INC | DEC)                                                           #postfixExprAlt
+    |   pathExpression op=(INC | DEC)?                                                      #postfixExprAlt
 
     // ~(BNOT)/!(LNOT) (level 1)
     |   (BITNOT | NOT) nls expression                                                       #unaryNotExprAlt

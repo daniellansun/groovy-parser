@@ -830,11 +830,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
 
     @Override
-    public Expression visitPathExprAlt(PathExprAltContext ctx) {
-        return this.configureAST(this.visitPathExpression(ctx.pathExpression()), ctx);
-    }
-
-    @Override
     public Expression visitPathExpression(PathExpressionContext ctx) {
         return this.configureAST(
                 this.createPathExpression((Expression) this.visit(ctx.primary()), ctx.pathElement()),
@@ -1191,12 +1186,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         throw createParsingFailedException("Unsupported dynamic member name: " + ctx.getText(), ctx);
     }
 
-
     @Override
-    public PostfixExpression visitPostfixExprAlt(PostfixExprAltContext ctx) {
-        return this.configureAST(
-                new PostfixExpression((Expression) this.visit(ctx.expression()), createGroovyToken(ctx.op)),
-                ctx);
+    public Expression visitPostfixExprAlt(PostfixExprAltContext ctx) {
+        Expression pathExpr = this.visitPathExpression(ctx.pathExpression());
+
+        if (asBoolean(ctx.op)) {
+            return this.configureAST(
+                    new PostfixExpression(pathExpr, createGroovyToken(ctx.op)),
+                    ctx);
+        }
+
+        return this.configureAST(pathExpr, ctx);
     }
 
     @Override
