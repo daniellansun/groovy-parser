@@ -58,5 +58,6 @@ a."${"$hello"}" 'world', {
 
 a.<String, Object>someMethod 'hello', 'world';
 
-
-
+a[x] b
+a[x] b c
+a[x] b c d
