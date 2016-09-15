@@ -70,6 +70,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         this.parser = new GroovyLangParser(
                 new CommonTokenStream(this.lexer));
 
+        this.parser.setErrorHandler(new BailErrorStrategy());
+
         this.setupErrorListener(this.parser);
     }
 
