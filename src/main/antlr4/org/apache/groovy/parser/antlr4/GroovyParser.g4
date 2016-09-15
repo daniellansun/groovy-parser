@@ -213,8 +213,8 @@ classBodyDeclaration
     ;
 
 memberDeclaration
-    :   methodDeclaration
-    |   genericMethodDeclaration
+    :   methodDeclaration[0]
+    |   genericMethodDeclaration[0]
     |   fieldDeclaration
     |   constructorDeclaration
     |   genericConstructorDeclaration
@@ -224,21 +224,23 @@ memberDeclaration
     |   enumDeclaration
     ;
 
-/* We use rule this even for void methods which cannot have [] after parameters.
-   This simplifies grammar and we can consider void to be a type, which
-   renders the [] matching as a context-sensitive issue or a semantic check
-   for invalid return type after parsing.
+/**
+ *  t   0: all, 1: normal method, 2: abstract method
  */
-methodDeclaration
-    :   (type|VOID) identifier formalParameters (LBRACK RBRACK)*
+methodDeclaration[int t]
+    :   (type|VOID) identifier formalParameters
         (THROWS qualifiedClassNameList)?
-        (   methodBody
-        |   SEMI
+        (
+            { 0 == $t || 1 == $t }?
+            methodBody
+        |
+            { 0 == $t || 2 == $t }?
+            sep
         )
     ;
 
-genericMethodDeclaration
-    :   typeParameters methodDeclaration
+genericMethodDeclaration[int t]
+    :   typeParameters methodDeclaration[$t]
     ;
 
 constructorDeclaration
@@ -261,8 +263,8 @@ interfaceBodyDeclaration
 
 interfaceMemberDeclaration
     :   constDeclaration
-    |   interfaceMethodDeclaration
-    |   genericInterfaceMethodDeclaration
+    |   methodDeclaration[2]
+    |   genericMethodDeclaration[2]
     |   interfaceDeclaration
     |   annotationTypeDeclaration
     |   classDeclaration
@@ -275,17 +277,6 @@ constDeclaration
 
 constantDeclarator
     :   identifier (LBRACK RBRACK)* ASSIGN variableInitializer
-    ;
-
-// see matching of [] comment in methodDeclaratorRest
-interfaceMethodDeclaration
-    :   (type|VOID) identifier formalParameters (LBRACK RBRACK)*
-        (THROWS qualifiedClassNameList)?
-        SEMI
-    ;
-
-genericInterfaceMethodDeclaration
-    :   typeParameters interfaceMethodDeclaration
     ;
 
 variableDeclarators
