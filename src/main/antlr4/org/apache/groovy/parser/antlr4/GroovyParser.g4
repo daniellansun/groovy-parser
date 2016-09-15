@@ -881,24 +881,13 @@ mapEntryLabel
     ;
 
 creator
-    :   nonWildcardTypeArguments createdName classCreatorRest
-    |   createdName (arrayCreatorRest | classCreatorRest)
+    :   createdName arguments classBody?
+    |   createdName (LBRACK expression RBRACK)+ (b+=LBRACK RBRACK)*
     ;
 
 createdName
-    :   className typeArgumentsOrDiamond? (DOT className typeArgumentsOrDiamond?)*
-    |   primitiveType
-    ;
-
-arrayCreatorRest
-    :   LBRACK
-        (   RBRACK (LBRACK RBRACK)* arrayInitializer
-        |   expression RBRACK (LBRACK expression RBRACK)* (LBRACK RBRACK)*
-        )
-    ;
-
-classCreatorRest
-    :   arguments classBody?
+    :   primitiveType
+    |   qualifiedClassName typeArgumentsOrDiamond?
     ;
 
 nonWildcardTypeArguments

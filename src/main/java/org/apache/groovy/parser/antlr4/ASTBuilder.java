@@ -1454,6 +1454,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public Expression visitNewPrmrAlt(NewPrmrAltContext ctx) {
+        return this.configureAST((Expression) this.visit(ctx.creator()), ctx);
+    }
+
+    @Override
     public VariableExpression visitThisPrmrAlt(ThisPrmrAltContext ctx) {
         return this.configureAST(new VariableExpression(ctx.THIS().getText()), ctx);
     }
@@ -1491,6 +1496,63 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
 
 // } primary       --------------------------------------------------------------------
+
+    @Override
+    public Expression visitCreator(CreatorContext ctx) {
+        ClassNode classNode = this.visitCreatedName(ctx.createdName());
+
+        if (asBoolean(ctx.arguments())) { // create instance of class
+            return this.configureAST(
+                    new ConstructorCallExpression(classNode, this.visitArguments(ctx.arguments())),
+                    ctx);
+        }
+
+        if (asBoolean(ctx.LBRACK())) { // create array
+            Expression[] empties;
+            if (asBoolean(ctx.b)) {
+                empties = new Expression[ctx.b.size()];
+                Arrays.setAll(empties, i -> new ConstantExpression(null));
+            } else {
+                empties = new Expression[0];
+            }
+
+            return this.configureAST(
+                    new ArrayExpression(
+                            classNode,
+                            null,
+                            Stream.concat(
+                                    ctx.expression().stream()
+                                            .map(e -> (Expression) this.visit(e)),
+                                    Arrays.stream(empties)
+                            ).collect(Collectors.toList())),
+                    ctx);
+        }
+
+        throw createParsingFailedException("Unsupported creator: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public ClassNode visitCreatedName(CreatedNameContext ctx) {
+        if (asBoolean(ctx.qualifiedClassName())) {
+            ClassNode classNode = this.visitQualifiedClassName(ctx.qualifiedClassName());
+
+            if (asBoolean(ctx.typeArgumentsOrDiamond())) {
+                classNode.setGenericsTypes(
+                        this.visitTypeArgumentsOrDiamond(ctx.typeArgumentsOrDiamond()));
+            }
+
+            return this.configureAST(classNode, ctx);
+        }
+
+        if (asBoolean(ctx.primitiveType())) {
+            return this.configureAST(
+                    this.visitPrimitiveType(ctx.primitiveType()),
+                    ctx);
+        }
+
+        throw createParsingFailedException("Unsupported created name: " + ctx.getText(), ctx);
+    }
+
 
     @Override
     public MapExpression visitMap(MapContext ctx) {
@@ -1897,6 +1959,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         return this.configureAST(classNode, ctx);
     }
+
+    @Override
+    public GenericsType[] visitTypeArgumentsOrDiamond(TypeArgumentsOrDiamondContext ctx) {
+        if (asBoolean(ctx.typeArguments())) {
+            return this.visitTypeArguments(ctx.typeArguments());
+        }
+
+        if (asBoolean(ctx.LT())) { // e.g. <>
+            return new GenericsType[0];
+        }
+
+        throw createParsingFailedException("Unsupported type arguments or diamond: " + ctx.getText(), ctx);
+    }
+
 
     @Override
     public GenericsType[] visitTypeArguments(TypeArgumentsContext ctx) {
