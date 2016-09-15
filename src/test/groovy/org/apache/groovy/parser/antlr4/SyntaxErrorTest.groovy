@@ -41,6 +41,14 @@ class SyntaxErrorTest extends GroovyTestCase {
 
     void "test groovy core - Expression"() {
         fail('fail/Expression_01.groovy');
+        fail('fail/Expression_02.groovy');
+        fail('fail/Expression_03.groovy');
+        fail('fail/Expression_04.groovy', true);
+        fail('fail/Expression_05.groovy', true);
+        fail('fail/Expression_06.groovy');
+        fail('fail/Expression_07.groovy');
+        fail('fail/Expression_08.groovy');
+        fail('fail/Expression_09.groovy');
     }
 
     void "test groovy core - Switch"() {
@@ -51,15 +59,15 @@ class SyntaxErrorTest extends GroovyTestCase {
         fail('fail/LocalVariableDeclaration_01.groovy');
     }
     // ************************************************************
-    static fail(String path) {
-        fail(path, ASTComparatorCategory.DEFAULT_CONFIGURATION)
+    static fail(String path, boolean toCheckNewParserOnly = false) {
+        fail(path, ASTComparatorCategory.DEFAULT_CONFIGURATION, toCheckNewParserOnly)
     }
 
-    static fail(String path, List ignoreClazzList) {
-        fail(path, addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST))
+    static fail(String path, List ignoreClazzList, boolean toCheckNewParserOnly = false) {
+        fail(path, addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), toCheckNewParserOnly)
     }
 
-    static fail(String path, conf) {
+    static fail(String path, conf, boolean toCheckNewParserOnly = false) {
         AbstractParser antlr4Parser = new Antlr4Parser()
         AbstractParser antlr2Parser = new Antlr2Parser()
 
@@ -67,8 +75,12 @@ class SyntaxErrorTest extends GroovyTestCase {
         def (newAST, newElapsedTime) = profile { antlr4Parser.parse(file) }
         def (oldAST, oldElapsedTime) = profile { antlr2Parser.parse(file) }
 
-        assert (newAST == null || newAST.context.errorCollector.hasErrors()) &&
-                (oldAST == null || oldAST.context.errorCollector.hasErrors())
+        if (toCheckNewParserOnly) {
+            assert (newAST == null || newAST.context.errorCollector.hasErrors())
+        } else {
+            assert (newAST == null || newAST.context.errorCollector.hasErrors()) &&
+                    (oldAST == null || oldAST.context.errorCollector.hasErrors())
+        }
 
         long diffInMillis = newElapsedTime - oldElapsedTime;
 

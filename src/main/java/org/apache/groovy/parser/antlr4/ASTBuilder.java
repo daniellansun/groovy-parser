@@ -1438,9 +1438,19 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public BinaryExpression visitAssignmentExprAlt(AssignmentExprAltContext ctx) {
+        Expression leftExpr = (Expression) this.visit(ctx.left);
+
+        // the LHS expression should be a variable which is not inside any parentheses
+        if (!(leftExpr instanceof VariableExpression
+                && !(THIS_STR.equals(leftExpr.getText()) || SUPER_STR.equals(leftExpr.getText()))
+                && !isTrue(leftExpr, IS_INSIDE_PARENTHESES))) {
+
+            throw createParsingFailedException("The LHS of an assignment should be a variable", ctx);
+        }
+
         return this.configureAST(
                 new BinaryExpression(
-                        (Expression) this.visit(ctx.left),
+                        leftExpr,
                         this.createGroovyToken(ctx.op),
                         ((ExpressionStatement) this.visit(ctx.right)).getExpression()),
                 ctx
@@ -2787,6 +2797,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String VALUE_STR = "value";
     private static final String DOLLAR_STR = "$";
     private static final String CALL_STR = "call";
+    private static final String THIS_STR = "this";
+    private static final String SUPER_STR = "super";
     private static final Set<String> PRIMITIVE_TYPE_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("boolean", "char", "byte", "short", "int", "long", "float", "double")));
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 
