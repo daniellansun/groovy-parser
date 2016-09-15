@@ -155,18 +155,18 @@ variableModifier
     ;
 
 classDeclaration
-    :   CLASS className typeParameters?
+    :   (modifier nls)* CLASS className typeParameters?
         (EXTENDS type)?
         (IMPLEMENTS typeList)?
         classBody
     ;
 
 typeParameters
-    :   LT typeParameter (COMMA typeParameter)* GT
+    :   LT nls typeParameter (COMMA nls typeParameter)* nls GT
     ;
 
 typeParameter
-    :   identifier (EXTENDS typeBound)?
+    :   identifier (EXTENDS nls typeBound)?
     ;
 
 typeBound
@@ -174,7 +174,7 @@ typeBound
     ;
 
 enumDeclaration
-    :   ENUM className (IMPLEMENTS typeList)?
+    :   (modifier nls)* ENUM className (IMPLEMENTS typeList)?
         LBRACE enumConstants? COMMA? enumBodyDeclarations? RBRACE
     ;
 
@@ -191,7 +191,7 @@ enumBodyDeclarations
     ;
 
 interfaceDeclaration
-    :   INTERFACE className typeParameters? (EXTENDS typeList)? interfaceBody
+    :   (modifier nls)* INTERFACE className typeParameters? (EXTENDS typeList)? interfaceBody
     ;
 
 typeList
@@ -209,12 +209,11 @@ interfaceBody
 classBodyDeclaration
     :   SEMI
     |   STATIC? block
-    |   modifier* memberDeclaration
+    |   memberDeclaration
     ;
 
 memberDeclaration
     :   methodDeclaration[0]
-    |   genericMethodDeclaration[0]
     |   fieldDeclaration
     |   constructorDeclaration
     |   genericConstructorDeclaration
@@ -225,11 +224,13 @@ memberDeclaration
     ;
 
 /**
- *  t   0: all, 1: normal method, 2: abstract method
+ *  t   0: all method declaration, 1: normal method declaration, 2: abstract method declaration
  */
 methodDeclaration[int t]
-    :   (type|VOID) identifier formalParameters
-        (THROWS qualifiedClassNameList)?
+    :   (   (modifier nls)*  typeParameters? (type | VOID)
+        |   (modifier nls)+  typeParameters? (type | VOID)?
+        )
+        identifier formalParameters (THROWS qualifiedClassNameList)?
         (
             { 0 == $t || 1 == $t }?
             methodBody
@@ -239,32 +240,27 @@ methodDeclaration[int t]
         )
     ;
 
-genericMethodDeclaration[int t]
-    :   typeParameters methodDeclaration[$t]
-    ;
-
 constructorDeclaration
-    :   className formalParameters (THROWS qualifiedClassNameList)?
+    :   (modifier nls)* className formalParameters (THROWS qualifiedClassNameList)?
         constructorBody
     ;
 
 genericConstructorDeclaration
-    :   typeParameters constructorDeclaration
+    :   (modifier nls)* typeParameters constructorDeclaration
     ;
 
 fieldDeclaration
-    :   type variableDeclarators SEMI
+    :   (modifier nls)* type variableDeclarators SEMI
     ;
 
 interfaceBodyDeclaration
-    :   modifier* interfaceMemberDeclaration
+    :   (modifier nls)* interfaceMemberDeclaration
     |   SEMI
     ;
 
 interfaceMemberDeclaration
     :   constDeclaration
     |   methodDeclaration[2]
-    |   genericMethodDeclaration[2]
     |   interfaceDeclaration
     |   annotationTypeDeclaration
     |   classDeclaration
@@ -440,7 +436,7 @@ elementValueArrayInitializer
     ;
 
 annotationTypeDeclaration
-    :   AT INTERFACE className annotationTypeBody
+    :   (modifier nls)* AT INTERFACE className annotationTypeBody
     ;
 
 annotationTypeBody
@@ -448,7 +444,7 @@ annotationTypeBody
     ;
 
 annotationTypeElementDeclaration
-    :   modifier* annotationTypeElementRest
+    :   (modifier nls)* annotationTypeElementRest
     |   SEMI // this is not allowed by the grammar, but apparently allowed by the actual compiler
     ;
 
@@ -525,6 +521,9 @@ statement
 
     |   typeDeclaration                                                                     #typeStmtAlt
     |   localVariableDeclaration                                                            #localVariableDeclarationStmtAlt
+
+    |   methodDeclaration[1]                                                      #methodDeclarationStmtAlt
+
     |   statementExpression                                                                 #expressionStmtAlt
 
     |   SEMI                                                                                #emptyStmtAlt

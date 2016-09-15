@@ -541,7 +541,18 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(this.visitLocalVariableDeclaration(ctx.localVariableDeclaration()), ctx);
     }
 
+    @Override
+    public MethodNode visitMethodDeclarationStmtAlt(MethodDeclarationStmtAltContext ctx) {
+        return this.configureAST(this.visitMethodDeclaration(ctx.methodDeclaration()), ctx);
+    }
+
+
 // } statement    --------------------------------------------------------------------
+
+    @Override
+    public MethodNode visitMethodDeclaration(MethodDeclarationContext ctx) {
+        return null; // TODO
+    }
 
     @Override
     public DeclarationListStatement visitLocalVariableDeclaration(LocalVariableDeclarationContext ctx) {
