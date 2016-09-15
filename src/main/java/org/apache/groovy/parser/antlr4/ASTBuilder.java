@@ -1909,12 +1909,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Parameter visitFormalParameter(FormalParameterContext ctx) {
-        return this.processFormalParameter(ctx, ctx.variableModifier(), ctx.type(), null, ctx.variableDeclaratorId());
+        return this.processFormalParameter(ctx, ctx.variableModifier(), ctx.type(), null, ctx.variableDeclaratorId(), ctx.expression());
     }
 
     @Override
     public Parameter visitLastFormalParameter(LastFormalParameterContext ctx) {
-        return this.processFormalParameter(ctx, ctx.variableModifier(), ctx.type(), ctx.ELLIPSIS(), ctx.variableDeclaratorId());
+        return this.processFormalParameter(ctx, ctx.variableModifier(), ctx.type(), ctx.ELLIPSIS(), ctx.variableDeclaratorId(), ctx.expression());
     }
 
     @Override
@@ -2231,7 +2231,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                              List<VariableModifierContext> variableModifierContextList,
                                              TypeContext typeContext,
                                              TerminalNode ellipsis,
-                                             VariableDeclaratorIdContext variableDeclaratorIdContext) {
+                                             VariableDeclaratorIdContext variableDeclaratorIdContext,
+                                             ExpressionContext expressionContext) {
 
         ClassNode classNode = this.visitType(typeContext);
 
@@ -2239,15 +2240,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             classNode = this.configureAST(classNode.makeArray(), classNode);
         }
 
-        return new ModifierManager(
-                variableModifierContextList.stream()
-                        .map(this::visitVariableModifier)
-                        .collect(Collectors.toList()))
-                .processParameter(
-                        this.configureAST(
-                                new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext).getName()),
-                                ctx)
-                );
+        Parameter parameter =
+                new ModifierManager(
+                        variableModifierContextList.stream()
+                                .map(this::visitVariableModifier)
+                                .collect(Collectors.toList()))
+                        .processParameter(
+                                this.configureAST(
+                                        new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext).getName()),
+                                        ctx)
+                        );
+
+        if (asBoolean(expressionContext)) {
+            parameter.setInitialExpression((Expression) this.visit(expressionContext));
+        }
+
+        return parameter;
     }
 
     private Expression createPathExpression(Expression primaryExpr, List<PathElementContext> pathElementContextList) {

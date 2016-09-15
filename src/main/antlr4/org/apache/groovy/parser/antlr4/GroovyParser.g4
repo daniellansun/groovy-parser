@@ -336,11 +336,11 @@ formalParameterList
     ;
 
 formalParameter
-    :   (variableModifier nls)* type? variableDeclaratorId
+    :   (variableModifier nls)* type? variableDeclaratorId (ASSIGN nls expression)?
     ;
 
 lastFormalParameter
-    :   (variableModifier nls)* (type ELLIPSIS)? variableDeclaratorId
+    :   (variableModifier nls)* (type ELLIPSIS)? variableDeclaratorId (ASSIGN nls expression)?
     ;
 
 methodBody
