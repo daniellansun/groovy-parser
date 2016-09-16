@@ -551,15 +551,39 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public MethodNode visitMethodDeclaration(MethodDeclarationContext ctx) {
+//        MethodNode methodNode = new MethodNode(methodName, modifiers, returnType, params, exceptions, statement);
+
         return null; // TODO
     }
 
     @Override
+    public String visitMethodName(MethodNameContext ctx) {
+        if (asBoolean(ctx.identifier())) {
+            return ctx.identifier().getText();
+        }
+
+        if (asBoolean(ctx.StringLiteral())) {
+            return this.cleanStringLiteral(ctx.StringLiteral().getText()).getText();
+        }
+
+        throw createParsingFailedException("Unsupported method name: " + ctx.getText(), ctx);
+    }
+
+
+    @Override
     public DeclarationListStatement visitLocalVariableDeclaration(LocalVariableDeclarationContext ctx) {
+        List<ModifierNode> modifierNodeList = Collections.EMPTY_LIST;
+
+        if (asBoolean(ctx.variableModifiers())) {
+            modifierNodeList = this.visitVariableModifiers(ctx.variableModifiers());
+        }
+
+        if (asBoolean(ctx.variableModifiersOpt())) {
+            modifierNodeList = this.visitVariableModifiersOpt(ctx.variableModifiersOpt());
+        }
+
         ModifierManager modifierManager =
-                new ModifierManager(ctx.variableModifier().stream()
-                        .map(this::visitVariableModifier)
-                        .collect(Collectors.toList()));
+                new ModifierManager(modifierNodeList);
 
         if (asBoolean(ctx.typeNamePairs())) { // e.g. def (int a, int b) = [1, 2]
             if (!modifierManager.exists(DEF)) {
@@ -1909,12 +1933,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Parameter visitFormalParameter(FormalParameterContext ctx) {
-        return this.processFormalParameter(ctx, ctx.variableModifier(), ctx.type(), null, ctx.variableDeclaratorId(), ctx.expression());
+        return this.processFormalParameter(ctx, ctx.variableModifiersOpt(), ctx.type(), null, ctx.variableDeclaratorId(), ctx.expression());
     }
 
     @Override
     public Parameter visitLastFormalParameter(LastFormalParameterContext ctx) {
-        return this.processFormalParameter(ctx, ctx.variableModifier(), ctx.type(), ctx.ELLIPSIS(), ctx.variableDeclaratorId(), ctx.expression());
+        return this.processFormalParameter(ctx, ctx.variableModifiersOpt(), ctx.type(), ctx.ELLIPSIS(), ctx.variableDeclaratorId(), ctx.expression());
     }
 
     @Override
@@ -1936,6 +1960,23 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         throw createParsingFailedException("Unsupported variable modifier", ctx);
     }
+
+    @Override
+    public List<ModifierNode> visitVariableModifiersOpt(VariableModifiersOptContext ctx) {
+        if (asBoolean(ctx.variableModifiers())) {
+            return this.visitVariableModifiers(ctx.variableModifiers());
+        }
+
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public List<ModifierNode> visitVariableModifiers(VariableModifiersContext ctx) {
+        return ctx.variableModifier().stream()
+                .map(this::visitVariableModifier)
+                .collect(Collectors.toList());
+    }
+
 
     // type {       --------------------------------------------------------------------
     @Override
@@ -2050,11 +2091,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public BlockStatement visitBlockStatementsOpt(BlockStatementsOptContext ctx) {
-        return this.configureAST(
-                this.createBlockStatement(
-                        ctx.blockStatement().stream()
-                                .map(this::visitBlockStatement).collect(Collectors.toList())),
-                ctx);
+        if (asBoolean(ctx.blockStatements())) {
+            return this.configureAST(this.visitBlockStatements(ctx.blockStatements()), ctx);
+        }
+
+        return this.configureAST(this.createBlockStatement(), ctx);
     }
 
     @Override
@@ -2228,7 +2269,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private Parameter processFormalParameter(GroovyParserRuleContext ctx,
-                                             List<VariableModifierContext> variableModifierContextList,
+                                             VariableModifiersOptContext variableModifiersOptContext,
                                              TypeContext typeContext,
                                              TerminalNode ellipsis,
                                              VariableDeclaratorIdContext variableDeclaratorIdContext,
@@ -2241,10 +2282,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         Parameter parameter =
-                new ModifierManager(
-                        variableModifierContextList.stream()
-                                .map(this::visitVariableModifier)
-                                .collect(Collectors.toList()))
+                new ModifierManager(this.visitVariableModifiersOpt(variableModifiersOptContext))
                         .processParameter(
                                 this.configureAST(
                                         new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext).getName()),

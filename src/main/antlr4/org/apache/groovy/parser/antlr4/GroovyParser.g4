@@ -136,6 +136,14 @@ modifier
         )
     ;
 
+modifiersOpt
+    :   modifiers?
+    ;
+
+modifiers
+    :   (modifier nls)+
+    ;
+
 classOrInterfaceModifier
     :   annotation       // class or interface
     |   (   PUBLIC     // class or interface
@@ -154,8 +162,17 @@ variableModifier
     |   annotation
     ;
 
+variableModifiersOpt
+    :   variableModifiers?
+    ;
+
+variableModifiers
+    :   (variableModifier nls)+
+    ;
+
+
 classDeclaration
-    :   (modifier nls)* CLASS className typeParameters?
+    :   modifiersOpt CLASS className typeParameters?
         (EXTENDS type)?
         (IMPLEMENTS typeList)?
         classBody
@@ -174,7 +191,7 @@ typeBound
     ;
 
 enumDeclaration
-    :   (modifier nls)* ENUM className (IMPLEMENTS typeList)?
+    :   modifiersOpt ENUM className (IMPLEMENTS typeList)?
         LBRACE enumConstants? COMMA? enumBodyDeclarations? RBRACE
     ;
 
@@ -191,7 +208,7 @@ enumBodyDeclarations
     ;
 
 interfaceDeclaration
-    :   (modifier nls)* INTERFACE className typeParameters? (EXTENDS typeList)? interfaceBody
+    :   modifiersOpt INTERFACE className typeParameters? (EXTENDS typeList)? interfaceBody
     ;
 
 typeList
@@ -227,10 +244,10 @@ memberDeclaration
  *  t   0: all method declaration, 1: normal method declaration, 2: abstract method declaration
  */
 methodDeclaration[int t]
-    :   (   (modifier nls)*  typeParameters? (type | VOID)
-        |   (modifier nls)+  typeParameters? (type | VOID)?
+    :   (   modifiersOpt  typeParameters? returnType
+        |   modifiers  typeParameters? returnType?
         )
-        identifier formalParameters (THROWS qualifiedClassNameList)?
+        methodName formalParameters (THROWS qualifiedClassNameList)?
         (
             { 0 == $t || 1 == $t }?
             methodBody
@@ -240,21 +257,33 @@ methodDeclaration[int t]
         )
     ;
 
+
+
+methodName
+    :   identifier
+    |   StringLiteral
+    ;
+
+returnType
+    :   type
+    |   VOID
+    ;
+
 constructorDeclaration
-    :   (modifier nls)* className formalParameters (THROWS qualifiedClassNameList)?
+    :   modifiersOpt className formalParameters (THROWS qualifiedClassNameList)?
         constructorBody
     ;
 
 genericConstructorDeclaration
-    :   (modifier nls)* typeParameters constructorDeclaration
+    :   modifiersOpt typeParameters constructorDeclaration
     ;
 
 fieldDeclaration
-    :   (modifier nls)* type variableDeclarators SEMI
+    :   modifiersOpt type variableDeclarators SEMI
     ;
 
 interfaceBodyDeclaration
-    :   (modifier nls)* interfaceMemberDeclaration
+    :   modifiersOpt interfaceMemberDeclaration
     |   SEMI
     ;
 
@@ -336,11 +365,11 @@ formalParameterList
     ;
 
 formalParameter
-    :   (variableModifier nls)* type? variableDeclaratorId (ASSIGN nls expression)?
+    :   variableModifiersOpt type? variableDeclaratorId (ASSIGN nls expression)?
     ;
 
 lastFormalParameter
-    :   (variableModifier nls)* (type ELLIPSIS)? variableDeclaratorId (ASSIGN nls expression)?
+    :   variableModifiersOpt (type ELLIPSIS)? variableDeclaratorId (ASSIGN nls expression)?
     ;
 
 methodBody
@@ -397,7 +426,7 @@ closure
     ;
 
 blockStatementsOpt
-    :   blockStatement? (sep blockStatement)* sep?
+    :   blockStatements?
     ;
 
 blockStatements
@@ -436,7 +465,7 @@ elementValueArrayInitializer
     ;
 
 annotationTypeDeclaration
-    :   (modifier nls)* AT INTERFACE className annotationTypeBody
+    :   modifiersOpt AT INTERFACE className annotationTypeBody
     ;
 
 annotationTypeBody
@@ -444,7 +473,7 @@ annotationTypeBody
     ;
 
 annotationTypeElementDeclaration
-    :   (modifier nls)* annotationTypeElementRest
+    :   modifiersOpt annotationTypeElementRest
     |   SEMI // this is not allowed by the grammar, but apparently allowed by the actual compiler
     ;
 
@@ -486,9 +515,9 @@ blockStatement
     ;
 
 localVariableDeclaration
-    :   (variableModifier nls)* type variableDeclarators
-    |   (variableModifier nls)+ type? variableDeclarators
-    |   (variableModifier nls)+ typeNamePairs ASSIGN nls variableInitializer
+    :   variableModifiersOpt type variableDeclarators
+    |   variableModifiers type? variableDeclarators
+    |   variableModifiers typeNamePairs ASSIGN nls variableInitializer
     ;
 
 typeNamePairs
@@ -530,7 +559,7 @@ statement
     ;
 
 catchClause
-    :   CATCH LPAREN (variableModifier nls)* catchType? identifier RPAREN nls block
+    :   CATCH LPAREN variableModifiersOpt catchType? identifier RPAREN nls block
     ;
 
 catchType
@@ -582,7 +611,7 @@ forUpdate
     ;
 
 enhancedForControl
-    :   (variableModifier nls)* type? variableDeclaratorId (COLON | IN) expression
+    :   variableModifiersOpt type? variableDeclaratorId (COLON | IN) expression
     ;
 
 
