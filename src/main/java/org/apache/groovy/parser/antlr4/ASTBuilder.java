@@ -102,6 +102,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     }
                 });
 
+        classNodeList.forEach(moduleNode::addClass);
+
         // if groovy source file only contains blank(including EOF), add "return null" to the AST
         if (this.isBlankScript(ctx)) {
             this.addEmptyReturnStatement();
@@ -539,6 +541,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public ImportNode visitImportStmtAlt(ImportStmtAltContext ctx) {
+        return this.configureAST(this.visitImportDeclaration(ctx.importDeclaration()), ctx);
+    }
+
+    @Override
+    public ClassNode visitTypeDeclarationStmtAlt(TypeDeclarationStmtAltContext ctx) {
+        return this.configureAST(this.visitTypeDeclaration(ctx.typeDeclaration()), ctx);
+    }
+
+
+    @Override
     public Statement visitLocalVariableDeclarationStmtAlt(LocalVariableDeclarationStmtAltContext ctx) {
         return this.configureAST(this.visitLocalVariableDeclaration(ctx.localVariableDeclaration()), ctx);
     }
@@ -548,11 +561,94 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(this.visitMethodDeclaration(ctx.methodDeclaration()), ctx);
     }
 
-// } statement    --------------------------------------------------------------------
+    // } statement    --------------------------------------------------------------------
+//    private final Deque<ClassNode> classNodeStack = new ArrayDeque<>();
+
+    @Override
+    public ClassNode visitTypeDeclaration(TypeDeclarationContext ctx) {
+        List<ModifierNode> modifierNodeList = this.visitClassOrInterfaceModifiersOpt(ctx.classOrInterfaceModifiersOpt());
+
+        if (asBoolean(ctx.classDeclaration())) { // e.g. class A {}
+            ctx.classDeclaration().putNodeMetaData(TYPE_DECLARATION_MODIFIERS, modifierNodeList);
+            return this.configureAST(this.visitClassDeclaration(ctx.classDeclaration()), ctx);
+        }
+
+        return null; // TODO
+    }
+
+    @Override
+    public ClassNode visitClassDeclaration(ClassDeclarationContext ctx) {
+        String packageName = moduleNode.getPackageName();
+        packageName = asBoolean((Object) packageName) ? packageName : "";
+
+        List<ModifierNode> modifierNodeList = ctx.getNodeMetaData(TYPE_DECLARATION_MODIFIERS);
+        ModifierManager modifierManager = new ModifierManager(modifierNodeList);
+        int modifiers = modifierManager.getClassModifiersOpValue();
+
+//      TODO support inner class  final ClassNode outerClass = asBoolean(classNodeStack) ? classNodeStack.peek() : null;
+
+        boolean syntheticPublic = ((modifiers & Opcodes.ACC_SYNTHETIC) != 0);
+        modifiers &= ~Opcodes.ACC_SYNTHETIC;
+
+        ClassNode classNode =
+                new ClassNode(
+                        packageName + ctx.className().getText(),
+                        modifiers,
+                        this.visitType(ctx.sc),
+                        this.visitTypeList(ctx.is),
+                        new MixinNode[0] /*TODO read mixins*/);
+        classNodeList.add(classNode);
+
+        classNode.addAnnotations(modifierManager.getAnnotations());
+
+        if (asBoolean(ctx.typeParameters())) {
+            classNode.setGenericsTypes(this.visitTypeParameters(ctx.typeParameters()));
+        }
+
+        classNode.setSyntheticPublic(syntheticPublic);
+
+        this.visitClassBody(ctx.classBody());
+
+        return this.configureAST(classNode, ctx);
+    }
+
+    @Override
+    public Void visitClassBody(ClassBodyContext ctx) {
+        return null; // TODO
+    }
+
+    @Override
+    public GenericsType[] visitTypeParameters(TypeParametersContext ctx) {
+        return ctx.typeParameter().stream()
+                .map(this::visitTypeParameter)
+                .toArray(GenericsType[]::new);
+    }
+
+    @Override
+    public GenericsType visitTypeParameter(TypeParameterContext ctx) {
+        return this.configureAST(
+                new GenericsType(
+                        ClassHelper.make(ctx.className().getText()),
+                        this.visitTypeBound(ctx.typeBound()),
+                        null
+                ),
+                ctx);
+    }
+
+    @Override
+    public ClassNode[] visitTypeBound(TypeBoundContext ctx) {
+        if (!asBoolean(ctx)) {
+            return null;
+        }
+
+        return ctx.type().stream()
+                .map(this::visitType)
+                .toArray(ClassNode[]::new);
+    }
 
     @Override
     public MethodNode visitMethodDeclaration(MethodDeclarationContext ctx) {
-        List<ModifierNode> modifierNodeList = Collections.EMPTY_LIST;
+        List<ModifierNode> modifierNodeList = Collections.emptyList();
 
         if (asBoolean(ctx.modifiers())) {
             modifierNodeList = this.visitModifiers(ctx.modifiers());
@@ -623,7 +719,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public DeclarationListStatement visitLocalVariableDeclaration(LocalVariableDeclarationContext ctx) {
-        List<ModifierNode> modifierNodeList = Collections.EMPTY_LIST;
+        List<ModifierNode> modifierNodeList = Collections.emptyList();
 
         if (asBoolean(ctx.variableModifiers())) {
             modifierNodeList = this.visitVariableModifiers(ctx.variableModifiers());
@@ -1176,14 +1272,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return null;
         }
 
-        return this.visitTypeList(ctx.typeList());
+        return Arrays.stream(this.visitTypeList(ctx.typeList()))
+                .map(this::createGenericsType)
+                .toArray(GenericsType[]::new);
     }
 
     @Override
-    public GenericsType[] visitTypeList(TypeListContext ctx) {
+    public ClassNode[] visitTypeList(TypeListContext ctx) {
+        if (!asBoolean(ctx)) {
+            return new ClassNode[0];
+        }
+
         return ctx.type().stream()
-                .map(this::createGenericsType)
-                .toArray(GenericsType[]::new);
+                .map(this::visitType)
+                .toArray(ClassNode[]::new);
     }
 
     @Override
@@ -1743,7 +1845,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public List<Expression> visitExpressionList(ExpressionListContext ctx) {
         if (!asBoolean(ctx)) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
         return ctx.expressionListElement().stream()
@@ -1998,6 +2100,23 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public List<ModifierNode> visitClassOrInterfaceModifiersOpt(ClassOrInterfaceModifiersOptContext ctx) {
+        if (asBoolean(ctx.classOrInterfaceModifiers())) {
+            return this.visitClassOrInterfaceModifiers(ctx.classOrInterfaceModifiers());
+        }
+
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<ModifierNode> visitClassOrInterfaceModifiers(ClassOrInterfaceModifiersContext ctx) {
+        return ctx.classOrInterfaceModifier().stream()
+                .map(this::visitClassOrInterfaceModifier)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
     public ModifierNode visitClassOrInterfaceModifier(ClassOrInterfaceModifierContext ctx) {
         if (asBoolean(ctx.annotation())) {
             return this.configureAST(new ModifierNode(this.visitAnnotation(ctx.annotation()), ctx.getText()), ctx);
@@ -2036,7 +2155,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return this.visitModifiers(ctx.modifiers());
         }
 
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
 
@@ -2059,7 +2178,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return this.visitVariableModifiers(ctx.variableModifiers());
         }
 
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override
@@ -2164,7 +2283,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             return this.configureAST(genericsType, ctx);
         } else if (asBoolean(ctx.type())) {
-            return this.configureAST(this.createGenericsType(ctx.type()), ctx);
+            return this.configureAST(
+                    this.createGenericsType(
+                            this.visitType(ctx.type())),
+                    ctx);
         }
 
         throw createParsingFailedException("Unsupported type argument: " + ctx.getText(), ctx);
@@ -2413,8 +2535,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 );
     }
 
-    private GenericsType createGenericsType(TypeContext ctx) {
-        return this.configureAST(new GenericsType(this.visitType(ctx)), ctx);
+    private GenericsType createGenericsType(ClassNode classNode) {
+        return this.configureAST(new GenericsType(classNode), classNode);
     }
 
     private ConstantExpression createConstantExpression(Expression expression) {
@@ -2834,7 +2956,21 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         private List<ModifierNode> modifierNodeList;
 
         public ModifierManager(List<ModifierNode> modifierNodeList) {
-            this.modifierNodeList = Collections.unmodifiableList(modifierNodeList);
+            this.modifierNodeList = Collections.unmodifiableList(asBoolean((Object) modifierNodeList) ? modifierNodeList : Collections.emptyList());
+        }
+
+        public int getClassModifiersOpValue() {
+            int result = 0;
+
+            for (ModifierNode modifierNode : modifierNodeList) {
+                result |= modifierNode.getOpCode();
+            }
+
+            if (!this.containsVisibilityModifier()) {
+                result |= Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PUBLIC;
+            }
+
+            return result;
         }
 
         public List<AnnotationNode> getAnnotations() {
@@ -3026,6 +3162,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private final SourceUnit sourceUnit;
     private final GroovyLangLexer lexer;
     private final GroovyLangParser parser;
+    private final List<ClassNode> classNodeList = new LinkedList<ClassNode>();
     private static final Class<ImportNode> IMPORT_NODE_CLASS = ImportNode.class;
     private static final String QUESTION_STR = "?";
     private static final String DOT_STR = ".";
@@ -3047,4 +3184,5 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String PATH_EXPRESSION_BASE_EXPR = "_PATH_EXPRESSION_BASE_EXPR";
     private static final String PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES = "_PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES";
     private static final String CMD_EXPRESSION_BASE_EXPR = "_CMD_EXPRESSION_BASE_EXPR";
+    private static final String TYPE_DECLARATION_MODIFIERS = "_TYPE_DECLARATION_MODIFIERS";
 }

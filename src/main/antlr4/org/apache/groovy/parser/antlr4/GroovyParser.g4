@@ -119,10 +119,10 @@ importDeclaration
     ;
 
 typeDeclaration
-    :   classOrInterfaceModifier* classDeclaration
-    |   classOrInterfaceModifier* enumDeclaration
-    |   classOrInterfaceModifier* interfaceDeclaration
-    |   classOrInterfaceModifier* annotationTypeDeclaration
+    :   classOrInterfaceModifiersOpt classDeclaration
+    |   classOrInterfaceModifiersOpt enumDeclaration
+    |   classOrInterfaceModifiersOpt interfaceDeclaration
+    |   classOrInterfaceModifiersOpt annotationTypeDeclaration
     |   SEMI
     ;
 
@@ -142,6 +142,14 @@ modifiersOpt
 
 modifiers
     :   (modifier nls)+
+    ;
+
+classOrInterfaceModifiersOpt
+    :   classOrInterfaceModifiers?
+    ;
+
+classOrInterfaceModifiers
+    :   (classOrInterfaceModifier nls)+
     ;
 
 classOrInterfaceModifier
@@ -173,9 +181,9 @@ variableModifiers
 
 
 classDeclaration
-    :   modifiersOpt CLASS className typeParameters?
-        (EXTENDS type)?
-        (IMPLEMENTS typeList)?
+    :   CLASS className nls typeParameters? nls
+        (EXTENDS nls sc=type nls)?
+        (IMPLEMENTS nls is=typeList nls)?
         classBody
     ;
 
@@ -184,15 +192,15 @@ typeParameters
     ;
 
 typeParameter
-    :   identifier (EXTENDS nls typeBound)?
+    :   className (EXTENDS nls typeBound)?
     ;
 
 typeBound
-    :   type (BITAND type)*
+    :   type (BITAND nls type)*
     ;
 
 enumDeclaration
-    :   modifiersOpt ENUM className (IMPLEMENTS typeList)?
+    :   ENUM className (IMPLEMENTS typeList)?
         LBRACE enumConstants? COMMA? enumBodyDeclarations? RBRACE
     ;
 
@@ -209,7 +217,7 @@ enumBodyDeclarations
     ;
 
 interfaceDeclaration
-    :   modifiersOpt INTERFACE className typeParameters? (EXTENDS typeList)? interfaceBody
+    :   INTERFACE className typeParameters? (EXTENDS typeList)? interfaceBody
     ;
 
 typeList
@@ -217,11 +225,11 @@ typeList
     ;
 
 classBody
-    :   LBRACE classBodyDeclaration* RBRACE
+    :   LBRACE nls classBodyDeclaration* nls RBRACE
     ;
 
 interfaceBody
-    :   LBRACE interfaceBodyDeclaration* RBRACE
+    :   LBRACE nls interfaceBodyDeclaration* nls RBRACE
     ;
 
 classBodyDeclaration
@@ -235,10 +243,11 @@ memberDeclaration
     |   fieldDeclaration
     |   constructorDeclaration
     |   genericConstructorDeclaration
-    |   interfaceDeclaration
-    |   annotationTypeDeclaration
-    |   classDeclaration
-    |   enumDeclaration
+
+    |   modifiersOpt classDeclaration
+    |   modifiersOpt enumDeclaration
+    |   modifiersOpt interfaceDeclaration
+    |   modifiersOpt annotationTypeDeclaration
     ;
 
 /**
@@ -466,7 +475,7 @@ elementValueArrayInitializer
     ;
 
 annotationTypeDeclaration
-    :   modifiersOpt AT INTERFACE className annotationTypeBody
+    :   AT INTERFACE className annotationTypeBody
     ;
 
 annotationTypeBody
@@ -549,10 +558,10 @@ statement
     // Import statement.  Can be used in any scope.  Has "import x as y" also.
     |   importDeclaration                                                                   #importStmtAlt
 
-    |   typeDeclaration                                                                     #typeStmtAlt
+    |   typeDeclaration                                                                     #typeDeclarationStmtAlt
     |   localVariableDeclaration                                                            #localVariableDeclarationStmtAlt
 
-    |   methodDeclaration[1]                                                      #methodDeclarationStmtAlt
+    |   methodDeclaration[1]                                                                #methodDeclarationStmtAlt
 
     |   statementExpression                                                                 #expressionStmtAlt
 
