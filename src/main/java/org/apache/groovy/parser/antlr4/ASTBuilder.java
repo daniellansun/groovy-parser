@@ -607,6 +607,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         classNode.setSyntheticPublic(syntheticPublic);
 
+        ctx.classBody().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
         this.visitClassBody(ctx.classBody());
 
         return this.configureAST(classNode, ctx);
@@ -614,8 +615,49 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Void visitClassBody(ClassBodyContext ctx) {
+        ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
+        Objects.requireNonNull(classNode, "classNode should not be null");
+
+        ctx.classBodyDeclaration().stream().forEach(e -> {
+            e.putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
+            this.visitClassBodyDeclaration(e);
+        });
+
+        return null;
+    }
+
+    @Override
+    public Void visitClassBodyDeclaration(GroovyParser.ClassBodyDeclarationContext ctx) {
+        ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
+        Objects.requireNonNull(classNode, "classNode should not be null");
+
+        if (asBoolean(ctx.block())) {
+            Statement statement = this.visitBlock(ctx.block());
+
+            if (asBoolean(ctx.STATIC())) { // e.g. static { }
+                MethodNode clinit =
+                        classNode.getMethods().stream()
+                                .filter(e -> CLINIT_STR.equals(e.getName()))
+                                .findFirst().orElse(null);
+
+                if (!asBoolean(clinit)) {
+                    clinit = new MethodNode(CLINIT_STR, Opcodes.ACC_STATIC, ClassHelper.VOID_TYPE, new Parameter[0], new ClassNode[0], new BlockStatement());
+                    clinit.setSynthetic(true);
+                    classNode.addMethod(clinit);
+                }
+
+                this.appendStatementsToBlockStatement((BlockStatement) clinit.getCode(), statement);
+            } else { // e.g.  { }
+                classNode.addObjectInitializerStatements(
+                        this.configureAST(
+                                this.createBlockStatement(statement),
+                                statement));
+            }
+        }
+
         return null; // TODO
     }
+
 
     @Override
     public GenericsType[] visitTypeParameters(TypeParametersContext ctx) {
@@ -2552,8 +2594,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private BlockStatement createBlockStatement(List<Statement> statementList) {
+        return this.appendStatementsToBlockStatement(new BlockStatement(), statementList);
+    }
+
+    private BlockStatement appendStatementsToBlockStatement(BlockStatement bs, Statement... statements) {
+        return this.appendStatementsToBlockStatement(bs, Arrays.asList(statements));
+    }
+
+    private BlockStatement appendStatementsToBlockStatement(BlockStatement bs, List<Statement> statementList) {
         return (BlockStatement) statementList.stream()
-                .reduce(new BlockStatement(), (r, e) -> {
+                .reduce(bs, (r, e) -> {
                     BlockStatement blockStatement = (BlockStatement) r;
 
                     if (e instanceof DeclarationListStatement) {
@@ -3172,6 +3222,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String CALL_STR = "call";
     private static final String THIS_STR = "this";
     private static final String SUPER_STR = "super";
+    private static final String CLINIT_STR = "<clinit>";
     private static final Set<String> PRIMITIVE_TYPE_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("boolean", "char", "byte", "short", "int", "long", "float", "double")));
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 
@@ -3185,4 +3236,5 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES = "_PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES";
     private static final String CMD_EXPRESSION_BASE_EXPR = "_CMD_EXPRESSION_BASE_EXPR";
     private static final String TYPE_DECLARATION_MODIFIERS = "_TYPE_DECLARATION_MODIFIERS";
+    private static final String CLASS_DECLARATION_CLASS_NODE = "_CLASS_DECLARATION_CLASS_NODE";
 }

@@ -225,16 +225,16 @@ typeList
     ;
 
 classBody
-    :   LBRACE nls classBodyDeclaration* nls RBRACE
+    :   LBRACE nls classBodyDeclaration? (sep classBodyDeclaration)* sep? RBRACE
     ;
 
 interfaceBody
-    :   LBRACE nls interfaceBodyDeclaration* nls RBRACE
+    :   LBRACE nls interfaceBodyDeclaration? (sep interfaceBodyDeclaration)* sep? RBRACE
     ;
 
 classBodyDeclaration
     :   SEMI
-    |   STATIC? block
+    |   (STATIC nls)? block
     |   memberDeclaration
     ;
 
@@ -293,17 +293,17 @@ fieldDeclaration
     ;
 
 interfaceBodyDeclaration
-    :   modifiersOpt interfaceMemberDeclaration
+    :   interfaceMemberDeclaration
     |   SEMI
     ;
 
 interfaceMemberDeclaration
     :   constDeclaration
     |   methodDeclaration[2]
-    |   interfaceDeclaration
-    |   annotationTypeDeclaration
-    |   classDeclaration
-    |   enumDeclaration
+    |   modifiersOpt classDeclaration
+    |   modifiersOpt enumDeclaration
+    |   modifiersOpt interfaceDeclaration
+    |   modifiersOpt annotationTypeDeclaration
     ;
 
 constDeclaration
