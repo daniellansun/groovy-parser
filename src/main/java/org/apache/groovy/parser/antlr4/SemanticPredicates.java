@@ -65,7 +65,7 @@ public class SemanticPredicates {
     }
 
     /**
-     * Distinguish between method declaration and constructor declaration
+     * Distinguish between method declaration and method call/constructor declaration
      */
     public static boolean isInvalidMethodDeclaration(TokenStream ts) {
         int tokenType = ts.LT(1).getType();
