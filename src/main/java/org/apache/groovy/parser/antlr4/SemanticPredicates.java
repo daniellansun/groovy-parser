@@ -19,6 +19,9 @@
 package org.apache.groovy.parser.antlr4;
 
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.TokenStream;
+
+import static org.apache.groovy.parser.antlr4.GroovyParser.*;
 
 /**
  * Created by Daniel.Sun on 2016/8/20.
@@ -59,5 +62,15 @@ public class SemanticPredicates {
      */
     public static boolean isFollowingMethodName(int t) {
         return !(2 == t || 3 == t);
+    }
+
+    /**
+     * Distinguish between method declaration and constructor declaration
+     */
+    public static boolean isInvalidMethodDeclaration(TokenStream ts) {
+        int tokenType = ts.LT(1).getType();
+
+        return (Identifier == tokenType || StringLiteral == tokenType)
+                && GroovyLangParser.LPAREN == (ts.LT(2).getType());
     }
 }

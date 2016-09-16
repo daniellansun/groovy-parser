@@ -241,8 +241,6 @@ classBodyDeclaration
 memberDeclaration
     :   methodDeclaration[0]
     |   fieldDeclaration
-    |   constructorDeclaration
-    |   genericConstructorDeclaration
 
     |   modifiersOpt classDeclaration
     |   modifiersOpt enumDeclaration
@@ -251,15 +249,19 @@ memberDeclaration
     ;
 
 /**
- *  t   0: all method declaration, 1: normal method declaration, 2: abstract method declaration
+ *  t   0: *class member* all kinds of method declaration AND constructor declaration,
+ *      1: normal method declaration, 2: abstract method declaration
  */
 methodDeclaration[int t]
     :   (   modifiersOpt  typeParameters? returnType
         |   modifiers  typeParameters? returnType?
+        |
+            { 0 == $t }?
+            modifiersOpt typeParameters?
         )
         methodName formalParameters nls (THROWS nls qualifiedClassNameList nls)?
         (
-            { 0 == $t || 1 == $t }?
+            { 0 == $t || 1 == $t}?
             methodBody
         |
             { 0 == $t || 2 == $t }?
@@ -277,15 +279,6 @@ methodName
 returnType
     :   type
     |   VOID
-    ;
-
-constructorDeclaration
-    :   modifiersOpt className formalParameters (THROWS qualifiedClassNameList)?
-        constructorBody
-    ;
-
-genericConstructorDeclaration
-    :   modifiersOpt typeParameters constructorDeclaration
     ;
 
 fieldDeclaration
@@ -383,10 +376,6 @@ lastFormalParameter
     ;
 
 methodBody
-    :   block
-    ;
-
-constructorBody
     :   block
     ;
 
@@ -561,7 +550,8 @@ statement
     |   typeDeclaration                                                                     #typeDeclarationStmtAlt
     |   localVariableDeclaration                                                            #localVariableDeclarationStmtAlt
 
-    |   methodDeclaration[1]                                                                #methodDeclarationStmtAlt
+    |   { !SemanticPredicates.isInvalidMethodDeclaration(_input) }?
+        methodDeclaration[1]                                                                #methodDeclarationStmtAlt
 
     |   statementExpression                                                                 #expressionStmtAlt
 

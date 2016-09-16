@@ -597,6 +597,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         this.visitType(ctx.sc),
                         this.visitTypeList(ctx.is),
                         new MixinNode[0] /*TODO read mixins*/);
+        classNode.putNodeMetaData(CLASS_NAME, ctx.className().getText());
+
         classNodeList.add(classNode);
 
         classNode.addAnnotations(modifierManager.getAnnotations());
@@ -655,12 +657,33 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
         }
 
+        if (asBoolean(ctx.memberDeclaration())) {
+            ctx.memberDeclaration().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
+            this.visitMemberDeclaration(ctx.memberDeclaration());
+        }
+
+        return null;
+    }
+
+    @Override
+    public Void visitMemberDeclaration(MemberDeclarationContext ctx) {
+        ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
+        Objects.requireNonNull(classNode, "classNode should not be null");
+
+        if (asBoolean(ctx.methodDeclaration())) {
+            ctx.methodDeclaration().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
+            this.visitMethodDeclaration(ctx.methodDeclaration());
+        }
+
         return null; // TODO
     }
 
-
     @Override
     public GenericsType[] visitTypeParameters(TypeParametersContext ctx) {
+        if (!asBoolean(ctx)) {
+            return null;
+        }
+
         return ctx.typeParameter().stream()
                 .map(this::visitTypeParameter)
                 .toArray(GenericsType[]::new);
@@ -700,23 +723,57 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             modifierNodeList = this.visitModifiersOpt(ctx.modifiersOpt());
         }
 
-        MethodNode methodNode =
-                new MethodNode(
-                        this.visitMethodName(ctx.methodName()),
-                        Opcodes.ACC_PUBLIC,
-                        this.visitReturnType(ctx.returnType()),
-                        this.visitFormalParameters(ctx.formalParameters()),
-                        this.visitQualifiedClassNameList(ctx.qualifiedClassNameList()),
-                        this.visitMethodBody(ctx.methodBody()));
-
         ModifierManager modifierManager = new ModifierManager(modifierNodeList);
 
-        boolean isAnnotationDeclaration = false; // TODO
-        methodNode.setSyntheticPublic(this.isSyntheticPublic(isAnnotationDeclaration, asBoolean(ctx.returnType()), modifierManager));
+        String methodName = this.visitMethodName(ctx.methodName());
 
-        return this.configureAST(
-                modifierManager.processMethodNode(methodNode),
-                ctx);
+        MethodNode methodNode = null;
+
+        ClassNode returnType = this.visitReturnType(ctx.returnType());
+        Parameter[] parameters = this.visitFormalParameters(ctx.formalParameters());
+        ClassNode[] exceptions = this.visitQualifiedClassNameList(ctx.qualifiedClassNameList());
+        Statement code = this.visitMethodBody(ctx.methodBody());
+
+        // if classNode is not null, the method declaration is for class declaration
+        ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
+        if (asBoolean(classNode)) {
+            String className = classNode.getNodeMetaData(CLASS_NAME);
+            int modifiers = modifierManager.getClassMemberModifiersOpValue();
+
+            if (!asBoolean(ctx.returnType())
+                    && asBoolean(ctx.methodBody())
+                    && methodName.equals(className)) { // constructor declaration
+                methodNode =
+                        classNode.addConstructor(
+                                modifiers,
+                                parameters,
+                                exceptions,
+                                code);
+
+            } else { // class memeber method declaration
+                methodNode = classNode.addMethod(methodName, modifiers, returnType, parameters, exceptions, code);
+            }
+
+            modifierManager.processMethodNode(methodNode, false);
+        } else { // script method declaration
+            methodNode =
+                    new MethodNode(
+                            this.visitMethodName(ctx.methodName()),
+                            Opcodes.ACC_PUBLIC,
+                            returnType,
+                            parameters,
+                            exceptions,
+                            code);
+
+            modifierManager.processMethodNode(methodNode);
+        }
+
+        methodNode.setGenericsTypes(this.visitTypeParameters(ctx.typeParameters()));
+
+        methodNode.setSyntheticPublic(
+                this.isSyntheticPublic(this.isAnnotationDeclaration(classNode), asBoolean(ctx.returnType()), modifierManager));
+
+        return this.configureAST(methodNode, ctx);
     }
 
     @Override
@@ -2115,6 +2172,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Parameter[] visitFormalParameterList(FormalParameterListContext ctx) {
+        if (!asBoolean(ctx)) {
+            return new Parameter[0];
+        }
+
         List<Parameter> parameterList = new LinkedList<>();
 
         if (asBoolean(ctx.formalParameter())) {
@@ -2616,6 +2677,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 });
     }
 
+    private boolean isAnnotationDeclaration(ClassNode classNode) {
+        return asBoolean(classNode) && ClassHelper.Annotation_TYPE.equals(classNode.getInterfaces().length > 0 ? classNode.getInterfaces()[0] : null);
+    }
+
     private boolean isSyntheticPublic(
             boolean isAnnotationDeclaration,
             boolean hasReturnType,
@@ -3009,7 +3074,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             this.modifierNodeList = Collections.unmodifiableList(asBoolean((Object) modifierNodeList) ? modifierNodeList : Collections.emptyList());
         }
 
-        public int getClassModifiersOpValue() {
+        // t    1: class modifiers value; 2: class member modifiers value
+        private int calcModifiersOpValue(int t) {
             int result = 0;
 
             for (ModifierNode modifierNode : modifierNodeList) {
@@ -3017,10 +3083,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
 
             if (!this.containsVisibilityModifier()) {
-                result |= Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PUBLIC;
+                if (1 == t) {
+                    result |= Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PUBLIC;
+                } else if (2 == t) {
+                    result |= Opcodes.ACC_PUBLIC;
+                }
             }
 
             return result;
+        }
+
+        public int getClassModifiersOpValue() {
+            return this.calcModifiersOpValue(1);
+        }
+
+        public int getClassMemberModifiersOpValue() {
+            return this.calcModifiersOpValue(2);
         }
 
         public List<AnnotationNode> getAnnotations() {
@@ -3075,8 +3153,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         public MethodNode processMethodNode(MethodNode mn) {
+            return this.processMethodNode(mn, true);
+        }
+
+        public MethodNode processMethodNode(MethodNode mn, boolean toProcessModifiers) {
             modifierNodeList.forEach(e -> {
-                mn.setModifiers(mn.getModifiers() | e.getOpCode());
+                if (toProcessModifiers) {
+                    mn.setModifiers(mn.getModifiers() | e.getOpCode());
+                }
 
                 if (e.isAnnotation()) {
                     mn.addAnnotation(e.getAnnotationNode());
@@ -3237,4 +3321,5 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String CMD_EXPRESSION_BASE_EXPR = "_CMD_EXPRESSION_BASE_EXPR";
     private static final String TYPE_DECLARATION_MODIFIERS = "_TYPE_DECLARATION_MODIFIERS";
     private static final String CLASS_DECLARATION_CLASS_NODE = "_CLASS_DECLARATION_CLASS_NODE";
+    private static final String CLASS_NAME = "_CLASS_NAME";
 }

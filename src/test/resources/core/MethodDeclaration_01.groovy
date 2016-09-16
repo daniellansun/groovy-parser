@@ -16,3 +16,8 @@ throws
 {
         return a + b;
 }
+
+def <T> T someMethod() {}
+def <T extends List> T someMethod2() {}
+def <T extends A & B> T someMethod3() {}
+
