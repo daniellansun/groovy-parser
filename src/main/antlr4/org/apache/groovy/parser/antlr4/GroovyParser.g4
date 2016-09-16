@@ -157,9 +157,10 @@ classOrInterfaceModifier
     ;
 
 variableModifier
-    :   FINAL
-    |   DEF
-    |   annotation
+    :   annotation
+    |   m=( FINAL
+          | DEF
+          )
     ;
 
 variableModifiersOpt

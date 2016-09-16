@@ -2046,15 +2046,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return this.configureAST(new ModifierNode(this.visitAnnotation(ctx.annotation()), ctx.getText()), ctx);
         }
 
-        Integer modifierType = null;
-        if (asBoolean(ctx.FINAL())) {
-            modifierType = ctx.FINAL().getSymbol().getType();
-        } else if (asBoolean(ctx.DEF())) {
-            modifierType = ctx.DEF().getSymbol().getType();
-        }
-
-        if (asBoolean((Object) modifierType)) {
-            return this.configureAST(new ModifierNode(modifierType, ctx.getText()), ctx);
+        if (asBoolean(ctx.m)) {
+            return this.configureAST(new ModifierNode(ctx.m.getType(), ctx.getText()), ctx);
         }
 
         throw createParsingFailedException("Unsupported variable modifier", ctx);
