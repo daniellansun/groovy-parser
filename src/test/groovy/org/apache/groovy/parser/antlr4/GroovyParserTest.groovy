@@ -177,6 +177,7 @@ class GroovyParserTest extends GroovyTestCase {
 
     void "test groovy core - MethodDeclaration_01"() {
         test('core/MethodDeclaration_01.groovy');
+        test('core/MethodDeclaration_02.groovy');
     }
 
     void "test groovy core - Command"() {

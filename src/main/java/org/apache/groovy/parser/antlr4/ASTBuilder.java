@@ -548,22 +548,37 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(this.visitMethodDeclaration(ctx.methodDeclaration()), ctx);
     }
 
-
 // } statement    --------------------------------------------------------------------
 
     @Override
     public MethodNode visitMethodDeclaration(MethodDeclarationContext ctx) {
+        List<ModifierNode> modifierNodeList = Collections.EMPTY_LIST;
+
+        if (asBoolean(ctx.modifiers())) {
+            modifierNodeList = this.visitModifiers(ctx.modifiers());
+        }
+
+        if (asBoolean(ctx.modifiersOpt())) {
+            modifierNodeList = this.visitModifiersOpt(ctx.modifiersOpt());
+        }
 
         MethodNode methodNode =
                 new MethodNode(
                         this.visitMethodName(ctx.methodName()),
-                        Opcodes.ACC_PUBLIC /*modifiers*/,
+                        Opcodes.ACC_PUBLIC,
                         this.visitReturnType(ctx.returnType()),
                         this.visitFormalParameters(ctx.formalParameters()),
-                        this.visitQualifiedClassNameList(ctx.qualifiedClassNameList()) /*exceptions*/,
+                        this.visitQualifiedClassNameList(ctx.qualifiedClassNameList()),
                         this.visitMethodBody(ctx.methodBody()));
 
-        return this.configureAST(methodNode, ctx);
+        ModifierManager modifierManager = new ModifierManager(modifierNodeList);
+
+        boolean isAnnotationDeclaration = false; // TODO
+        methodNode.setSyntheticPublic(this.isSyntheticPublic(isAnnotationDeclaration, asBoolean(ctx.returnType()), modifierManager));
+
+        return this.configureAST(
+                modifierManager.processMethodNode(methodNode),
+                ctx);
     }
 
     @Override
@@ -581,6 +596,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClassNode visitReturnType(ReturnTypeContext ctx) {
+        if (!asBoolean(ctx)) {
+            return ClassHelper.OBJECT_TYPE;
+        }
+
         if (asBoolean(ctx.type())) {
             return this.visitType(ctx.type());
         }
@@ -618,7 +637,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 new ModifierManager(modifierNodeList);
 
         if (asBoolean(ctx.typeNamePairs())) { // e.g. def (int a, int b) = [1, 2]
-            if (!modifierManager.exists(DEF)) {
+            if (!modifierManager.contains(DEF)) {
                 throw createParsingFailedException("keyword def is required to declare tuple, e.g. def (int a, int b) = [1, 2]", ctx);
             }
 
@@ -1979,6 +1998,49 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public ModifierNode visitClassOrInterfaceModifier(ClassOrInterfaceModifierContext ctx) {
+        if (asBoolean(ctx.annotation())) {
+            return this.configureAST(new ModifierNode(this.visitAnnotation(ctx.annotation()), ctx.getText()), ctx);
+        }
+
+        if (asBoolean(ctx.m)) {
+            return this.configureAST(new ModifierNode(ctx.m.getType(), ctx.getText()), ctx);
+        }
+
+        throw createParsingFailedException("Unsupported class or interface modifier: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public ModifierNode visitModifier(ModifierContext ctx) {
+        if (asBoolean(ctx.classOrInterfaceModifier())) {
+            return this.configureAST(this.visitClassOrInterfaceModifier(ctx.classOrInterfaceModifier()), ctx);
+        }
+
+        if (asBoolean(ctx.m)) {
+            return this.configureAST(new ModifierNode(ctx.m.getType(), ctx.getText()), ctx);
+        }
+
+        throw createParsingFailedException("Unsupported modifier: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public List<ModifierNode> visitModifiers(ModifiersContext ctx) {
+        return ctx.modifier().stream()
+                .map(this::visitModifier)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ModifierNode> visitModifiersOpt(ModifiersOptContext ctx) {
+        if (asBoolean(ctx.modifiers())) {
+            return this.visitModifiers(ctx.modifiers());
+        }
+
+        return Collections.EMPTY_LIST;
+    }
+
+
+    @Override
     public ModifierNode visitVariableModifier(VariableModifierContext ctx) {
         if (asBoolean(ctx.annotation())) {
             return this.configureAST(new ModifierNode(this.visitAnnotation(ctx.annotation()), ctx.getText()), ctx);
@@ -2389,6 +2451,56 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 });
     }
 
+    private boolean isSyntheticPublic(
+            boolean isAnnotationDeclaration,
+            boolean hasReturnType,
+            ModifierManager modifierManager
+    ) {
+        return this.isSyntheticPublic(
+                isAnnotationDeclaration,
+                modifierManager.containsAnnotations(),
+                modifierManager.containsVisibilityModifier(),
+                modifierManager.containsNonVisibilityModifier(),
+                hasReturnType,
+                modifierManager.contains(DEF));
+    }
+
+    /**
+     * @param isAnnotationDeclaration whether the method is defined in an annotation
+     * @param hasAnnotation           whether the method declaration has annotations
+     * @param hasVisibilityModifier   whether the method declaration contains visibility modifier(e.g. public, protected, private)
+     * @param hasModifier             whether the method declaration has modifier(e.g. visibility modifier, final, static and so on)
+     * @param hasReturnType           whether the method declaration has an return type(e.g. String, generic types)
+     * @param hasDef                  whether the method declaration using def keyword
+     * @return the result
+     */
+    private boolean isSyntheticPublic(
+            boolean isAnnotationDeclaration,
+            boolean hasAnnotation,
+            boolean hasVisibilityModifier,
+            boolean hasModifier,
+            boolean hasReturnType,
+            boolean hasDef) {
+
+        if (hasVisibilityModifier) {
+            return false;
+        }
+
+        if (isAnnotationDeclaration) {
+            return true;
+        }
+
+        if (hasDef && hasReturnType) {
+            return true;
+        }
+
+        if (hasModifier || hasAnnotation || !hasReturnType) {
+            return true;
+        }
+
+        return false;
+    }
+
     private boolean isBlankScript(CompilationUnitContext ctx) {
         long blankCnt =
                 ctx.children.stream()
@@ -2729,7 +2841,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         private List<ModifierNode> modifierNodeList;
 
         public ModifierManager(List<ModifierNode> modifierNodeList) {
-            this.modifierNodeList = modifierNodeList;
+            this.modifierNodeList = Collections.unmodifiableList(modifierNodeList);
         }
 
         public List<AnnotationNode> getAnnotations() {
@@ -2739,8 +2851,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     .collect(Collectors.toList());
         }
 
-        public boolean exists(int modifierType) {
+        public boolean contains(int modifierType) {
             return modifierNodeList.stream().anyMatch(e -> modifierType == e.getType());
+        }
+
+        public boolean containsAnnotations() {
+            return modifierNodeList.stream().anyMatch(ModifierNode::isAnnotation);
+        }
+
+        public boolean containsVisibilityModifier() {
+            return modifierNodeList.stream().anyMatch(ModifierNode::isVisibilityModifier);
+        }
+
+        public boolean containsNonVisibilityModifier() {
+            return modifierNodeList.stream().anyMatch(ModifierNode::isNonVisibilityModifier);
         }
 
         public Parameter processParameter(Parameter parameter) {
@@ -2769,6 +2893,18 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             this.getAnnotations().forEach(de::addAnnotation);
 
             return de;
+        }
+
+        public MethodNode processMethodNode(MethodNode mn) {
+            modifierNodeList.forEach(e -> {
+                mn.setModifiers(mn.getModifiers() | e.getOpCode());
+
+                if (e.isAnnotation()) {
+                    mn.addAnnotation(e.getAnnotationNode());
+                }
+            });
+
+            return mn;
         }
     }
 
@@ -2835,8 +2971,21 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
         }
 
-        public boolean isOp() {
+        /**
+         * Check whether the modifier is not an imagined modifier(annotation, def)
+         */
+        public boolean isModifier() {
             return !this.isAnnotation() && !this.isDef();
+        }
+
+        public boolean isVisibilityModifier() {
+            return Objects.equals(PUBLIC, this.type)
+                    || Objects.equals(PROTECTED, this.type)
+                    || Objects.equals(PRIVATE, this.type);
+        }
+
+        public boolean isNonVisibilityModifier() {
+            return this.isModifier() && !this.isVisibilityModifier();
         }
 
         public boolean isAnnotation() {

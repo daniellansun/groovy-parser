@@ -128,12 +128,12 @@ typeDeclaration
 
 modifier
     :   classOrInterfaceModifier
-    |   (   NATIVE
-        |   SYNCHRONIZED
-        |   TRANSIENT
-        |   VOLATILE
-        |   DEF
-        )
+    |   m=(   NATIVE
+          |   SYNCHRONIZED
+          |   TRANSIENT
+          |   VOLATILE
+          |   DEF
+          )
     ;
 
 modifiersOpt
@@ -146,14 +146,14 @@ modifiers
 
 classOrInterfaceModifier
     :   annotation       // class or interface
-    |   (   PUBLIC     // class or interface
-        |   PROTECTED  // class or interface
-        |   PRIVATE    // class or interface
-        |   STATIC     // class or interface
-        |   ABSTRACT   // class or interface
-        |   FINAL      // class only -- does not apply to interfaces
-        |   STRICTFP   // class or interface
-        )
+    |   m=(   PUBLIC     // class or interface
+          |   PROTECTED  // class or interface
+          |   PRIVATE    // class or interface
+          |   STATIC     // class or interface
+          |   ABSTRACT   // class or interface
+          |   FINAL      // class only -- does not apply to interfaces
+          |   STRICTFP   // class or interface
+          )
     ;
 
 variableModifier
