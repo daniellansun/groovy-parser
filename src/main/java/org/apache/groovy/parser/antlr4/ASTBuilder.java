@@ -91,12 +91,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         ctx.statement().stream()
                 .map(this::visit)
-                .filter(e -> e instanceof Statement)
+//                .filter(e -> e instanceof Statement)
                 .forEach(e -> {
-                    if (e instanceof DeclarationListStatement) {
+                    if (e instanceof DeclarationListStatement) { // local variable declaration
                         ((DeclarationListStatement) e).getDeclarationStatements().forEach(moduleNode::addStatement);
-                    } else {
+                    } else if (e instanceof Statement) {
                         moduleNode.addStatement((Statement) e);
+                    } else if (e instanceof MethodNode) { // script method
+                        moduleNode.addMethod((MethodNode) e);
                     }
                 });
 
@@ -551,9 +553,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public MethodNode visitMethodDeclaration(MethodDeclarationContext ctx) {
-//        MethodNode methodNode = new MethodNode(methodName, modifiers, returnType, params, exceptions, statement);
 
-        return null; // TODO
+        MethodNode methodNode =
+                new MethodNode(
+                        this.visitMethodName(ctx.methodName()),
+                        Opcodes.ACC_PUBLIC /*modifiers*/,
+                        this.visitReturnType(ctx.returnType()),
+                        this.visitFormalParameters(ctx.formalParameters()),
+                        this.visitQualifiedClassNameList(ctx.qualifiedClassNameList()) /*exceptions*/,
+                        this.visitMethodBody(ctx.methodBody()));
+
+        return this.configureAST(methodNode, ctx);
     }
 
     @Override
@@ -567,6 +577,28 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         throw createParsingFailedException("Unsupported method name: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public ClassNode visitReturnType(ReturnTypeContext ctx) {
+        if (asBoolean(ctx.type())) {
+            return this.visitType(ctx.type());
+        }
+
+        if (asBoolean(ctx.VOID())) {
+            return ClassHelper.VOID_TYPE;
+        }
+
+        throw createParsingFailedException("Unsupported return type: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public Statement visitMethodBody(MethodBodyContext ctx) {
+        if (!asBoolean(ctx)) {
+            return null;
+        }
+
+        return this.configureAST(this.visitBlock(ctx.block()), ctx);
     }
 
 
@@ -1914,6 +1946,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public Parameter[] visitFormalParameters(FormalParametersContext ctx) {
+        return this.visitFormalParameterList(ctx.formalParameterList());
+    }
+
+    @Override
     public Parameter[] visitFormalParameterList(FormalParameterListContext ctx) {
         List<Parameter> parameterList = new LinkedList<>();
 
@@ -2194,6 +2231,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return ctx.identifier().stream()
                 .map(ParseTree::getText)
                 .collect(Collectors.joining(DOT_STR));
+    }
+
+    @Override
+    public ClassNode[] visitQualifiedClassNameList(QualifiedClassNameListContext ctx) {
+        if (!asBoolean(ctx)) {
+            return new ClassNode[0];
+        }
+
+        return ctx.qualifiedClassName().stream()
+                .map(this::visitQualifiedClassName)
+                .toArray(ClassNode[]::new);
     }
 
     @Override

@@ -247,7 +247,7 @@ methodDeclaration[int t]
     :   (   modifiersOpt  typeParameters? returnType
         |   modifiers  typeParameters? returnType?
         )
-        methodName formalParameters (THROWS qualifiedClassNameList)?
+        methodName formalParameters nls (THROWS nls qualifiedClassNameList nls)?
         (
             { 0 == $t || 1 == $t }?
             methodBody
@@ -352,7 +352,7 @@ typeArgument
     ;
 
 qualifiedClassNameList
-    :   qualifiedClassName (COMMA qualifiedClassName)*
+    :   qualifiedClassName (COMMA nls qualifiedClassName)*
     ;
 
 formalParameters
