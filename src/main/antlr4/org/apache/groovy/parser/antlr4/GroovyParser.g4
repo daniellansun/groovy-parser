@@ -282,7 +282,7 @@ returnType
     ;
 
 fieldDeclaration
-    :   modifiersOpt type variableDeclarators SEMI
+    :   modifiersOpt type variableDeclarators
     ;
 
 interfaceBodyDeclaration
@@ -514,6 +514,10 @@ blockStatement
     ;
 
 localVariableDeclaration
+    :   variableDeclaration
+    ;
+
+variableDeclaration
     :   variableModifiersOpt type variableDeclarators
     |   variableModifiers type? variableDeclarators
     |   variableModifiers typeNamePairs ASSIGN nls variableInitializer

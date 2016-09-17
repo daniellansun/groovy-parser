@@ -633,7 +633,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
         Objects.requireNonNull(classNode, "classNode should not be null");
 
-        if (asBoolean(ctx.block())) {
+        if (asBoolean(ctx.memberDeclaration())) {
+            ctx.memberDeclaration().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
+            this.visitMemberDeclaration(ctx.memberDeclaration());
+        } else if (asBoolean(ctx.block())) {
             Statement statement = this.visitBlock(ctx.block());
 
             if (asBoolean(ctx.STATIC())) { // e.g. static { }
@@ -644,11 +647,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 this.createBlockStatement(statement),
                                 statement));
             }
-        }
-
-        if (asBoolean(ctx.memberDeclaration())) {
-            ctx.memberDeclaration().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
-            this.visitMemberDeclaration(ctx.memberDeclaration());
         }
 
         return null;
@@ -662,6 +660,9 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(ctx.methodDeclaration())) {
             ctx.methodDeclaration().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
             this.visitMethodDeclaration(ctx.methodDeclaration());
+        } else if (asBoolean(asBoolean(ctx.fieldDeclaration()))) {
+            ctx.fieldDeclaration().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
+            this.visitFieldDeclaration(ctx.fieldDeclaration());
         }
 
         return null; // TODO
@@ -698,6 +699,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return ctx.type().stream()
                 .map(this::visitType)
                 .toArray(ClassNode[]::new);
+    }
+
+    @Override
+    public Void visitFieldDeclaration(GroovyParser.FieldDeclarationContext ctx) {
+        return null;
     }
 
     @Override
@@ -801,9 +807,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(this.visitBlock(ctx.block()), ctx);
     }
 
-
     @Override
     public DeclarationListStatement visitLocalVariableDeclaration(LocalVariableDeclarationContext ctx) {
+        return this.configureAST(this.visitVariableDeclaration(ctx.variableDeclaration()), ctx);
+    }
+
+    @Override
+    public DeclarationListStatement visitVariableDeclaration(VariableDeclarationContext ctx) {
         List<ModifierNode> modifierNodeList = Collections.emptyList();
 
         if (asBoolean(ctx.variableModifiers())) {
@@ -2644,9 +2654,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.appendStatementsToBlockStatement(new BlockStatement(), statementList);
     }
 
+    /*
     private BlockStatement appendStatementsToBlockStatement(BlockStatement bs, Statement... statements) {
         return this.appendStatementsToBlockStatement(bs, Arrays.asList(statements));
     }
+    */
 
     private BlockStatement appendStatementsToBlockStatement(BlockStatement bs, List<Statement> statementList) {
         return (BlockStatement) statementList.stream()
