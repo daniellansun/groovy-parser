@@ -18,8 +18,10 @@
  */
 package org.apache.groovy.parser.antlr4
 
+import org.codehaus.groovy.ast.FieldNode
 import org.codehaus.groovy.ast.ModuleNode
 import org.codehaus.groovy.ast.Parameter
+import org.codehaus.groovy.ast.PropertyNode
 import org.codehaus.groovy.ast.stmt.AssertStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
 import org.apache.groovy.parser.AbstractParser
@@ -175,15 +177,16 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/LocalVariableDeclaration_01.groovy', [Token]); // [class org.codehaus.groovy.syntax.Token][startLine]:: 9 != 8
     }
 
-    void "test groovy core - MethodDeclaration_01"() {
+    void "test groovy core - MethodDeclaration"() {
         test('core/MethodDeclaration_01.groovy');
         test('core/MethodDeclaration_02.groovy');
     }
 
-    void "test groovy core - ClassDeclaration_01"() {
+    void "test groovy core - ClassDeclaration"() {
         test('core/ClassDeclaration_01.groovy');
         test('core/ClassDeclaration_02.groovy');
         test('core/ClassDeclaration_03.groovy');
+        test('core/ClassDeclaration_04.groovy', [PropertyNode, FieldNode]);
     }
 
     void "test groovy core - Command"() {

@@ -750,7 +750,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 methodNode = classNode.addMethod(methodName, modifiers, returnType, parameters, exceptions, code);
             }
 
-            modifierManager.processMethodNode(methodNode, false);
+            modifierManager.attachAnnotations(methodNode);
         } else { // script method declaration
             methodNode =
                     new MethodNode(
@@ -818,8 +818,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public DeclarationListStatement visitVariableDeclaration(VariableDeclarationContext ctx) {
-        ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
-
         List<ModifierNode> modifierNodeList = Collections.emptyList();
 
         if (asBoolean(ctx.variableModifiers())) {
@@ -832,8 +830,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             modifierNodeList = this.visitModifiersOpt(ctx.modifiersOpt());
         }
 
-        ModifierManager modifierManager =
-                new ModifierManager(modifierNodeList);
+        ModifierManager modifierManager = new ModifierManager(modifierNodeList);
 
         if (asBoolean(ctx.typeNamePairs())) { // e.g. def (int a, int b) = [1, 2]
             if (!modifierManager.contains(DEF)) {
@@ -843,7 +840,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return this.configureAST(
                     new DeclarationListStatement(
                             this.configureAST(
-                                    modifierManager.processDeclarationExpression(
+                                    modifierManager.attachAnnotations(
                                             new DeclarationExpression(
                                                     new ArgumentListExpression(
                                                             this.visitTypeNamePairs(ctx.typeNamePairs()).stream()
@@ -865,11 +862,56 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         ctx.variableDeclarators().putNodeMetaData(VARIABLE_DECLARATION_VARIABLE_TYPE, variableType);
         List<DeclarationExpression> declarationExpressionList = this.visitVariableDeclarators(ctx.variableDeclarators());
 
+        // if classNode is not null, the variable declaration is for class declaration. In other words, it is a field declaration
+        ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
+
+        if (asBoolean(classNode)) {
+            declarationExpressionList.stream().forEach(e -> {
+                VariableExpression variableExpression = (VariableExpression) e.getLeftExpression();
+
+                int modifiers = modifierManager.getClassMemberModifiersOpValue();
+                modifiers |= classNode.isInterface() ? Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL : 0;
+
+                if (modifierManager.containsVisibilityModifier()) {
+                    FieldNode fieldNode =
+                            classNode.addField(
+                                    variableExpression.getName(),
+                                    modifiers,
+                                    variableType,
+                                    EmptyExpression.INSTANCE.equals(e.getRightExpression()) ? null : e.getRightExpression());
+                    modifierManager.attachAnnotations(fieldNode);
+
+                    this.configureAST(fieldNode, ctx);
+                } else {
+                    PropertyNode propertyNode =
+                            classNode.addProperty(
+                                    variableExpression.getName(),
+                                    modifiers | Opcodes.ACC_PUBLIC,
+                                    variableType,
+                                    EmptyExpression.INSTANCE.equals(e.getRightExpression()) ? null : e.getRightExpression(),
+                                    null,
+                                    null);
+
+                    FieldNode fieldNode = propertyNode.getField();
+                    fieldNode.setModifiers(modifiers & ~Opcodes.ACC_PUBLIC | Opcodes.ACC_PRIVATE);
+                    fieldNode.setSynthetic(!classNode.isInterface());
+                    modifierManager.attachAnnotations(fieldNode);
+
+                    this.configureAST(fieldNode, ctx);
+                    this.configureAST(propertyNode, ctx);
+                }
+
+            });
+
+            return null;
+        }
+
         declarationExpressionList.stream().forEach(e -> {
             VariableExpression variableExpression = (VariableExpression) e.getLeftExpression();
 
             modifierManager.processVariableExpression(variableExpression);
-            modifierManager.processDeclarationExpression(e);
+            modifierManager.attachAnnotations(e);
+
         });
 
         int size = declarationExpressionList.size();
@@ -911,6 +953,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 .map(e -> {
                     e.putNodeMetaData(VARIABLE_DECLARATION_VARIABLE_TYPE, variableType);
                     return this.visitVariableDeclarator(e);
+//                    return this.configureAST(this.visitVariableDeclarator(e), ctx);
                 })
                 .collect(Collectors.toList());
     }
@@ -3149,6 +3192,18 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return parameter;
         }
 
+        public MethodNode processMethodNode(MethodNode mn) {
+            modifierNodeList.forEach(e -> {
+                mn.setModifiers(mn.getModifiers() | e.getOpCode());
+
+                if (e.isAnnotation()) {
+                    mn.addAnnotation(e.getAnnotationNode());
+                }
+            });
+
+            return mn;
+        }
+
         public VariableExpression processVariableExpression(VariableExpression ve) {
             modifierNodeList.forEach(e -> {
                 ve.setModifiers(ve.getModifiers() | e.getOpCode());
@@ -3159,28 +3214,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return ve;
         }
 
-        public DeclarationExpression processDeclarationExpression(DeclarationExpression de) {
-            this.getAnnotations().forEach(de::addAnnotation);
+        public <T extends AnnotatedNode> T attachAnnotations(T node) {
+            this.getAnnotations().forEach(node::addAnnotation);
 
-            return de;
-        }
-
-        public MethodNode processMethodNode(MethodNode mn) {
-            return this.processMethodNode(mn, true);
-        }
-
-        public MethodNode processMethodNode(MethodNode mn, boolean toProcessModifiers) {
-            modifierNodeList.forEach(e -> {
-                if (toProcessModifiers) {
-                    mn.setModifiers(mn.getModifiers() | e.getOpCode());
-                }
-
-                if (e.isAnnotation()) {
-                    mn.addAnnotation(e.getAnnotationNode());
-                }
-            });
-
-            return mn;
+            return node;
         }
     }
 
