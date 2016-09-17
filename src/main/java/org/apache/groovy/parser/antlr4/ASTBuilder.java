@@ -577,21 +577,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         throw createParsingFailedException("Unsupported type declaration: " + ctx.getText(), ctx);
     }
 
-    private void hackMixins(ClassNode classNode) {
-        if (!classNode.isInterface()) {
-            return;
-        }
-
-        try {
-            // FIXME Hack with visibility.
-            Field field = ClassNode.class.getDeclaredField("mixins");
-            field.setAccessible(true);
-            field.set(classNode, null);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            throw new GroovyBugError("Failed to access mixins field", e);
-        }
-    }
-
     @Override
     public ClassNode visitClassDeclaration(ClassDeclarationContext ctx) {
         String packageName = moduleNode.getPackageName();
@@ -606,6 +591,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         boolean syntheticPublic = ((modifiers & Opcodes.ACC_SYNTHETIC) != 0);
         modifiers &= ~Opcodes.ACC_SYNTHETIC;
 
+
         ClassNode classNode =
                 new ClassNode(
                         packageName + ctx.className().getText(),
@@ -613,11 +599,29 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         ClassHelper.OBJECT_TYPE);
         classNode.putNodeMetaData(CLASS_NAME, ctx.className().getText());
         classNode.setSyntheticPublic(syntheticPublic);
-        classNode.setSuperClass(this.visitType(ctx.sc));
-        classNode.setInterfaces(this.visitTypeList(ctx.is));
+
         classNode.addAnnotations(modifierManager.getAnnotations());
         classNode.setGenericsTypes(this.visitTypeParameters(ctx.typeParameters()));
-        this.hackMixins(classNode);
+
+        if (asBoolean(ctx.INTERFACE()) && !asBoolean(ctx.AT())) { // interface(NOT annotation)
+            classNode.setModifiers(classNode.getModifiers() | Opcodes.ACC_INTERFACE | Opcodes.ACC_ABSTRACT);
+
+            classNode.setSuperClass(ClassHelper.OBJECT_TYPE);
+            classNode.setInterfaces(this.visitTypeList(ctx.scs));
+
+            this.hackMixins(classNode);
+        } else if (asBoolean(ctx.ENUM())) { // enum
+            classNode.setModifiers(classNode.getModifiers() | Opcodes.ACC_ENUM | Opcodes.ACC_FINAL);
+
+            classNode.setInterfaces(this.visitTypeList(ctx.is));
+        } else if (asBoolean(ctx.AT())) { // annotation
+            classNode.setModifiers(classNode.getModifiers() | Opcodes.ACC_ANNOTATION);
+
+            classNode.addInterface(ClassHelper.Annotation_TYPE);
+        } else if (asBoolean(ctx.CLASS())) { // class
+            classNode.setSuperClass(this.visitType(ctx.sc));
+            classNode.setInterfaces(this.visitTypeList(ctx.is));
+        }
 
         classNodeList.add(classNode);
 
@@ -759,6 +763,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 code);
 
             } else { // class memeber method declaration
+                modifiers |= classNode.isInterface() ? Opcodes.ACC_ABSTRACT : 0;
                 methodNode = classNode.addMethod(methodName, modifiers, returnType, parameters, exceptions, code);
             }
 
@@ -882,15 +887,25 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 VariableExpression variableExpression = (VariableExpression) e.getLeftExpression();
 
                 int modifiers = modifierManager.getClassMemberModifiersOpValue();
-                modifiers |= classNode.isInterface() ? Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL : 0;
 
-                if (modifierManager.containsVisibilityModifier()) {
+                Expression initialValue = EmptyExpression.INSTANCE.equals(e.getRightExpression()) ? null : e.getRightExpression();
+                Object defaultValue = findDefaultValueByType(variableType);
+
+                if (classNode.isInterface()) {
+                    if (!asBoolean(initialValue)) {
+                        initialValue = !asBoolean(defaultValue) ? null : new ConstantExpression(defaultValue);
+                    }
+
+                    modifiers |= Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL;
+                }
+
+                if (classNode.isInterface() || modifierManager.containsVisibilityModifier()) {
                     FieldNode fieldNode =
                             classNode.addField(
                                     variableExpression.getName(),
                                     modifiers,
                                     variableType,
-                                    EmptyExpression.INSTANCE.equals(e.getRightExpression()) ? null : e.getRightExpression());
+                                    initialValue);
                     modifierManager.attachAnnotations(fieldNode);
 
                     this.configureAST(fieldNode, ctx);
@@ -900,7 +915,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                     variableExpression.getName(),
                                     modifiers | Opcodes.ACC_PUBLIC,
                                     variableType,
-                                    EmptyExpression.INSTANCE.equals(e.getRightExpression()) ? null : e.getRightExpression(),
+                                    initialValue,
                                     null,
                                     null);
 
@@ -2797,6 +2812,37 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         return false;
+    }
+
+    private void hackMixins(ClassNode classNode) {
+        if (!classNode.isInterface()) {
+            return;
+        }
+
+        try {
+            // FIXME Hack with visibility.
+            Field field = ClassNode.class.getDeclaredField("mixins");
+            field.setAccessible(true);
+            field.set(classNode, null);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new GroovyBugError("Failed to access mixins field", e);
+        }
+    }
+
+    private static final Map<ClassNode, Object> TYPE_DEFAULT_VALUE_MAP = Collections.unmodifiableMap(new HashMap<ClassNode, Object>() {
+        {
+            this.put(ClassHelper.int_TYPE, 0);
+            this.put(ClassHelper.long_TYPE, 0L);
+            this.put(ClassHelper.double_TYPE, 0.0D);
+            this.put(ClassHelper.float_TYPE, 0.0F);
+            this.put(ClassHelper.short_TYPE, (short) 0);
+            this.put(ClassHelper.byte_TYPE, (byte) 0);
+            this.put(ClassHelper.char_TYPE, (char) 0);
+            this.put(ClassHelper.boolean_TYPE, Boolean.FALSE);
+        }
+    });
+    private Object findDefaultValueByType(ClassNode type) {
+        return TYPE_DEFAULT_VALUE_MAP.get(type);
     }
 
     private boolean isBlankScript(CompilationUnitContext ctx) {

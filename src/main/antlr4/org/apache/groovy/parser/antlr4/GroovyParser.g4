@@ -247,10 +247,11 @@ locals[ int t ]
 classBody[int t]
     :   LBRACE nls
         (
+            /* Only enum can have  enum constants*/
             { 2 == $t }?
             enumConstants? COMMA?
         |
-            /* Only enum can have  enum constants*/
+
         )
         classBodyDeclaration? (sep classBodyDeclaration)* sep? RBRACE
     ;
@@ -285,7 +286,7 @@ methodDeclaration[int t]
             methodBody
         |
             { 0 == $t || 2 == $t }?
-            sep
+            /* no method body */
         )
     ;
 

@@ -17,10 +17,12 @@ public class J<T extends A & B & C> extends A implements X, Y, Z {}
 @Test3
 public
 class M
-<T extends
+<
+        T extends
 A &
 B &
-C>
+C
+>
         extends
                 A
         implements
