@@ -44,6 +44,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -573,7 +574,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return this.configureAST(this.visitClassDeclaration(ctx.classDeclaration()), ctx);
         }
 
-        return null; // TODO
+        throw createParsingFailedException("Unsupported type declaration: " + ctx.getText(), ctx);
+    }
+
+    private void hackMixins(ClassNode classNode) {
+        if (!classNode.isInterface()) {
+            return;
+        }
+
+        try {
+            // FIXME Hack with visibility.
+            Field field = ClassNode.class.getDeclaredField("mixins");
+            field.setAccessible(true);
+            field.set(classNode, null);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new GroovyBugError("Failed to access mixins field", e);
+        }
     }
 
     @Override
@@ -594,20 +610,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 new ClassNode(
                         packageName + ctx.className().getText(),
                         modifiers,
-                        this.visitType(ctx.sc),
-                        this.visitTypeList(ctx.is),
-                        new MixinNode[0] /*TODO read mixins*/);
+                        ClassHelper.OBJECT_TYPE);
         classNode.putNodeMetaData(CLASS_NAME, ctx.className().getText());
+        classNode.setSyntheticPublic(syntheticPublic);
+        classNode.setSuperClass(this.visitType(ctx.sc));
+        classNode.setInterfaces(this.visitTypeList(ctx.is));
+        classNode.addAnnotations(modifierManager.getAnnotations());
+        classNode.setGenericsTypes(this.visitTypeParameters(ctx.typeParameters()));
+        this.hackMixins(classNode);
 
         classNodeList.add(classNode);
-
-        classNode.addAnnotations(modifierManager.getAnnotations());
-
-        if (asBoolean(ctx.typeParameters())) {
-            classNode.setGenericsTypes(this.visitTypeParameters(ctx.typeParameters()));
-        }
-
-        classNode.setSyntheticPublic(syntheticPublic);
 
         ctx.classBody().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
         this.visitClassBody(ctx.classBody());
