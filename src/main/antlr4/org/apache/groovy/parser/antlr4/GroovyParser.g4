@@ -120,9 +120,6 @@ importDeclaration
 
 typeDeclaration
     :   classOrInterfaceModifiersOpt classDeclaration
-    |   classOrInterfaceModifiersOpt enumDeclaration
-    |   classOrInterfaceModifiersOpt interfaceDeclaration
-    |   classOrInterfaceModifiersOpt annotationTypeDeclaration
     |   SEMI
     ;
 
@@ -179,14 +176,6 @@ variableModifiers
     :   (variableModifier nls)+
     ;
 
-
-classDeclaration
-    :   CLASS className nls typeParameters? nls
-        (EXTENDS nls sc=type nls)?
-        (IMPLEMENTS nls is=typeList nls)?
-        classBody
-    ;
-
 typeParameters
     :   LT nls typeParameter (COMMA nls typeParameter)* nls GT
     ;
@@ -199,37 +188,71 @@ typeBound
     :   type (BITAND nls type)*
     ;
 
-enumDeclaration
-    :   ENUM className (IMPLEMENTS typeList)?
-        LBRACE enumConstants? COMMA? enumBodyDeclarations? RBRACE
-    ;
-
 enumConstants
     :   enumConstant (COMMA enumConstant)*
     ;
 
 enumConstant
-    :   annotation* identifier arguments? classBody?
-    ;
-
-enumBodyDeclarations
-    :   SEMI classBodyDeclaration*
-    ;
-
-interfaceDeclaration
-    :   INTERFACE className typeParameters? (EXTENDS typeList)? interfaceBody
+    :   annotation* identifier arguments? classBody[0]?
     ;
 
 typeList
     :   type (COMMA nls type)*
     ;
 
-classBody
-    :   LBRACE nls classBodyDeclaration? (sep classBodyDeclaration)* sep? RBRACE
+
+/**
+ *  t   0: class; 1: interface; 2: enum; 3: annotation
+ */
+classDeclaration
+locals[ int t ]
+    :   (   CLASS { $t = 0; }
+        |   INTERFACE { $t = 1; }
+        |   ENUM { $t = 2; }
+        |   AT INTERFACE { $t = 3; }
+        )
+        className
+
+        (
+            { 3 != $t }?
+            nls typeParameters? nls
+            (
+                { 2 != $t }?
+                (EXTENDS nls
+                    (
+                        // Only interface can extend more than one super class
+                        {1 == $t}? scs=typeList
+                    |
+                        sc=type
+                    )
+                nls)?
+            |
+                /* enum should not extend any super class */
+            )
+
+            (
+                {1 != $t}?
+                (IMPLEMENTS nls is=typeList nls)?
+            |
+                /* interface should not implement other interfaces */
+            )
+        |
+            /* annotation should not have implements and extends*/
+        )
+
+        classBody[$t]
     ;
 
-interfaceBody
-    :   LBRACE nls interfaceBodyDeclaration? (sep interfaceBodyDeclaration)* sep? RBRACE
+
+classBody[int t]
+    :   LBRACE nls
+        (
+            { 2 == $t }?
+            enumConstants? COMMA?
+        |
+            /* Only enum can have  enum constants*/
+        )
+        classBodyDeclaration? (sep classBodyDeclaration)* sep? RBRACE
     ;
 
 classBodyDeclaration
@@ -241,11 +264,8 @@ classBodyDeclaration
 memberDeclaration
     :   methodDeclaration[0]
     |   fieldDeclaration
-
+    |   type annotationMethodRest
     |   modifiersOpt classDeclaration
-    |   modifiersOpt enumDeclaration
-    |   modifiersOpt interfaceDeclaration
-    |   modifiersOpt annotationTypeDeclaration
     ;
 
 /**
@@ -283,28 +303,6 @@ returnType
 
 fieldDeclaration
     :   variableDeclaration[1]
-    ;
-
-interfaceBodyDeclaration
-    :   interfaceMemberDeclaration
-    |   SEMI
-    ;
-
-interfaceMemberDeclaration
-    :   constDeclaration
-    |   methodDeclaration[2]
-    |   modifiersOpt classDeclaration
-    |   modifiersOpt enumDeclaration
-    |   modifiersOpt interfaceDeclaration
-    |   modifiersOpt annotationTypeDeclaration
-    ;
-
-constDeclaration
-    :   type constantDeclarator (COMMA constantDeclarator)* SEMI
-    ;
-
-constantDeclarator
-    :   identifier (LBRACK RBRACK)* ASSIGN variableInitializer
     ;
 
 variableDeclarators
@@ -463,42 +461,8 @@ elementValueArrayInitializer
     :   LBRACK (elementValue (COMMA elementValue)*)? (COMMA)? RBRACK
     ;
 
-annotationTypeDeclaration
-    :   AT INTERFACE className annotationTypeBody
-    ;
-
-annotationTypeBody
-    :   LBRACE (annotationTypeElementDeclaration)* RBRACE
-    ;
-
-annotationTypeElementDeclaration
-    :   modifiersOpt annotationTypeElementRest
-    |   SEMI // this is not allowed by the grammar, but apparently allowed by the actual compiler
-    ;
-
-annotationTypeElementRest
-    :   type annotationMethodOrConstantRest SEMI
-    |   classDeclaration SEMI?
-    |   interfaceDeclaration SEMI?
-    |   enumDeclaration SEMI?
-    |   annotationTypeDeclaration SEMI?
-    ;
-
-annotationMethodOrConstantRest
-    :   annotationMethodRest
-    |   annotationConstantRest
-    ;
-
 annotationMethodRest
-    :   identifier LPAREN RPAREN defaultValue?
-    ;
-
-annotationConstantRest
-    :   variableDeclarators
-    ;
-
-defaultValue
-    :   DEFAULT elementValue
+    :   identifier LPAREN RPAREN (DEFAULT elementValue)?
     ;
 
 // STATEMENTS / BLOCKS
@@ -918,7 +882,7 @@ mapEntryLabel
     ;
 
 creator
-    :   createdName arguments classBody?
+    :   createdName arguments classBody[0]?
     |   createdName (LBRACK expression RBRACK)+ (b+=LBRACK RBRACK)*
     ;
 
