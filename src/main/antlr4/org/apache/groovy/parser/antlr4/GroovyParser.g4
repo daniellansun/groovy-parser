@@ -211,11 +211,11 @@ locals[ int t ]
         |   ENUM { $t = 2; }
         |   AT INTERFACE { $t = 3; }
         )
-        className
+        className nls
 
         (
             { 3 != $t }?
-            nls typeParameters? nls
+            typeParameters? nls
             (
                 { 2 != $t }?
                 (EXTENDS nls
