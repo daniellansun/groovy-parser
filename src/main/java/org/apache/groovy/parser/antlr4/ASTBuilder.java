@@ -26,6 +26,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.groovy.parser.antlr4.util.StringUtil;
 import org.codehaus.groovy.GroovyBugError;
+import org.codehaus.groovy.antlr.EnumHelper;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;
@@ -45,6 +46,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -563,7 +565,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     // } statement    --------------------------------------------------------------------
-//    private final Deque<ClassNode> classNodeStack = new ArrayDeque<>();
 
     @Override
     public ClassNode visitTypeDeclaration(TypeDeclarationContext ctx) {
@@ -586,17 +587,24 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         ModifierManager modifierManager = new ModifierManager(modifierNodeList);
         int modifiers = modifierManager.getClassModifiersOpValue();
 
-//      TODO support inner class  final ClassNode outerClass = asBoolean(classNodeStack) ? classNodeStack.peek() : null;
-
         boolean syntheticPublic = ((modifiers & Opcodes.ACC_SYNTHETIC) != 0);
         modifiers &= ~Opcodes.ACC_SYNTHETIC;
 
+        final ClassNode outerClass = asBoolean(classNodeStack) ? classNodeStack.peek() : null;
+        ClassNode classNode = null;
+        if (asBoolean(ctx.ENUM())) {
+            classNode =
+                    EnumHelper.makeEnumNode(
+                            asBoolean(outerClass) ? ctx.className().getText() : packageName + ctx.className().getText(),
+                            Modifier.PUBLIC, null, outerClass);
+        } else {
+            classNode =
+                    new ClassNode(
+                            packageName + ctx.className().getText(),
+                            modifiers,
+                            ClassHelper.OBJECT_TYPE);
+        }
 
-        ClassNode classNode =
-                new ClassNode(
-                        packageName + ctx.className().getText(),
-                        modifiers,
-                        ClassHelper.OBJECT_TYPE);
         classNode.putNodeMetaData(CLASS_NAME, ctx.className().getText());
         classNode.setSyntheticPublic(syntheticPublic);
 
@@ -636,6 +644,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
         Objects.requireNonNull(classNode, "classNode should not be null");
 
+        if (asBoolean(ctx.enumConstants())) {
+            ctx.enumConstants().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
+            this.visitEnumConstants(ctx.enumConstants());
+        }
+
         ctx.classBodyDeclaration().stream().forEach(e -> {
             e.putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
             this.visitClassBodyDeclaration(e);
@@ -643,6 +656,56 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         return null;
     }
+
+    @Override
+    public List<FieldNode> visitEnumConstants(EnumConstantsContext ctx) {
+        ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
+        Objects.requireNonNull(classNode, "classNode should not be null");
+
+        return ctx.enumConstant().stream()
+                .map(e -> {
+                    e.putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
+                    return this.visitEnumConstant(e);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public FieldNode visitEnumConstant(EnumConstantContext ctx) {
+        ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
+        Objects.requireNonNull(classNode, "classNode should not be null");
+
+        FieldNode enumConstant =
+                EnumHelper.addEnumConstant(
+                        classNode,
+                        ctx.identifier().getText(),
+                        createEnumConstantInitExpression(ctx.arguments()));
+
+        ctx.annotation().stream()
+                .map(this::visitAnnotation)
+                .forEach(enumConstant::addAnnotation);
+
+        return this.configureAST(enumConstant, ctx);
+    }
+
+    private Expression createEnumConstantInitExpression(ArgumentsContext ctx) {
+        if (!asBoolean(ctx)) {
+            return null;
+        }
+
+        TupleExpression argumentListExpression = (TupleExpression) this.visitArguments(ctx);
+        List<Expression> expressions = argumentListExpression.getExpressions();
+
+        if (expressions.size() == 1) {
+            return expressions.get(0);
+        }
+
+        ListExpression listExpression = new ListExpression(expressions);
+        listExpression.setWrapped(true);
+
+        return this.configureAST(listExpression, ctx);
+    }
+
 
     @Override
     public Void visitClassBodyDeclaration(GroovyParser.ClassBodyDeclarationContext ctx) {
@@ -2841,6 +2904,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             this.put(ClassHelper.boolean_TYPE, Boolean.FALSE);
         }
     });
+
     private Object findDefaultValueByType(ClassNode type) {
         return TYPE_DEFAULT_VALUE_MAP.get(type);
     }
@@ -3405,6 +3469,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private final GroovyLangLexer lexer;
     private final GroovyLangParser parser;
     private final List<ClassNode> classNodeList = new LinkedList<ClassNode>();
+    private final Deque<ClassNode> classNodeStack = new ArrayDeque<>();
     private static final Class<ImportNode> IMPORT_NODE_CLASS = ImportNode.class;
     private static final String QUESTION_STR = "?";
     private static final String DOT_STR = ".";

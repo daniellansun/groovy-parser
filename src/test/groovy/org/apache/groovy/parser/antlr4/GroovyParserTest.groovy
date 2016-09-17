@@ -194,6 +194,10 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/InterfaceDeclaration_02.groovy');
     }
 
+    void "test groovy core - EnumDeclaration"() {
+        test('core/EnumDeclaration_01.groovy');
+    }
+
     void "test groovy core - Command"() {
         test('core/Command_01.groovy');
         test('core/Command_02.groovy');

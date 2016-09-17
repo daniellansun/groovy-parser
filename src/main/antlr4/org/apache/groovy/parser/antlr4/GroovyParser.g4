@@ -188,14 +188,6 @@ typeBound
     :   type (BITAND nls type)*
     ;
 
-enumConstants
-    :   enumConstant (COMMA enumConstant)*
-    ;
-
-enumConstant
-    :   annotation* identifier arguments? classBody[0]?
-    ;
-
 typeList
     :   type (COMMA nls type)*
     ;
@@ -227,7 +219,7 @@ locals[ int t ]
                     )
                 nls)?
             |
-                /* enum should not extend any super class */
+                /* enum should not have type parameters and extends */
             )
 
             (
@@ -247,13 +239,21 @@ locals[ int t ]
 classBody[int t]
     :   LBRACE nls
         (
-            /* Only enum can have  enum constants*/
+            /* Only enum can have enum constants */
             { 2 == $t }?
-            enumConstants? COMMA?
+            enumConstants? nls
         |
 
         )
         classBodyDeclaration? (sep classBodyDeclaration)* sep? RBRACE
+    ;
+
+enumConstants
+    :   enumConstant (nls COMMA nls enumConstant)* (nls COMMA)?
+    ;
+
+enumConstant
+    :   annotation* identifier arguments? classBody[0]?
     ;
 
 classBodyDeclaration
