@@ -25,6 +25,14 @@ class DD {
     {
         println 'abc'
     }
+
+    static {
+        println '234'
+    }
+
+    {
+        println 'bcd'
+    }
 }
 
 class EE {{}}

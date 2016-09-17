@@ -637,18 +637,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             Statement statement = this.visitBlock(ctx.block());
 
             if (asBoolean(ctx.STATIC())) { // e.g. static { }
-                MethodNode clinit =
-                        classNode.getMethods().stream()
-                                .filter(e -> CLINIT_STR.equals(e.getName()))
-                                .findFirst().orElse(null);
-
-                if (!asBoolean(clinit)) {
-                    clinit = new MethodNode(CLINIT_STR, Opcodes.ACC_STATIC, ClassHelper.VOID_TYPE, new Parameter[0], new ClassNode[0], new BlockStatement());
-                    clinit.setSynthetic(true);
-                    classNode.addMethod(clinit);
-                }
-
-                this.appendStatementsToBlockStatement((BlockStatement) clinit.getCode(), statement);
+                classNode.addStaticInitializerStatements(Collections.singletonList(statement), false);
             } else { // e.g.  { }
                 classNode.addObjectInitializerStatements(
                         this.configureAST(
@@ -724,16 +713,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         ModifierManager modifierManager = new ModifierManager(modifierNodeList);
-
         String methodName = this.visitMethodName(ctx.methodName());
-
-        MethodNode methodNode = null;
-
         ClassNode returnType = this.visitReturnType(ctx.returnType());
         Parameter[] parameters = this.visitFormalParameters(ctx.formalParameters());
         ClassNode[] exceptions = this.visitQualifiedClassNameList(ctx.qualifiedClassNameList());
         Statement code = this.visitMethodBody(ctx.methodBody());
 
+        MethodNode methodNode;
         // if classNode is not null, the method declaration is for class declaration
         ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
         if (asBoolean(classNode)) {
@@ -2678,7 +2664,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private boolean isAnnotationDeclaration(ClassNode classNode) {
-        return asBoolean(classNode) && ClassHelper.Annotation_TYPE.equals(classNode.getInterfaces().length > 0 ? classNode.getInterfaces()[0] : null);
+        return asBoolean(classNode) && classNode.isAnnotationDefinition();
     }
 
     private boolean isSyntheticPublic(
@@ -3306,7 +3292,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String CALL_STR = "call";
     private static final String THIS_STR = "this";
     private static final String SUPER_STR = "super";
-    private static final String CLINIT_STR = "<clinit>";
     private static final Set<String> PRIMITIVE_TYPE_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("boolean", "char", "byte", "short", "int", "long", "float", "double")));
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 

@@ -1,3 +1,5 @@
+package core
+
 class A {}
 class B<T> {}
 class C<T extends A> {}
