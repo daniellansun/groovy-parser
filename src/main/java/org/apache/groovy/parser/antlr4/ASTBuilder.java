@@ -702,7 +702,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public Void visitFieldDeclaration(GroovyParser.FieldDeclarationContext ctx) {
+    public Void visitFieldDeclaration(FieldDeclarationContext ctx) {
+        ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
+        Objects.requireNonNull(classNode, "classNode should not be null");
+
+        ctx.variableDeclaration().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
+        this.visitVariableDeclaration(ctx.variableDeclaration());
+
         return null;
     }
 
@@ -712,9 +718,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         if (asBoolean(ctx.modifiers())) {
             modifierNodeList = this.visitModifiers(ctx.modifiers());
-        }
-
-        if (asBoolean(ctx.modifiersOpt())) {
+        } else if (asBoolean(ctx.modifiersOpt())) {
             modifierNodeList = this.visitModifiersOpt(ctx.modifiersOpt());
         }
 
@@ -814,14 +818,18 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public DeclarationListStatement visitVariableDeclaration(VariableDeclarationContext ctx) {
+        ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
+
         List<ModifierNode> modifierNodeList = Collections.emptyList();
 
         if (asBoolean(ctx.variableModifiers())) {
             modifierNodeList = this.visitVariableModifiers(ctx.variableModifiers());
-        }
-
-        if (asBoolean(ctx.variableModifiersOpt())) {
+        } else if (asBoolean(ctx.variableModifiersOpt())) {
             modifierNodeList = this.visitVariableModifiersOpt(ctx.variableModifiersOpt());
+        } else if (asBoolean(ctx.modifiers())) {
+            modifierNodeList = this.visitModifiers(ctx.modifiers());
+        } else if (asBoolean(ctx.modifiersOpt())) {
+            modifierNodeList = this.visitModifiersOpt(ctx.modifiersOpt());
         }
 
         ModifierManager modifierManager =
@@ -853,25 +861,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             );
         }
 
-        ClassNode classNode = this.visitType(ctx.type());
+        ClassNode variableType = this.visitType(ctx.type());
+        ctx.variableDeclarators().putNodeMetaData(VARIABLE_DECLARATION_VARIABLE_TYPE, variableType);
         List<DeclarationExpression> declarationExpressionList = this.visitVariableDeclarators(ctx.variableDeclarators());
 
         declarationExpressionList.stream().forEach(e -> {
-
-            VariableExpression veDTO = (VariableExpression) e.getLeftExpression();
-
-            VariableExpression variableExpression =
-                    this.configureAST(
-                            new VariableExpression(
-                                    veDTO.getName(),
-                                    classNode),
-                            veDTO);
-
+            VariableExpression variableExpression = (VariableExpression) e.getLeftExpression();
 
             modifierManager.processVariableExpression(variableExpression);
-
-            e.setLeftExpression(variableExpression);
-
             modifierManager.processDeclarationExpression(e);
         });
 
@@ -907,11 +904,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public List<DeclarationExpression> visitVariableDeclarators(VariableDeclaratorsContext ctx) {
-        return ctx.variableDeclarator().stream().map(this::visitVariableDeclarator).collect(Collectors.toList());
+        ClassNode variableType = ctx.getNodeMetaData(VARIABLE_DECLARATION_VARIABLE_TYPE);
+        Objects.requireNonNull(variableType, "variableType should not be null");
+
+        return ctx.variableDeclarator().stream()
+                .map(e -> {
+                    e.putNodeMetaData(VARIABLE_DECLARATION_VARIABLE_TYPE, variableType);
+                    return this.visitVariableDeclarator(e);
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
     public DeclarationExpression visitVariableDeclarator(VariableDeclaratorContext ctx) {
+        ClassNode variableType = ctx.getNodeMetaData(VARIABLE_DECLARATION_VARIABLE_TYPE);
+        Objects.requireNonNull(variableType, "variableType should not be null");
+
         org.codehaus.groovy.syntax.Token token;
         if (asBoolean(ctx.ASSIGN())) {
             token = createGroovyTokenByType(ctx.ASSIGN().getSymbol(), Types.ASSIGN);
@@ -922,9 +930,9 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(
                 new DeclarationExpression(
                         this.configureAST(
-                                new VariableExpression( // Act as a DTO
+                                new VariableExpression(
                                         this.visitVariableDeclaratorId(ctx.variableDeclaratorId()).getName(),
-                                        ClassHelper.OBJECT_TYPE
+                                        variableType
                                 ),
                                 ctx.variableDeclaratorId()),
                         token,
@@ -1713,11 +1721,18 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         Expression leftExpr = (Expression) this.visit(ctx.left);
 
         // the LHS expression should be a variable which is not inside any parentheses
-        if (!(leftExpr instanceof VariableExpression
-                && !(THIS_STR.equals(leftExpr.getText()) || SUPER_STR.equals(leftExpr.getText()))
-                && !isTrue(leftExpr, IS_INSIDE_PARENTHESES))) {
+        if (
+                !(
+                        (leftExpr instanceof VariableExpression
+                                && !(THIS_STR.equals(leftExpr.getText()) || SUPER_STR.equals(leftExpr.getText()))
+                                && !isTrue(leftExpr, IS_INSIDE_PARENTHESES)) // e.g. p = 123
 
-            throw createParsingFailedException("The LHS of an assignment should be a variable", ctx);
+                                || leftExpr instanceof PropertyExpression // e.g. obj.p = 123
+                )
+
+                ) {
+
+            throw createParsingFailedException("The LHS of an assignment should be a variable or a field accessing expression", ctx);
         }
 
         return this.configureAST(
@@ -3318,5 +3333,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String CMD_EXPRESSION_BASE_EXPR = "_CMD_EXPRESSION_BASE_EXPR";
     private static final String TYPE_DECLARATION_MODIFIERS = "_TYPE_DECLARATION_MODIFIERS";
     private static final String CLASS_DECLARATION_CLASS_NODE = "_CLASS_DECLARATION_CLASS_NODE";
+    private static final String VARIABLE_DECLARATION_VARIABLE_TYPE = "_VARIABLE_DECLARATION_VARIABLE_TYPE";
+
     private static final String CLASS_NAME = "_CLASS_NAME";
 }

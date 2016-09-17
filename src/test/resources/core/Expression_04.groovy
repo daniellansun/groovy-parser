@@ -16,6 +16,9 @@ a &= that
 a = e f g h
 a = b *= c += d %= e f g h
 
+obj.name = '123'
+m().result = 123
+
 a =
         b =
                 left >>>=

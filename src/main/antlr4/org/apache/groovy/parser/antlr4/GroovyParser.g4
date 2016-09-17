@@ -282,7 +282,7 @@ returnType
     ;
 
 fieldDeclaration
-    :   modifiersOpt type variableDeclarators
+    :   variableDeclaration[1]
     ;
 
 interfaceBodyDeclaration
@@ -514,13 +514,27 @@ blockStatement
     ;
 
 localVariableDeclaration
-    :   variableDeclaration
+    :   variableDeclaration[0]
     ;
 
-variableDeclaration
-    :   variableModifiersOpt type variableDeclarators
-    |   variableModifiers type? variableDeclarators
-    |   variableModifiers typeNamePairs ASSIGN nls variableInitializer
+/**
+ *  t   0: local variable declaration; 1: field declaration
+ */
+variableDeclaration[int t]
+    :   (   { 0 == $t }? variableModifiersOpt
+        |   { 1 == $t }? modifiersOpt
+        )
+        type variableDeclarators
+    |
+        (   { 0 == $t }? variableModifiers
+        |   { 1 == $t }? modifiers
+        )
+        type? variableDeclarators
+    |
+        (   { 0 == $t }? variableModifiers
+        |   { 1 == $t }? modifiers
+        )
+        typeNamePairs ASSIGN nls variableInitializer
     ;
 
 typeNamePairs
