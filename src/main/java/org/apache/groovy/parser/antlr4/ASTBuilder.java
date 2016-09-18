@@ -608,10 +608,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         classNode.putNodeMetaData(CLASS_NAME, ctx.className().getText());
         classNode.setSyntheticPublic(syntheticPublic);
 
+        if (asBoolean(ctx.TRAIT())) {
+            classNode.addAnnotation(new AnnotationNode(ClassHelper.make(GROOVY_TRANSFORM_TRAIT)));
+        }
         classNode.addAnnotations(modifierManager.getAnnotations());
         classNode.setGenericsTypes(this.visitTypeParameters(ctx.typeParameters()));
 
-        if (asBoolean(ctx.INTERFACE()) && !asBoolean(ctx.AT())) { // interface(NOT annotation)
+        if (asBoolean(ctx.CLASS()) || asBoolean(ctx.TRAIT())) { // class OR trait
+            classNode.setSuperClass(this.visitType(ctx.sc));
+            classNode.setInterfaces(this.visitTypeList(ctx.is));
+        } else if (asBoolean(ctx.INTERFACE()) && !asBoolean(ctx.AT())) { // interface(NOT annotation)
             classNode.setModifiers(classNode.getModifiers() | Opcodes.ACC_INTERFACE | Opcodes.ACC_ABSTRACT);
 
             classNode.setSuperClass(ClassHelper.OBJECT_TYPE);
@@ -623,12 +629,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             classNode.setInterfaces(this.visitTypeList(ctx.is));
         } else if (asBoolean(ctx.AT())) { // annotation
-            classNode.setModifiers(classNode.getModifiers() | Opcodes.ACC_ANNOTATION);
+            classNode.setModifiers(classNode.getModifiers() | Opcodes.ACC_INTERFACE | Opcodes.ACC_ABSTRACT | Opcodes.ACC_ANNOTATION);
 
             classNode.addInterface(ClassHelper.Annotation_TYPE);
-        } else if (asBoolean(ctx.CLASS())) { // class
-            classNode.setSuperClass(this.visitType(ctx.sc));
-            classNode.setInterfaces(this.visitTypeList(ctx.is));
+
+            this.hackMixins(classNode);
+        } else {
+            throw createParsingFailedException("Unsupported class declaration: " + ctx.getText(), ctx);
         }
 
         classNodeList.add(classNode);
@@ -826,6 +833,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 code);
 
             } else { // class memeber method declaration
+                if (asBoolean(ctx.elementValue())) { // the code of annotation method
+                    code = this.configureAST(
+                            new ExpressionStatement(
+                                    this.visitElementValue(ctx.elementValue())),
+                            ctx.elementValue());
+                }
+
                 modifiers |= classNode.isInterface() ? Opcodes.ACC_ABSTRACT : 0;
                 methodNode = classNode.addMethod(methodName, modifiers, returnType, parameters, exceptions, code);
             }
@@ -2311,6 +2325,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Parameter[] visitFormalParameters(FormalParametersContext ctx) {
+        if (!asBoolean(ctx)) {
+            return new Parameter[0];
+        }
+
         return this.visitFormalParameterList(ctx.formalParameterList());
     }
 
@@ -2877,11 +2895,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return false;
     }
 
+    // the mixins of interface and annotation should be null
     private void hackMixins(ClassNode classNode) {
-        if (!classNode.isInterface()) {
-            return;
-        }
-
         try {
             // FIXME Hack with visibility.
             Field field = ClassNode.class.getDeclaredField("mixins");
@@ -3479,6 +3494,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String CALL_STR = "call";
     private static final String THIS_STR = "this";
     private static final String SUPER_STR = "super";
+    private static final String GROOVY_TRANSFORM_TRAIT = "groovy.transform.Trait";
     private static final Set<String> PRIMITIVE_TYPE_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("boolean", "char", "byte", "short", "int", "long", "float", "double")));
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
 

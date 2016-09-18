@@ -198,6 +198,17 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/EnumDeclaration_01.groovy');
     }
 
+    void "test groovy core - TraitDeclaration"() {
+        test('core/TraitDeclaration_01.groovy');
+        test('core/TraitDeclaration_02.groovy');
+        test('core/TraitDeclaration_03.groovy');
+        test('core/TraitDeclaration_04.groovy', [PropertyNode, FieldNode]);
+    }
+
+    void "test groovy core - AnnotationDeclaration"() {
+        test('core/AnnotationDeclaration_01.groovy');
+    }
+
     void "test groovy core - Command"() {
         test('core/Command_01.groovy');
         test('core/Command_02.groovy');

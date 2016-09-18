@@ -194,7 +194,7 @@ typeList
 
 
 /**
- *  t   0: class; 1: interface; 2: enum; 3: annotation
+ *  t   0: class; 1: interface; 2: enum; 3: annotation; 4: trait
  */
 classDeclaration
 locals[ int t ]
@@ -202,6 +202,7 @@ locals[ int t ]
         |   INTERFACE { $t = 1; }
         |   ENUM { $t = 2; }
         |   AT INTERFACE { $t = 3; }
+        |   TRAIT { $t = 4; }
         )
         className nls
 
@@ -235,7 +236,7 @@ locals[ int t ]
         classBody[$t]
     ;
 
-
+// t    see the comment of classDeclaration
 classBody[int t]
     :   LBRACE nls
         (
@@ -245,7 +246,7 @@ classBody[int t]
         |
 
         )
-        classBodyDeclaration? (sep classBodyDeclaration)* sep? RBRACE
+        classBodyDeclaration[$t]? (sep classBodyDeclaration[$t])* sep? RBRACE
     ;
 
 enumConstants
@@ -256,26 +257,26 @@ enumConstant
     :   annotation* identifier arguments? classBody[0]?
     ;
 
-classBodyDeclaration
+classBodyDeclaration[int t]
     :   SEMI
     |   (STATIC nls)? block
-    |   memberDeclaration
+    |   memberDeclaration[$t]
     ;
 
-memberDeclaration
-    :   methodDeclaration[0]
+memberDeclaration[int t]
+    :   methodDeclaration[0, $t]
     |   fieldDeclaration
-    |   type annotationMethodRest
     |   modifiersOpt classDeclaration
     ;
 
 /**
  *  t   0: *class member* all kinds of method declaration AND constructor declaration,
  *      1: normal method declaration, 2: abstract method declaration
+ *  ct  9: script, other see the comment of classDeclaration
  */
-methodDeclaration[int t]
-    :   (   modifiersOpt  typeParameters? returnType
-        |   modifiers  typeParameters? returnType?
+methodDeclaration[int t, int ct]
+    :   (   modifiersOpt  typeParameters? returnType[$ct]
+        |   modifiers  typeParameters? returnType[$ct]?
         |
             { 0 == $t }?
             modifiersOpt typeParameters?
@@ -288,18 +289,22 @@ methodDeclaration[int t]
             { 0 == $t || 2 == $t }?
             /* no method body */
         )
+    |
+        { 3 == $ct }?
+        returnType[$ct] methodName LPAREN RPAREN (DEFAULT nls elementValue)?
     ;
-
-
 
 methodName
     :   identifier
     |   StringLiteral
     ;
 
-returnType
-    :   type
-    |   VOID
+returnType[int ct]
+    :
+        type
+    |
+        // annotation method can not have void return type
+        { 3 != $ct }? VOID
     ;
 
 fieldDeclaration
@@ -462,10 +467,6 @@ elementValueArrayInitializer
     :   LBRACK (elementValue (COMMA elementValue)*)? (COMMA)? RBRACK
     ;
 
-annotationMethodRest
-    :   identifier LPAREN RPAREN (DEFAULT elementValue)?
-    ;
-
 // STATEMENTS / BLOCKS
 
 block
@@ -534,7 +535,7 @@ statement
     |   localVariableDeclaration                                                            #localVariableDeclarationStmtAlt
 
     |   { !SemanticPredicates.isInvalidMethodDeclaration(_input) }?
-        methodDeclaration[1]                                                                #methodDeclarationStmtAlt
+        methodDeclaration[1, 9]                                                                #methodDeclarationStmtAlt
 
     |   statementExpression                                                                 #expressionStmtAlt
 
