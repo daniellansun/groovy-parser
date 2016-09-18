@@ -188,6 +188,7 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/ClassDeclaration_03.groovy');
         test('core/ClassDeclaration_04.groovy', [PropertyNode, FieldNode]);
         test('core/ClassDeclaration_05.groovy', [ExpressionStatement]);
+        test('core/ClassDeclaration_06.groovy');
     }
 
     void "test groovy core - InterfaceDeclaration"() {
