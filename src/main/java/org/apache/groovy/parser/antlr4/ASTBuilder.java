@@ -1401,6 +1401,18 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     || baseExpr instanceof GStringExpression
                     || (baseExpr instanceof ConstantExpression && isTrue(baseExpr, IS_STRING))) { // e.g. m(), "$m"(), "m"()
 
+                String baseExprText = baseExpr.getText();
+                if (SUPER_STR.equals(baseExprText) || THIS_STR.equals(baseExprText)) { // e.g. this(...), super(...)
+                    return this.configureAST(
+                            new ConstructorCallExpression(
+                                    SUPER_STR.equals(baseExprText)
+                                            ? ClassNode.SUPER
+                                            : ClassNode.THIS,
+                                    argumentsExpr
+                            ),
+                            ctx);
+                }
+
                 MethodCallExpression methodCallExpression =
                         this.createMethodCallExpression(baseExpr, argumentsExpr);
 
