@@ -20,6 +20,7 @@ enum E1 {
     A(111,'aa'), B(222,'bb')
 }
 
+@Test2
 enum E2 {
     A2,
     B2,C2,

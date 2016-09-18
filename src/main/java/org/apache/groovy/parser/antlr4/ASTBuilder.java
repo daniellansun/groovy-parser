@@ -105,7 +105,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     }
                 });
 
-        classNodeList.forEach(moduleNode::addClass);
+        this.addClasses();
 
         // if groovy source file only contains blank(including EOF), add "return null" to the AST
         if (this.isBlankScript(ctx)) {
@@ -568,10 +568,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClassNode visitTypeDeclaration(TypeDeclarationContext ctx) {
-        List<ModifierNode> modifierNodeList = this.visitClassOrInterfaceModifiersOpt(ctx.classOrInterfaceModifiersOpt());
-
         if (asBoolean(ctx.classDeclaration())) { // e.g. class A {}
-            ctx.classDeclaration().putNodeMetaData(TYPE_DECLARATION_MODIFIERS, modifierNodeList);
+            ctx.classDeclaration().putNodeMetaData(TYPE_DECLARATION_MODIFIERS, this.visitClassOrInterfaceModifiersOpt(ctx.classOrInterfaceModifiersOpt()));
             return this.configureAST(this.visitClassDeclaration(ctx.classDeclaration()), ctx);
         }
 
@@ -584,6 +582,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         packageName = asBoolean((Object) packageName) ? packageName : "";
 
         List<ModifierNode> modifierNodeList = ctx.getNodeMetaData(TYPE_DECLARATION_MODIFIERS);
+        Objects.requireNonNull(modifierNodeList, "modifierNodeList should not be null");
+
         ModifierManager modifierManager = new ModifierManager(modifierNodeList);
         int modifiers = modifierManager.getClassModifiersOpValue();
 
@@ -596,13 +596,23 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             classNode =
                     EnumHelper.makeEnumNode(
                             asBoolean(outerClass) ? ctx.className().getText() : packageName + ctx.className().getText(),
-                            Modifier.PUBLIC, null, outerClass);
+                            modifiers, null, outerClass);
         } else {
-            classNode =
-                    new ClassNode(
-                            packageName + ctx.className().getText(),
-                            modifiers,
-                            ClassHelper.OBJECT_TYPE);
+            if (asBoolean(outerClass)) {
+                classNode =
+                        new InnerClassNode(
+                                outerClass,
+                                outerClass.getName() + "$" + ctx.className().getText(),
+                                modifiers,
+                                ClassHelper.OBJECT_TYPE);
+            } else {
+                classNode =
+                        new ClassNode(
+                                packageName + ctx.className().getText(),
+                                modifiers,
+                                ClassHelper.OBJECT_TYPE);
+            }
+
         }
 
         classNode.putNodeMetaData(CLASS_NAME, ctx.className().getText());
@@ -638,10 +648,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             throw createParsingFailedException("Unsupported class declaration: " + ctx.getText(), ctx);
         }
 
-        classNodeList.add(classNode);
-
+        classNodeStack.push(classNode);
         ctx.classBody().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
         this.visitClassBody(ctx.classBody());
+        classNodeStack.pop();
+
+        classNodeList.add(classNode);
 
         return this.configureAST(classNode, ctx);
     }
@@ -746,12 +758,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(ctx.methodDeclaration())) {
             ctx.methodDeclaration().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
             this.visitMethodDeclaration(ctx.methodDeclaration());
-        } else if (asBoolean(asBoolean(ctx.fieldDeclaration()))) {
+        } else if (asBoolean(ctx.fieldDeclaration())) {
             ctx.fieldDeclaration().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
             this.visitFieldDeclaration(ctx.fieldDeclaration());
+        } else if (asBoolean(ctx.classDeclaration())) {
+            ctx.classDeclaration().putNodeMetaData(TYPE_DECLARATION_MODIFIERS, this.visitModifiersOpt(ctx.modifiersOpt()));
+            ctx.classDeclaration().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
+            this.visitClassDeclaration(ctx.classDeclaration());
         }
 
-        return null; // TODO
+        return null;
     }
 
     @Override
@@ -3187,6 +3203,39 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return sw.toString();
     }
 
+    private void addClasses() {
+        // TODO The following sort code to fix "mainClassName" can be removed when verifying the equality of new and old parser is completed.
+        if (this.classNodeList.size() > 1) {
+            Collections.sort(this.classNodeList, new Comparator<ClassNode>() {
+                private ClassNode findOutestClass(ClassNode cn) {
+                    ClassNode outerClass = cn.getOuterClass();
+
+                    if (null == outerClass) {
+                        return cn;
+                    }
+
+                    return findOutestClass(outerClass);
+                }
+
+                private static final String SEPARATOR = "@";
+
+                private String convert(ClassNode cn) {
+                    return StringGroovyMethods.padLeft((CharSequence) (findOutestClass(cn).getLineNumber() + ""), 10, "0") + SEPARATOR
+                            + (cn.isInterface() || cn.isEnum() ? "1" : "0") + SEPARATOR
+                            + cn.getName();
+                }
+
+                @Override
+                public int compare(ClassNode cn1, ClassNode cn2) {
+                    return convert(cn1).compareTo(convert(cn2));
+                }
+            });
+        }
+
+        for (ClassNode cn : this.classNodeList) {
+            moduleNode.addClass(cn);
+        }
+    }
 
     private class DeclarationListStatement extends Statement {
         private List<ExpressionStatement> declarationStatements;
