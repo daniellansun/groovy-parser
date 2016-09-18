@@ -1071,7 +1071,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(ctx.ASSIGN())) {
             token = createGroovyTokenByType(ctx.ASSIGN().getSymbol(), Types.ASSIGN);
         } else {
-            token = new org.codehaus.groovy.syntax.Token(Types.ASSIGN, "=", ctx.start.getLine(), 1);
+            token = new org.codehaus.groovy.syntax.Token(Types.ASSIGN, ASSIGN_STR, ctx.start.getLine(), 1);
         }
 
         return this.configureAST(
@@ -3489,6 +3489,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String QUESTION_STR = "?";
     private static final String DOT_STR = ".";
     private static final String SUB_STR = "-";
+    private static final String ASSIGN_STR = "=";
     private static final String VALUE_STR = "value";
     private static final String DOLLAR_STR = "$";
     private static final String CALL_STR = "call";

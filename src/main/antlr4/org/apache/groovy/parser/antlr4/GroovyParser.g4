@@ -332,10 +332,6 @@ arrayInitializer
     :   LBRACK (variableInitializer (COMMA variableInitializer)* (COMMA)? )? RBRACK
     ;
 
-enumConstantName
-    :   identifier
-    ;
-
 type
     :   primitiveType (LBRACK RBRACK)*
     |   classOrInterfaceType (LBRACK RBRACK)*
@@ -397,16 +393,7 @@ literal
     |   StringLiteral                                                                       #stringLiteralAlt
     |   BooleanLiteral                                                                      #booleanLiteralAlt
     |   NullLiteral                                                                         #nullLiteralAlt
-//    |   classLiteral                                                                        #classLiteralAlt
     ;
-
-/*
-classLiteral
-    :   VOID (DOT CLASS)?
-    |   type (DOT CLASS)?
-    ;
-*/
-
 
 // GSTRING
 
@@ -900,16 +887,6 @@ nonWildcardTypeArguments
 typeArgumentsOrDiamond
     :   LT GT
     |   typeArguments
-    ;
-
-nonWildcardTypeArgumentsOrDiamond
-    :   LT GT
-    |   nonWildcardTypeArguments
-    ;
-
-superSuffix
-    :   arguments
-    |   DOT identifier arguments?
     ;
 
 arguments

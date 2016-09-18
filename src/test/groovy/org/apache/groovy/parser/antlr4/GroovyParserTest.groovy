@@ -203,6 +203,7 @@ class GroovyParserTest extends GroovyTestCase {
         test('core/TraitDeclaration_02.groovy');
         test('core/TraitDeclaration_03.groovy');
         test('core/TraitDeclaration_04.groovy', [PropertyNode, FieldNode]);
+        test('core/TraitDeclaration_05.groovy');
     }
 
     void "test groovy core - AnnotationDeclaration"() {
