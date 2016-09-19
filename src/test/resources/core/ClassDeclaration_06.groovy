@@ -20,13 +20,11 @@ class AA {
         }
 
         ProtectedFinalInner(Integer a) {
-            /*
             new A() {
                 public int method() {
                     1
                 }
             }
-            */
         }
     }
 

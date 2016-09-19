@@ -255,7 +255,7 @@ enumConstants
     ;
 
 enumConstant
-    :   annotation* identifier arguments? classBody[0]?
+    :   annotation* identifier arguments? anonymousInnerClassDeclaration[1]?
     ;
 
 classBodyDeclaration[int t]
@@ -872,8 +872,15 @@ mapEntryLabel
     ;
 
 creator
-    :   createdName arguments classBody[0]?
+    :   createdName arguments anonymousInnerClassDeclaration[0]?
     |   createdName (LBRACK expression RBRACK)+ (b+=LBRACK RBRACK)*
+    ;
+
+/**
+ *  t   0: anonymous inner class; 1: anonymous enum
+ */
+anonymousInnerClassDeclaration[int t]
+    :   classBody[0]
     ;
 
 createdName

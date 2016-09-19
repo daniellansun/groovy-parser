@@ -592,8 +592,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         boolean syntheticPublic = ((modifiers & Opcodes.ACC_SYNTHETIC) != 0);
         modifiers &= ~Opcodes.ACC_SYNTHETIC;
 
-        final ClassNode outerClass = asBoolean(classNodeStack) ? classNodeStack.peek() : null;
-        ClassNode classNode = null;
+        final ClassNode outerClass = classNodeStack.peek();
+        ClassNode classNode;
         if (asBoolean(ctx.ENUM())) {
             classNode =
                     EnumHelper.makeEnumNode(
@@ -617,6 +617,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         }
 
+        this.configureAST(classNode, ctx);
         classNode.putNodeMetaData(CLASS_NAME, ctx.className().getText());
         classNode.setSyntheticPublic(syntheticPublic);
 
@@ -658,16 +659,18 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             classNodeList.add(classNode);
         }
 
+        int oldAnonymousInnerClassCounter = this.anonymousInnerClassCounter;
         classNodeStack.push(classNode);
         ctx.classBody().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
         this.visitClassBody(ctx.classBody());
         classNodeStack.pop();
+        this.anonymousInnerClassCounter = oldAnonymousInnerClassCounter;
 
         if (!asBoolean(ctx.CLASS())) {
             classNodeList.add(classNode);
         }
 
-        return this.configureAST(classNode, ctx);
+        return classNode;
     }
 
     @Override
@@ -841,7 +844,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         ClassNode returnType = this.visitReturnType(ctx.returnType());
         Parameter[] parameters = this.visitFormalParameters(ctx.formalParameters());
         ClassNode[] exceptions = this.visitQualifiedClassNameList(ctx.qualifiedClassNameList());
+
+        anonymousInnerClassesDefinedInMethodStack.push(new LinkedList<>());
         Statement code = this.visitMethodBody(ctx.methodBody());
+        List<InnerClassNode> anonymousInnerClassList = anonymousInnerClassesDefinedInMethodStack.pop();
 
         MethodNode methodNode;
         // if classNode is not null, the method declaration is for class declaration
@@ -885,11 +891,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             modifierManager.processMethodNode(methodNode);
         }
+        anonymousInnerClassList.stream().forEach(e -> e.setEnclosingMethod(methodNode));
 
         methodNode.setGenericsTypes(this.visitTypeParameters(ctx.typeParameters()));
-
         methodNode.setSyntheticPublic(
                 this.isSyntheticPublic(this.isAnnotationDeclaration(classNode), asBoolean(ctx.returnType()), modifierManager));
+
 
         return this.configureAST(methodNode, ctx);
     }
@@ -1580,7 +1587,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitArguments(ArgumentsContext ctx) {
-        if (!asBoolean(ctx.argumentList())) {
+        if (!asBoolean(ctx) || !asBoolean(ctx.argumentList())) {
             return ArgumentListExpression.EMPTY_ARGUMENTS;
         }
 
@@ -1997,10 +2004,26 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Expression visitCreator(CreatorContext ctx) {
         ClassNode classNode = this.visitCreatedName(ctx.createdName());
+        Expression arguments = this.visitArguments(ctx.arguments());
 
         if (asBoolean(ctx.arguments())) { // create instance of class
+            if (asBoolean(ctx.anonymousInnerClassDeclaration())) {
+                ctx.anonymousInnerClassDeclaration().putNodeMetaData(ANONYMOUS_INNER_CLASS_SUPER_CLASS, classNode);
+                InnerClassNode anonymousInnerClassNode = this.visitAnonymousInnerClassDeclaration(ctx.anonymousInnerClassDeclaration());
+
+                List<InnerClassNode> anonymousInnerClassList = anonymousInnerClassesDefinedInMethodStack.peek();
+                if (asBoolean((Object) anonymousInnerClassList)) { // if the anonymous class is created in a script, no anonymousInnerClassList is available.
+                    anonymousInnerClassList.add(anonymousInnerClassNode);
+                }
+
+                ConstructorCallExpression constructorCallExpression = new ConstructorCallExpression(anonymousInnerClassNode, arguments);
+                constructorCallExpression.setUsingAnonymousInnerClass(true);
+
+                return this.configureAST(constructorCallExpression, ctx);
+            }
+
             return this.configureAST(
-                    new ConstructorCallExpression(classNode, this.visitArguments(ctx.arguments())),
+                    new ConstructorCallExpression(classNode, arguments),
                     ctx);
         }
 
@@ -2027,6 +2050,42 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         throw createParsingFailedException("Unsupported creator: " + ctx.getText(), ctx);
     }
+
+
+    private String genAnonymousClassName(String outerClassName) {
+        return outerClassName + "$" + this.anonymousInnerClassCounter++;
+    }
+
+    @Override
+    public InnerClassNode visitAnonymousInnerClassDeclaration(AnonymousInnerClassDeclarationContext ctx) {
+        ClassNode superClass = ctx.getNodeMetaData(ANONYMOUS_INNER_CLASS_SUPER_CLASS);
+        Objects.requireNonNull(superClass, "superClass should not be null");
+
+        InnerClassNode anonymousInnerClass;
+
+        ClassNode outerClass = this.classNodeStack.peek();
+        outerClass = asBoolean(outerClass) ? outerClass : moduleNode.getScriptClassDummy();
+
+        String fullName = this.genAnonymousClassName(outerClass.getName());
+        if (1 == ctx.t) { // anonymous enum
+            anonymousInnerClass = new EnumConstantClassNode(outerClass, fullName, Opcodes.ACC_PUBLIC, superClass);
+        } else { // anonymous inner class
+            anonymousInnerClass = new InnerClassNode(outerClass, fullName, Opcodes.ACC_PUBLIC, superClass);
+        }
+
+        this.configureAST(anonymousInnerClass, ctx);
+        anonymousInnerClass.setAnonymous(true);
+
+        classNodeStack.push(anonymousInnerClass);
+        ctx.classBody().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, anonymousInnerClass);
+        this.visitClassBody(ctx.classBody());
+        classNodeStack.pop();
+
+        classNodeList.add(anonymousInnerClass);
+
+        return anonymousInnerClass;
+    }
+
 
     @Override
     public ClassNode visitCreatedName(CreatedNameContext ctx) {
@@ -3507,8 +3566,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private final SourceUnit sourceUnit;
     private final GroovyLangLexer lexer;
     private final GroovyLangParser parser;
-    private final List<ClassNode> classNodeList = new LinkedList<ClassNode>();
+    private final List<ClassNode> classNodeList = new LinkedList<>();
     private final Deque<ClassNode> classNodeStack = new ArrayDeque<>();
+    private final Deque<List<InnerClassNode>> anonymousInnerClassesDefinedInMethodStack = new ArrayDeque<>();
+    private int anonymousInnerClassCounter = 1;
     private static final Class<ImportNode> IMPORT_NODE_CLASS = ImportNode.class;
     private static final String QUESTION_STR = "?";
     private static final String DOT_STR = ".";
@@ -3535,6 +3596,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String TYPE_DECLARATION_MODIFIERS = "_TYPE_DECLARATION_MODIFIERS";
     private static final String CLASS_DECLARATION_CLASS_NODE = "_CLASS_DECLARATION_CLASS_NODE";
     private static final String VARIABLE_DECLARATION_VARIABLE_TYPE = "_VARIABLE_DECLARATION_VARIABLE_TYPE";
+    private static final String ANONYMOUS_INNER_CLASS_SUPER_CLASS = "_ANONYMOUS_INNER_CLASS_SUPER_CLASS";
 
     private static final String CLASS_NAME = "_CLASS_NAME";
 }
