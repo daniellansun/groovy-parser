@@ -46,7 +46,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -105,7 +104,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     }
                 });
 
-        this.addClasses();
+        this.classNodeList.stream().forEach(moduleNode::addClass);
 
         // if groovy source file only contains blank(including EOF), add "return null" to the AST
         if (this.isBlankScript(ctx)) {
@@ -648,12 +647,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             throw createParsingFailedException("Unsupported class declaration: " + ctx.getText(), ctx);
         }
 
+        // we put the class already in output to avoid the most inner classes
+        // will be used as first class later in the loader. The first class
+        // there determines what GCL#parseClass for example will return, so we
+        // have here to ensure it won't be the inner class
+        if (asBoolean(ctx.CLASS())) {
+            classNodeList.add(classNode);
+        }
+
         classNodeStack.push(classNode);
         ctx.classBody().putNodeMetaData(CLASS_DECLARATION_CLASS_NODE, classNode);
         this.visitClassBody(ctx.classBody());
         classNodeStack.pop();
 
-        classNodeList.add(classNode);
+        if (!asBoolean(ctx.CLASS())) {
+            classNodeList.add(classNode);
+        }
 
         return this.configureAST(classNode, ctx);
     }
@@ -3201,40 +3210,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         return sw.toString();
-    }
-
-    private void addClasses() {
-        // TODO The following sort code to fix "mainClassName" can be removed when verifying the equality of new and old parser is completed.
-        if (this.classNodeList.size() > 1) {
-            Collections.sort(this.classNodeList, new Comparator<ClassNode>() {
-                private ClassNode findOutestClass(ClassNode cn) {
-                    ClassNode outerClass = cn.getOuterClass();
-
-                    if (null == outerClass) {
-                        return cn;
-                    }
-
-                    return findOutestClass(outerClass);
-                }
-
-                private static final String SEPARATOR = "@";
-
-                private String convert(ClassNode cn) {
-                    return StringGroovyMethods.padLeft((CharSequence) (findOutestClass(cn).getLineNumber() + ""), 10, "0") + SEPARATOR
-                            + (cn.isInterface() || cn.isEnum() ? "1" : "0") + SEPARATOR
-                            + cn.getName();
-                }
-
-                @Override
-                public int compare(ClassNode cn1, ClassNode cn2) {
-                    return convert(cn1).compareTo(convert(cn2));
-                }
-            });
-        }
-
-        for (ClassNode cn : this.classNodeList) {
-            moduleNode.addClass(cn);
-        }
     }
 
     private class DeclarationListStatement extends Statement {
