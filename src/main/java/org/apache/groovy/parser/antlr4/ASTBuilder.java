@@ -1952,7 +1952,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitNewPrmrAlt(NewPrmrAltContext ctx) {
-        return this.configureAST((Expression) this.visit(ctx.creator()), ctx);
+        return this.configureAST(this.visitCreator(ctx.creator()), ctx);
     }
 
     @Override
@@ -3015,23 +3015,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return new org.codehaus.groovy.syntax.Token(type, token.getText(), token.getLine(), token.getCharPositionInLine());
     }
 
-    /*
-    private org.codehaus.groovy.syntax.Token createGroovyToken(TerminalNode node) {
-        return this.createGroovyToken(node, 1);
-    }
-    */
-
     private org.codehaus.groovy.syntax.Token createGroovyToken(Token token) {
         return this.createGroovyToken(token, 1);
-    }
-
-    /**
-     * @param node
-     * @param cardinality Used for handling GT ">" operator, which can be repeated to give bitwise shifts >> or >>>
-     * @return
-     */
-    private org.codehaus.groovy.syntax.Token createGroovyToken(TerminalNode node, int cardinality) {
-        return this.createGroovyToken(node.getSymbol(), cardinality);
     }
 
     private org.codehaus.groovy.syntax.Token createGroovyToken(Token token, int cardinality) {
