@@ -4,7 +4,10 @@ import org.codehaus.groovy.control.ParserPlugin;
 import org.codehaus.groovy.control.ParserPluginFactory;
 
 /**
- * Created by Daniel.Sun on 2016/8/14.
+ * A parser plugin factory for the new parser
+ *
+ * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
+ * @date    2016/08/14
  */
 public class Antlr4PluginFactory extends ParserPluginFactory {
     @Override

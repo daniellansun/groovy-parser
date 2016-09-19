@@ -5,7 +5,10 @@ import org.apache.groovy.parser.antlr4.Antlr4PluginFactory
 import org.codehaus.groovy.control.CompilerConfiguration
 
 /**
- * Created by Daniel on 2016/9/4.
+ * A console for evaluating the new parser
+ *
+ * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
+ * @date    2016/09/04
  */
 class GroovyConsole {
     private Console console;

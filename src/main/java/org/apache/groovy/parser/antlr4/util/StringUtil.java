@@ -25,6 +25,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/**
+ * Utilities for handling strings
+ *
+ * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
+ * @date    2016/08/20
+ */
 public class StringUtil {
     public static String replaceHexEscapes(String text) {
         Pattern p = Pattern.compile("(\\\\*)\\\\u([0-9abcdefABCDEF]{4})");

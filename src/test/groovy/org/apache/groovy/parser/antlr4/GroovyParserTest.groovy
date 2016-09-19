@@ -32,7 +32,10 @@ import org.apache.groovy.parser.antlr4.util.GroovySourceGenerator
 import org.codehaus.groovy.syntax.Token
 
 /**
- * Created by Daniel.Sun on 2016/8/14.
+ * Some basic test cases for the new parser
+ *
+ * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
+ * @date    2016/08/14
  */
 class GroovyParserTest extends GroovyTestCase {
     public static final String RESOURCES_PATH = 'src/test/resources';

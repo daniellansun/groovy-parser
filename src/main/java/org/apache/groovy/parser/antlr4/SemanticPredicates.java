@@ -24,7 +24,10 @@ import org.antlr.v4.runtime.TokenStream;
 import static org.apache.groovy.parser.antlr4.GroovyParser.*;
 
 /**
- * Created by Daniel.Sun on 2016/8/20.
+ * Some semantic predicates for altering the behaviour of the lexer and parser
+ *
+ * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
+ * @date    2016/08/20
  */
 public class SemanticPredicates {
     public static boolean isFollowedByJavaLetterInGString(CharStream cs) {

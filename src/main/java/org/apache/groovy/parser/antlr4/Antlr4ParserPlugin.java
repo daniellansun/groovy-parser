@@ -26,7 +26,10 @@ import org.codehaus.groovy.syntax.ParserException;
 import org.codehaus.groovy.syntax.Reduction;
 
 /**
- * Created by Daniel.Sun on 2016/8/14.
+ * A parser plugin for the new parser
+ *
+ * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
+ * @date    2016/08/14
  */
 public class Antlr4ParserPlugin implements ParserPlugin {
     @Override

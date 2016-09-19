@@ -25,7 +25,11 @@ import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.control.io.ReaderSource
 
 /**
- * Created by Daniel.Sun on 2016/8/16.
+ * Generate the groovy source according to the AST.
+ * It is useful to verify the equality of new and old parser.
+ *
+ * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
+ * @date    2016/08/16
  */
 class GroovySourceGenerator {
     private ModuleNode ast;

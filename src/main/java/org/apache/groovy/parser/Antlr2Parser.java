@@ -21,7 +21,10 @@ package org.apache.groovy.parser;
 import org.codehaus.groovy.control.CompilerConfiguration;
 
 /**
- * Created by Daniel.Sun on 2016/8/14.
+ * The Antlr2 parser for creating a module node.
+ *
+ * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
+ * @date    2016/08/14
  */
 public class Antlr2Parser extends AbstractParser {
     @Override

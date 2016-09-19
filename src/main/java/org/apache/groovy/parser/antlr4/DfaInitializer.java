@@ -24,7 +24,10 @@ import org.antlr.v4.runtime.dfa.DFA;
 import java.util.Arrays;
 
 /**
- * Created by Daniel.Sun on 2016/8/14.
+ * Create the brand new DFA array for lexer and parser to avoid memory leak
+ *
+ * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
+ * @date    2016/08/14
  */
 public class DfaInitializer {
     private ATN atn;

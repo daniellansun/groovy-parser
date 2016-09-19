@@ -28,7 +28,8 @@
 /**
  * The Groovy grammar is based on the official grammar for Java(https://github.com/antlr/grammars-v4/blob/master/java/Java.g4)
  *
- * @author Daniel.Sun
+ * @author <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
+ * @date   2016/08/14
  *
  */
 lexer grammar GroovyLexer;
