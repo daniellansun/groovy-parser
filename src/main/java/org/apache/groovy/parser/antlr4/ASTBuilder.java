@@ -2095,8 +2095,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         String fullName = this.genAnonymousClassName(outerClass.getName());
         if (1 == ctx.t) { // anonymous enum
-            anonymousInnerClass = new EnumConstantClassNode(outerClass, fullName, superClass.getModifiers() | Opcodes.ACC_FINAL, superClass);
-
+            anonymousInnerClass = new EnumConstantClassNode(outerClass, fullName, superClass.getModifiers() | Opcodes.ACC_FINAL, superClass.getPlainNodeReference());
+            anonymousInnerClass.setUsingGenerics(false);
             // and remove the final modifier from classNode to allow the sub class
             superClass.setModifiers(superClass.getModifiers() & ~Opcodes.ACC_FINAL);
         } else { // anonymous inner class
