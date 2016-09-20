@@ -43,7 +43,7 @@ class ASTComparatorCategory {
             (ClassNode): (['module', "declaredMethodsMap", "plainNodeReference", "typeClass", "allInterfaces", "orAddStaticConstructorNode", "allDeclaredMethods", "unresolvedSuperClass", "innerClasses" ] + LOCATION_IGNORE_LIST) as List<String>,
             (ConstructorNode): ['declaringClass'],
             (DynamicVariable): [],
-            (EnumConstantClassNode): [],
+            (EnumConstantClassNode): ["typeClass"],
             (FieldNode): ["owner", "declaringClass", "initialValueExpression", "assignToken"],
             (GenericsType): [],
             (ImportNode): LOCATION_IGNORE_LIST,

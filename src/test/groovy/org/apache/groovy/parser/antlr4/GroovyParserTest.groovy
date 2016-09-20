@@ -202,6 +202,7 @@ class GroovyParserTest extends GroovyTestCase {
 
     void "test groovy core - EnumDeclaration"() {
         test('core/EnumDeclaration_01.groovy');
+        test('core/EnumDeclaration_02.groovy', [ExpressionStatement]);
     }
 
     void "test groovy core - TraitDeclaration"() {
@@ -219,7 +220,7 @@ class GroovyParserTest extends GroovyTestCase {
     void "test groovy core - Command"() {
         test('core/Command_01.groovy');
         test('core/Command_02.groovy');
-        test('core/Command_03.groovy');
+        test('core/Command_03.groovy', [ExpressionStatement, Parameter]);
         test('core/Command_04.groovy', [ExpressionStatement]);
         test('core/Command_05.groovy');
     }
