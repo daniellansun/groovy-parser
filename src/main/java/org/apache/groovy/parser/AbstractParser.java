@@ -43,10 +43,29 @@ public abstract class AbstractParser {
             throw new IllegalArgumentException(file + " does not exist.");
         }
 
-        try {
-            CompilerConfiguration configuration = this.getCompilerConfiguration();
-            SourceUnit sourceUnit = new SourceUnit(file, configuration, new GroovyClassLoader(), new ErrorCollector(configuration));
+        CompilerConfiguration configuration = this.getCompilerConfiguration();
+        SourceUnit sourceUnit = new SourceUnit(file, configuration, new GroovyClassLoader(), new ErrorCollector(configuration));
 
+        return this.parse(sourceUnit);
+    }
+
+    public ModuleNode parse(String name, String text) {
+        if (null == name) {
+            throw new IllegalArgumentException("name should not be null");
+        }
+
+        if (null == text) {
+            throw new IllegalArgumentException("text should not be null");
+        }
+
+        CompilerConfiguration configuration = this.getCompilerConfiguration();
+        SourceUnit sourceUnit = new SourceUnit(name, text, configuration, new GroovyClassLoader(), new ErrorCollector(configuration));
+
+        return this.parse(sourceUnit);
+    }
+
+    public ModuleNode parse(SourceUnit sourceUnit) {
+        try {
             sourceUnit.parse();
             sourceUnit.completePhase();
             sourceUnit.nextPhase();
@@ -54,7 +73,7 @@ public abstract class AbstractParser {
 
             return sourceUnit.getAST();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to parse " + file.getName(), e);
+            LOGGER.log(Level.SEVERE, "Failed to parse " + sourceUnit.getName(), e);
 
             return null;
         }

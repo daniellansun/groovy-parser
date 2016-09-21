@@ -277,23 +277,23 @@ memberDeclaration[int t]
  *  ct  9: script, other see the comment of classDeclaration
  */
 methodDeclaration[int t, int ct]
-    :   (   modifiersOpt  typeParameters? returnType[$ct]
+    :   { 3 == $ct }?
+        returnType[$ct] methodName LPAREN RPAREN (DEFAULT nls elementValue)?
+    |
+        (   modifiersOpt  typeParameters? returnType[$ct]
         |   modifiers  typeParameters? returnType[$ct]?
         |
             { 0 == $t }?
             modifiersOpt typeParameters?
         )
-        methodName formalParameters nls (THROWS nls qualifiedClassNameList nls)?
+        methodName formalParameters (nls THROWS nls qualifiedClassNameList)?
         (
             { 0 == $t || 1 == $t}?
-            methodBody
+            nls methodBody
         |
             { 0 == $t || 2 == $t }?
             /* no method body */
         )
-    |
-        { 3 == $ct }?
-        returnType[$ct] methodName LPAREN RPAREN (DEFAULT nls elementValue)?
     ;
 
 methodName
