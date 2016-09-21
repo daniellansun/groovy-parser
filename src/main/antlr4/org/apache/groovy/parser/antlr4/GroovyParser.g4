@@ -116,8 +116,9 @@ packageDeclaration
     ;
 
 importDeclaration
-    :   annotationsOpt IMPORT STATIC? qualifiedName (DOT MUL | AS identifier)?
+    :   annotationsOpt IMPORT STATIC? qualifiedName (DOT MUL | AS alias=identifier)?
     ;
+
 
 typeDeclaration
     :   classOrInterfaceModifiersOpt classDeclaration
@@ -297,7 +298,7 @@ methodDeclaration[int t, int ct]
 
 methodName
     :   identifier
-    |   StringLiteral
+    |   stringLiteral
     ;
 
 returnType[int ct]
@@ -391,7 +392,7 @@ qualifiedClassName
 literal
     :   IntegerLiteral                                                                      #integerLiteralAlt
     |   FloatingPointLiteral                                                                #floatingPointLiteralAlt
-    |   StringLiteral                                                                       #stringLiteralAlt
+    |   stringLiteral                                                                       #stringLiteralAlt
     |   BooleanLiteral                                                                      #booleanLiteralAlt
     |   NullLiteral                                                                         #nullLiteralAlt
     ;
@@ -523,7 +524,7 @@ statement
     |   localVariableDeclaration                                                            #localVariableDeclarationStmtAlt
 
     |   { !SemanticPredicates.isInvalidMethodDeclaration(_input) }?
-        methodDeclaration[1, 9]                                                                #methodDeclarationStmtAlt
+        methodDeclaration[1, 9]                                                             #methodDeclarationStmtAlt
 
     |   statementExpression                                                                 #expressionStmtAlt
 
@@ -791,7 +792,7 @@ namePart
         (   identifier
 
         // foo.'bar' is in all ways same as foo.bar, except that bar can have an arbitrary spelling
-        |   StringLiteral
+        |   stringLiteral
 
         |   dynamicMemberName
 
@@ -904,6 +905,10 @@ arguments
 argumentList
     :   expressionList
     |   mapEntryList
+    ;
+
+stringLiteral
+    :   StringLiteral
     ;
 
 className

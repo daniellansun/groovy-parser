@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * @date    2016/08/20
  */
-public class StringUtil {
+public class StringUtils {
     public static String replaceHexEscapes(String text) {
         Pattern p = Pattern.compile("(\\\\*)\\\\u([0-9abcdefABCDEF]{4})");
 	    return StringGroovyMethods.replaceAll((CharSequence) text, p, new Closure<Void>(null, null) {
@@ -91,7 +91,7 @@ public class StringUtil {
 
 	public static String replaceEscapes(String text, int slashyType) {
 		if (slashyType == SLASHY || slashyType == DOLLAR_SLASHY) {
-			text = StringUtil.replaceHexEscapes(text);
+			text = StringUtils.replaceHexEscapes(text);
 
 			if (slashyType == SLASHY)
 				text = text.replace("\\/", "/");
@@ -99,7 +99,7 @@ public class StringUtil {
 			if (slashyType == DOLLAR_SLASHY)
 				text = text.replace("$$", "$");
 		} else if (slashyType == NONE_SLASHY) {
-			text = StringUtil.replaceEscapes(text);
+			text = StringUtils.replaceEscapes(text);
 		} else {
 			throw new IllegalArgumentException("Invalid slashyType: " + slashyType);
 		}

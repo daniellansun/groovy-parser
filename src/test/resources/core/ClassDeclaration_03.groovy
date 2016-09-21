@@ -1,6 +1,9 @@
 import java.sql.SQLException
 
 class AAA {
+    private volatile XX xx;
+    private transient YY yy;
+
     public AAA() {
 
     }
@@ -23,7 +26,7 @@ class AAA {
     }
 
     @Test2
-    public String sayHello(String name) {
+    public synchronized String sayHello(String name) {
         return "Hello, $name";
     }
 
