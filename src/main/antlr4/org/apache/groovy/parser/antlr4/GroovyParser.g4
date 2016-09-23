@@ -442,7 +442,12 @@ elementValuePairs
     ;
 
 elementValuePair
-    :   identifier ASSIGN elementValue
+    :   elementValuePairName ASSIGN elementValue
+    ;
+
+elementValuePairName
+    :   identifier
+    |   keywords
     ;
 
 // TODO verify the potential performance issue because rule expression contains sub-rule assignments(https://github.com/antlr/grammars-v4/issues/215)

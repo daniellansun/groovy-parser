@@ -114,11 +114,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/AnnotationTest_003.groovy", [])
     }
 
-    /* FIXME
     void "test AnnotationTest_004.groovy"() {
         unzipAndTest("scripts/AnnotationTest_004.groovy", [])
     }
-    */
 
     void "test AnnotationTest_005.groovy"() {
         unzipAndTest("scripts/AnnotationTest_005.groovy", [])

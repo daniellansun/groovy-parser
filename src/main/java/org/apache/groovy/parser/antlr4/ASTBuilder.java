@@ -2788,7 +2788,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Pair<String, Expression> visitElementValuePair(ElementValuePairContext ctx) {
-        return new Pair<>(ctx.identifier().getText(), this.visitElementValue(ctx.elementValue()));
+        return new Pair<>(ctx.elementValuePairName().getText(), this.visitElementValue(ctx.elementValue()));
     }
 
     @Override
