@@ -2778,7 +2778,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public Map<String, Expression> visitElementValuePairs(ElementValuePairsContext ctx) {
         return ctx.elementValuePair().stream()
                 .map(this::visitElementValuePair)
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+                .collect(Collectors.toMap(
+                        Pair::getKey,
+                        Pair::getValue,
+                        (k, v) -> { throw new IllegalStateException(String.format("Duplicate key %s", k));},
+                        LinkedHashMap::new
+                ));
     }
 
     @Override
