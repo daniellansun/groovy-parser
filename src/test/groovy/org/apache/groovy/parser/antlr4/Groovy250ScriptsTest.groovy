@@ -46,11 +46,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/AnnotationCollectorTest_002.groovy", [])
     }
 
-    /* FIXME
     void "test AnnotationCollectorTest_003.groovy"() {
-        unzipAndTest("scripts/AnnotationCollectorTest_003.groovy", [])
+        unzipAndTest("scripts/AnnotationCollectorTest_003.groovy", [AssertStatement])
     }
-    */
 
     void "test AnnotationCollectorTest_004.groovy"() {
         unzipAndTest("scripts/AnnotationCollectorTest_004.groovy", [])
@@ -64,11 +62,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/AnnotationCollectorTest_006.groovy", [])
     }
 
-    /* FIXME
     void "test AnnotationCollectorTest_007.groovy"() {
-        unzipAndTest("scripts/AnnotationCollectorTest_007.groovy", [])
+        unzipAndTest("scripts/AnnotationCollectorTest_007.groovy", [AssertStatement])
     }
-    */
 
     /* FIXME
     void "test AnnotationCollectorTest_008.groovy"() {

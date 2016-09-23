@@ -83,15 +83,19 @@ lexer grammar GroovyLexer;
      */
     protected void rollbackOneChar() {}
 
-    private int nestLevel = 0; // just track the parentheses and brackets
-    private void enterParen() {
-        this.nestLevel++;
+    private final Deque<String> parenStack = new ArrayDeque<>();
+    private void enterParen(String paren) {
+        parenStack.push(paren);
     }
     private void exitParen() {
-        this.nestLevel--;
+        parenStack.pop();
     }
     private boolean isInsideParens() {
-        return 0 != this.nestLevel;
+        String paren = parenStack.peek();
+
+        // We just care about "(" and "[", which will determine whether to ignore new lines or not.
+        // Notice: new lines between "{" and "}" can not be ignored.
+        return "(".equals(paren) || "[".equals(paren);
     }
 }
 
@@ -170,7 +174,7 @@ DollarSlashyGStringCharacter
 
 mode GSTRING_TYPE_SELECTOR_MODE;
 GStringLBrace
-    :   '{' -> type(LBRACE), popMode, pushMode(DEFAULT_MODE)
+    :   '{' { this.enterParen("{");  } -> type(LBRACE), popMode, pushMode(DEFAULT_MODE)
     ;
 GStringIdentifier
     :   IdentifierInGString -> type(Identifier), popMode, pushMode(GSTRING_PATH_MODE)
@@ -600,12 +604,12 @@ DOLLAR              : '$';
 
 // §3.11 Separators
 
-LPAREN          : '(' { this.enterParen();  } -> pushMode(DEFAULT_MODE);
-RPAREN          : ')' { this.exitParen();   } -> popMode;
-LBRACE          : '{' -> pushMode(DEFAULT_MODE);
-RBRACE          : '}' -> popMode;
-LBRACK          : '[' { this.enterParen();  } -> pushMode(DEFAULT_MODE);
-RBRACK          : ']' { this.exitParen();   } -> popMode;
+LPAREN          : '(' { this.enterParen("(");  } -> pushMode(DEFAULT_MODE);
+RPAREN          : ')' { this.exitParen();      } -> popMode;
+LBRACE          : '{' { this.enterParen("{");  } -> pushMode(DEFAULT_MODE);
+RBRACE          : '}' { this.exitParen();      } -> popMode;
+LBRACK          : '[' { this.enterParen("[");  } -> pushMode(DEFAULT_MODE);
+RBRACK          : ']' { this.exitParen();      } -> popMode;
 SEMI            : ';';
 COMMA           : ',';
 DOT             : '.';
