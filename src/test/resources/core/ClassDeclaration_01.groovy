@@ -15,6 +15,10 @@ public class J<T extends A & B & C> extends A implements X, Y, Z {}
 
 @Test2
 @Test3
+@Test4(value={
+        def a = someMethod()
+        assert a.result() == 'abc'
+})
 public
 class M
 <

@@ -1186,10 +1186,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         return this.configureAST(
-                this.createBlockStatement(
-                        ctx.blockStatement().stream()
-                                .map(e -> (Statement) this.visit(e))
-                                .collect(Collectors.toList())),
+                this.visitBlockStatementsOpt(ctx.blockStatementsOpt()),
                 ctx);
     }
 
