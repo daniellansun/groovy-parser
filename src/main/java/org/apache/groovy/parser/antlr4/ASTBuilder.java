@@ -724,9 +724,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         ctx.identifier().getText(),
                         createEnumConstantInitExpression(ctx.arguments(), anonymousInnerClassNode));
 
-        ctx.annotation().stream()
-                .map(this::visitAnnotation)
-                .forEach(enumConstant::addAnnotation);
+        this.visitAnnotationsOpt(ctx.annotationsOpt()).forEach(enumConstant::addAnnotation);
 
         return this.configureAST(enumConstant, ctx);
     }
@@ -2744,9 +2742,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         throw createParsingFailedException("Unsupported block statement: " + ctx.getText(), ctx);
     }
 
-
     @Override
     public List<AnnotationNode> visitAnnotationsOpt(AnnotationsOptContext ctx) {
+        if (!asBoolean(ctx)) {
+            return Collections.emptyList();
+        }
+
         return ctx.annotation().stream()
                 .map(this::visitAnnotation)
                 .collect(Collectors.toList());

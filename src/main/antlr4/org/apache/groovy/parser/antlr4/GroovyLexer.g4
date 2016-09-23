@@ -93,8 +93,8 @@ lexer grammar GroovyLexer;
     private boolean isInsideParens() {
         String paren = parenStack.peek();
 
-        // We just care about "(" and "[", which will determine whether to ignore new lines or not.
-        // Notice: new lines between "{" and "}" can not be ignored.
+        // We just care about "(" and "[", which will ignore the new lines inside them.
+        // Notice: the new lines between "{" and "}" can not be ignored.
         return "(".equals(paren) || "[".equals(paren);
     }
 }

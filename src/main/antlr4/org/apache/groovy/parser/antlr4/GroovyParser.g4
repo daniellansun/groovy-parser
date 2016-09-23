@@ -256,7 +256,7 @@ enumConstants
     ;
 
 enumConstant
-    :   annotation* identifier arguments? anonymousInnerClassDeclaration[1]?
+    :   annotationsOpt identifier arguments? anonymousInnerClassDeclaration[1]?
     ;
 
 classBodyDeclaration[int t]
