@@ -19,6 +19,8 @@
 package org.apache.groovy.parser.antlr4
 
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
+import org.codehaus.groovy.ast.FieldNode
+import org.codehaus.groovy.ast.PropertyNode
 import org.codehaus.groovy.ast.stmt.AssertStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
 
@@ -154,17 +156,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/AnnotationTest_013.groovy", [])
     }
 
-    /* FIXME
     void "test AnonymousInnerClassSTCTest_001.groovy"() {
-        unzipAndTest("scripts/AnonymousInnerClassSTCTest_001.groovy", [])
+        unzipAndTest("scripts/AnonymousInnerClassSTCTest_001.groovy", [PropertyNode, FieldNode])
     }
-    */
 
-    /* FIXME
     void "test AnonymousInnerClassSTCTest_002.groovy"() {
-        unzipAndTest("scripts/AnonymousInnerClassSTCTest_002.groovy", [])
+        unzipAndTest("scripts/AnonymousInnerClassSTCTest_002.groovy", [PropertyNode, FieldNode])
     }
-    */
 
     void "test AnonymousInnerClassSTCTest_003.groovy"() {
         unzipAndTest("scripts/AnonymousInnerClassSTCTest_003.groovy", [])
@@ -178,21 +176,17 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/AnonymousInnerClassSTCTest_005.groovy", [])
     }
 
-    /* FIXME
     void "test AnonymousInnerClassSTCTest_006.groovy"() {
-        unzipAndTest("scripts/AnonymousInnerClassSTCTest_006.groovy", [])
+        unzipAndTest("scripts/AnonymousInnerClassSTCTest_006.groovy", [ExpressionStatement])
     }
-    */
 
     void "test AnonymousInnerClassSTCTest_007.groovy"() {
         unzipAndTest("scripts/AnonymousInnerClassSTCTest_007.groovy", [])
     }
 
-    /* FIXME
     void "test AnonymousInnerClassSTCTest_008.groovy"() {
-        unzipAndTest("scripts/AnonymousInnerClassSTCTest_008.groovy", [])
+        unzipAndTest("scripts/AnonymousInnerClassSTCTest_008.groovy", [ExpressionStatement])
     }
-    */
 
     void "test AnonymousInnerClassSTCTest_009.groovy"() {
         unzipAndTest("scripts/AnonymousInnerClassSTCTest_009.groovy", [])
