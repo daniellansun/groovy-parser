@@ -860,7 +860,7 @@ locals[boolean empty = true]
     ;
 
 map
-    :   LBRACK (mapEntryList? COMMA? | COLON) RBRACK
+    :   LBRACK (mapEntryList COMMA? | COLON) RBRACK
     ;
 
 mapEntryList
