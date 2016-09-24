@@ -20,10 +20,13 @@ package org.apache.groovy.parser.antlr4
 
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 import org.codehaus.groovy.ast.FieldNode
+import org.codehaus.groovy.ast.GenericsType
 import org.codehaus.groovy.ast.MethodNode
+import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.PropertyNode
 import org.codehaus.groovy.ast.stmt.AssertStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
+import org.codehaus.groovy.syntax.Token
 
 /**
  * Add Groovy 2.5.0 scripts as test cases
@@ -273,33 +276,25 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_008.groovy", [])
     }
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_009.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_009.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_009.groovy", [Token])
     }
-    */
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_010.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_010.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_010.groovy", [Token])
     }
-    */
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_011.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_011.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_011.groovy", [Token])
     }
-    */
 
     void "test ArraysAndCollectionsSTCTest_012.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_012.groovy", [])
     }
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_013.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_013.groovy", [])
     }
-    */
 
     void "test ArraysAndCollectionsSTCTest_014.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_014.groovy", [])
@@ -317,11 +312,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_017.groovy", [])
     }
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_018.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_018.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_018.groovy", [ExpressionStatement])
     }
-    */
 
     void "test ArraysAndCollectionsSTCTest_019.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_019.groovy", [])
@@ -339,23 +332,17 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_022.groovy", [])
     }
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_023.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_023.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_023.groovy", [Token])
     }
-    */
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_024.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_024.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_024.groovy", [Token])
     }
-    */
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_025.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_025.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_025.groovy", [Token])
     }
-    */
 
     void "test ArraysAndCollectionsSTCTest_026.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_026.groovy", [])
@@ -405,39 +392,29 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_037.groovy", [])
     }
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_038.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_038.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_038.groovy", [Parameter, ExpressionStatement, Token])
     }
-    */
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_039.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_039.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_039.groovy", [Token])
     }
-    */
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_040.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_040.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_040.groovy", [Token])
     }
-    */
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_041.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_041.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_041.groovy", [Parameter])
     }
-    */
 
     void "test ArraysAndCollectionsSTCTest_042.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_042.groovy", [])
     }
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_043.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_043.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsSTCTest_043.groovy", [GenericsType])
     }
-    */
 
     void "test ArraysAndCollectionsSTCTest_044.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_044.groovy", [])
