@@ -18,6 +18,14 @@ a = b *= c += d %= e f g h
 
 obj.name = '123'
 m().result = 123
+map[a] = 1
+map['a'] = 1
+map["$a"] = 1
+map[a.b] = 1
+map[a()] = 1
+map[obj.a()] = 1
+map[a().result] = 1
+map[a + b] = 1
 
 a =
         b =

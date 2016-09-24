@@ -20,6 +20,7 @@ package org.apache.groovy.parser.antlr4
 
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 import org.codehaus.groovy.ast.FieldNode
+import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.PropertyNode
 import org.codehaus.groovy.ast.stmt.AssertStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
@@ -200,17 +201,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/AnonymousInnerClassSTCTest_011.groovy", [])
     }
 
-    /* FIXME
     void "test AnonymousInnerClassSTCTest_012.groovy"() {
         unzipAndTest("scripts/AnonymousInnerClassSTCTest_012.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test ArraysAndCollectionsStaticCompileTest_001.groovy"() {
-        unzipAndTest("scripts/ArraysAndCollectionsStaticCompileTest_001.groovy", [])
+        unzipAndTest("scripts/ArraysAndCollectionsStaticCompileTest_001.groovy", [MethodNode])
     }
-    */
 
     void "test ArraysAndCollectionsStaticCompileTest_002.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsStaticCompileTest_002.groovy", [])
@@ -224,11 +221,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/ArraysAndCollectionsStaticCompileTest_004.groovy", [])
     }
 
-    /* FIXME
     void "test ArraysAndCollectionsStaticCompileTest_005.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsStaticCompileTest_005.groovy", [])
     }
-    */
 
     void "test ArraysAndCollectionsStaticCompileTest_006.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsStaticCompileTest_006.groovy", [])
