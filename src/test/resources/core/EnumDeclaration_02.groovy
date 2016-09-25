@@ -23,3 +23,7 @@ enum F {
     @Test2
     A
 }
+
+enum G implements I<T> {
+
+}

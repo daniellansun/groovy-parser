@@ -582,11 +582,18 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private void initUsingGenerics(ClassNode classNode) {
+        this.initUsingGenerics(classNode, false);
+    }
+
+    private void initUsingGenerics(ClassNode classNode, boolean toIgnoreSuperClass) {
         if (classNode.isUsingGenerics()) {
             return;
         }
 
-        classNode.setUsingGenerics(classNode.getSuperClass().isUsingGenerics());
+        if (!toIgnoreSuperClass) {
+            classNode.setUsingGenerics(classNode.getSuperClass().isUsingGenerics());
+        }
+
         if (!classNode.isUsingGenerics() && asBoolean((Object) classNode.getInterfaces())) {
             for (ClassNode anInterface : classNode.getInterfaces()) {
                 classNode.setUsingGenerics(classNode.isUsingGenerics() || anInterface.isUsingGenerics());
@@ -657,11 +664,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             classNode.setSuperClass(ClassHelper.OBJECT_TYPE);
             classNode.setInterfaces(this.visitTypeList(ctx.scs));
 
+            this.initUsingGenerics(classNode);
+
             this.hackMixins(classNode);
         } else if (asBoolean(ctx.ENUM())) { // enum
             classNode.setModifiers(classNode.getModifiers() | Opcodes.ACC_ENUM | Opcodes.ACC_FINAL);
 
             classNode.setInterfaces(this.visitTypeList(ctx.is));
+
+            this.initUsingGenerics(classNode, true);
         } else if (asBoolean(ctx.AT())) { // annotation
             classNode.setModifiers(classNode.getModifiers() | Opcodes.ACC_INTERFACE | Opcodes.ACC_ABSTRACT | Opcodes.ACC_ANNOTATION);
 

@@ -6,6 +6,7 @@ interface A3<T extends A> {}
 interface A4<T extends A & B> {}
 interface A5<T extends A & B & C> {}
 interface A6<T extends A & B & C> extends A {}
+interface A62 extends A<T> {}
 interface A7<T extends A & B & C> extends A, B {}
 interface A8<T extends A & B & C> extends A, B, C {}
 @Test2 interface A9<T extends A & B & C> extends A, B, C {}
