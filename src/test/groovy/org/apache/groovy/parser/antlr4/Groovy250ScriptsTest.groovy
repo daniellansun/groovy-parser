@@ -581,6 +581,7 @@ class Groovy250ScriptsTest extends GroovyTestCase {
      *      $type [ []].call( b = new $type[1])
      *
      * I think the result is not correct @_@
+     * SEE https://github.com/danielsun1106/groovy-parser/issues/1
      *
     void "test BinaryOperationsTest_001.groovy"() {
         unzipAndTest("scripts/BinaryOperationsTest_001.groovy", [])
@@ -588,6 +589,8 @@ class Groovy250ScriptsTest extends GroovyTestCase {
     */
 
     /* FIXME
+     * SEE https://github.com/danielsun1106/groovy-parser/issues/1
+     *
     void "test BinaryOperationsTest_002.groovy"() {
         unzipAndTest("scripts/BinaryOperationsTest_002.groovy", [])
     }
@@ -605,11 +608,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BindableTest_002.groovy", [])
     }
 
-    /* FIXME
     void "test BindableTest_003.groovy"() {
-        unzipAndTest("scripts/BindableTest_003.groovy", [])
+        unzipAndTest("scripts/BindableTest_003.groovy", [Parameter])
     }
-    */
 
     void "test BindableTest_004.groovy"() {
         unzipAndTest("scripts/BindableTest_004.groovy", [])
@@ -631,11 +632,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BindableTest_008.groovy", [])
     }
 
-    /* FIXME
     void "test BindableTest_009.groovy"() {
-        unzipAndTest("scripts/BindableTest_009.groovy", [])
+        unzipAndTest("scripts/BindableTest_009.groovy", [ExpressionStatement])
     }
-    */
 
     void "test BindableTest_010.groovy"() {
         unzipAndTest("scripts/BindableTest_010.groovy", [])
