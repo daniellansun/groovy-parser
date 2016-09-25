@@ -52,17 +52,25 @@ class TestUtils {
         unzipAndTest(path, entryName, ASTComparatorCategory.DEFAULT_CONFIGURATION)
     }
 
+    /*
     static unzipAndTest(String path, String entryName, List ignoreClazzList) {
         unzipAndTest(path, entryName, addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST))
     }
+    */
 
-    static unzipAndTest(String path, String entryName, conf) {
+    static unzipAndTest(String path, String entryName, conf, Map<String, String> replacementsMap=[:]) {
         AbstractParser antlr4Parser = new Antlr4Parser()
         AbstractParser antlr2Parser = new Antlr2Parser()
 
+        String name = "$path!$entryName";
         String text = readZipEntry(path, entryName);
-        def (newAST, newElapsedTime) = profile { antlr4Parser.parse("$path!$entryName", text) }
-        def (oldAST, oldElapsedTime) = profile { antlr2Parser.parse("$path!$entryName", text) }
+
+        replacementsMap?.each {k, v ->
+            text = text.replace(k, v);
+        }
+
+        def (newAST, newElapsedTime) = profile { antlr4Parser.parse(name, text) }
+        def (oldAST, oldElapsedTime) = profile { antlr2Parser.parse(name, text) }
 
 
         assertAST(newAST, oldAST, conf);

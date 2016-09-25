@@ -26,6 +26,7 @@ import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.PropertyNode
 import org.codehaus.groovy.ast.stmt.AssertStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
+import org.codehaus.groovy.ast.stmt.ReturnStatement
 import org.codehaus.groovy.syntax.Token
 
 /**
@@ -244,17 +245,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_001.groovy", [])
     }
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_002.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_002.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test ArraysAndCollectionsSTCTest_003.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_003.groovy", [])
     }
-    */
 
     void "test ArraysAndCollectionsSTCTest_004.groovy"() {
         unzipAndTest("scripts/ArraysAndCollectionsSTCTest_004.groovy", [])
@@ -572,17 +569,17 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BinaryLiteralTest_001.groovy", [])
     }
 
-    /* FIXME
     void "test BinaryOperationsTest_001.groovy"() {
-        unzipAndTest("scripts/BinaryOperationsTest_001.groovy", [])
+        ['byte','int','short','long'].each {
+            unzipAndTest("scripts/BinaryOperationsTest_001.groovy", [], ['$type': it]);
+        }
     }
-    */
 
-    /* FIXME
     void "test BinaryOperationsTest_002.groovy"() {
-        unzipAndTest("scripts/BinaryOperationsTest_002.groovy", [])
+        ['byte','int','short','long'].each {
+            unzipAndTest("scripts/BinaryOperationsTest_002.groovy", [], ['$type': it])
+        }
     }
-    */
 
     void "test BindableSwingTest_001.groovy"() {
         unzipAndTest("scripts/BindableSwingTest_001.groovy", [])
@@ -696,11 +693,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BugsStaticCompileTest_003.groovy", [])
     }
 
-    /* FIXME
     void "test BugsStaticCompileTest_004.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_004.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_004.groovy", [Parameter])
     }
-    */
 
     void "test BugsStaticCompileTest_005.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_005.groovy", [])
@@ -714,11 +709,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BugsStaticCompileTest_007.groovy", [])
     }
 
-    /* FIXME
     void "test BugsStaticCompileTest_008.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_008.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_008.groovy", [ExpressionStatement])
     }
-    */
 
     void "test BugsStaticCompileTest_009.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_009.groovy", [])
@@ -744,39 +737,29 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BugsStaticCompileTest_014.groovy", [])
     }
 
-    /* FIXME
     void "test BugsStaticCompileTest_015.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_015.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_015.groovy", [Token])
     }
-    */
 
-    /* FIXME
     void "test BugsStaticCompileTest_016.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_016.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_016.groovy", [Token])
     }
-    */
 
-    /* FIXME
     void "test BugsStaticCompileTest_017.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_017.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_017.groovy", [Token])
     }
-    */
 
     void "test BugsStaticCompileTest_018.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_018.groovy", [])
     }
 
-    /* FIXME
     void "test BugsStaticCompileTest_019.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_019.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_019.groovy", [Parameter, ExpressionStatement])
     }
-    */
 
-    /* FIXME
     void "test BugsStaticCompileTest_020.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_020.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_020.groovy", [Token])
     }
-    */
 
     void "test BugsStaticCompileTest_021.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_021.groovy", [])
@@ -818,11 +801,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BugsStaticCompileTest_030.groovy", [])
     }
 
-    /* FIXME
     void "test BugsStaticCompileTest_031.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_031.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_031.groovy", [FieldNode, PropertyNode, ReturnStatement, ExpressionStatement])
     }
-    */
 
     void "test BugsStaticCompileTest_032.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_032.groovy", [])
@@ -856,17 +837,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BugsStaticCompileTest_039.groovy", [])
     }
 
-    /* FIXME
     void "test BugsStaticCompileTest_040.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_040.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_040.groovy", [ExpressionStatement])
     }
-    */
 
-    /* FIXME
     void "test BugsStaticCompileTest_041.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_041.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_041.groovy", [Parameter])
     }
-    */
 
     void "test BugsStaticCompileTest_042.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_042.groovy", [])
@@ -896,31 +873,25 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BugsStaticCompileTest_048.groovy", [])
     }
 
-    /* FIXME
     void "test BugsStaticCompileTest_049.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_049.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_049.groovy", [ExpressionStatement, MethodNode])
     }
-    */
 
     void "test BugsStaticCompileTest_050.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_050.groovy", [])
     }
 
-    /* FIXME
     void "test BugsStaticCompileTest_051.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_051.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_051.groovy", [GenericsType])
     }
-    */
 
     void "test BugsStaticCompileTest_052.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_052.groovy", [])
     }
 
-    /* FIXME
     void "test BugsStaticCompileTest_053.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_053.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_053.groovy", [ExpressionStatement])
     }
-    */
 
     void "test BugsStaticCompileTest_054.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_054.groovy", [])
@@ -930,35 +901,25 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BugsStaticCompileTest_055.groovy", [])
     }
 
-    /* FIXME
     void "test BugsStaticCompileTest_056.groovy"() {
-        unzipAndTest("scripts/BugsStaticCompileTest_056.groovy", [])
+        unzipAndTest("scripts/BugsStaticCompileTest_056.groovy", [ExpressionStatement])
     }
-    */
 
-    /* FIXME
     void "test BugsStaticCompileTest_057.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_057.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test BugsStaticCompileTest_058.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_058.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test BugsStaticCompileTest_059.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_059.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test BugsStaticCompileTest_060.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_060.groovy", [])
     }
-    */
 
     void "test BugsStaticCompileTest_061.groovy"() {
         unzipAndTest("scripts/BugsStaticCompileTest_061.groovy", [])
@@ -12954,13 +12915,15 @@ class Groovy250ScriptsTest extends GroovyTestCase {
 
 
     /*************************************/
-    static unzipAndTest(String entryName, List ignoreClazzList) {
-        TestUtils.unzipAndTest(ZIP_PATH, entryName, TestUtils.addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST))
+    static unzipAndTest(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:]) {
+        TestUtils.unzipAndTest(ZIP_PATH, entryName, TestUtils.addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), replacementsMap)
     }
 
+    /*
     static unzipAndTest(String entryName) {
         TestUtils.unzipAndTest(ZIP_PATH, entryName);
     }
+    */
 
     public static final String ZIP_PATH = "$TestUtils.RESOURCES_PATH/groovy-2.5.0/groovy-2.5.0-SNAPSHOT-20160921-allscripts.zip";
 }
