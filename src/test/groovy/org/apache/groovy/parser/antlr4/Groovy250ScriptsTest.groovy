@@ -573,24 +573,12 @@ class Groovy250ScriptsTest extends GroovyTestCase {
     }
 
     /* FIXME
-     * (src/test/org/codehaus/groovy/classgen/asm/BinaryOperationsTest.groovy)
-     * The old parser parses the following statement
-     *
-     *      $type[] b = new $type[1]
-     * as
-     *      $type [ []].call( b = new $type[1])
-     *
-     * I think the result is not correct @_@
-     * SEE https://github.com/danielsun1106/groovy-parser/issues/1
-     *
     void "test BinaryOperationsTest_001.groovy"() {
         unzipAndTest("scripts/BinaryOperationsTest_001.groovy", [])
     }
     */
 
     /* FIXME
-     * SEE https://github.com/danielsun1106/groovy-parser/issues/1
-     *
     void "test BinaryOperationsTest_002.groovy"() {
         unzipAndTest("scripts/BinaryOperationsTest_002.groovy", [])
     }

@@ -1,7 +1,6 @@
 package core
 
 class A {}
-class $A {}
 class B<T> {}
 class C<T extends A> {}
 class D<T extends A & B> {}
