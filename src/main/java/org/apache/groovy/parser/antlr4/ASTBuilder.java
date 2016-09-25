@@ -582,15 +582,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private void initUsingGenerics(ClassNode classNode) {
-        this.initUsingGenerics(classNode, false);
-    }
-
-    private void initUsingGenerics(ClassNode classNode, boolean toIgnoreSuperClass) {
         if (classNode.isUsingGenerics()) {
             return;
         }
 
-        if (!toIgnoreSuperClass) {
+        if (!classNode.isEnum()) {
             classNode.setUsingGenerics(classNode.getSuperClass().isUsingGenerics());
         }
 
@@ -672,7 +668,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             classNode.setInterfaces(this.visitTypeList(ctx.is));
 
-            this.initUsingGenerics(classNode, true);
+            this.initUsingGenerics(classNode);
         } else if (asBoolean(ctx.AT())) { // annotation
             classNode.setModifiers(classNode.getModifiers() | Opcodes.ACC_INTERFACE | Opcodes.ACC_ABSTRACT | Opcodes.ACC_ANNOTATION);
 
