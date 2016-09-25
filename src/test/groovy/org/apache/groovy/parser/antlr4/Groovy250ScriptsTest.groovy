@@ -492,11 +492,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/AutoImplementTransformTest_001.groovy", [ExpressionStatement])
     }
 
-    /* FIXME
     void "test AutoImplementTransformTest_002.groovy"() {
-        unzipAndTest("scripts/AutoImplementTransformTest_002.groovy", [])
+        unzipAndTest("scripts/AutoImplementTransformTest_002.groovy", [ExpressionStatement])
     }
-    */
 
     void "test AutoImplementTransformTest_003.groovy"() {
         unzipAndTest("scripts/AutoImplementTransformTest_003.groovy", [])
@@ -514,21 +512,17 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BaseScriptSpecTest_001.groovy", [])
     }
 
-    /* FIXME
     void "test BaseScriptSpecTest_002.groovy"() {
-        unzipAndTest("scripts/BaseScriptSpecTest_002.groovy", [])
+        unzipAndTest("scripts/BaseScriptSpecTest_002.groovy", [ExpressionStatement])
     }
-    */
 
     void "test BaseScriptSpecTest_003.groovy"() {
         unzipAndTest("scripts/BaseScriptSpecTest_003.groovy", [])
     }
 
-    /* FIXME
     void "test BaseScriptSpecTest_004.groovy"() {
-        unzipAndTest("scripts/BaseScriptSpecTest_004.groovy", [])
+        unzipAndTest("scripts/BaseScriptSpecTest_004.groovy", [MethodNode, ExpressionStatement])
     }
-    */
 
     void "test BaseScriptTransformTest_001.groovy"() {
         unzipAndTest("scripts/BaseScriptTransformTest_001.groovy", [])
@@ -558,11 +552,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BaseScriptTransformTest_007.groovy", [])
     }
 
-    /* FIXME
     void "test BaseScriptTransformTest_008.groovy"() {
-        unzipAndTest("scripts/BaseScriptTransformTest_008.groovy", [])
+        unzipAndTest("scripts/BaseScriptTransformTest_008.groovy", [ExpressionStatement])
     }
-    */
 
     void "test BaseScriptTransformTest_009.groovy"() {
         unzipAndTest("scripts/BaseScriptTransformTest_009.groovy", [])
@@ -572,17 +564,24 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/BaseScriptTransformTest_010.groovy", [])
     }
 
-    /* FIXME
     void "test BigDecimalOperatorsTest_001.groovy"() {
-        unzipAndTest("scripts/BigDecimalOperatorsTest_001.groovy", [])
+        unzipAndTest("scripts/BigDecimalOperatorsTest_001.groovy", [MethodNode])
     }
-    */
 
     void "test BinaryLiteralTest_001.groovy"() {
         unzipAndTest("scripts/BinaryLiteralTest_001.groovy", [])
     }
 
     /* FIXME
+     * (src/test/org/codehaus/groovy/classgen/asm/BinaryOperationsTest.groovy)
+     * The old parser parses the following statement
+     *
+     *      $type[] b = new $type[1]
+     * as
+     *      $type [ []].call( b = new $type[1])
+     *
+     * I think the result is not correct @_@
+     *
     void "test BinaryOperationsTest_001.groovy"() {
         unzipAndTest("scripts/BinaryOperationsTest_001.groovy", [])
     }

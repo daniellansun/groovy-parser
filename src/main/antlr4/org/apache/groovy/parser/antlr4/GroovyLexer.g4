@@ -656,7 +656,7 @@ URSHIFT_ASSIGN  : '>>>=';
 
 // §3.8 Identifiers (must appear after all keywords in the grammar)
 CapitalizedIdentifier
-    :   [A-Z] JavaLetterOrDigit*
+    :   [A-Z$] JavaLetterOrDigit*
     ;
 
 Identifier
