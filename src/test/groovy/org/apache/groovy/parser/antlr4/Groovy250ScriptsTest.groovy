@@ -488,11 +488,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/AutoCloneTransformTest_002.groovy", [])
     }
 
-    /* FIXME
     void "test AutoImplementTransformTest_001.groovy"() {
-        unzipAndTest("scripts/AutoImplementTransformTest_001.groovy", [])
+        unzipAndTest("scripts/AutoImplementTransformTest_001.groovy", [ExpressionStatement])
     }
-    */
 
     /* FIXME
     void "test AutoImplementTransformTest_002.groovy"() {

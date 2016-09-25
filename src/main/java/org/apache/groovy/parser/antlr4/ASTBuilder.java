@@ -581,6 +581,22 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         throw createParsingFailedException("Unsupported type declaration: " + ctx.getText(), ctx);
     }
 
+    private void initUsingGenerics(ClassNode classNode) {
+        if (classNode.isUsingGenerics()) {
+            return;
+        }
+
+        classNode.setUsingGenerics(classNode.getSuperClass().isUsingGenerics());
+        if (!classNode.isUsingGenerics() && asBoolean((Object) classNode.getInterfaces())) {
+            for (ClassNode anInterface : classNode.getInterfaces()) {
+                classNode.setUsingGenerics(classNode.isUsingGenerics() || anInterface.isUsingGenerics());
+
+                if (classNode.isUsingGenerics())
+                    break;
+            }
+        }
+    }
+
     @Override
     public ClassNode visitClassDeclaration(ClassDeclarationContext ctx) {
         String packageName = moduleNode.getPackageName();
@@ -633,6 +649,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(ctx.CLASS()) || asBoolean(ctx.TRAIT())) { // class OR trait
             classNode.setSuperClass(this.visitType(ctx.sc));
             classNode.setInterfaces(this.visitTypeList(ctx.is));
+
+            this.initUsingGenerics(classNode);
         } else if (asBoolean(ctx.INTERFACE()) && !asBoolean(ctx.AT())) { // interface(NOT annotation)
             classNode.setModifiers(classNode.getModifiers() | Opcodes.ACC_INTERFACE | Opcodes.ACC_ABSTRACT);
 

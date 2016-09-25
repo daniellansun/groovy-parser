@@ -18,3 +18,8 @@ enum E {
         this.y = y;
     }
 }
+
+enum F {
+    @Test2
+    A
+}
