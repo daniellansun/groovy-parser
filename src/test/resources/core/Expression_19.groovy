@@ -18,3 +18,5 @@ int[][] h = new int[10][];
 int[][][] i = new int[10][][];
 ArrayList[][] j = new ArrayList[10][];
 ArrayList[][] k = new ArrayList<String>[10][];
+
+def bb = new A.B();

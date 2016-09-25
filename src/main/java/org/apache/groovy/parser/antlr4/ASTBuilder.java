@@ -2871,12 +2871,19 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClassNode visitQualifiedClassName(QualifiedClassNameContext ctx) {
-        String className = ctx.className().getText();
+        String className =
+                ctx.className().stream()
+                        .map(ParseTree::getText)
+                        .collect(Collectors.joining("."));
 
         if (asBoolean(ctx.Identifier())) {
-            return ClassHelper.make(ctx.Identifier().stream().map(e -> e.getText()).collect(Collectors.joining("."))
+            return ClassHelper.make(
+                    ctx.Identifier().stream()
+                            .map(ParseTree::getText)
+                            .collect(Collectors.joining("."))
                     + "."
-                    + className);
+                    + className
+            );
         }
 
         return ClassHelper.make(className);

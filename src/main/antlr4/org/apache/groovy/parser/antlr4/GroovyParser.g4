@@ -386,7 +386,7 @@ qualifiedName
     ;
 
 qualifiedClassName
-    :   (Identifier DOT)* className
+    :   (Identifier DOT)* (className DOT)* className
     ;
 
 literal
