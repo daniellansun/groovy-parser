@@ -38,3 +38,5 @@ class DD {
 class EE {{}}
 class FF {static {}}
 class GG {static {};{}}
+
+class Iterator implements java.util.Iterator {}

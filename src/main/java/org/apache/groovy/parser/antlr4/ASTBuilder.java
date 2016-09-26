@@ -2668,6 +2668,11 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(ctx.typeArguments())) {
             classNode.setGenericsTypes(
                     this.visitTypeArguments(ctx.typeArguments()));
+        } else {
+            // ClassHelper.make("java.util.Iterator") will derive the generics type info from JDK library: java.util.Iterator<E extends java.lang.Object>
+            // so if no generics type, we have to erase the generics type of AST node
+            classNode.setGenericsTypes(null);
+            classNode.setUsingGenerics(false);
         }
 
         return this.configureAST(classNode, ctx);

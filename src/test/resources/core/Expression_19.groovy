@@ -20,3 +20,4 @@ ArrayList[][] j = new ArrayList[10][];
 ArrayList[][] k = new ArrayList<String>[10][];
 
 def bb = new A.B();
+def bb2 = new A.B[0];

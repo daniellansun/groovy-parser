@@ -30,3 +30,5 @@ C
         {
 
         }
+
+interface Iterator extends java.util.Iterator {}
