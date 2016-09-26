@@ -1987,6 +1987,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public BinaryExpression visitMultipleAssignmentExprAlt(MultipleAssignmentExprAltContext ctx) {
+        return this.configureAST(
+                new BinaryExpression(
+                        this.visitVariableNames(ctx.left),
+                        this.createGroovyToken(ctx.op),
+                        ((ExpressionStatement) this.visit(ctx.right)).getExpression()),
+                ctx);
+    }
+
+    @Override
     public BinaryExpression visitAssignmentExprAlt(AssignmentExprAltContext ctx) {
         Expression leftExpr = (Expression) this.visit(ctx.left);
 
@@ -2747,6 +2757,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public TupleExpression visitVariableNames(VariableNamesContext ctx) {
+        return this.configureAST(
+                new TupleExpression(
+                        ctx.variableDeclaratorId().stream()
+                                .map(this::visitVariableDeclaratorId)
+                                .collect(Collectors.toList())
+                ),
+                ctx);
+    }
+
+    @Override
     public BlockStatement visitBlockStatementsOpt(BlockStatementsOptContext ctx) {
         if (asBoolean(ctx.blockStatements())) {
             return this.configureAST(this.visitBlockStatements(ctx.blockStatements()), ctx);
@@ -2886,8 +2907,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     ctx.Identifier().stream()
                             .map(ParseTree::getText)
                             .collect(Collectors.joining("."))
-                    + "."
-                    + className
+                            + "."
+                            + className
             );
         }
 

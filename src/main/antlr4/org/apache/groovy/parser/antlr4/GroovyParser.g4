@@ -505,6 +505,10 @@ typeNamePair
     :   type? variableDeclaratorId
     ;
 
+variableNames
+    :   LPAREN variableDeclaratorId (COMMA variableDeclaratorId)* RPAREN
+    ;
+
 statement
     :   block                                                                               #blockStmtAlt
     |   ASSERT ce=expression ((COLON | COMMA) nls me=expression)?                           #assertStmtAlt
@@ -623,8 +627,10 @@ statementExpression
 
 expression
     // qualified names, array expressions, method invocation, post inc/dec, type casting (level 1)
-    // The cast expression must put first to resovle the ambiguities between type casting and call on parentheses expression, e.g. (int)(1 / 2)
+    // The cast expression must be put before pathExpression to resovle the ambiguities between type casting and call on parentheses expression, e.g. (int)(1 / 2)
+    // Similarly, multipleAssignmentExprAlt must be put before pathExpression too, because of the ambiguities, e.g. (a) = [1] can be parsed as primary"(a)" ASSIGN"=" list"[1]" OR multipleAssignmentExprAlt, the latter is the result we expected
     :   castParExpression expression                                                        #castExprAlt
+    |   <assoc=right> left=variableNames op=ASSIGN nls right=statementExpression            #multipleAssignmentExprAlt
     |   pathExpression op=(INC | DEC)?                                                      #postfixExprAlt
 
     // ~(BNOT)/!(LNOT) (level 1)
@@ -712,7 +718,6 @@ expression
                            |   POWER_ASSIGN
                            ) nls
                      right=statementExpression                                              #assignmentExprAlt
-
     ;
 
 commandExpression

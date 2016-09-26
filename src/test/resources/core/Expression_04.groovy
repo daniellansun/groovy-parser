@@ -27,8 +27,18 @@ map[obj.a()] = 1
 map[a().result] = 1
 map[a + b] = 1
 
-a =
-        b =
+(a)         = [1]
+(a)         = x++
+(a)         = (SomeType)x++
+(a)         = obj.m()
+(a)         = [1]
+(a)         = [1] + [2]
+(a, b)      = [1, 2]
+(a, b, c)   = [1, 2, 3]
+
+(obj) =
+        a =
+              b =
                 left >>>=
                         left >>=
                                 left <<=
