@@ -78,7 +78,7 @@ class TestUtils {
         long diffInMillis = newElapsedTime - oldElapsedTime;
 
         if (diffInMillis >= 500) {
-            log.warning "${path}\t\t\t\t\tdiff:${diffInMillis / 1000}s,\tnew:${newElapsedTime / 1000}s,\told:${oldElapsedTime / 1000}s."
+            log.warning "${path}!${entryName}\t\t\t\t\tdiff:${diffInMillis / 1000}s,\tnew:${newElapsedTime / 1000}s,\told:${oldElapsedTime / 1000}s."
         }
     }
 
