@@ -2000,6 +2000,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public BinaryExpression visitAssignmentExprAlt(AssignmentExprAltContext ctx) {
         Expression leftExpr = (Expression) this.visit(ctx.left);
 
+        if (leftExpr instanceof VariableExpression
+                && isTrue(leftExpr, IS_INSIDE_PARENTHESES)) { // it is a special multiple assignment whose variable count is only one, e.g. (a) = [1]
+
+            return this.configureAST(
+                    new BinaryExpression(
+                            this.configureAST(new TupleExpression(leftExpr), ctx.left),
+                            this.createGroovyToken(ctx.op),
+                            ((ExpressionStatement) this.visit(ctx.right)).getExpression()),
+                    ctx);
+        }
+
         // the LHS expression should be a variable which is not inside any parentheses
         if (
                 !(
