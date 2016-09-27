@@ -26,6 +26,7 @@ import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.PropertyNode
 import org.codehaus.groovy.ast.stmt.AssertStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
+import org.codehaus.groovy.ast.stmt.ForStatement
 import org.codehaus.groovy.ast.stmt.ReturnStatement
 import org.codehaus.groovy.syntax.Token
 
@@ -1381,11 +1382,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/CanonicalComponentsTransformTest_012.groovy", [Parameter, ExpressionStatement, AssertStatement])
     }
 
-    /* FIXME
     void "test CanonicalComponentsTransformTest_013.groovy"() {
         unzipAndTest("scripts/CanonicalComponentsTransformTest_013.groovy", [])
     }
-    */
 
     void "test CanonicalComponentsTransformTest_014.groovy"() {
         unzipAndTest("scripts/CanonicalComponentsTransformTest_014.groovy", [])
@@ -1471,37 +1470,29 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/CanonicalTransformTest_016.groovy", [])
     }
 
-    /* FIXME
     void "test CanonicalTransformTest_017.groovy"() {
         unzipAndTest("scripts/CanonicalTransformTest_017.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test CanonicalTransformTest_018.groovy"() {
         unzipAndTest("scripts/CanonicalTransformTest_018.groovy", [])
     }
-    */
 
     void "test CanonicalTransformTest_019.groovy"() {
         unzipAndTest("scripts/CanonicalTransformTest_019.groovy", [])
     }
 
-    /* FIXME
     void "test CanonicalTransformTest_020.groovy"() {
         unzipAndTest("scripts/CanonicalTransformTest_020.groovy", [])
     }
-    */
 
     void "test CanonicalTransformTest_021.groovy"() {
         unzipAndTest("scripts/CanonicalTransformTest_021.groovy", [])
     }
 
-    /* FIXME
     void "test CanonicalTransformTest_022.groovy"() {
         unzipAndTest("scripts/CanonicalTransformTest_022.groovy", [])
     }
-    */
 
     void "test CanonicalTransformTest_023.groovy"() {
         unzipAndTest("scripts/CanonicalTransformTest_023.groovy", [])
@@ -1511,11 +1502,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/CanonicalTransformTest_024.groovy", [])
     }
 
-    /* FIXME
     void "test CanonicalTransformTest_025.groovy"() {
-        unzipAndTest("scripts/CanonicalTransformTest_025.groovy", [])
+        unzipAndTest("scripts/CanonicalTransformTest_025.groovy", [ExpressionStatement])
     }
-    */
 
     void "test CanonicalTransformTest_026.groovy"() {
         unzipAndTest("scripts/CanonicalTransformTest_026.groovy", [])
@@ -1529,11 +1518,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/CanonicalTransformTest_028.groovy", [])
     }
 
-    /* FIXME
     void "test CanonicalTransformTest_029.groovy"() {
         unzipAndTest("scripts/CanonicalTransformTest_029.groovy", [])
     }
-    */
 
     void "test CastToStringTest_001.groovy"() {
         unzipAndTest("scripts/CastToStringTest_001.groovy", [])
@@ -1547,11 +1534,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/CategoryAnnotationTest_002.groovy", [])
     }
 
-    /* FIXME
     void "test CategoryAnnotationTest_003.groovy"() {
-        unzipAndTest("scripts/CategoryAnnotationTest_003.groovy", [])
+        unzipAndTest("scripts/CategoryAnnotationTest_003.groovy", [MethodNode, ExpressionStatement, ReturnStatement, ForStatement])
     }
-    */
 
     void "test CategoryAnnotationTest_004.groovy"() {
         unzipAndTest("scripts/CategoryAnnotationTest_004.groovy", [])

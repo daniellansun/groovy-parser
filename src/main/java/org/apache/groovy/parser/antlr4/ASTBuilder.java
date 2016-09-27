@@ -2021,7 +2021,6 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 || leftExpr instanceof PropertyExpression // e.g. obj.p = 123
 
                                 || (leftExpr instanceof BinaryExpression
-                                && ((BinaryExpression) leftExpr).getLeftExpression() instanceof VariableExpression
                                 && !(((BinaryExpression) leftExpr).getRightExpression() instanceof ListExpression)
                                 && Types.LEFT_SQUARE_BRACKET == ((BinaryExpression) leftExpr).getOperation().getType()) // e.g. map[a] = 123 OR map['a'] = 123 OR map["$a"] = 123
                 )
