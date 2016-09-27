@@ -506,7 +506,7 @@ typeNamePair
     ;
 
 variableNames
-    :   LPAREN variableDeclaratorId (COMMA variableDeclaratorId)* RPAREN
+    :   LPAREN variableDeclaratorId (COMMA variableDeclaratorId)+ RPAREN
     ;
 
 statement
@@ -700,6 +700,7 @@ expression
         fb=expression                                                                       #conditionalExprAlt
 
     // assignment expression (level 15)
+    // "(a) = [1]" is a special case of multipleAssignmentExprAlt, it will be handle by assignmentExprAlt
     |   <assoc=right> left=variableNames op=ASSIGN nls right=statementExpression            #multipleAssignmentExprAlt
     |   <assoc=right> left=expression
                         op=(   ASSIGN
@@ -864,7 +865,11 @@ locals[boolean empty = true]
     ;
 
 map
-    :   LBRACK (mapEntryList COMMA? | COLON) RBRACK
+    :   LBRACK
+        (   mapEntryList COMMA?
+        |   COLON
+        )
+        RBRACK
     ;
 
 mapEntryList
