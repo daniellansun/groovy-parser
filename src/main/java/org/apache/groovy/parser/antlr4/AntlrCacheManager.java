@@ -28,14 +28,12 @@ import java.util.*;
 /**
  * Manage DFA cache and prediction context cache for lexer and parser to avoid memory leak
  *
- * DFA cache management depends on modifying the source code of antlr4, which will be done later
- * The rationale of DFA cache management is to use SoftReference to avoid DFA cache growing forever and recreate one when it is needed
- *
  * @author <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * @date 2016/08/14
  */
 public class AntlrCacheManager {
     private static final Map<Class, PredictionContextCache> CACHE_MAP;
+    private static final Map<Class, DFA[]> DFA_MAP;
     private ATN atn;
     private Class ownerClass;
 
@@ -47,6 +45,7 @@ public class AntlrCacheManager {
         cacheMap.put(GroovyLangParser.class, new PredictionContextLruCache(1024));
 
         CACHE_MAP = Collections.unmodifiableMap(cacheMap);
+        DFA_MAP = new HashMap<>();
     }
 
     public AntlrCacheManager(GroovyLangLexer lexer) {
@@ -60,9 +59,20 @@ public class AntlrCacheManager {
     }
 
     public DFA[] createDecisionToDFA() {
-        DFA[] decisionToDFA = new DFA[atn.getNumberOfDecisions()];
+        DFA[] decisionToDFA = DFA_MAP.get(ownerClass);
 
-        Arrays.setAll(decisionToDFA, i -> new DFA(atn.getDecisionState(i), i));
+        if (null != decisionToDFA) {
+            return decisionToDFA;
+        }
+
+        synchronized (DFA_MAP) {
+            if (null == DFA_MAP.get(ownerClass)) {
+                decisionToDFA = new DFA[atn.getNumberOfDecisions()];
+                Arrays.setAll(decisionToDFA, i -> new DfaWrapper(atn, i));
+
+                DFA_MAP.put(ownerClass, decisionToDFA);
+            }
+        }
 
         return decisionToDFA;
     }
@@ -78,7 +88,7 @@ public class AntlrCacheManager {
      * @date 2016/09/27
      */
     public static class PredictionContextLruCache extends PredictionContextCache {
-        protected final Map<PredictionContext, PredictionContext> cache;
+        private final Map<PredictionContext, PredictionContext> cache;
 
         public PredictionContextLruCache(final int capacity) {
             // TODO the implementation of cache will be change to ConcurrentLinkedHashMap or the newer one
@@ -92,6 +102,7 @@ public class AntlrCacheManager {
                             });
         }
 
+        @Override
         public PredictionContext add(PredictionContext ctx) {
             if (ctx == PredictionContext.EMPTY) {
                 return PredictionContext.EMPTY;
@@ -108,10 +119,12 @@ public class AntlrCacheManager {
             }
         }
 
+        @Override
         public PredictionContext get(PredictionContext ctx) {
             return this.cache.get(ctx);
         }
 
+        @Override
         public int size() {
             return this.cache.size();
         }
