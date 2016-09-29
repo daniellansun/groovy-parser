@@ -2486,11 +2486,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/ClosureParamTypeInferenceSTCTest_144.groovy", [])
     }
 
-    /* FIXME
     void "test ClosureParamTypeInferenceSTCTest_145.groovy"() {
         unzipAndTest("scripts/ClosureParamTypeInferenceSTCTest_145.groovy", [])
     }
-    */
 
     void "test ClosureParamTypeInferenceSTCTest_146.groovy"() {
         unzipAndTest("scripts/ClosureParamTypeInferenceSTCTest_146.groovy", [])

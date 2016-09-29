@@ -25,3 +25,8 @@ static m(a) {}
 static m2(a, b) {}
 static m3(a, b, c) {}
 static Object m4(a, b, c) {}
+
+private String relativePath() { '' }
+def foo() {}
+
+

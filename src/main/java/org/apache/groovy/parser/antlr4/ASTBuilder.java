@@ -933,7 +933,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             methodNode =
                     new MethodNode(
                             this.visitMethodName(ctx.methodName()),
-                            Opcodes.ACC_PUBLIC,
+                            modifierManager.contains(PRIVATE) ? Opcodes.ACC_PRIVATE : Opcodes.ACC_PUBLIC,
                             returnType,
                             parameters,
                             exceptions,
