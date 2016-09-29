@@ -19,11 +19,13 @@
 package org.apache.groovy.parser.antlr4;
 
 import org.antlr.v4.runtime.atn.ATN;
-import org.antlr.v4.runtime.atn.PredictionContext;
 import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.dfa.DFA;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Manage DFA cache and prediction context cache for lexer and parser to avoid memory leak
@@ -34,15 +36,15 @@ import java.util.*;
 public class AntlrCacheManager {
     private static final Map<Class, PredictionContextCache> CACHE_MAP;
     private static final Map<Class, DFA[]> DFA_MAP;
-    private ATN atn;
-    private Class ownerClass;
+    private final ATN atn;
+    private final Class ownerClass;
 
     static {
         Map<Class, PredictionContextCache> cacheMap = new HashMap<>();
 
         // TODO evaluate the size of caches reasonably
-        cacheMap.put(GroovyLangLexer.class, new PredictionContextLruCache(1024));
-        cacheMap.put(GroovyLangParser.class, new PredictionContextLruCache(1024));
+        cacheMap.put(GroovyLangLexer.class, new PredictionContextLruCache(2048));
+        cacheMap.put(GroovyLangParser.class, new PredictionContextLruCache(4096));
 
         CACHE_MAP = Collections.unmodifiableMap(cacheMap);
         DFA_MAP = new HashMap<>();
@@ -79,54 +81,5 @@ public class AntlrCacheManager {
 
     public PredictionContextCache createPredictionContextCache() {
         return CACHE_MAP.get(this.ownerClass);
-    }
-
-    /**
-     * prediction context cache with the LRU cache eviction policy
-     *
-     * @author <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
-     * @date 2016/09/27
-     */
-    public static class PredictionContextLruCache extends PredictionContextCache {
-        private final Map<PredictionContext, PredictionContext> cache;
-
-        public PredictionContextLruCache(final int capacity) {
-            // TODO the implementation of cache will be change to ConcurrentLinkedHashMap or the newer one
-            this.cache =
-                    Collections.synchronizedMap(
-                            new LinkedHashMap<PredictionContext, PredictionContext>(16, 0.75f, true) {
-                                @Override
-                                protected boolean removeEldestEntry(Map.Entry eldest) {
-                                    return this.size() > capacity;
-                                }
-                            });
-        }
-
-        @Override
-        public PredictionContext add(PredictionContext ctx) {
-            if (ctx == PredictionContext.EMPTY) {
-                return PredictionContext.EMPTY;
-            } else {
-                synchronized (this.cache) {
-                    PredictionContext existing = this.get(ctx);
-                    if (existing != null) {
-                        return existing;
-                    } else {
-                        this.cache.put(ctx, ctx);
-                        return ctx;
-                    }
-                }
-            }
-        }
-
-        @Override
-        public PredictionContext get(PredictionContext ctx) {
-            return this.cache.get(ctx);
-        }
-
-        @Override
-        public int size() {
-            return this.cache.size();
-        }
     }
 }

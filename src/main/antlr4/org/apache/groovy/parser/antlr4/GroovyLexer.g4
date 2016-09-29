@@ -730,12 +730,7 @@ WS  :  [ \t\u000C]+     -> skip
 NL  : '\r'? '\n' { if (this.isInsideParens()) this.setChannel(Token.HIDDEN_CHANNEL); }
     ;
 
-// groovydoc comments
-DC_COMMENT
-    :   '/**' .*? '*/'      -> type(NL)
-    ;
-
-// Multiple-line comments
+// Multiple-line comments(including groovydoc comments)
 ML_COMMENT
     :   '/*' .*? '*/'       -> type(NL)
     ;
