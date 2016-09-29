@@ -947,6 +947,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         methodNode.setSyntheticPublic(
                 this.isSyntheticPublic(this.isAnnotationDeclaration(classNode), asBoolean(ctx.returnType()), modifierManager));
 
+        if (modifierManager.contains(STATIC)) {
+            Arrays.stream(methodNode.getParameters()).forEach(e -> e.setInStaticContext(true));
+            methodNode.getVariableScope().setInStaticContext(true);
+        }
 
         return this.configureAST(methodNode, ctx);
     }

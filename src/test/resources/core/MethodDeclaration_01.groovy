@@ -21,3 +21,7 @@ def <T> T someMethod() {}
 def <T extends List> T someMethod2() {}
 def <T extends A & B> T someMethod3() {}
 
+static m(a) {}
+static m2(a, b) {}
+static m3(a, b, c) {}
+static Object m4(a, b, c) {}

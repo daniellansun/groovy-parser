@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *  The implementation of DfaWrapper depends on modifying the source code of antlr4(https://github.com/danielsun1106/antlr4/commit/96bfc4b2101dbf51faada334a1ef790f3f6a39bc)
- *  The rationale of DfaWrapper is to use SoftReference to avoid DFA cache growing forever and recreate one when it is needed
+ *  The implementation of DfaWrapper depends on modifying the source code of antlr4(https://github.com/antlr/antlr4/pull/1297)
+ *  The rationale of DfaWrapper is to use SoftReference to avoid DFA cache growing forever. If the DFA instance is GCed, recreate one when it is needed.
  *
  * @author <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * @date 2016/09/28
