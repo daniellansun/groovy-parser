@@ -2634,11 +2634,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/ClosuresSTCTest_017.groovy", [])
     }
 
-    /* FIXME
     void "test ClosuresSTCTest_018.groovy"() {
         unzipAndTest("scripts/ClosuresSTCTest_018.groovy", [])
     }
-    */
 
     void "test ClosuresSTCTest_019.groovy"() {
         unzipAndTest("scripts/ClosuresSTCTest_019.groovy", [])
