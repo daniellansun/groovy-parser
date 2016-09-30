@@ -19,11 +19,7 @@
 package org.apache.groovy.parser.antlr4
 
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
-import org.codehaus.groovy.ast.FieldNode
-import org.codehaus.groovy.ast.GenericsType
-import org.codehaus.groovy.ast.MethodNode
-import org.codehaus.groovy.ast.Parameter
-import org.codehaus.groovy.ast.PropertyNode
+import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.stmt.AssertStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
 import org.codehaus.groovy.ast.stmt.ForStatement
@@ -2650,11 +2646,11 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/ClosuresSTCTest_021.groovy", [])
     }
 
-    /* FIXME
     void "test ClosuresSTCTest_022.groovy"() {
-        unzipAndTest("scripts/ClosuresSTCTest_022.groovy", [])
+        ["java.util.concurrent.Callable", "Object", "Closure", "GroovyObjectSupport", "Cloneable", "Runnable", "GroovyCallable", "Serializable", "GroovyObject"].each {
+            unzipAndTest("scripts/ClosuresSTCTest_022.groovy", [], ['$className': it])
+        }
     }
-    */
 
     void "test ClosuresSTCTest_023.groovy"() {
         unzipAndTest("scripts/ClosuresSTCTest_023.groovy", [])
@@ -3072,11 +3068,11 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/CoercionTest_012.groovy", [])
     }
 
-    /* FIXME
     void "test CombinedIndyAndStaticCompilationTest_001.groovy"() {
-        unzipAndTest("scripts/CombinedIndyAndStaticCompilationTest_001.groovy", [])
+        ["byte", "short", "int", "long", "float", "double", "char"].each {
+            unzipAndTest("scripts/CombinedIndyAndStaticCompilationTest_001.groovy", [], ['${type}': it])
+        }
     }
-    */
 
     void "test CombinedIndyAndStaticCompilationTest_002.groovy"() {
         unzipAndTest("scripts/CombinedIndyAndStaticCompilationTest_002.groovy", [])
@@ -3118,11 +3114,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/CommandChainsTest_009.groovy", [])
     }
 
-    /* FIXME
     void "test CommandChainsTest_010.groovy"() {
-        unzipAndTest("scripts/CommandChainsTest_010.groovy", [])
+        unzipAndTest("scripts/CommandChainsTest_010.groovy", [], ['\\\'': '\''])
     }
-    */
 
     void "test CompatWithASTXFormStaticCompileTest_001.groovy"() {
         unzipAndTest("scripts/CompatWithASTXFormStaticCompileTest_001.groovy", [])
@@ -3168,13 +3162,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/CompilerDirectivesASTTransformsTest_007.groovy", [])
     }
 
-    /* FIXME
+    /* moved to SyntaxErrorTest
     void "test CompilerErrorTest_001.groovy"() {
         unzipAndTest("scripts/CompilerErrorTest_001.groovy", [])
     }
     */
 
-    /* FIXME
+    /* moved to SyntaxErrorTest
     void "test CompilerErrorTest_002.groovy"() {
         unzipAndTest("scripts/CompilerErrorTest_002.groovy", [])
     }
@@ -3468,11 +3462,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/DefaultParamTest_006.groovy", [])
     }
 
-    /* FIXME
     void "test DefaultParamTest_007.groovy"() {
         unzipAndTest("scripts/DefaultParamTest_007.groovy", [])
     }
-    */
 
     void "test DefaultParamTest_008.groovy"() {
         unzipAndTest("scripts/DefaultParamTest_008.groovy", [])
@@ -3490,11 +3482,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/DefaultParamTest_011.groovy", [])
     }
 
-    /* FIXME
     void "test DefaultParamTest_012.groovy"() {
         unzipAndTest("scripts/DefaultParamTest_012.groovy", [])
     }
-    */
 
     void "test DefaultParamTest_013.groovy"() {
         unzipAndTest("scripts/DefaultParamTest_013.groovy", [])
@@ -11238,7 +11228,7 @@ class Groovy250ScriptsTest extends GroovyTestCase {
 
     /*************************************/
     static unzipAndTest(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:]) {
-        ignoreClazzList.addAll([AssertStatement, ExpressionStatement, FieldNode, ForStatement, GenericsType, MethodNode, Parameter, PropertyNode, ReturnStatement, Token])
+        ignoreClazzList.addAll(TestUtils.COMMON_IGNORE_CLASS_LIST)
 
         TestUtils.unzipAndTest(ZIP_PATH, entryName, TestUtils.addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), replacementsMap)
     }

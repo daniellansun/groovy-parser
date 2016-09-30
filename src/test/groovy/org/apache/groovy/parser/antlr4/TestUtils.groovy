@@ -6,7 +6,9 @@ import org.apache.groovy.parser.Antlr2Parser
 import org.apache.groovy.parser.Antlr4Parser
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 import org.apache.groovy.parser.antlr4.util.GroovySourceGenerator
-import org.codehaus.groovy.ast.ModuleNode
+import org.codehaus.groovy.ast.*
+import org.codehaus.groovy.ast.stmt.*
+import org.codehaus.groovy.syntax.Token
 
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -83,6 +85,65 @@ class TestUtils {
     }
 
 
+    static shouldFail(String path, boolean toCheckNewParserOnly = false) {
+        shouldFail(path, ASTComparatorCategory.DEFAULT_CONFIGURATION, toCheckNewParserOnly)
+    }
+
+    static shouldFail(String path, List ignoreClazzList, boolean toCheckNewParserOnly = false) {
+        shouldFail(path, addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), toCheckNewParserOnly)
+    }
+
+    static shouldFail(String path, conf, boolean toCheckNewParserOnly = false) {
+        AbstractParser antlr4Parser = new Antlr4Parser()
+        AbstractParser antlr2Parser = new Antlr2Parser()
+
+        File file = new File("$RESOURCES_PATH/$path");
+        def (newAST, newElapsedTime) = profile { antlr4Parser.parse(file) }
+        def (oldAST, oldElapsedTime) = profile { antlr2Parser.parse(file) }
+
+        if (toCheckNewParserOnly) {
+            assert (newAST == null || newAST.context.errorCollector.hasErrors())
+        } else {
+            assert (newAST == null || newAST.context.errorCollector.hasErrors()) &&
+                    (oldAST == null || oldAST.context.errorCollector.hasErrors())
+        }
+
+        long diffInMillis = newElapsedTime - oldElapsedTime;
+
+        if (diffInMillis >= 500) {
+            log.warning "${path}\t\t\t\t\tdiff:${diffInMillis / 1000}s,\tnew:${newElapsedTime / 1000}s,\told:${oldElapsedTime / 1000}s."
+        }
+    }
+
+    static unzipAndFail(String path, String entryName, conf, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
+        AbstractParser antlr4Parser = new Antlr4Parser()
+        AbstractParser antlr2Parser = new Antlr2Parser()
+
+        String name = "$path!$entryName";
+        String text = readZipEntry(path, entryName);
+
+        replacementsMap?.each {k, v ->
+            text = text.replace(k, v);
+        }
+
+        def (newAST, newElapsedTime) = profile { antlr4Parser.parse(name, text) }
+        def (oldAST, oldElapsedTime) = profile { antlr2Parser.parse(name, text) }
+
+        if (toCheckNewParserOnly) {
+            assert (newAST == null || newAST.context.errorCollector.hasErrors())
+        } else {
+            assert (newAST == null || newAST.context.errorCollector.hasErrors()) &&
+                    (oldAST == null || oldAST.context.errorCollector.hasErrors())
+        }
+
+        long diffInMillis = newElapsedTime - oldElapsedTime;
+
+        if (diffInMillis >= 500) {
+            log.warning "${path}!${entryName}\t\t\t\t\tdiff:${diffInMillis / 1000}s,\tnew:${newElapsedTime / 1000}s,\told:${oldElapsedTime / 1000}s."
+        }
+    }
+
+
     static assertAST(ast1, ast2, conf) {
         assert null != ast1 && null != ast2
 
@@ -130,4 +191,6 @@ class TestUtils {
 
         return result;
     }
+
+    public static final List COMMON_IGNORE_CLASS_LIST = Collections.unmodifiableList([AssertStatement, ExpressionStatement, FieldNode, ForStatement, GenericsType, IfStatement, MethodNode, Parameter, PropertyNode, ReturnStatement, Token]);
 }

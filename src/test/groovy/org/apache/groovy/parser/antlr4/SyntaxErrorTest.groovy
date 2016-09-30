@@ -18,12 +18,10 @@
  */
 package org.apache.groovy.parser.antlr4
 
-import org.codehaus.groovy.ast.ModuleNode
-import org.apache.groovy.parser.AbstractParser
-import org.apache.groovy.parser.Antlr2Parser
-import org.apache.groovy.parser.Antlr4Parser
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
-import org.apache.groovy.parser.antlr4.util.GroovySourceGenerator
+
+import static org.apache.groovy.parser.antlr4.TestUtils.COMMON_IGNORE_CLASS_LIST
+import static org.apache.groovy.parser.antlr4.TestUtils.shouldFail
 
 /**
  * Some syntax error test cases for the new parser
@@ -39,89 +37,42 @@ class SyntaxErrorTest extends GroovyTestCase {
     void tearDown() {}
 
     void "test groovy core - List"() {
-        fail('fail/List_01.groovy');
+        shouldFail('fail/List_01.groovy');
     }
 
     void "test groovy core - Expression"() {
-        fail('fail/Expression_01.groovy');
-        fail('fail/Expression_02.groovy');
-        fail('fail/Expression_03.groovy');
-        fail('fail/Expression_04.groovy', true);
-        fail('fail/Expression_05.groovy', true);
-        fail('fail/Expression_06.groovy');
-        fail('fail/Expression_07.groovy');
-        fail('fail/Expression_08.groovy');
-        fail('fail/Expression_09.groovy');
+        shouldFail('fail/Expression_01.groovy');
+        shouldFail('fail/Expression_02.groovy');
+        shouldFail('fail/Expression_03.groovy');
+        shouldFail('fail/Expression_04.groovy', true);
+        shouldFail('fail/Expression_05.groovy', true);
+        shouldFail('fail/Expression_06.groovy');
+        shouldFail('fail/Expression_07.groovy');
+        shouldFail('fail/Expression_08.groovy');
+        shouldFail('fail/Expression_09.groovy');
     }
 
     void "test groovy core - Switch"() {
-        fail('fail/Switch_01.groovy');
+        shouldFail('fail/Switch_01.groovy');
     }
 
     void "test groovy core - LocalVariableDeclaration"() {
-        fail('fail/LocalVariableDeclaration_01.groovy');
-    }
-    // ************************************************************
-    static fail(String path, boolean toCheckNewParserOnly = false) {
-        fail(path, ASTComparatorCategory.DEFAULT_CONFIGURATION, toCheckNewParserOnly)
+        shouldFail('fail/LocalVariableDeclaration_01.groovy');
     }
 
-    static fail(String path, List ignoreClazzList, boolean toCheckNewParserOnly = false) {
-        fail(path, addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), toCheckNewParserOnly)
+    void "test CompilerErrorTest_001.groovy"() {
+        unzipAndFailScript("scripts/CompilerErrorTest_001.groovy", [])
     }
 
-    static fail(String path, conf, boolean toCheckNewParserOnly = false) {
-        AbstractParser antlr4Parser = new Antlr4Parser()
-        AbstractParser antlr2Parser = new Antlr2Parser()
-
-        File file = new File("$RESOURCES_PATH/$path");
-        def (newAST, newElapsedTime) = profile { antlr4Parser.parse(file) }
-        def (oldAST, oldElapsedTime) = profile { antlr2Parser.parse(file) }
-
-        if (toCheckNewParserOnly) {
-            assert (newAST == null || newAST.context.errorCollector.hasErrors())
-        } else {
-            assert (newAST == null || newAST.context.errorCollector.hasErrors()) &&
-                    (oldAST == null || oldAST.context.errorCollector.hasErrors())
-        }
-
-        long diffInMillis = newElapsedTime - oldElapsedTime;
-
-        if (diffInMillis >= 500) {
-            log.warning "${path}\t\t\t\t\tdiff:${diffInMillis / 1000}s,\tnew:${newElapsedTime / 1000}s,\told:${oldElapsedTime / 1000}s."
-        }
+    void "test CompilerErrorTest_002.groovy"() {
+        unzipAndFailScript("scripts/CompilerErrorTest_002.groovy", [])
     }
 
-    static assertAST(ast1, ast2, conf) {
-        assert null != ast1 && null != ast2
+    static unzipAndFailScript(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
+        ignoreClazzList.addAll(COMMON_IGNORE_CLASS_LIST)
 
-        ASTComparatorCategory.apply(conf) {
-            assert ast1 == ast2
-        }
-        assert genSrc(ast1) == genSrc(ast2)
+        TestUtils.unzipAndFail(SCRIPT_ZIP_PATH, entryName, TestUtils.addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), replacementsMap, toCheckNewParserOnly)
     }
 
-    static String genSrc(ModuleNode ast) {
-        return new GroovySourceGenerator(ast).gen();
-    }
-
-    static profile(Closure c) {
-        long begin = System.currentTimeMillis()
-        def result = c.call()
-        long end = System.currentTimeMillis()
-
-        return [result, end - begin];
-    }
-
-    static addIgnore(Class aClass, ArrayList<String> ignore, Map<Class, List<String>> c = null) {
-        c = c ?: ASTComparatorCategory.DEFAULT_CONFIGURATION.clone() as Map<Class, List<String>>;
-        c[aClass].addAll(ignore)
-        return c
-    }
-
-    static addIgnore(Collection<Class> aClass, ArrayList<String> ignore, Map<Class, List<String>> c = null) {
-        c = c ?: ASTComparatorCategory.DEFAULT_CONFIGURATION.clone() as Map<Class, List<String>>;
-        aClass.each { c[it].addAll(ignore) }
-        return c
-    }
+    public static final String SCRIPT_ZIP_PATH = "$TestUtils.RESOURCES_PATH/groovy-2.5.0/groovy-2.5.0-SNAPSHOT-20160921-allscripts.zip";
 }
