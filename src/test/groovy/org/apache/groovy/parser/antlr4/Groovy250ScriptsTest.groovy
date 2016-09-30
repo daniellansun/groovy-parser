@@ -3798,7 +3798,7 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/DifferencesFromJavaTest_001.groovy", [])
     }
 
-    /* FIXME
+    /* moved to SyntaxErrorTest
     void "test DifferencesFromJavaTest_002.groovy"() {
         unzipAndTest("scripts/DifferencesFromJavaTest_002.groovy", [])
     }
@@ -3884,49 +3884,37 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/EnumTest_006.groovy", [])
     }
 
-    /* FIXME
     void "test EnumTest_007.groovy"() {
         unzipAndTest("scripts/EnumTest_007.groovy", [])
     }
-    */
 
     void "test EnumTest_008.groovy"() {
         unzipAndTest("scripts/EnumTest_008.groovy", [])
     }
 
-    /* FIXME
     void "test EnumTest_009.groovy"() {
         unzipAndTest("scripts/EnumTest_009.groovy", [])
     }
-    */
 
     void "test EnumTest_010.groovy"() {
         unzipAndTest("scripts/EnumTest_010.groovy", [])
     }
 
-    /* FIXME
     void "test EnumTest_011.groovy"() {
         unzipAndTest("scripts/EnumTest_011.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test EnumTest_012.groovy"() {
         unzipAndTest("scripts/EnumTest_012.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test EnumTest_013.groovy"() {
         unzipAndTest("scripts/EnumTest_013.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test EnumTest_014.groovy"() {
         unzipAndTest("scripts/EnumTest_014.groovy", [])
     }
-    */
 
     /* FIXME
     void "test EnumTest_015.groovy"() {
@@ -3934,11 +3922,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
     }
     */
 
-    /* FIXME
     void "test EnumTest_016.groovy"() {
         unzipAndTest("scripts/EnumTest_016.groovy", [])
     }
-    */
 
     void "test EnumTest_017.groovy"() {
         unzipAndTest("scripts/EnumTest_017.groovy", [])

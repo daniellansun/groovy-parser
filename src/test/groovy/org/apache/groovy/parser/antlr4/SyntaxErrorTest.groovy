@@ -68,6 +68,11 @@ class SyntaxErrorTest extends GroovyTestCase {
         unzipAndFailScript("scripts/CompilerErrorTest_002.groovy", [])
     }
 
+    void "test DifferencesFromJavaTest_002.groovy"() {
+        unzipAndFailScript("scripts/DifferencesFromJavaTest_002.groovy", [])
+    }
+
+    /**************************************/
     static unzipAndFailScript(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
         ignoreClazzList.addAll(COMMON_IGNORE_CLASS_LIST)
 
