@@ -16,11 +16,13 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.groovy.parser.antlr4;
+package org.apache.groovy.parser.antlr4.internal;
 
 import org.antlr.v4.runtime.atn.ATN;
 import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.dfa.DFA;
+import org.apache.groovy.parser.antlr4.GroovyLangLexer;
+import org.apache.groovy.parser.antlr4.GroovyLangParser;
 
 import java.util.Arrays;
 import java.util.Collections;

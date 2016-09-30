@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.groovy.parser.antlr4;
+package org.apache.groovy.parser.antlr4.internal;
 
 import org.antlr.v4.runtime.Vocabulary;
 import org.antlr.v4.runtime.atn.ATN;
@@ -55,7 +55,7 @@ public class DfaWrapper extends DFA {
         }
 
         synchronized (this) {
-            if (null == dfaSR.get()) {
+            if (null == (dfa = dfaSR.get())) {
                 dfa = new DFA(atn.getDecisionState(decision), decision);
                 this.dfaSR = new SoftReference<>(dfa);
             }
