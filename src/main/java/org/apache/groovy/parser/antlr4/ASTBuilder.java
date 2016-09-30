@@ -20,8 +20,6 @@ package org.apache.groovy.parser.antlr4;
 
 import groovy.lang.IntRange;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.ATNConfigSet;
-import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.groovy.parser.antlr4.util.StringUtils;
@@ -3016,7 +3014,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return parameter;
     }
 
-    private Expression createPathExpression(Expression primaryExpr, List<PathElementContext> pathElementContextList) {
+    private Expression createPathExpression(Expression primaryExpr, List<? extends PathElementContext> pathElementContextList) {
         return (Expression) pathElementContextList.stream()
                 .map(e -> (Object) e)
                 .reduce(primaryExpr,
@@ -3322,38 +3320,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         parser.addErrorListener(new ANTLRErrorListener() {
             @Override
             public void syntaxError(
-                    Recognizer<?, ?> recognizer,
+                    Recognizer recognizer,
                     Object offendingSymbol, int line, int charPositionInLine,
                     String msg, RecognitionException e) {
 
                 sourceUnit.getErrorCollector().addFatalError(new SyntaxErrorMessage(new SyntaxException(msg, line, charPositionInLine + 1), sourceUnit));
             }
-
-            @Override
-            public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact, BitSet ambigAlts, ATNConfigSet configs) {
-
-                LOGGER.fine("Ambiguity at " + startIndex + " - " + stopIndex);
-            }
-
-            @Override
-            public void reportAttemptingFullContext(
-                    Parser recognizer,
-                    DFA dfa, int startIndex, int stopIndex,
-                    BitSet conflictingAlts, ATNConfigSet configs) {
-
-                LOGGER.fine("Attempting Full Context at " + startIndex + " - " + stopIndex);
-            }
-
-            @Override
-            public void reportContextSensitivity(
-                    Parser recognizer,
-                    DFA dfa, int startIndex, int stopIndex, int prediction, ATNConfigSet configs) {
-
-                LOGGER.fine("Context Sensitivity at " + startIndex + " - " + stopIndex);
-            }
         });
     }
-
 
     private String createExceptionMessage(Throwable t) {
         StringWriter sw = new StringWriter();

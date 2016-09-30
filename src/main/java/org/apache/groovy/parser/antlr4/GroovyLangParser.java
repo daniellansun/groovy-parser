@@ -32,14 +32,6 @@ public class GroovyLangParser extends GroovyParser {
     public GroovyLangParser(TokenStream input) {
         super(input);
 
-        AntlrCacheManager acm = new AntlrCacheManager(this);
-        this.setInterpreter(
-                new ParserATNSimulator(
-                        this,
-                        this.getATN(),
-                        acm.createDecisionToDFA(),
-                        acm.createPredictionContextCache()
-                )
-        );
+        this.setInterpreter(new ParserATNSimulator(this, new AtnManager(this).getATN()));
     }
 }

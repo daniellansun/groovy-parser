@@ -26,7 +26,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'me.champeau.gradle:antlr4-gradle-plugin:0.1'
+        classpath files("lib/antlr4-gradle-plugin-0.1.2-SNAPSHOT.jar");
     }
 }
 
@@ -92,7 +92,8 @@ ext {
 }
 
 dependencies {
-    antlr4 "org.antlr:antlr4:$antlr4Version"
+//    antlr4 "org.antlr:antlr4:$antlr4Version"
+    antlr4 "com.tunnelvisionlabs:antlr4:$antlr4Version"
     compile "org.codehaus.groovy:groovy-all:$groovyVersion"
 
     compile "org.ow2.asm:asm:$asmVersion"
