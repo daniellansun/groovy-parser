@@ -97,6 +97,14 @@ lexer grammar GroovyLexer;
         // Notice: the new lines between "{" and "}" can not be ignored.
         return "(".equals(paren) || "[".equals(paren);
     }
+
+    private void ignoreNewLineInsideParens() {
+        if (!this.isInsideParens()) {
+            return;
+        }
+
+        this.setChannel(Token.HIDDEN_CHANNEL);
+    }
 }
 
 
@@ -727,17 +735,17 @@ WS  :  [ \t\u000C]+     -> skip
     ;
 
 // Inside (...) and [...] but not {...}, ignore newlines.
-NL  : '\r'? '\n' { if (this.isInsideParens()) this.setChannel(Token.HIDDEN_CHANNEL); }
+NL  : '\r'? '\n'            { this.ignoreNewLineInsideParens(); }
     ;
 
 // Multiple-line comments(including groovydoc comments)
 ML_COMMENT
-    :   '/*' .*? '*/'       -> type(NL)
+    :   '/*' .*? '*/'       { this.ignoreNewLineInsideParens(); }       -> type(NL)
     ;
 
 // Single-line comments
 SL_COMMENT
-    :   '//' ~[\r\n\uFFFF]* -> type(NL)
+    :   '//' ~[\r\n\uFFFF]* { this.ignoreNewLineInsideParens(); }       -> type(NL)
     ;
 
 // Script-header comments.

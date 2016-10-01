@@ -6,3 +6,9 @@
 @Test5(v=[1, 2, 3])
 @Test6(v1=[1, 2, 3], v2=[1], v3=6)
 package core
+
+@Grapes([
+        @Grab('xx:yy:1.0'), // xx
+        @Grab('zz:yy:1.0') /* zz */
+])
+import xx.yy.ZZ;

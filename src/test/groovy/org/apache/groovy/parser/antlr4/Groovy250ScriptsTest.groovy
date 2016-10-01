@@ -6720,11 +6720,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/IOGMClosureParamTypeInferenceSTCTest_043.groovy", [])
     }
 
-    /* FIXME
     void "test JsonBuilderTest_001.groovy"() {
         unzipAndTest("scripts/JsonBuilderTest_001.groovy", [])
     }
-    */
 
     void "test JsonTest_001.groovy"() {
         unzipAndTest("scripts/JsonTest_001.groovy", [])
