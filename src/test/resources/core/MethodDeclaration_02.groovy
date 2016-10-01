@@ -25,3 +25,10 @@ final int plus(int a, int b) {
 synchronized final int plus(int a, int b) {
         return a + b;
 }
+
+
+public void someMethod (java.lang.Class<String> clazz) {}
+public void someMethod2 (java.lang.Class clazz) {}
+public boolean someMethod3 (java.util.List<String> list) {
+        list instanceof java.util.List
+}

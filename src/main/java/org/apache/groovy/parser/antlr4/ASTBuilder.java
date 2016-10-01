@@ -1933,6 +1933,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         ctx);
 
             case INSTANCEOF:
+                ctx.type().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, true);
                 return this.configureAST(
                         new BinaryExpression((Expression) this.visit(ctx.left),
                                 this.createGroovyToken(ctx.op),
@@ -2691,6 +2692,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         ClassNode classNode = null;
 
         if (asBoolean(ctx.classOrInterfaceType())) {
+            ctx.classOrInterfaceType().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, ctx.getNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR));
             classNode = this.visitClassOrInterfaceType(ctx.classOrInterfaceType());
 
             if (asBoolean(ctx.LBRACK())) {
@@ -2717,16 +2719,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClassNode visitClassOrInterfaceType(ClassOrInterfaceTypeContext ctx) {
+        ctx.qualifiedClassName().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, ctx.getNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR));
         ClassNode classNode = this.visitQualifiedClassName(ctx.qualifiedClassName());
 
         if (asBoolean(ctx.typeArguments())) {
             classNode.setGenericsTypes(
                     this.visitTypeArguments(ctx.typeArguments()));
-        } else {
-            // ClassHelper.make("java.util.Iterator") will derive the generics type info from JDK library: java.util.Iterator<E extends java.lang.Object>
-            // so if no generics type, we have to erase the generics type of AST node
-            classNode.setGenericsTypes(null);
-            classNode.setUsingGenerics(false);
         }
 
         return this.configureAST(classNode, ctx);
@@ -2944,19 +2942,30 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         String className =
                 ctx.className().stream()
                         .map(ParseTree::getText)
-                        .collect(Collectors.joining("."));
+                        .collect(Collectors.joining(DOT_STR));
 
+        ClassNode result;
         if (asBoolean(ctx.Identifier())) {
-            return ClassHelper.make(
+            result = ClassHelper.make(
                     ctx.Identifier().stream()
                             .map(ParseTree::getText)
-                            .collect(Collectors.joining("."))
-                            + "."
+                            .collect(Collectors.joining(DOT_STR))
+                            + DOT_STR
                             + className
             );
+        } else {
+            result = ClassHelper.make(className);
         }
 
-        return ClassHelper.make(className);
+        if (!isTrue(ctx, IS_INSIDE_INSTANCEOF_EXPR)) { // type in the "instanceof" expression should not have proxy to redirect to it
+            if (result.isUsingGenerics()) {
+                ClassNode cn = ClassHelper.makeWithoutCaching(result.getName());
+                cn.setRedirect(result);
+                result = cn;
+            }
+        }
+
+        return this.configureAST(result, ctx);
     }
 
     /**
@@ -3289,6 +3298,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         astNode.setLastColumnNumber(source.getLastColumnNumber());
 
         return astNode;
+    }
+
+    private boolean isTrue(GroovyParserRuleContext ctx, String key) {
+        Object nmd = ctx.getNodeMetaData(key);
+
+        if (null == nmd) {
+            return false;
+        }
+
+        if (!(nmd instanceof Boolean)) {
+            throw new GroovyBugError(ctx + " ctx meta data[" + key + "] is not an instance of Boolean");
+        }
+
+        return (Boolean) nmd;
     }
 
     private boolean isTrue(ASTNode node, String key) {
@@ -3706,6 +3729,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     // keys for meta data
     private static final String IS_INSIDE_PARENTHESES = "_IS_INSIDE_PARENTHESES";
+    public static final String IS_INSIDE_INSTANCEOF_EXPR = "_IS_INSIDE_INSTANCEOF_EXPR";
     private static final String IS_SWITCH_DEFAULT = "_IS_SWITCH_DEFAULT";
     private static final String IS_NUMERIC = "_IS_NUMERIC";
     private static final String IS_STRING = "_IS_STRING";
