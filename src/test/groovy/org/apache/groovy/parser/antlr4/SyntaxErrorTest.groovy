@@ -44,8 +44,8 @@ class SyntaxErrorTest extends GroovyTestCase {
         shouldFail('fail/Expression_01.groovy');
         shouldFail('fail/Expression_02.groovy');
         shouldFail('fail/Expression_03.groovy');
-        shouldFail('fail/Expression_04.groovy', true);
-        shouldFail('fail/Expression_05.groovy', true);
+//        shouldFail('fail/Expression_04.groovy', true);
+//        shouldFail('fail/Expression_05.groovy', true);
         shouldFail('fail/Expression_06.groovy');
         shouldFail('fail/Expression_07.groovy');
         shouldFail('fail/Expression_08.groovy');
@@ -74,6 +74,10 @@ class SyntaxErrorTest extends GroovyTestCase {
 
     void "test Groovy5212Bug_001.groovy"() {
         unzipScriptAndShouldFail("scripts/Groovy5212Bug_001.groovy", [])
+    }
+
+    void "test GStringEndTest_001.groovy"() {
+        unzipScriptAndShouldFail("scripts/GStringEndTest_001.groovy", [])
     }
 
     /**************************************/

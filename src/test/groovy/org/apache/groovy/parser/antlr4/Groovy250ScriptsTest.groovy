@@ -6142,7 +6142,7 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/GroovyTestCaseExampleTests_001.groovy", [])
     }
 
-    /* FIXME
+    /* moved to SyntaxErrorTest
     void "test GStringEndTest_001.groovy"() {
         unzipAndTest("scripts/GStringEndTest_001.groovy", [])
     }
