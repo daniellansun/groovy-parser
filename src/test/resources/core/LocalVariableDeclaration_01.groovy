@@ -1,3 +1,5 @@
+import groovy.transform.Field
+
 int a;
 int b = 1;
 int c =
@@ -57,3 +59,5 @@ def cc = {
 }
 
 int xx = b c d e
+
+@Field static List list = [1, 2, 3]

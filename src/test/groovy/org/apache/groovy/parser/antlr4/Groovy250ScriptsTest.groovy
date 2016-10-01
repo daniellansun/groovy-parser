@@ -4380,11 +4380,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/FieldTransformTest_002.groovy", [])
     }
 
-    /* FIXME
     void "test FieldTransformTest_003.groovy"() {
         unzipAndTest("scripts/FieldTransformTest_003.groovy", [])
     }
-    */
 
     void "test FieldTransformTest_004.groovy"() {
         unzipAndTest("scripts/FieldTransformTest_004.groovy", [])
@@ -4406,17 +4404,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/FieldTransformTest_008.groovy", [])
     }
 
-    /* FIXME
     void "test FieldTransformTest_009.groovy"() {
         unzipAndTest("scripts/FieldTransformTest_009.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test FieldTransformTest_010.groovy"() {
         unzipAndTest("scripts/FieldTransformTest_010.groovy", [])
     }
-    */
 
     void "test FieldTransformTest_011.groovy"() {
         unzipAndTest("scripts/FieldTransformTest_011.groovy", [])
@@ -4430,11 +4424,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/FinalVariableAnalyzerTest_001.groovy", [])
     }
 
-    /* FIXME
     void "test FinalVariableAnalyzerTest_002.groovy"() {
         unzipAndTest("scripts/FinalVariableAnalyzerTest_002.groovy", [])
     }
-    */
 
     void "test ForAndSqlBug_001.groovy"() {
         unzipAndTest("scripts/ForAndSqlBug_001.groovy", [])
