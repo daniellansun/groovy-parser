@@ -761,12 +761,36 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         List<Expression> expressions = argumentListExpression.getExpressions();
 
         if (expressions.size() == 1) {
+            Expression expression = expressions.get(0);
+
+            if (expression instanceof NamedArgumentListExpression) { // e.g. SOME_ENUM_CONSTANT(a: "1", b: "2")
+                List<MapEntryExpression> mapEntryExpressionList = ((NamedArgumentListExpression) expression).getMapEntryExpressions();
+                ListExpression listExpression =
+                        new ListExpression(
+                                mapEntryExpressionList.stream()
+                                        .map(e -> (Expression) e)
+                                        .collect(Collectors.toList()));
+
+                if (asBoolean(anonymousInnerClassNode)) {
+                    listExpression.addExpression(
+                            this.configureAST(
+                                    new ClassExpression(anonymousInnerClassNode),
+                                    anonymousInnerClassNode));
+                }
+
+                if (mapEntryExpressionList.size() > 1) {
+                    listExpression.setWrapped(true);
+                }
+
+                return this.configureAST(listExpression, ctx);
+            }
+
             if (!asBoolean(anonymousInnerClassNode)) {
-                return expressions.get(0);
+                return expression;
             }
 
             ListExpression listExpression = new ListExpression();
-            listExpression.addExpression(expressions.get(0));
+            listExpression.addExpression(expression);
             listExpression.addExpression(
                     this.configureAST(
                             new ClassExpression(anonymousInnerClassNode),
