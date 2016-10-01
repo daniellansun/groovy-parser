@@ -6440,21 +6440,17 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/InnerClassTest_025.groovy", [])
     }
 
-    /* FIXME
     void "test InnerClassTest_026.groovy"() {
         unzipAndTest("scripts/InnerClassTest_026.groovy", [])
     }
-    */
 
     void "test InnerClassTest_027.groovy"() {
         unzipAndTest("scripts/InnerClassTest_027.groovy", [])
     }
 
-    /* FIXME
     void "test InnerClassTest_028.groovy"() {
         unzipAndTest("scripts/InnerClassTest_028.groovy", [])
     }
-    */
 
     void "test InnerClassTest_029.groovy"() {
         unzipAndTest("scripts/InnerClassTest_029.groovy", [])
@@ -6468,11 +6464,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/InnerClassTest_031.groovy", [])
     }
 
-    /* FIXME
     void "test InnerClassTest_032.groovy"() {
         unzipAndTest("scripts/InnerClassTest_032.groovy", [])
     }
-    */
 
     void "test InnerClassTest_033.groovy"() {
         unzipAndTest("scripts/InnerClassTest_033.groovy", [])
@@ -6494,11 +6488,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/InnerInterfaceTest_004.groovy", [])
     }
 
-    /* FIXME
     void "test InnerInterfaceTest_005.groovy"() {
         unzipAndTest("scripts/InnerInterfaceTest_005.groovy", [])
     }
-    */
 
     void "test IntegerOperatorsTest_001.groovy"() {
         unzipAndTest("scripts/IntegerOperatorsTest_001.groovy", [])

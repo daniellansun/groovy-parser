@@ -625,7 +625,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         new InnerClassNode(
                                 outerClass,
                                 outerClass.getName() + "$" + ctx.className().getText(),
-                                modifiers,
+                                modifiers | (outerClass.isInterface() ? Opcodes.ACC_STATIC : 0),
                                 ClassHelper.OBJECT_TYPE);
             } else {
                 classNode =
