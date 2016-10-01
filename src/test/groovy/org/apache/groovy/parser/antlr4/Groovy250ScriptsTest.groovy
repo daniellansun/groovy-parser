@@ -4744,11 +4744,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/GenericsSTCTest_075.groovy", [])
     }
 
-    /* FIXME
     void "test GenericsSTCTest_076.groovy"() {
         unzipAndTest("scripts/GenericsSTCTest_076.groovy", [])
     }
-    */
 
     void "test GenericsSTCTest_077.groovy"() {
         unzipAndTest("scripts/GenericsSTCTest_077.groovy", [])
@@ -4806,11 +4804,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/GenericsSTCTest_090.groovy", [])
     }
 
-    /* FIXME
     void "test GenericsSTCTest_091.groovy"() {
         unzipAndTest("scripts/GenericsSTCTest_091.groovy", [])
     }
-    */
 
     void "test GenericsSTCTest_092.groovy"() {
         unzipAndTest("scripts/GenericsSTCTest_092.groovy", [])
@@ -4844,11 +4840,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/GenericsSTCTest_099.groovy", [])
     }
 
-    /* FIXME
     void "test GenericsSTCTest_100.groovy"() {
-        unzipAndTest("scripts/GenericsSTCTest_100.groovy", [])
+        unzipAndTest("scripts/GenericsSTCTest_100.groovy", [], ['assert result == \'ok\\': ''])
     }
-    */
 
     void "test GenericsSTCTest_101.groovy"() {
         unzipAndTest("scripts/GenericsSTCTest_101.groovy", [])
@@ -4870,11 +4864,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/GenericsSTCTest_105.groovy", [])
     }
 
-    /* FIXME
     void "test GenericsSTCTest_106.groovy"() {
         unzipAndTest("scripts/GenericsSTCTest_106.groovy", [])
     }
-    */
 
     void "test GenericsSTCTest_107.groovy"() {
         unzipAndTest("scripts/GenericsSTCTest_107.groovy", [])
@@ -4960,17 +4952,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/GrapeIvyTest_001.groovy", [])
     }
 
-    /* FIXME
     void "test GrapeIvyTest_002.groovy"() {
         unzipAndTest("scripts/GrapeIvyTest_002.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test GrapeIvyTest_003.groovy"() {
         unzipAndTest("scripts/GrapeIvyTest_003.groovy", [])
     }
-    */
 
     void "test GrapeIvyTest_004.groovy"() {
         unzipAndTest("scripts/GrapeIvyTest_004.groovy", [])

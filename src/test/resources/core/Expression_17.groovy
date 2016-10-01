@@ -122,3 +122,8 @@ m
 -1.1(1, 2) {
 
 }
+
+hello(x: 1, y: 2, z: 3)
+hello('a', 'b')
+hello(x: 1, 'a', y: 2, 'b', z: 3)
+hello('c', x: 1, 'a', y: 2, 'b', z: 3)

@@ -918,8 +918,14 @@ arguments
     ;
 
 argumentList
-    :   expressionList
-    |   mapEntryList
+    :   (   expressionListElement
+        |   mapEntry
+        )
+        (   COMMA
+            (   expressionListElement
+            |   mapEntry
+            )
+        )*
     ;
 
 stringLiteral

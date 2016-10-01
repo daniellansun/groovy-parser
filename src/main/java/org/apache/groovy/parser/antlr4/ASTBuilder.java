@@ -1681,21 +1681,29 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return null;
         }
 
-        if (asBoolean(ctx.expressionList())) { // e.g. arguments like  1, 2
+        List<Expression> expressionList = this.createExpressionList(ctx.expressionListElement());
+        List<MapEntryExpression> mapEntryExpressionList = this.createMapEntryList(ctx.mapEntry());
+
+        if (!asBoolean(ctx.mapEntry())) { // e.g. arguments like  1, 2
             return this.configureAST(
-                    new ArgumentListExpression(
-                            this.visitExpressionList(ctx.expressionList())),
+                    new ArgumentListExpression(expressionList),
                     ctx);
         }
 
-        if (asBoolean(ctx.mapEntryList())) { // e.g. arguments like  x: 1, y: 2
+        if (!asBoolean(ctx.expressionListElement())) { // e.g. arguments like  x: 1, y: 2
             return this.configureAST(
                     new TupleExpression(
                             this.configureAST(
-                                    new NamedArgumentListExpression(
-                                            this.visitMapEntryList(ctx.mapEntryList())),
+                                    new NamedArgumentListExpression(mapEntryExpressionList),
                                     ctx)),
                     ctx);
+        }
+
+        if (asBoolean(ctx.mapEntry()) && asBoolean(ctx.expressionListElement())) { // e.g. arguments like x: 1, 'a', y: 2, 'b', z: 3
+            ArgumentListExpression argumentListExpression = new ArgumentListExpression(expressionList);
+            argumentListExpression.getExpressions().add(0, new MapExpression(mapEntryExpressionList)); // TODO: confirm BUG OR NOT? All map entries will be put at first, which is not friendly to Groovy developers
+
+            return this.configureAST(argumentListExpression, ctx);
         }
 
         throw createParsingFailedException("Unsupported argument list: " + ctx.getText(), ctx);
@@ -2263,7 +2271,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return Collections.emptyList();
         }
 
-        return ctx.mapEntry().stream()
+        return this.createMapEntryList(ctx.mapEntry());
+    }
+
+    private List<MapEntryExpression> createMapEntryList(List<? extends MapEntryContext> mapEntryContextList) {
+        if (!asBoolean(mapEntryContextList)) {
+            return Collections.emptyList();
+        }
+
+        return mapEntryContextList.stream()
                 .map(this::visitMapEntry)
                 .collect(Collectors.toList());
     }
@@ -2348,8 +2364,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return Collections.emptyList();
         }
 
-        return ctx.expressionListElement().stream()
-                .map(e -> this.visitExpressionListElement(e))
+        return this.createExpressionList(ctx.expressionListElement());
+    }
+
+    private List<Expression> createExpressionList(List<? extends ExpressionListElementContext> expressionListElementContextList) {
+        if (!asBoolean(expressionListElementContextList)) {
+            return Collections.emptyList();
+        }
+
+        return expressionListElementContextList.stream()
+                .map(this::visitExpressionListElement)
                 .collect(Collectors.toList());
     }
 
