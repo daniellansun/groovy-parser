@@ -27,6 +27,8 @@ map[obj.a()] = 1
 map[a().result] = 1
 map[a + b] = 1
 obj.prop[0][1] = 'a'
+this = someValue;
+super = someValue;
 
 (a)         = [1]
 (a)         = x++

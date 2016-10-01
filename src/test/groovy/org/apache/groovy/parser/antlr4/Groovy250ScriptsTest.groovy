@@ -6030,11 +6030,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/Groovy7920Bug_003.groovy", [])
     }
 
-    /* FIXME
     void "test Groovy7921Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7921Bug_001.groovy", [])
     }
-    */
 
     void "test Groovy7924Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7924Bug_001.groovy", [])

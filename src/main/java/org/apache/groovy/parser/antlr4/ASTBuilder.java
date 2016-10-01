@@ -2058,7 +2058,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (
                 !(
                         (leftExpr instanceof VariableExpression
-                                && !(THIS_STR.equals(leftExpr.getText()) || SUPER_STR.equals(leftExpr.getText()))
+//                                && !(THIS_STR.equals(leftExpr.getText()) || SUPER_STR.equals(leftExpr.getText()))     // this = value // this will be transformed to $this
                                 && !isTrue(leftExpr, IS_INSIDE_PARENTHESES)) // e.g. p = 123
 
                                 || leftExpr instanceof PropertyExpression // e.g. obj.p = 123

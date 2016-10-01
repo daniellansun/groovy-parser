@@ -32,3 +32,4 @@ public void someMethod2 (java.lang.Class clazz) {}
 public boolean someMethod3 (java.util.List<String> list) {
         list instanceof java.util.List
 }
+
