@@ -3916,11 +3916,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/EnumTest_014.groovy", [])
     }
 
-    /* FIXME
     void "test EnumTest_015.groovy"() {
         unzipAndTest("scripts/EnumTest_015.groovy", [])
     }
-    */
 
     void "test EnumTest_016.groovy"() {
         unzipAndTest("scripts/EnumTest_016.groovy", [])
@@ -4378,11 +4376,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/FieldTransformTest_001.groovy", [])
     }
 
-    /* FIXME
     void "test FieldTransformTest_002.groovy"() {
         unzipAndTest("scripts/FieldTransformTest_002.groovy", [])
     }
-    */
 
     /* FIXME
     void "test FieldTransformTest_003.groovy"() {

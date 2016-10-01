@@ -167,6 +167,7 @@ variableModifier
     :   annotation
     |   m=( FINAL
           | DEF
+          | STATIC      // Groovy supports declaring static variables in the script, e.g. import groovy.transform.*; @Field static List awe = [1, 2, 3]
           )
     ;
 
