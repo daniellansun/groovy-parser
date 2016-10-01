@@ -19,6 +19,7 @@
 package org.apache.groovy.parser.antlr4;
 
 import org.antlr.v4.runtime.atn.ATN;
+import org.antlr.v4.runtime.atn.ATNDeserializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,36 +33,30 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class AtnManager {
     private final Class ownerClass;
-    private static final Map<Class, AtnWrapper> ATN_MAP = new HashMap<>();
-    private ATN atn;
+    private final ATN atn;
+    private static final Map<Class, AtnWrapper> ATN_MAP = new HashMap<Class, AtnWrapper>() {
+        {
+            put(GroovyLangLexer.class, new AtnWrapper(new ATNDeserializer().deserialize(GroovyLangLexer._serializedATN.toCharArray()), GroovyLangLexer.class));
+            put(GroovyLangParser.class, new AtnWrapper(new ATNDeserializer().deserialize(GroovyLangParser._serializedATN.toCharArray()), GroovyLangParser.class));
+        }
+    };
 
     public AtnManager(GroovyLangLexer lexer) {
         this.ownerClass = lexer.getClass();
-
-        this.atn = getAtnWrapper(this.ownerClass, lexer.getATN()).checkAndClear();
+        this.atn = getAtnWrapper(this.ownerClass).checkAndClear();
     }
 
     public AtnManager(GroovyLangParser parser) {
         this.ownerClass = parser.getClass();
-
-        this.atn = getAtnWrapper(this.ownerClass, parser.getATN()).checkAndClear();
+        this.atn = getAtnWrapper(this.ownerClass).checkAndClear();
     }
 
     public ATN getATN() {
         return this.atn;
     }
 
-    private static AtnWrapper getAtnWrapper(Class ownerClass, ATN atn) {
-        synchronized (ATN_MAP) {
-            AtnWrapper atnWrapper = ATN_MAP.get(ownerClass);
-
-            if (null == atnWrapper) {
-                atnWrapper = new AtnWrapper(atn, ownerClass);
-                ATN_MAP.put(ownerClass, atnWrapper);
-            }
-
-            return atnWrapper;
-        }
+    private AtnWrapper getAtnWrapper(Class ownerClass) {
+        return ATN_MAP.get(ownerClass);
     }
 
     private static class AtnWrapper {
