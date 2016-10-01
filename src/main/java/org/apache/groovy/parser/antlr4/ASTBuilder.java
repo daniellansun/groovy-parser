@@ -153,7 +153,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
                 importNode = last(moduleNode.getStaticStarImports().values());
             } else { // e.g. import static java.lang.Math.pow
-                List<GroovyParserRuleContext> identifierList = new LinkedList<>(ctx.qualifiedName().identifier());
+                List<GroovyParserRuleContext> identifierList = new LinkedList<>(ctx.qualifiedName().qualifiedNameElement());
                 int identifierListSize = identifierList.size();
                 String name = identifierList.get(identifierListSize - 1).getText();
                 ClassNode classNode =
@@ -179,7 +179,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 importNode = last(moduleNode.getStarImports());
             } else { // e.g. import java.util.Map
                 String qualifiedName = this.visitQualifiedName(ctx.qualifiedName());
-                String name = last(ctx.qualifiedName().identifier()).getText();
+                String name = last(ctx.qualifiedName().qualifiedNameElement()).getText();
                 ClassNode classNode = ClassHelper.make(qualifiedName);
                 String alias = hasAlias
                         ? ctx.alias.getText()
@@ -2945,7 +2945,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public String visitQualifiedName(QualifiedNameContext ctx) {
-        return ctx.identifier().stream()
+        return ctx.qualifiedNameElement().stream()
                 .map(ParseTree::getText)
                 .collect(Collectors.joining(DOT_STR));
     }
@@ -3155,13 +3155,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     /**
-     * @param isAnnotationDeclaration           whether the method is defined in an annotation
-     * @param isAnonymousInnerEnumDeclaration   whether the method is defined in an anonymous inner enum
-     * @param hasAnnotation                     whether the method declaration has annotations
-     * @param hasVisibilityModifier             whether the method declaration contains visibility modifier(e.g. public, protected, private)
-     * @param hasModifier                       whether the method declaration has modifier(e.g. visibility modifier, final, static and so on)
-     * @param hasReturnType                     whether the method declaration has an return type(e.g. String, generic types)
-     * @param hasDef                            whether the method declaration using def keyword
+     * @param isAnnotationDeclaration         whether the method is defined in an annotation
+     * @param isAnonymousInnerEnumDeclaration whether the method is defined in an anonymous inner enum
+     * @param hasAnnotation                   whether the method declaration has annotations
+     * @param hasVisibilityModifier           whether the method declaration contains visibility modifier(e.g. public, protected, private)
+     * @param hasModifier                     whether the method declaration has modifier(e.g. visibility modifier, final, static and so on)
+     * @param hasReturnType                   whether the method declaration has an return type(e.g. String, generic types)
+     * @param hasDef                          whether the method declaration using def keyword
      * @return the result
      */
     private boolean isSyntheticPublic(
@@ -3402,6 +3402,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return text;
     }
 
+    @SuppressWarnings({"unchecked"})
     private void setupErrorListener(GroovyLangParser parser) {
         parser.removeErrorListeners();
         parser.addErrorListener(new ANTLRErrorListener() {

@@ -383,7 +383,19 @@ methodBody
     ;
 
 qualifiedName
-    :   identifier (DOT identifier)*
+    :   qualifiedNameElement (DOT qualifiedNameElement)*
+    ;
+
+/**
+ *  Java doesn't have the keywords 'as', 'in', 'def', 'trait' so we make some allowances
+ *  for them in package names for better integration with existing Java packages
+ */
+qualifiedNameElement
+    :   identifier
+    |   DEF
+    |   IN
+    |   AS
+    |   TRAIT
     ;
 
 qualifiedClassName

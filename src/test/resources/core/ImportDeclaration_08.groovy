@@ -25,3 +25,4 @@ import java.io.*
 import java.sql.Blob as Bb
 import static java.lang.Math.*;
 import static java.lang.Math.pow as pw
+import def.in.as.trait.*;

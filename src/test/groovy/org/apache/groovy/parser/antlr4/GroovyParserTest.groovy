@@ -49,6 +49,7 @@ class GroovyParserTest extends GroovyTestCase {
         doTest('core/PackageDeclaration_03.groovy');
         doTest('core/PackageDeclaration_04.groovy');
         doTest('core/PackageDeclaration_05.groovy');
+        doTest('core/PackageDeclaration_06.groovy');
     }
 
     void "test groovy core - ImportDeclaration"() {

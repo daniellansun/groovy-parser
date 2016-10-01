@@ -5312,7 +5312,7 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/Groovy5210Bug_002.groovy", [])
     }
 
-    /* FIXME
+    /* moved to SyntaxErrorTest
     void "test Groovy5212Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy5212Bug_001.groovy", [])
     }
@@ -5506,11 +5506,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/Groovy6650Bug_002.groovy", [])
     }
 
-    /* FIXME
     void "test Groovy6657Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy6657Bug_001.groovy", [])
     }
-    */
 
     void "test Groovy6670Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy6670Bug_001.groovy", [])
@@ -5524,11 +5522,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/Groovy6671Bug_002.groovy", [])
     }
 
-    /* FIXME
     void "test Groovy6676Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy6676Bug_001.groovy", [])
     }
-    */
 
     void "test Groovy6693Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy6693Bug_001.groovy", [])
@@ -5634,11 +5630,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/Groovy6821Bug_001.groovy", [])
     }
 
-    /* FIXME
     void "test Groovy6821Bug_002.groovy"() {
-        unzipAndTest("scripts/Groovy6821Bug_002.groovy", [])
+        unzipAndTest("scripts/Groovy6821Bug_002.groovy", [], ['\'ok\\\'': '\'ok\\\'\''])
     }
-    */
 
     void "test Groovy6830Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy6830Bug_001.groovy", [])
@@ -5688,11 +5682,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/Groovy7041Bug_001.groovy", [])
     }
 
-    /* FIXME
     void "test Groovy7042Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7042Bug_001.groovy", [])
     }
-    */
 
     void "test Groovy7072Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7072Bug_001.groovy", [])
@@ -5858,11 +5850,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/Groovy7285Bug_001.groovy", [])
     }
 
-    /* FIXME
     void "test Groovy7298Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7298Bug_001.groovy", [])
     }
-    */
 
     void "test Groovy7300Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7300Bug_001.groovy", [])
@@ -5872,11 +5862,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/Groovy7300Bug_002.groovy", [])
     }
 
-    /* FIXME
     void "test Groovy7307Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7307Bug_001.groovy", [])
     }
-    */
 
     void "test Groovy7316Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7316Bug_001.groovy", [])
@@ -5902,17 +5890,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/Groovy7324Bug_002.groovy", [])
     }
 
-    /* FIXME
     void "test Groovy7325Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7325Bug_001.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test Groovy7327Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7327Bug_001.groovy", [])
     }
-    */
 
     void "test Groovy7333Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7333Bug_001.groovy", [])
@@ -5922,35 +5906,25 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/Groovy7343Bug_001.groovy", [])
     }
 
-    /* FIXME
     void "test Groovy7355Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7355Bug_001.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test Groovy7356Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7356Bug_001.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test Groovy7356Bug_002.groovy"() {
         unzipAndTest("scripts/Groovy7356Bug_002.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test Groovy7357Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7357Bug_001.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test Groovy7358Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7358Bug_001.groovy", [])
     }
-    */
 
     void "test Groovy7361Bug_001.groovy"() {
         unzipAndTest("scripts/Groovy7361Bug_001.groovy", [])

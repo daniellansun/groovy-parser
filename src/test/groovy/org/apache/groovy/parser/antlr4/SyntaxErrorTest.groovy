@@ -61,19 +61,23 @@ class SyntaxErrorTest extends GroovyTestCase {
     }
 
     void "test CompilerErrorTest_001.groovy"() {
-        unzipAndFailScript("scripts/CompilerErrorTest_001.groovy", [])
+        unzipScriptAndShouldFail("scripts/CompilerErrorTest_001.groovy", [])
     }
 
     void "test CompilerErrorTest_002.groovy"() {
-        unzipAndFailScript("scripts/CompilerErrorTest_002.groovy", [])
+        unzipScriptAndShouldFail("scripts/CompilerErrorTest_002.groovy", [])
     }
 
     void "test DifferencesFromJavaTest_002.groovy"() {
-        unzipAndFailScript("scripts/DifferencesFromJavaTest_002.groovy", [])
+        unzipScriptAndShouldFail("scripts/DifferencesFromJavaTest_002.groovy", [])
+    }
+
+    void "test Groovy5212Bug_001.groovy"() {
+        unzipScriptAndShouldFail("scripts/Groovy5212Bug_001.groovy", [])
     }
 
     /**************************************/
-    static unzipAndFailScript(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
+    static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
         ignoreClazzList.addAll(COMMON_IGNORE_CLASS_LIST)
 
         TestUtils.unzipAndFail(SCRIPT_ZIP_PATH, entryName, TestUtils.addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), replacementsMap, toCheckNewParserOnly)
