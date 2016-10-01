@@ -6920,17 +6920,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/MacroTest_004.groovy", [])
     }
 
-    /* FIXME
     void "test MacroTest_005.groovy"() {
         unzipAndTest("scripts/MacroTest_005.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test MacroTest_006.groovy"() {
         unzipAndTest("scripts/MacroTest_006.groovy", [])
     }
-    */
 
     void "test MacroTest_007.groovy"() {
         unzipAndTest("scripts/MacroTest_007.groovy", [])

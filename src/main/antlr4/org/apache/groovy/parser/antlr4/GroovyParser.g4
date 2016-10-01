@@ -926,7 +926,11 @@ typeArgumentsOrDiamond
     ;
 
 arguments
-    :   LPAREN argumentList? RPAREN
+    :   LPAREN
+        (   argumentList?
+        |   argumentList COMMA
+        )
+        RPAREN
     ;
 
 argumentList
