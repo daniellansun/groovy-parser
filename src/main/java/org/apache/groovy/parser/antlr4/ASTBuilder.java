@@ -1910,7 +1910,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         switch (ctx.op.getType()) {
             case ADD: {
                 if (expression instanceof ConstantExpression && !insidePar) {
-                    return this.configureAST((ConstantExpression) this.visit(expressionCtx), ctx);
+                    return this.configureAST(expression, ctx);
                 }
 
                 return this.configureAST(new UnaryPlusExpression(expression), ctx);
