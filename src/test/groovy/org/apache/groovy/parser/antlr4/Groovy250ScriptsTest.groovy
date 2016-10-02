@@ -7394,11 +7394,11 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/MethodSelectionTest_017.groovy", [])
     }
 
-    /* FIXME
     void "test MethodSelectionTest_018.groovy"() {
-        unzipAndTest("scripts/MethodSelectionTest_018.groovy", [])
+        ["java.util.concurrent.Callable", "Object", "Closure", "GroovyObjectSupport", "Cloneable", "Runnable", "GroovyCallable", "Serializable", "GroovyObject"].each {
+            unzipAndTest("scripts/MethodSelectionTest_018.groovy", [], ['$className': it])
+        }
     }
-    */
 
     void "test MethodSelectionTest_019.groovy"() {
         unzipAndTest("scripts/MethodSelectionTest_019.groovy", [])
@@ -7412,11 +7412,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/MethodSelectionTest_021.groovy", [])
     }
 
-    /* FIXME
     void "test MethodsTest_001.groovy"() {
         unzipAndTest("scripts/MethodsTest_001.groovy", [])
     }
-    */
 
     void "test MethodsTest_002.groovy"() {
         unzipAndTest("scripts/MethodsTest_002.groovy", [])
@@ -7654,11 +7652,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/MultipleDefinitionOfSameVariableTest_003.groovy", [])
     }
 
-    /* FIXME
     void "test NameResolvingTest_001.groovy"() {
         unzipAndTest("scripts/NameResolvingTest_001.groovy", [])
     }
-    */
 
     void "test NameResolvingTest_002.groovy"() {
         unzipAndTest("scripts/NameResolvingTest_002.groovy", [])
@@ -7780,11 +7776,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/OperatorsTest_004.groovy", [])
     }
 
-    /* FIXME
     void "test OperatorsTest_005.groovy"() {
         unzipAndTest("scripts/OperatorsTest_005.groovy", [])
     }
-    */
 
     void "test OperatorsTest_006.groovy"() {
         unzipAndTest("scripts/OperatorsTest_006.groovy", [])
@@ -7866,11 +7860,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/OptionalTypingTest_004.groovy", [])
     }
 
-    /* FIXME
     void "test OptionalTypingTest_005.groovy"() {
         unzipAndTest("scripts/OptionalTypingTest_005.groovy", [])
     }
-    */
 
     void "test OverrideTest_001.groovy"() {
         unzipAndTest("scripts/OverrideTest_001.groovy", [])
