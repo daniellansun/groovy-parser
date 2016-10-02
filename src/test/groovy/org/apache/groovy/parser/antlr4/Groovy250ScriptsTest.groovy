@@ -7348,23 +7348,23 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/MethodSelectionTest_007.groovy", [])
     }
 
-    /* FIXME
     void "test MethodSelectionTest_008.groovy"() {
-        unzipAndTest("scripts/MethodSelectionTest_008.groovy", [])
+        [byte,int,short,float,double,boolean,char].each {
+            unzipAndTest("scripts/MethodSelectionTest_008.groovy", [], ['$type': it as String])
+        }
     }
-    */
 
-    /* FIXME
     void "test MethodSelectionTest_009.groovy"() {
-        unzipAndTest("scripts/MethodSelectionTest_009.groovy", [])
+        [byte,int,short,float,double,boolean,char].each {
+            unzipAndTest("scripts/MethodSelectionTest_009.groovy", [], ['$type': it as String])
+        }
     }
-    */
 
-    /* FIXME
     void "test MethodSelectionTest_010.groovy"() {
-        unzipAndTest("scripts/MethodSelectionTest_010.groovy", [])
+        [byte,int,short,float,double,boolean,char].each {
+            unzipAndTest("scripts/MethodSelectionTest_010.groovy", [], ['$type': it as String])
+        }
     }
-    */
 
     void "test MethodSelectionTest_011.groovy"() {
         unzipAndTest("scripts/MethodSelectionTest_011.groovy", [])
@@ -7382,17 +7382,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/MethodSelectionTest_014.groovy", [])
     }
 
-    /* FIXME
     void "test MethodSelectionTest_015.groovy"() {
         unzipAndTest("scripts/MethodSelectionTest_015.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test MethodSelectionTest_016.groovy"() {
         unzipAndTest("scripts/MethodSelectionTest_016.groovy", [])
     }
-    */
 
     void "test MethodSelectionTest_017.groovy"() {
         unzipAndTest("scripts/MethodSelectionTest_017.groovy", [])

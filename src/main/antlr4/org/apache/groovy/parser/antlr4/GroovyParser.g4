@@ -855,7 +855,7 @@ dynamicMemberName
  *  The brackets may also be empty, as in T[].  This is how Groovy names array types.
  */
 indexPropertyArgs
-    :   LBRACK expressionList RBRACK
+    :   LBRACK expressionList? RBRACK
     ;
 
 primary
