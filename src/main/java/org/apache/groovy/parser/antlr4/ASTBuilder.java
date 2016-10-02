@@ -1442,6 +1442,45 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     ctx);
         }
 
+        if (asBoolean(ctx.namedPropertyArgs())) { // this is a special way to new instance, e.g. Person(name: 'Daniel.Sun', location: 'Shanghai')
+            List<MapEntryExpression> mapEntryExpressionList =
+                    this.visitNamedPropertyArgs(ctx.namedPropertyArgs());
+
+            Expression right;
+            if (mapEntryExpressionList.size() == 1) {
+                MapEntryExpression mapEntryExpression = mapEntryExpressionList.get(0);
+
+                if (mapEntryExpression.getKeyExpression() instanceof SpreadMapExpression) {
+                    right = mapEntryExpression.getKeyExpression();
+                } else {
+                    right = mapEntryExpression;
+                }
+            } else {
+                ListExpression listExpression =
+                        this.configureAST(
+                                new ListExpression(
+                                        mapEntryExpressionList.stream()
+                                                .map(
+                                                        e -> {
+                                                            if (e.getKeyExpression() instanceof SpreadMapExpression) {
+                                                                return e.getKeyExpression();
+                                                            }
+
+                                                            return e;
+                                                        }
+                                                )
+                                                .collect(Collectors.toList())),
+                                ctx.namedPropertyArgs()
+                        );
+                listExpression.setWrapped(true);
+                right = listExpression;
+            }
+
+            return this.configureAST(
+                    new BinaryExpression(baseExpr, createGroovyToken(ctx.namedPropertyArgs().LBRACK().getSymbol()), right),
+                    ctx);
+        }
+
         if (asBoolean(ctx.arguments())) {
             Expression argumentsExpr = this.visitArguments(ctx.arguments());
 
@@ -1778,6 +1817,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return new Pair<>(ctx.LBRACK().getSymbol(), this.configureAST(indexExpr, ctx));
     }
 
+    @Override
+    public List<MapEntryExpression> visitNamedPropertyArgs(NamedPropertyArgsContext ctx) {
+        return this.visitMapEntryList(ctx.mapEntryList());
+    }
 
     @Override
     public Expression visitNamePart(NamePartContext ctx) {

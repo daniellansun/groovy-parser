@@ -776,7 +776,7 @@ commandArgument
  *  (Compare to a C lvalue, or LeftHandSide in the JLS section 15.26.)
  *  General expressions are built up from path expressions, using operators like '+' and '='.
  *
- *  t   0: primary, 1: namePart, 2: arguments, 3: closure, 4: indexPropertyArgs
+ *  t   0: primary, 1: namePart, 2: arguments, 3: closure, 4: indexPropertyArgs, 5: namedPropertyArgs
  */
 pathExpression returns [int t]
     :   primary (pathElement { $t = $pathElement.t; })*
@@ -814,6 +814,9 @@ locals[ boolean isInsideClosure ]
     // since the bracket operator is transformed into a method call.
     |   indexPropertyArgs
         { $t = 4; }
+
+    |   namedPropertyArgs
+        { $t = 5; }
     ;
 
 /**
@@ -856,6 +859,10 @@ dynamicMemberName
  */
 indexPropertyArgs
     :   LBRACK expressionList? RBRACK
+    ;
+
+namedPropertyArgs
+    :   LBRACK mapEntryList RBRACK
     ;
 
 primary

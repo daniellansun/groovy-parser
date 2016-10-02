@@ -8380,11 +8380,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/SourceURITransformTest_001.groovy", [])
     }
 
-    /* FIXME
     void "test SpreadMapOperatorTest_001.groovy"() {
         unzipAndTest("scripts/SpreadMapOperatorTest_001.groovy", [])
     }
-    */
 
     void "test SqlTest_001.groovy"() {
         unzipAndTest("scripts/SqlTest_001.groovy", [])
@@ -8422,11 +8420,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/SqlTest_009.groovy", [])
     }
 
-    /* FIXME
     void "test SqlTest_010.groovy"() {
         unzipAndTest("scripts/SqlTest_010.groovy", [])
     }
-    */
 
     void "test SqlTest_011.groovy"() {
         unzipAndTest("scripts/SqlTest_011.groovy", [])
@@ -8648,11 +8644,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/StaticMethodInvocationTest_001.groovy", [])
     }
 
-    /* FIXME
     void "test StaticMethodInvocationTest_002.groovy"() {
         unzipAndTest("scripts/StaticMethodInvocationTest_002.groovy", [])
     }
-    */
 
     void "test StaticMethodInvocationTest_003.groovy"() {
         unzipAndTest("scripts/StaticMethodInvocationTest_003.groovy", [])
@@ -8686,27 +8680,21 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/StaticScopeTest_007.groovy", [])
     }
 
-    /* FIXME
     void "test StaticScopeTest_008.groovy"() {
         unzipAndTest("scripts/StaticScopeTest_008.groovy", [])
     }
-    */
 
     void "test StaticScopeTest_009.groovy"() {
         unzipAndTest("scripts/StaticScopeTest_009.groovy", [])
     }
 
-    /* FIXME
     void "test StaticScopeTest_010.groovy"() {
         unzipAndTest("scripts/StaticScopeTest_010.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test StaticScopeTest_011.groovy"() {
         unzipAndTest("scripts/StaticScopeTest_011.groovy", [])
     }
-    */
 
     void "test StaticThisTest_001.groovy"() {
         unzipAndTest("scripts/StaticThisTest_001.groovy", [])
@@ -9064,11 +9052,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/STCwithTransformationsTest_001.groovy", [])
     }
 
-    /* FIXME
     void "test StreamingJsonBuilderTest_001.groovy"() {
         unzipAndTest("scripts/StreamingJsonBuilderTest_001.groovy", [])
     }
-    */
 
     void "test StringGMClosureParamTypeInferenceSTCTest_001.groovy"() {
         unzipAndTest("scripts/StringGMClosureParamTypeInferenceSTCTest_001.groovy", [])

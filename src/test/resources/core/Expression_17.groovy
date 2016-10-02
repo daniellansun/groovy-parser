@@ -127,3 +127,13 @@ hello(x: 1, y: 2, z: 3)
 hello('a', 'b')
 hello(x: 1, 'a', y: 2, 'b', z: 3)
 hello('c', x: 1, 'a', y: 2, 'b', z: 3)
+
+
+A[x: 1, y: 2]
+A[*: someMap]
+A[*: someMap, z: 3]
+A[w: 0, *: someMap]
+A[*: [x: 1, y: 2]]
+A[*: [x: 1, y: 2], z: 3]
+A[w: 0, *: [x: 1, y: 2]]
+
