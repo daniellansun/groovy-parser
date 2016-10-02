@@ -21,6 +21,7 @@ package org.apache.groovy.parser.antlr4;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.TokenStream;
 
+import static org.apache.groovy.parser.antlr4.GroovyParser.CapitalizedIdentifier;
 import static org.apache.groovy.parser.antlr4.GroovyParser.Identifier;
 import static org.apache.groovy.parser.antlr4.GroovyParser.StringLiteral;
 
@@ -74,7 +75,7 @@ public class SemanticPredicates {
     public static boolean isInvalidMethodDeclaration(TokenStream ts) {
         int tokenType = ts.LT(1).getType();
 
-        return (Identifier == tokenType || StringLiteral == tokenType)
+        return (Identifier == tokenType || CapitalizedIdentifier == tokenType || StringLiteral == tokenType)
                 && GroovyLangParser.LPAREN == (ts.LT(2).getType());
     }
 }

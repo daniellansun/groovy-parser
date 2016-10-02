@@ -114,7 +114,7 @@ StringLiteral
     :   '"'      DqStringCharacter*?           '"'
     |   '\''     SqStringCharacter*?           '\''
 
-    |   '/'      { this.isRegexAllowed() }?
+    |   '/'      { this.isRegexAllowed() && _input.LA(1) != '*' }?
                  SlashyStringCharacter+?       '/'
 
     |   '"""'    TdqStringCharacter*?          '"""'
@@ -130,7 +130,7 @@ TdqGStringBegin
     :   '"""'   TdqStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(TDQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 SlashyGStringBegin
-    :   '/' { this.isRegexAllowed() }? SlashyStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    :   '/' { this.isRegexAllowed() && _input.LA(1) != '*' }? SlashyStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 DollarSlashyGStringBegin
     :   '$/' DollarSlashyStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(DOLLAR_SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)

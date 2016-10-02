@@ -37,7 +37,7 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("benchmark/bench/ackermann.groovy", [])
     }
 
-    /* FIXME
+    /* FIXME SEE https://github.com/danielsun1106/groovy-parser/issues/2
     void "test benchmark/bench/ary.groovy"() {
         unzipAndTest("benchmark/bench/ary.groovy", [])
     }
@@ -55,11 +55,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("benchmark/bench/fibo.groovy", [])
     }
 
-    /* FIXME
     void "test benchmark/bench/heapsort.groovy"() {
         unzipAndTest("benchmark/bench/heapsort.groovy", [])
     }
-    */
 
     void "test benchmark/bench/hello.groovy"() {
         unzipAndTest("benchmark/bench/hello.groovy", [])
@@ -89,11 +87,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("benchmark/bench/revcomp.groovy", [])
     }
 
-    /* FIXME
     void "test benchmark/bench/spectralnorm.groovy"() {
         unzipAndTest("benchmark/bench/spectralnorm.groovy", [])
     }
-    */
 
     void "test benchmark/bench/threadring.groovy"() {
         unzipAndTest("benchmark/bench/threadring.groovy", [])
