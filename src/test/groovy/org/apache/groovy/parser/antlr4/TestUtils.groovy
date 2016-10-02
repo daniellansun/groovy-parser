@@ -192,5 +192,5 @@ class TestUtils {
         return result;
     }
 
-    public static final List COMMON_IGNORE_CLASS_LIST = Collections.unmodifiableList([AssertStatement, ConstructorNode, ExpressionStatement, FieldNode, ForStatement, GenericsType, IfStatement, MethodNode, Parameter, PropertyNode, ReturnStatement, ThrowStatement, Token]);
+    public static final List COMMON_IGNORE_CLASS_LIST = Collections.unmodifiableList([AssertStatement, BreakStatement, ConstructorNode, ExpressionStatement, FieldNode, ForStatement, GenericsType, IfStatement, MethodNode, Parameter, PropertyNode, ReturnStatement, ThrowStatement, Token]);
 }

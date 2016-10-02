@@ -69,7 +69,7 @@ lexer grammar GroovyLexer;
 
     private static final Set<Integer> REGEX_CHECK_SET =
                                             Collections.unmodifiableSet(
-                                                new HashSet<>(Arrays.asList(Identifier, NullLiteral, BooleanLiteral, THIS, RPAREN, RBRACK, RBRACE, IntegerLiteral, FloatingPointLiteral, StringLiteral, GStringEnd, INC, DEC)));
+                                                new HashSet<>(Arrays.asList(Identifier, CapitalizedIdentifier, NullLiteral, BooleanLiteral, THIS, RPAREN, RBRACK, RBRACE, IntegerLiteral, FloatingPointLiteral, StringLiteral, GStringEnd, INC, DEC)));
     private boolean isRegexAllowed() {
         if (REGEX_CHECK_SET.contains(this.lastTokenType)) {
             return false;
@@ -231,7 +231,7 @@ fragment TsqStringCharacter
 fragment SlashyStringCharacter
     :   SlashEscape
     |   '$' { !isFollowedByJavaLetterInGString(_input) }?
-    |   ~[/$\n\u0000]
+    |   ~[/$\u0000]
     ;
 
 // character in the collar slashy string. e.g. $/a/$

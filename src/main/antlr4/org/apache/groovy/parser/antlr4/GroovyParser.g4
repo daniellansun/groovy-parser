@@ -171,7 +171,7 @@ variableModifier
           // e.g. import groovy.transform.*; @Field static List awe = [1, 2, 3]
           // e.g. import groovy.transform.*; def a = { @Field public List awe = [1, 2, 3] }
           // Notice: Groovy 2.4.7 just allows to declare local variables with the following modifiers when using annotations(e.g. @Field)
-          // TODO check whether the following modifiers accompany annotations or not. Because the legacy codes(e.g. benchmark/bench/heapsort.groovy) allow to declare the special instance/class fields without annotations, so leave it as it is for the time being
+          // TODO check whether the following modifiers accompany annotations or not. Because the legacy codes(e.g. benchmark/bench/heapsort.groovy) allow to declare the special instance/class fields without annotations, we leave it as it is for the time being
           | PUBLIC
           | PROTECTED
           | PRIVATE

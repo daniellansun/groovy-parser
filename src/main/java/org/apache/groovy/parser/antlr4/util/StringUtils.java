@@ -93,8 +93,10 @@ public class StringUtils {
 		if (slashyType == SLASHY || slashyType == DOLLAR_SLASHY) {
 			text = StringUtils.replaceHexEscapes(text);
 
-			if (slashyType == SLASHY)
+			if (slashyType == SLASHY) {
 				text = text.replace("\\/", "/");
+				text = StringUtils.replaceLineEscape(text);
+			}
 
 			if (slashyType == DOLLAR_SLASHY)
 				text = text.replace("$$", "$");
@@ -110,6 +112,12 @@ public class StringUtils {
 	private static String replaceEscapes(String text) {
 		text = text.replace("\\$", "$");
 
+		text = StringUtils.replaceLineEscape(text);
+
+        return StringUtils.replaceStandardEscapes(replaceHexEscapes(replaceOctalEscapes(text)));
+    }
+
+	private static String replaceLineEscape(String text) {
 		Pattern p = Pattern.compile("(\\\\*)\\\\\r?\n");
 		text = StringGroovyMethods.replaceAll((CharSequence) text, p, new Closure<Void>(null, null) {
 			Object doCall(String _0, String _1) {
@@ -121,8 +129,8 @@ public class StringUtils {
 			}
 		});
 
-        return replaceStandardEscapes(replaceHexEscapes(replaceOctalEscapes(text)));
-    }
+		return text;
+	}
 
 	public static String removeCR(String text) {
         return text.replace("\r\n", "\n");

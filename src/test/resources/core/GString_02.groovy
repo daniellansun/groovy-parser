@@ -41,5 +41,14 @@ p41=/$0+/
 p42=/$2a+/
 p43=/$$2a+/
 p44=/^$|$|^$$2a+$/
-
-
+p45=/
+    hello, world!
+/
+p46=/hello\
+world/
+p47=/hello\
+    \/
+world/
+p48=/^hello\
+    \/$|^
+world$/

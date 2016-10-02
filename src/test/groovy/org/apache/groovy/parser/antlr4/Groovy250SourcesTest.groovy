@@ -151,11 +151,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/examples/commandLineTools/SimpleWebServer.groovy", [])
     }
 
-    /* FIXME
     void "test src/examples/console/MortgageCalculator.groovy"() {
         unzipAndTest("src/examples/console/MortgageCalculator.groovy", [])
     }
-    */
 
     void "test src/examples/console/knowYourTables.groovy"() {
         unzipAndTest("src/examples/console/knowYourTables.groovy", [])
@@ -265,11 +263,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/examples/swing/greet/Greet.groovy", [])
     }
 
-    /* FIXME
     void "test src/examples/swing/greet/TwitterAPI.groovy"() {
         unzipAndTest("src/examples/swing/greet/TwitterAPI.groovy", [])
     }
-    */
 
     void "test src/examples/swing/greet/View.groovy"() {
         unzipAndTest("src/examples/swing/greet/View.groovy", [])
@@ -287,11 +283,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/examples/swing/timelog/TimeLogView.groovy", [])
     }
 
-    /* FIXME
     void "test src/examples/transforms/global/CompiledAtASTTransformation.groovy"() {
         unzipAndTest("src/examples/transforms/global/CompiledAtASTTransformation.groovy", [])
     }
-    */
 
     void "test src/examples/transforms/global/CompiledAtExample.groovy"() {
         unzipAndTest("src/examples/transforms/global/CompiledAtExample.groovy", [])
@@ -919,11 +913,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/tck/src/org/codehaus/groovy/tck/TestGenerator.groovy", [])
     }
 
-    /* FIXME
     void "test src/tck/test/gls/ch03/s01/Unicode1.groovy"() {
         unzipAndTest("src/tck/test/gls/ch03/s01/Unicode1.groovy", [])
     }
-    */
 
     /* FIXME
     void "test src/tck/test/gls/ch03/s01/Unicode2.groovy"() {
@@ -1279,11 +1271,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/gls/syntax/BinaryLiteralTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/gls/syntax/Gep3OrderDslTest.groovy"() {
         unzipAndTest("src/test/gls/syntax/Gep3OrderDslTest.groovy", [])
     }
-    */
 
     /* FIXME
     void "test src/test/gls/syntax/Gep3Test.groovy"() {
@@ -1657,11 +1647,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/HomepageTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/IdentityClosureTest.groovy"() {
         unzipAndTest("src/test/groovy/IdentityClosureTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/IfElseCompactTest.groovy"() {
         unzipAndTest("src/test/groovy/IfElseCompactTest.groovy", [])
@@ -1775,17 +1763,13 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/MethodCallWithoutParenthesisTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/MethodInBadPositionTest.groovy"() {
         unzipAndTest("src/test/groovy/MethodInBadPositionTest.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test src/test/groovy/MethodParameterAccessWithinClosureTest.groovy"() {
         unzipAndTest("src/test/groovy/MethodParameterAccessWithinClosureTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/MinMaxTest.groovy"() {
         unzipAndTest("src/test/groovy/MinMaxTest.groovy", [])
@@ -2061,23 +2045,17 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/TypesafeMethodTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/UniqueOnCollectionTest.groovy"() {
         unzipAndTest("src/test/groovy/UniqueOnCollectionTest.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test src/test/groovy/UniqueOnCollectionWithClosureTest.groovy"() {
         unzipAndTest("src/test/groovy/UniqueOnCollectionWithClosureTest.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test src/test/groovy/UniqueOnCollectionWithComparatorTest.groovy"() {
         unzipAndTest("src/test/groovy/UniqueOnCollectionWithComparatorTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/UnitTestAsScriptTest.groovy"() {
         unzipAndTest("src/test/groovy/UnitTestAsScriptTest.groovy", [])
@@ -2735,11 +2713,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/bugs/Groovy3868Bug.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/bugs/Groovy3871Bug.groovy"() {
         unzipAndTest("src/test/groovy/bugs/Groovy3871Bug.groovy", [])
     }
-    */
 
     void "test src/test/groovy/bugs/Groovy3873Bug.groovy"() {
         unzipAndTest("src/test/groovy/bugs/Groovy3873Bug.groovy", [])
@@ -2757,11 +2733,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/bugs/Groovy389_Bug.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/bugs/Groovy3904Bug.groovy"() {
         unzipAndTest("src/test/groovy/bugs/Groovy3904Bug.groovy", [])
     }
-    */
 
     void "test src/test/groovy/bugs/Groovy3948Bug.groovy"() {
         unzipAndTest("src/test/groovy/bugs/Groovy3948Bug.groovy", [])
@@ -3255,11 +3229,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/bugs/Groovy6396Bug.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/bugs/Groovy6508Bug.groovy"() {
         unzipAndTest("src/test/groovy/bugs/Groovy6508Bug.groovy", [])
     }
-    */
 
     void "test src/test/groovy/bugs/Groovy6522Bug.groovy"() {
         unzipAndTest("src/test/groovy/bugs/Groovy6522Bug.groovy", [])
@@ -3557,31 +3529,25 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/bugs/SubscriptOnStringArrayBug.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/bugs/SuperMethod2Bug.groovy"() {
         unzipAndTest("src/test/groovy/bugs/SuperMethod2Bug.groovy", [])
     }
-    */
 
     void "test src/test/groovy/bugs/SuperMethodBug.groovy"() {
         unzipAndTest("src/test/groovy/bugs/SuperMethodBug.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/bugs/SynchronizedBytecodeBug.groovy"() {
         unzipAndTest("src/test/groovy/bugs/SynchronizedBytecodeBug.groovy", [])
     }
-    */
 
     void "test src/test/groovy/bugs/TernaryOperatorTest.groovy"() {
         unzipAndTest("src/test/groovy/bugs/TernaryOperatorTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/bugs/TestBase.groovy"() {
         unzipAndTest("src/test/groovy/bugs/TestBase.groovy", [])
     }
-    */
 
     void "test src/test/groovy/bugs/TestCaseBug.groovy"() {
         unzipAndTest("src/test/groovy/bugs/TestCaseBug.groovy", [])
@@ -3727,11 +3693,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/lang/Groovy3406Test.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/lang/GroovyClassLoaderTest.groovy"() {
         unzipAndTest("src/test/groovy/lang/GroovyClassLoaderTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/lang/GroovyCodeSourceTest.groovy"() {
         unzipAndTest("src/test/groovy/lang/GroovyCodeSourceTest.groovy", [])
@@ -4305,11 +4269,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/util/GroovyCollectionsTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/util/GroovyScriptEngineReloadingTest.groovy"() {
         unzipAndTest("src/test/groovy/util/GroovyScriptEngineReloadingTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/util/GroovyScriptEngineTest.groovy"() {
         unzipAndTest("src/test/groovy/util/GroovyScriptEngineTest.groovy", [])
@@ -4523,11 +4485,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/org/codehaus/groovy/benchmarks/alioth/recursive.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/org/codehaus/groovy/benchmarks/alioth/spectralnorm.groovy"() {
         unzipAndTest("src/test/org/codehaus/groovy/benchmarks/alioth/spectralnorm.groovy", [])
     }
-    */
 
     void "test src/test/org/codehaus/groovy/benchmarks/vm5/b2394/script120.groovy"() {
         unzipAndTest("src/test/org/codehaus/groovy/benchmarks/vm5/b2394/script120.groovy", [])
@@ -5109,17 +5069,13 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/org/codehaus/groovy/runtime/CategoryForIteratorTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/org/codehaus/groovy/runtime/CustomBooleanCoercionTest.groovy"() {
         unzipAndTest("src/test/org/codehaus/groovy/runtime/CustomBooleanCoercionTest.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test src/test/org/codehaus/groovy/runtime/DateGDKTest.groovy"() {
         unzipAndTest("src/test/org/codehaus/groovy/runtime/DateGDKTest.groovy", [])
     }
-    */
 
     void "test src/test/org/codehaus/groovy/runtime/DefaultGroovyMethodsSupportTest.groovy"() {
         unzipAndTest("src/test/org/codehaus/groovy/runtime/DefaultGroovyMethodsSupportTest.groovy", [])
@@ -5555,11 +5511,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/org/codehaus/groovy/transform/CanonicalTransformTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/org/codehaus/groovy/transform/DelegateTransformTest.groovy"() {
         unzipAndTest("src/test/org/codehaus/groovy/transform/DelegateTransformTest.groovy", [])
     }
-    */
 
     void "test src/test/org/codehaus/groovy/transform/EqualsAndHashCodeTransformTest.groovy"() {
         unzipAndTest("src/test/org/codehaus/groovy/transform/EqualsAndHashCodeTransformTest.groovy", [])
@@ -5863,11 +5817,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-ant/src/test-resources/org/codehaus/groovy/ant/groovytest3/GroovyTest3Class.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-ant/src/test/groovy/groovy/util/AntTest.groovy"() {
         unzipAndTest("subprojects/groovy-ant/src/test/groovy/groovy/util/AntTest.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-ant/src/test/groovy/groovy/util/FileNameFinderTest.groovy"() {
         unzipAndTest("subprojects/groovy-ant/src/test/groovy/groovy/util/FileNameFinderTest.groovy", [])
@@ -5901,11 +5853,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-console/src/main/groovy/groovy/inspect/swingui/ButtonOrDefaultRenderer.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-console/src/main/groovy/groovy/inspect/swingui/ButtonOrTextEditor.groovy"() {
         unzipAndTest("subprojects/groovy-console/src/main/groovy/groovy/inspect/swingui/ButtonOrTextEditor.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-console/src/main/groovy/groovy/inspect/swingui/ObjectBrowser.groovy"() {
         unzipAndTest("subprojects/groovy-console/src/main/groovy/groovy/inspect/swingui/ObjectBrowser.groovy", [])
@@ -6015,11 +5965,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-groovydoc/src/main/groovy/org/codehaus/groovy/tools/groovydoc/Main.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-groovydoc/src/test/groovy/org/codehaus/groovy/tools/groovydoc/GroovyDocToolTestSampleGroovy.groovy"() {
         unzipAndTest("subprojects/groovy-groovydoc/src/test/groovy/org/codehaus/groovy/tools/groovydoc/GroovyDocToolTestSampleGroovy.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-groovydoc/src/test/groovy/org/codehaus/groovy/tools/groovydoc/SimpleGroovyClassDocTests.groovy"() {
         unzipAndTest("subprojects/groovy-groovydoc/src/test/groovy/org/codehaus/groovy/tools/groovydoc/SimpleGroovyClassDocTests.groovy", [])
@@ -6085,11 +6033,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-groovydoc/src/test/groovy/org/codehaus/groovy/tools/groovydoc/testfiles/PropertyLink.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-groovydoc/src/test/groovy/org/codehaus/groovy/tools/groovydoc/testfiles/Script.groovy"() {
         unzipAndTest("subprojects/groovy-groovydoc/src/test/groovy/org/codehaus/groovy/tools/groovydoc/testfiles/Script.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-groovydoc/src/test/groovy/org/codehaus/groovy/tools/groovydoc/testfiles/TestConstructors.groovy"() {
         unzipAndTest("subprojects/groovy-groovydoc/src/test/groovy/org/codehaus/groovy/tools/groovydoc/testfiles/TestConstructors.groovy", [])
@@ -6157,11 +6103,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/CommandException.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/CommandRegistry.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/CommandRegistry.groovy", [])
     }
-    */
 
     /* FIXME
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/CommandSupport.groovy"() {
@@ -6173,17 +6117,13 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/ComplexCommandSupport.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/ExitNotification.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/ExitNotification.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Groovysh.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Groovysh.groovy", [])
     }
-    */
 
     /* FIXME
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/InteractiveShellRunner.groovy"() {
@@ -6199,11 +6139,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Main.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Parser.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Parser.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Shell.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Shell.groovy", [])
@@ -6761,11 +6699,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-json/src/test/groovy/groovy/json/JsonSlurperLaxTest.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-json/src/test/groovy/groovy/json/JsonSlurperTest.groovy"() {
         unzipAndTest("subprojects/groovy-json/src/test/groovy/groovy/json/JsonSlurperTest.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-json/src/test/groovy/groovy/json/JsonTokenTypeTest.groovy"() {
         unzipAndTest("subprojects/groovy-json/src/test/groovy/groovy/json/JsonTokenTypeTest.groovy", [])
@@ -6913,11 +6849,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-sql/src/test/groovy/groovy/sql/SqlCallTest.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-sql/src/test/groovy/groovy/sql/SqlCompleteTest.groovy"() {
         unzipAndTest("subprojects/groovy-sql/src/test/groovy/groovy/sql/SqlCompleteTest.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-sql/src/test/groovy/groovy/sql/SqlCompleteWithoutDataSourceTest.groovy"() {
         unzipAndTest("subprojects/groovy-sql/src/test/groovy/groovy/sql/SqlCompleteWithoutDataSourceTest.groovy", [])
@@ -7287,11 +7221,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-test/src/main/groovy/groovy/mock/interceptor/Ignore.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-test/src/main/groovy/groovy/mock/interceptor/LooseExpectation.groovy"() {
         unzipAndTest("subprojects/groovy-test/src/main/groovy/groovy/mock/interceptor/LooseExpectation.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-test/src/main/groovy/groovy/mock/interceptor/MockFor.groovy"() {
         unzipAndTest("subprojects/groovy-test/src/main/groovy/groovy/mock/interceptor/MockFor.groovy", [])
@@ -7301,11 +7233,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-test/src/main/groovy/groovy/mock/interceptor/MockInterceptor.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-test/src/main/groovy/groovy/mock/interceptor/StrictExpectation.groovy"() {
         unzipAndTest("subprojects/groovy-test/src/main/groovy/groovy/mock/interceptor/StrictExpectation.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-test/src/main/groovy/groovy/mock/interceptor/StubFor.groovy"() {
         unzipAndTest("subprojects/groovy-test/src/main/groovy/groovy/mock/interceptor/StubFor.groovy", [])
@@ -7343,11 +7273,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-test/src/test/groovy/groovy/test/GroovyTestJavadocAssertionTest.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-test/src/test/groovy/groovy/util/AllTestSuiteTest.groovy"() {
         unzipAndTest("subprojects/groovy-test/src/test/groovy/groovy/util/AllTestSuiteTest.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-test/src/test/groovy/groovy/util/suite/ATestScriptThatsNoTestCase.groovy"() {
         unzipAndTest("subprojects/groovy-test/src/test/groovy/groovy/util/suite/ATestScriptThatsNoTestCase.groovy", [])
@@ -7409,17 +7337,13 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-xml/src/spec/test/UserGuideStreamingMarkupBuilderTest.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-xml/src/spec/test/UserGuideXmlParserTest.groovy"() {
         unzipAndTest("subprojects/groovy-xml/src/spec/test/UserGuideXmlParserTest.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test subprojects/groovy-xml/src/spec/test/UserGuideXmlSlurperTest.groovy"() {
         unzipAndTest("subprojects/groovy-xml/src/spec/test/UserGuideXmlSlurperTest.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-xml/src/spec/test/UserGuideXmlUtilTest.groovy"() {
         unzipAndTest("subprojects/groovy-xml/src/spec/test/UserGuideXmlUtilTest.groovy", [])
@@ -7501,11 +7425,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-xml/src/test/groovy/groovy/xml/StreamingMarkupBuilderTest.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-xml/src/test/groovy/groovy/xml/StreamingSAXBuilderTest.groovy"() {
         unzipAndTest("subprojects/groovy-xml/src/test/groovy/groovy/xml/StreamingSAXBuilderTest.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-xml/src/test/groovy/groovy/xml/TraversalTestSupport.groovy"() {
         unzipAndTest("subprojects/groovy-xml/src/test/groovy/groovy/xml/TraversalTestSupport.groovy", [])
@@ -7527,11 +7449,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-xml/src/test/groovy/groovy/xml/XmlUtilTest.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-xml/src/test/groovy/groovy/xml/dom/DOMCategoryTest.groovy"() {
         unzipAndTest("subprojects/groovy-xml/src/test/groovy/groovy/xml/dom/DOMCategoryTest.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-xml/src/test/groovy/groovy/xml/dom/DOMTest.groovy"() {
         unzipAndTest("subprojects/groovy-xml/src/test/groovy/groovy/xml/dom/DOMTest.groovy", [])
