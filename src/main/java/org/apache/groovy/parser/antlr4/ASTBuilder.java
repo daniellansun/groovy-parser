@@ -2510,6 +2510,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             } else if (it.startsWith("$/")) {
                 it = StringUtils.removeCR(it);
                 it = "\"" + it.substring(2); // translate leading $/ to "
+            } else if (it.startsWith("/")) {
+                it = StringUtils.removeCR(it);
             }
 
             it = StringUtils.replaceEscapes(it, slashyType);
@@ -2541,6 +2543,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             } else if (it.endsWith("/$")) {
                 it = StringUtils.removeCR(it);
                 it = StringGroovyMethods.getAt(it, new IntRange(false, 0, -2)) + "\""; // translate tailing /$ to "
+            } else if (it.endsWith("/")) {
+                it = StringUtils.removeCR(it);
             }
 
             it = StringUtils.replaceEscapes(it, slashyType);

@@ -163,7 +163,7 @@ SlashyGStringEnd
     :   '$'? '/'  -> type(GStringEnd), popMode
     ;
 SlashyGStringPart
-    :   DOLLAR    -> type(GStringPart), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    :   DOLLAR { isFollowedByJavaLetterInGString(_input) }?   -> type(GStringPart), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 SlashyGStringCharacter
     :   SlashyStringCharacter -> more
@@ -174,7 +174,7 @@ DollarSlashyGStringEnd
     :   '/$'      -> type(GStringEnd), popMode
     ;
 DollarSlashyGStringPart
-    :   DOLLAR    -> type(GStringPart), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    :   DOLLAR { isFollowedByJavaLetterInGString(_input) }?   -> type(GStringPart), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 DollarSlashyGStringCharacter
     :   DollarSlashyStringCharacter -> more
@@ -236,7 +236,7 @@ fragment SlashyStringCharacter
 
 // character in the collar slashy string. e.g. $/a/$
 fragment DollarSlashyStringCharacter
-    :   SlashEscape
+    :   SlashEscape | DollarSlashEscape
     |   '/' { _input.LA(1) != '$' }?
     |   '$' { !isFollowedByJavaLetterInGString(_input) }?
     |   ~[/$\u0000]
@@ -583,6 +583,10 @@ SlashEscape
     :   '\\' '/'
     ;
 
+fragment
+DollarSlashEscape
+    :   '$/$'
+    ;
 // §3.10.7 The Null Literal
 
 NullLiteral

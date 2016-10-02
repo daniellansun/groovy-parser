@@ -92,14 +92,17 @@ public class StringUtils {
 	public static String replaceEscapes(String text, int slashyType) {
 		if (slashyType == SLASHY || slashyType == DOLLAR_SLASHY) {
 			text = StringUtils.replaceHexEscapes(text);
+			text = StringUtils.replaceLineEscape(text);
 
 			if (slashyType == SLASHY) {
 				text = text.replace("\\/", "/");
-				text = StringUtils.replaceLineEscape(text);
 			}
 
-			if (slashyType == DOLLAR_SLASHY)
+			if (slashyType == DOLLAR_SLASHY) {
 				text = text.replace("$$", "$");
+				text = text.replace("$/", "/");
+			}
+
 		} else if (slashyType == NONE_SLASHY) {
 			text = StringUtils.replaceEscapes(text);
 		} else {
