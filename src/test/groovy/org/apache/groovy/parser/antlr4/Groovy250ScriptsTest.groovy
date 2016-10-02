@@ -8044,17 +8044,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/ResourceGMClosureParamTypeInferenceSTCTest_010.groovy", [])
     }
 
-    /* FIXME
     void "test ResourceGMClosureParamTypeInferenceSTCTest_011.groovy"() {
-        unzipAndTest("scripts/ResourceGMClosureParamTypeInferenceSTCTest_011.groovy", [])
+        unzipAndTest("scripts/ResourceGMClosureParamTypeInferenceSTCTest_011.groovy", [], ['\'utf-8\\\'': '\'utf-8\\\'\''])
     }
-    */
 
-    /* FIXME
     void "test ResourceGMClosureParamTypeInferenceSTCTest_012.groovy"() {
-        unzipAndTest("scripts/ResourceGMClosureParamTypeInferenceSTCTest_012.groovy", [])
+        unzipAndTest("scripts/ResourceGMClosureParamTypeInferenceSTCTest_012.groovy", [], ['\'utf-8\\\'': '\'utf-8\\\'\''])
     }
-    */
 
     void "test ResourceGMClosureParamTypeInferenceSTCTest_013.groovy"() {
         unzipAndTest("scripts/ResourceGMClosureParamTypeInferenceSTCTest_013.groovy", [])
@@ -8124,17 +8120,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/SaferScriptingASTTransformsTest_001.groovy", [])
     }
 
-    /* FIXME
     void "test SaferScriptingASTTransformsTest_002.groovy"() {
         unzipAndTest("scripts/SaferScriptingASTTransformsTest_002.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test SaferScriptingASTTransformsTest_003.groovy"() {
         unzipAndTest("scripts/SaferScriptingASTTransformsTest_003.groovy", [])
     }
-    */
 
     void "test SaferScriptingASTTransformsTest_004.groovy"() {
         unzipAndTest("scripts/SaferScriptingASTTransformsTest_004.groovy", [])
@@ -8148,17 +8140,13 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/SaferScriptingASTTransformsTest_006.groovy", [])
     }
 
-    /* FIXME
     void "test SaferScriptingASTTransformsTest_007.groovy"() {
         unzipAndTest("scripts/SaferScriptingASTTransformsTest_007.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test SaferScriptingASTTransformsTest_008.groovy"() {
         unzipAndTest("scripts/SaferScriptingASTTransformsTest_008.groovy", [])
     }
-    */
 
     void "test ScriptsAndClassesSpecTest_001.groovy"() {
         unzipAndTest("scripts/ScriptsAndClassesSpecTest_001.groovy", [])
