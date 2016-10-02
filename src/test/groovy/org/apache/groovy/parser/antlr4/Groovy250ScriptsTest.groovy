@@ -7020,11 +7020,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/MethodCallsStaticCompilationTest_009.groovy", [])
     }
 
-    /* FIXME
     void "test MethodCallsStaticCompilationTest_010.groovy"() {
         unzipAndTest("scripts/MethodCallsStaticCompilationTest_010.groovy", [])
     }
-    */
 
     void "test MethodCallsStaticCompilationTest_011.groovy"() {
         unzipAndTest("scripts/MethodCallsStaticCompilationTest_011.groovy", [])
@@ -7134,35 +7132,25 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/MethodCallsSTCTest_020.groovy", [])
     }
 
-    /* FIXME
     void "test MethodCallsSTCTest_021.groovy"() {
         unzipAndTest("scripts/MethodCallsSTCTest_021.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test MethodCallsSTCTest_022.groovy"() {
         unzipAndTest("scripts/MethodCallsSTCTest_022.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test MethodCallsSTCTest_023.groovy"() {
         unzipAndTest("scripts/MethodCallsSTCTest_023.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test MethodCallsSTCTest_024.groovy"() {
         unzipAndTest("scripts/MethodCallsSTCTest_024.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test MethodCallsSTCTest_025.groovy"() {
         unzipAndTest("scripts/MethodCallsSTCTest_025.groovy", [])
     }
-    */
 
     void "test MethodCallsSTCTest_026.groovy"() {
         unzipAndTest("scripts/MethodCallsSTCTest_026.groovy", [])
@@ -7352,11 +7340,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/MethodSelectionTest_005.groovy", [])
     }
 
-    /* FIXME
     void "test MethodSelectionTest_006.groovy"() {
         unzipAndTest("scripts/MethodSelectionTest_006.groovy", [])
     }
-    */
 
     void "test MethodSelectionTest_007.groovy"() {
         unzipAndTest("scripts/MethodSelectionTest_007.groovy", [])
