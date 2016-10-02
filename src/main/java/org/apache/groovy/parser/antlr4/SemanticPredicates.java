@@ -21,12 +21,7 @@ package org.apache.groovy.parser.antlr4;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.TokenStream;
 
-import static org.apache.groovy.parser.antlr4.GroovyParser.CapitalizedIdentifier;
-import static org.apache.groovy.parser.antlr4.GroovyParser.Identifier;
-import static org.apache.groovy.parser.antlr4.GroovyParser.StringLiteral;
-import static org.apache.groovy.parser.antlr4.GroovyParser.WS;
-import static org.apache.groovy.parser.antlr4.GroovyParser.NL;
-import static org.apache.groovy.parser.antlr4.GroovyParser.EOF;
+import static org.apache.groovy.parser.antlr4.GroovyParser.*;
 
 /**
  * Some semantic predicates for altering the behaviour of the lexer and parser
@@ -36,8 +31,8 @@ import static org.apache.groovy.parser.antlr4.GroovyParser.EOF;
  */
 public class SemanticPredicates {
     public static boolean isFollowedByWhiteSpaces(CharStream cs) {
-        for (int index = 1, c = cs.LA(index); !(NL == c || EOF == c); index++, c = cs.LA(index)) {
-            if (WS != c) {
+        for (int index = 1, c = cs.LA(index); !('\r' == c || '\n' == c || CharStream.EOF == c); index++, c = cs.LA(index)) {
+            if (String.valueOf((char) c).matches("\\S+?")) {
                 return false;
             }
         }
