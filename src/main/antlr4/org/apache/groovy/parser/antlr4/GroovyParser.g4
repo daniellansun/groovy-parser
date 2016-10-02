@@ -427,6 +427,7 @@ gstringPath
     ;
 
 closure
+locals[ Map<String, Object> dynaScope = new ListHashMap<>() ]
     :   LBRACE nls (formalParameterList? nls ARROW nls)? blockStatementsOpt RBRACE
     ;
 
@@ -782,6 +783,14 @@ pathExpression returns [int t]
     ;
 
 pathElement returns [int t]
+locals[ boolean isInsideClosure ]
+@init {
+    try {
+        $isInsideClosure = null != $closure::dynaScope;
+    } catch(NullPointerException e) {
+        $isInsideClosure = false;
+    }
+}
     :   nls
 
         // AT: foo.@bar selects the field (or attribute), not property

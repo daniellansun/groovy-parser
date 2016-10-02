@@ -1519,6 +1519,20 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
                 String baseExprText = baseExpr.getText();
                 if (SUPER_STR.equals(baseExprText) || THIS_STR.equals(baseExprText)) { // e.g. this(...), super(...)
+                    // class declaration is not allowed in the closure,
+                    // so if this and super is inside the closure, it will not be constructor call.
+                    // e.g. src/test/org/codehaus/groovy/transform/MapConstructorTransformTest.groovy:
+                    // @MapConstructor(pre={ super(args?.first, args?.last); args = args ?: [:] }, post = { first = first?.toUpperCase() })
+                    if (ctx.isInsideClosure) {
+                        return this.configureAST(
+                                new MethodCallExpression(
+                                        baseExpr,
+                                        baseExprText,
+                                        argumentsExpr
+                                ),
+                                ctx);
+                    }
+
                     return this.configureAST(
                             new ConstructorCallExpression(
                                     SUPER_STR.equals(baseExprText)

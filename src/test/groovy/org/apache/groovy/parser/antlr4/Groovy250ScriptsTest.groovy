@@ -6960,11 +6960,9 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/MapConstructorTransformTest_006.groovy", [])
     }
 
-    /* FIXME
     void "test MapConstructorTransformTest_007.groovy"() {
         unzipAndTest("scripts/MapConstructorTransformTest_007.groovy", [])
     }
-    */
 
     void "test MapConstructorTransformTest_008.groovy"() {
         unzipAndTest("scripts/MapConstructorTransformTest_008.groovy", [])
