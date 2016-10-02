@@ -98,8 +98,16 @@ lexer grammar GroovyLexer;
         return "(".equals(paren) || "[".equals(paren);
     }
 
-    private void ignoreNewLineInsideParens() {
+    private void ignoreTokenInsideParens() {
         if (!this.isInsideParens()) {
+            return;
+        }
+
+        this.setChannel(Token.HIDDEN_CHANNEL);
+    }
+
+    private void ignoreMultiLineCommentConditionally() {
+        if (!this.isInsideParens() && isFollowedByWhiteSpaces(_input)) {
             return;
         }
 
@@ -739,17 +747,17 @@ WS  :  [ \t\u000C]+     -> skip
     ;
 
 // Inside (...) and [...] but not {...}, ignore newlines.
-NL  : '\r'? '\n'            { this.ignoreNewLineInsideParens(); }
+NL  : '\r'? '\n'            { this.ignoreTokenInsideParens(); }
     ;
 
 // Multiple-line comments(including groovydoc comments)
 ML_COMMENT
-    :   '/*' .*? '*/'       { this.ignoreNewLineInsideParens(); }       -> type(NL)
+    :   '/*' .*? '*/'       { this.ignoreMultiLineCommentConditionally(); } -> type(NL)
     ;
 
 // Single-line comments
 SL_COMMENT
-    :   '//' ~[\r\n\uFFFF]* { this.ignoreNewLineInsideParens(); }       -> type(NL)
+    :   '//' ~[\r\n\uFFFF]* { this.ignoreTokenInsideParens(); }             -> type(NL)
     ;
 
 // Script-header comments.

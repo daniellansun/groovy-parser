@@ -24,6 +24,9 @@ import org.antlr.v4.runtime.TokenStream;
 import static org.apache.groovy.parser.antlr4.GroovyParser.CapitalizedIdentifier;
 import static org.apache.groovy.parser.antlr4.GroovyParser.Identifier;
 import static org.apache.groovy.parser.antlr4.GroovyParser.StringLiteral;
+import static org.apache.groovy.parser.antlr4.GroovyParser.WS;
+import static org.apache.groovy.parser.antlr4.GroovyParser.NL;
+import static org.apache.groovy.parser.antlr4.GroovyParser.EOF;
 
 /**
  * Some semantic predicates for altering the behaviour of the lexer and parser
@@ -32,6 +35,16 @@ import static org.apache.groovy.parser.antlr4.GroovyParser.StringLiteral;
  * @date    2016/08/20
  */
 public class SemanticPredicates {
+    public static boolean isFollowedByWhiteSpaces(CharStream cs) {
+        for (int index = 1, c = cs.LA(index); !(NL == c || EOF == c); index++, c = cs.LA(index)) {
+            if (WS != c) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static boolean isFollowedByJavaLetterInGString(CharStream cs) {
         int c1 = cs.LA(1);
         String str1 = String.valueOf((char) c1);
