@@ -123,6 +123,8 @@ find x:
 
 a b 1 2
 
+static.unused = { -> }
+
 ResolveOptions resolveOptions = new ResolveOptions()\
             .setConfs(['default'] as String[])\
             .setOutputReport(false)\

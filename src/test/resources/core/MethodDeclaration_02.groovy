@@ -37,3 +37,5 @@ public boolean someMethod3 (java.util.List<String> list) {
 def A(i, j) {
         return 1.0D / ((i+j) * (i + j + 1.0D) / 2.0D  + i + 1.0D)
 }
+
+String m(Integer a, ... params) {}

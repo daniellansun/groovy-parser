@@ -384,7 +384,7 @@ formalParameter
     ;
 
 lastFormalParameter
-    :   variableModifiersOpt (type ELLIPSIS)? variableDeclaratorId (ASSIGN nls expression)?
+    :   variableModifiersOpt (type? ELLIPSIS)? variableDeclaratorId (ASSIGN nls expression)?
     ;
 
 methodBody
@@ -984,6 +984,11 @@ className
 identifier
     :   Identifier
     |   CapitalizedIdentifier
+
+    |
+        // if 'static' followed by DOT, we can treat them as identifiers, e.g. static.unused = { -> }
+        { DOT == _input.LT(2).getType() }?
+        STATIC
     ;
 
 builtInType

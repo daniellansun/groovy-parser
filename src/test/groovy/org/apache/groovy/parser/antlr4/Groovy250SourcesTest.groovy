@@ -5072,11 +5072,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/org/codehaus/groovy/runtime/NullObjectTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/org/codehaus/groovy/runtime/PerInstanceMetaClassTest.groovy"() {
         unzipAndTest("src/test/org/codehaus/groovy/runtime/PerInstanceMetaClassTest.groovy", [])
     }
-    */
 
     void "test src/test/org/codehaus/groovy/runtime/ResourceGroovyMethodsTest.groovy"() {
         unzipAndTest("src/test/org/codehaus/groovy/runtime/ResourceGroovyMethodsTest.groovy", [])
@@ -5498,11 +5496,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/org/codehaus/groovy/transform/MapConstructorTransformTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/org/codehaus/groovy/transform/MemoizedASTTransformationTest.groovy"() {
         unzipAndTest("src/test/org/codehaus/groovy/transform/MemoizedASTTransformationTest.groovy", [])
     }
-    */
 
     void "test src/test/org/codehaus/groovy/transform/NewifyTransformTest.groovy"() {
         unzipAndTest("src/test/org/codehaus/groovy/transform/NewifyTransformTest.groovy", [])

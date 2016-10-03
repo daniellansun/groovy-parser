@@ -20,3 +20,9 @@ public trait Person {
 
     protected static def protectedStaticDefField;
 }
+
+trait xx {
+    class yy {
+        enum zz {}
+    }
+}
