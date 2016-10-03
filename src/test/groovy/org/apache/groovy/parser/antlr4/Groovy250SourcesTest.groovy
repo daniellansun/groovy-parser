@@ -1692,11 +1692,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/ListTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/LiteralTypesTest.groovy"() {
         unzipAndTest("src/test/groovy/LiteralTypesTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/LittleClosureTest.groovy"() {
         unzipAndTest("src/test/groovy/LittleClosureTest.groovy", [])
@@ -1754,11 +1752,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/MinMaxTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/MinusEqualsTest.groovy"() {
         unzipAndTest("src/test/groovy/MinusEqualsTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/ModifiersTest.groovy"() {
         unzipAndTest("src/test/groovy/ModifiersTest.groovy", [])
@@ -1788,11 +1784,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/MultiplyDivideEqualsTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/NamedParameterTest.groovy"() {
         unzipAndTest("src/test/groovy/NamedParameterTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/NestedClassTest.groovy"() {
         unzipAndTest("src/test/groovy/NestedClassTest.groovy", [])
