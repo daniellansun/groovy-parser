@@ -138,10 +138,10 @@ TdqGStringBegin
     :   '"""'   TdqStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(TDQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 SlashyGStringBegin
-    :   '/' { this.isRegexAllowed() && _input.LA(1) != '*' }? SlashyStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    :   '/' { this.isRegexAllowed() && _input.LA(1) != '*' }? SlashyStringCharacter*? DOLLAR { isFollowedByJavaLetterInGString(_input) }? -> type(GStringBegin), pushMode(SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 DollarSlashyGStringBegin
-    :   '$/' DollarSlashyStringCharacter*? DOLLAR -> type(GStringBegin), pushMode(DOLLAR_SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    :   '$/' DollarSlashyStringCharacter*? DOLLAR { isFollowedByJavaLetterInGString(_input) }? -> type(GStringBegin), pushMode(DOLLAR_SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 
 mode DQ_GSTRING_MODE;
@@ -244,7 +244,7 @@ fragment SlashyStringCharacter
 
 // character in the collar slashy string. e.g. $/a/$
 fragment DollarSlashyStringCharacter
-    :   SlashEscape | DollarSlashEscape
+    :   SlashEscape | DollarSlashEscape | DollarDollarEscape
     |   '/' { _input.LA(1) != '$' }?
     |   '$' { !isFollowedByJavaLetterInGString(_input) }?
     |   ~[/$\u0000]
@@ -595,6 +595,11 @@ SlashEscape
 fragment
 DollarSlashEscape
     :   '$/$'
+    ;
+
+fragment
+DollarDollarEscape
+    :   '$$'
     ;
 // §3.10.7 The Null Literal
 

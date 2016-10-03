@@ -45,3 +45,5 @@ a = $/
             $/ escaped forward slash
             $/$ escaped dollar slashy string delimiter
         /$
+a = $/$$VAR/$
+a = $/$$ $VAR/$

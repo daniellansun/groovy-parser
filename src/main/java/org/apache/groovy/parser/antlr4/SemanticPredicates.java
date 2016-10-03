@@ -42,6 +42,11 @@ public class SemanticPredicates {
 
     public static boolean isFollowedByJavaLetterInGString(CharStream cs) {
         int c1 = cs.LA(1);
+
+        if ('$' == c1) { // single $ is not a valid identifier
+            return false;
+        }
+
         String str1 = String.valueOf((char) c1);
 
         if (str1.matches("[a-zA-Z_{]")) {

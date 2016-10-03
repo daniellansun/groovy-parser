@@ -1960,11 +1960,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/StringBufferTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/StringTest.groovy"() {
         unzipAndTest("src/test/groovy/StringTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/SubscriptTest.groovy"() {
         unzipAndTest("src/test/groovy/SubscriptTest.groovy", [])
