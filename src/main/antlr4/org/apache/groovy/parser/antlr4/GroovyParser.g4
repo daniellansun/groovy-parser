@@ -538,7 +538,7 @@ variableNames
 
 statement
     :   block                                                                               #blockStmtAlt
-    |   ASSERT ce=expression ((COLON | COMMA) nls me=expression)?                           #assertStmtAlt
+    |   ASSERT ce=expression ((COLON | COMMA) nlsORles me=expression)?                           #assertStmtAlt
     |   IF parExpression nls tb=statement (nls ELSE nls fb=statement)?                      #ifElseStmtAlt
     |   FOR LPAREN forControl RPAREN nls statement                                          #forStmtAlt
     |   WHILE parExpression nls statement                                                   #whileStmtAlt
@@ -1052,4 +1052,10 @@ nls :   NL*
 
 sep :   SEMI NL*
     |   NL+ (SEMI NL*)*
+    ;
+
+nlsORles
+    :   (   NL
+        |   LINE_ESCAPE
+        )*
     ;

@@ -106,10 +106,14 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         this.classNodeList.stream().forEach(moduleNode::addClass);
 
-        // if groovy source file only contains blank(including EOF), add "return null" to the AST
-        if (this.isBlankScript(ctx)) {
-            this.addEmptyReturnStatement();
-            return moduleNode;
+        if (this.isPackageInfoDeclaration()) {
+            this.addPackageInfoClassNode();
+        } else {
+            // if groovy source file only contains blank(including EOF), add "return null" to the AST
+            if (this.isBlankScript(ctx)) {
+                this.addEmptyReturnStatement();
+                return moduleNode;
+            }
         }
 
         return moduleNode;
@@ -689,7 +693,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         // will be used as first class later in the loader. The first class
         // there determines what GCL#parseClass for example will return, so we
         // have here to ensure it won't be the inner class
-        if (asBoolean(ctx.CLASS())) {
+        if (asBoolean(ctx.CLASS()) || asBoolean(ctx.TRAIT())) {
             classNodeList.add(classNode);
         }
 
@@ -700,7 +704,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         classNodeStack.pop();
         this.anonymousInnerClassCounter = oldAnonymousInnerClassCounter;
 
-        if (!asBoolean(ctx.CLASS())) {
+        if (!(asBoolean(ctx.CLASS()) || asBoolean(ctx.TRAIT()))) {
             classNodeList.add(classNode);
         }
 
@@ -3381,6 +3385,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return TYPE_DEFAULT_VALUE_MAP.get(type);
     }
 
+    private boolean isPackageInfoDeclaration() {
+        String name = this.sourceUnit.getName();
+
+        if (asBoolean((Object) name) && name.endsWith(PACKAGE_INFO_FILE_NAME)) {
+            return true;
+        }
+
+        return false;
+    }
+
     private boolean isBlankScript(CompilationUnitContext ctx) {
         long blankCnt =
                 ctx.children.stream()
@@ -3397,6 +3411,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private void addEmptyReturnStatement() {
         moduleNode.addStatement(new ReturnStatement(new ConstantExpression(null)));
+    }
+
+    private void addPackageInfoClassNode() {
+        List<ClassNode> classNodeList = moduleNode.getClasses();
+        ClassNode packageInfoClassNode = ClassHelper.make(GROOVY_ANNOTATIONS_PACKAGE_INFO);
+
+        if (!classNodeList.contains(packageInfoClassNode)) {
+            moduleNode.addClass(packageInfoClassNode);
+        }
     }
 
     private org.codehaus.groovy.syntax.Token createGroovyTokenByType(Token token, int type) {
@@ -3904,6 +3927,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String CALL_STR = "call";
     private static final String THIS_STR = "this";
     private static final String SUPER_STR = "super";
+    private static final String PACKAGE_INFO_FILE_NAME = "package-info.groovy";
+    private static final String GROOVY_ANNOTATIONS_PACKAGE_INFO = "groovy.annotations.package-info";
     private static final String GROOVY_TRANSFORM_TRAIT = "groovy.transform.Trait";
     private static final Set<String> PRIMITIVE_TYPE_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("boolean", "char", "byte", "short", "int", "long", "float", "double")));
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
