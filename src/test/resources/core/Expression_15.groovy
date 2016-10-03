@@ -123,3 +123,7 @@ find x:
 
 a b 1 2
 
+ResolveOptions resolveOptions = new ResolveOptions()\
+            .setConfs(['default'] as String[])\
+            .setOutputReport(false)\
+            .setValidate(args.containsKey('validate') ? args.validate : false)
