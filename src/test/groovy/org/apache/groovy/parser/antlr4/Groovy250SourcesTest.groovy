@@ -1546,7 +1546,7 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/EqualsTest.groovy", [])
     }
 
-    /* FIXME
+    /* FIXME find a better way to translate code written in unicode escapes
     void "test src/test/groovy/EscapedUnicodeTest.groovy"() {
         unzipAndTest("src/test/groovy/EscapedUnicodeTest.groovy", [])
     }
@@ -1576,11 +1576,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/Foo.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/ForLoopTest.groovy"() {
         unzipAndTest("src/test/groovy/ForLoopTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/ForLoopWithLocalVariablesTest.groovy"() {
         unzipAndTest("src/test/groovy/ForLoopWithLocalVariablesTest.groovy", [])

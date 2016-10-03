@@ -20,3 +20,7 @@ for (def i in [1, 2]) {
 
 for (;;)
     int number = 1
+
+
+int i
+for (i = 0; i < 5; i++);

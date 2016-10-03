@@ -243,8 +243,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public ForStatement visitForStmtAlt(ForStmtAltContext ctx) {
         Pair<Parameter, Expression> controlPair = this.visitForControl(ctx.forControl());
 
+        Statement loopBlock = this.unpackStatement((Statement) this.visit(ctx.statement()));
+
         return this.configureAST(
-                new ForStatement(controlPair.getKey(), controlPair.getValue(), this.unpackStatement((Statement) this.visit(ctx.statement()))),
+                new ForStatement(controlPair.getKey(), controlPair.getValue(), asBoolean(loopBlock) ? loopBlock : EmptyStatement.INSTANCE),
                 ctx);
     }
 
@@ -322,8 +324,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 this.configureAST(
                         new BooleanExpression(conditionExpression), conditionExpression);
 
+        Statement loopBlock = this.unpackStatement((Statement) this.visit(ctx.statement()));
+
         return this.configureAST(
-                new WhileStatement(booleanExpression, this.unpackStatement((Statement) this.visit(ctx.statement()))),
+                new WhileStatement(booleanExpression, asBoolean(loopBlock) ? loopBlock : EmptyStatement.INSTANCE),
                 ctx);
     }
 

@@ -122,7 +122,6 @@ importDeclaration
 
 typeDeclaration
     :   classOrInterfaceModifiersOpt classDeclaration
-    |   SEMI
     ;
 
 modifier

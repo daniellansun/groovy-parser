@@ -54,3 +54,5 @@ while(true) {
 while (false)
     int number = 1
 
+while(true);
+
