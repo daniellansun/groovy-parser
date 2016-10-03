@@ -26,3 +26,7 @@ new
     A
         ('x', 'y');
 
+
+new a();
+new $a();
+new as.def.in.trait.a();

@@ -2032,11 +2032,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/VArgsTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/ValidNameTest.groovy"() {
         unzipAndTest("src/test/groovy/ValidNameTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/VarargsMethodTest.groovy"() {
         unzipAndTest("src/test/groovy/VarargsMethodTest.groovy", [])
@@ -2046,11 +2044,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/VerbatimGStringTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/WhileLoopTest.groovy"() {
         unzipAndTest("src/test/groovy/WhileLoopTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/annotations/MyClass.groovy"() {
         unzipAndTest("src/test/groovy/annotations/MyClass.groovy", [])

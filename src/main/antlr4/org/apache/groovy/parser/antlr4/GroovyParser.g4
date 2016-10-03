@@ -350,7 +350,7 @@ type
     ;
 
 classOrInterfaceType
-    :   qualifiedClassName typeArguments?
+    :   qualifiedStandardClassName typeArguments?
     ;
 
 primitiveType
@@ -408,7 +408,11 @@ qualifiedNameElement
     ;
 
 qualifiedClassName
-    :   (Identifier DOT)* (className DOT)* className
+    :   (qualifiedNameElement DOT)* identifier
+    ;
+
+qualifiedStandardClassName
+    :   (qualifiedNameElement DOT)* (className DOT)* className
     ;
 
 literal

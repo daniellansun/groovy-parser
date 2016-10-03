@@ -2829,8 +2829,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClassNode visitClassOrInterfaceType(ClassOrInterfaceTypeContext ctx) {
-        ctx.qualifiedClassName().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, ctx.getNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR));
-        ClassNode classNode = this.visitQualifiedClassName(ctx.qualifiedClassName());
+        ctx.qualifiedStandardClassName().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, ctx.getNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR));
+        ClassNode classNode = this.visitQualifiedStandardClassName(ctx.qualifiedStandardClassName());
 
         if (asBoolean(ctx.typeArguments())) {
             classNode.setGenericsTypes(
@@ -3072,15 +3072,42 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClassNode visitQualifiedClassName(QualifiedClassNameContext ctx) {
+        String className = this.visitIdentifier(ctx.identifier());
+
+        ClassNode result;
+        if (asBoolean(ctx.qualifiedNameElement())) {
+            result =
+                    ClassHelper.make(
+                            ctx.qualifiedNameElement().stream()
+                                    .map(ParseTree::getText)
+                                    .collect(Collectors.joining(DOT_STR))
+                                    + DOT_STR
+                                    + className
+                    );
+        } else {
+            result = ClassHelper.make(className);
+        }
+
+        /*
+        if (!isTrue(ctx, IS_INSIDE_INSTANCEOF_EXPR)) { // type in the "instanceof" expression should not have proxy to redirect to it
+            result = this.proxyClassNode(result);
+        }
+        */
+
+        return this.configureAST(result, ctx);
+    }
+
+    @Override
+    public ClassNode visitQualifiedStandardClassName(QualifiedStandardClassNameContext ctx) {
         String className =
                 ctx.className().stream()
                         .map(this::visitClassName)
                         .collect(Collectors.joining(DOT_STR));
 
         ClassNode result;
-        if (asBoolean(ctx.Identifier())) {
+        if (asBoolean(ctx.qualifiedNameElement())) {
             result = ClassHelper.make(
-                    ctx.Identifier().stream()
+                    ctx.qualifiedNameElement().stream()
                             .map(ParseTree::getText)
                             .collect(Collectors.joining(DOT_STR))
                             + DOT_STR
@@ -3091,14 +3118,21 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         if (!isTrue(ctx, IS_INSIDE_INSTANCEOF_EXPR)) { // type in the "instanceof" expression should not have proxy to redirect to it
-            if (result.isUsingGenerics()) {
-                ClassNode cn = ClassHelper.makeWithoutCaching(result.getName());
-                cn.setRedirect(result);
-                result = cn;
-            }
+            result = this.proxyClassNode(result);
         }
 
         return this.configureAST(result, ctx);
+    }
+
+    private ClassNode proxyClassNode(ClassNode classNode) {
+        if (!classNode.isUsingGenerics()) {
+            return classNode;
+        }
+
+        ClassNode cn = ClassHelper.makeWithoutCaching(classNode.getName());
+        cn.setRedirect(classNode);
+
+        return cn;
     }
 
     /**
