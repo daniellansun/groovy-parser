@@ -913,11 +913,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/tck/test/gls/ch03/s01/Unicode1.groovy", [])
     }
 
-    /* FIXME
     void "test src/tck/test/gls/ch03/s01/Unicode2.groovy"() {
         unzipAndTest("src/tck/test/gls/ch03/s01/Unicode2.groovy", [])
     }
-    */
 
     void "test src/tck/test/gls/ch03/s02/LexicalTranslation1.groovy"() {
         unzipAndTest("src/tck/test/gls/ch03/s02/LexicalTranslation1.groovy", [])
@@ -927,13 +925,11 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/tck/test/gls/ch03/s02/Longest1.groovy", [])
     }
 
-    /* FIXME
     void "test src/tck/test/gls/ch03/s03/UnicodeEscapes1.groovy"() {
         unzipAndTest("src/tck/test/gls/ch03/s03/UnicodeEscapes1.groovy", [])
     }
-    */
 
-    /* FIXME
+    /* FIXME SEE https://github.com/danielsun1106/groovy-parser/issues/3
     void "test src/tck/test/gls/ch03/s03/UnicodeEscapes2.groovy"() {
         unzipAndTest("src/tck/test/gls/ch03/s03/UnicodeEscapes2.groovy", [])
     }

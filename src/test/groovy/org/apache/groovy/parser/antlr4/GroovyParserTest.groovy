@@ -223,4 +223,8 @@ class GroovyParserTest extends GroovyTestCase {
         doTest('core/Command_04.groovy', [ExpressionStatement]);
         doTest('core/Command_05.groovy');
     }
+
+    void "test groovy core - Unicode"() {
+        doTest('core/Unicode_01.groovy');
+    }
 }

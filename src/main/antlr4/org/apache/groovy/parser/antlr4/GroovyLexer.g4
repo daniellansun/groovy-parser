@@ -564,9 +564,10 @@ OctalEscape
     |   '\\' ZeroToThree OctalDigit OctalDigit
     ;
 
+// Groovy allows 1 or more u's after the backslash
 fragment
 UnicodeEscape
-    :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
+    :   '\\' 'u'+ HexDigit HexDigit HexDigit HexDigit
     ;
 
 fragment
@@ -677,10 +678,16 @@ URSHIFT_ASSIGN  : '>>>=';
 // §3.8 Identifiers (must appear after all keywords in the grammar)
 CapitalizedIdentifier
     :   [A-Z] JavaLetterOrDigit*
+
+    // Groovy's identifier can be unicode escape
+    |   [A-Z] (JavaLetterOrDigit | UnicodeEscape)*
     ;
 
 Identifier
     :   JavaLetter JavaLetterOrDigit*
+
+    // Groovy's identifier can be unicode escape
+    |   (JavaLetter | UnicodeEscape) (JavaLetterOrDigit | UnicodeEscape)*
     ;
 
 fragment
