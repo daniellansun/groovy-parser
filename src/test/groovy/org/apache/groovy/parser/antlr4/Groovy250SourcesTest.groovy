@@ -6016,11 +6016,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/BufferManager.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Command.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Command.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/CommandAlias.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/CommandAlias.groovy", [])
@@ -6034,11 +6032,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/CommandRegistry.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/CommandSupport.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/CommandSupport.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/ComplexCommandSupport.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/ComplexCommandSupport.groovy", [])
@@ -6052,11 +6048,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Groovysh.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/InteractiveShellRunner.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/InteractiveShellRunner.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Interpreter.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Interpreter.groovy", [])
@@ -6090,7 +6084,7 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/commands/DisplayCommand.groovy", [])
     }
 
-    /* FIXME
+    /* FIXME    SEE https://github.com/danielsun1106/groovy-parser/issues/5
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/commands/DocCommand.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/commands/DocCommand.groovy", [])
     }
@@ -6504,11 +6498,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-jmx/src/main/groovy/groovy/jmx/builder/JmxTimerFactory.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-jmx/src/main/groovy/groovy/jmx/builder/package-info.groovy"() {
         unzipAndTest("subprojects/groovy-jmx/src/main/groovy/groovy/jmx/builder/package-info.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-jmx/src/spec/test/JmxTest.groovy"() {
         unzipAndTest("subprojects/groovy-jmx/src/spec/test/JmxTest.groovy", [])
@@ -6714,11 +6706,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-macro/src/test/groovy/org/codehaus/groovy/macro/MacroTest.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/groovy-macro/src/test/groovy/org/codehaus/groovy/macro/matcher/ASTMatcherTest.groovy"() {
         unzipAndTest("subprojects/groovy-macro/src/test/groovy/org/codehaus/groovy/macro/matcher/ASTMatcherTest.groovy", [])
     }
-    */
 
     void "test subprojects/groovy-nio/src/test/groovy/org/codehaus/groovy/runtime/NioGroovyMethodsTest.groovy"() {
         unzipAndTest("subprojects/groovy-nio/src/test/groovy/org/codehaus/groovy/runtime/NioGroovyMethodsTest.groovy", [])

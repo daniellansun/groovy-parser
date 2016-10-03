@@ -3415,7 +3415,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private void addPackageInfoClassNode() {
         List<ClassNode> classNodeList = moduleNode.getClasses();
-        ClassNode packageInfoClassNode = ClassHelper.make(GROOVY_ANNOTATIONS_PACKAGE_INFO);
+        ClassNode packageInfoClassNode = ClassHelper.make(moduleNode.getPackageName() + PACKAGE_INFO);
 
         if (!classNodeList.contains(packageInfoClassNode)) {
             moduleNode.addClass(packageInfoClassNode);
@@ -3927,8 +3927,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String CALL_STR = "call";
     private static final String THIS_STR = "this";
     private static final String SUPER_STR = "super";
-    private static final String PACKAGE_INFO_FILE_NAME = "package-info.groovy";
-    private static final String GROOVY_ANNOTATIONS_PACKAGE_INFO = "groovy.annotations.package-info";
+    private static final String PACKAGE_INFO = "package-info";
+    private static final String PACKAGE_INFO_FILE_NAME = PACKAGE_INFO + ".groovy";
     private static final String GROOVY_TRANSFORM_TRAIT = "groovy.transform.Trait";
     private static final Set<String> PRIMITIVE_TYPE_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("boolean", "char", "byte", "short", "int", "long", "float", "double")));
     private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
