@@ -30,6 +30,9 @@ obj.prop[0][1] = 'a'
 this = someValue;
 super = someValue;
 
+list[0] = 1
+list[1, 2] = [11, 22]
+
 (a)         = [1]
 (a)         = x++
 (a)         = (SomeType)x++

@@ -1688,11 +1688,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/ListIteratingTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/ListTest.groovy"() {
         unzipAndTest("src/test/groovy/ListTest.groovy", [])
     }
-    */
 
     /* FIXME
     void "test src/test/groovy/LiteralTypesTest.groovy"() {
