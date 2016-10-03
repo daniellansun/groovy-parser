@@ -51,3 +51,10 @@ switch (a) {case 1:
     case 4 + 2:
     case 5:
     default: break;}
+
+switch (a) {
+    case 1:
+        int x = 1;
+    default:
+        int y = 2;
+}

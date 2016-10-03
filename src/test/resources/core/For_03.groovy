@@ -16,3 +16,7 @@ for (def i in [1, 2]) {
         }
     }
 }
+
+
+for (;;)
+    int number = 1

@@ -227,11 +227,16 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 this.configureAST(
                         new BooleanExpression(conditionExpression), conditionExpression);
 
-        return this.configureAST(
-                new IfStatement(booleanExpression,
-                        (Statement) this.visit(ctx.tb),
-                        asBoolean(ctx.ELSE()) ? (Statement) this.visit(ctx.fb) : EmptyStatement.INSTANCE),
-                ctx);
+        Statement ifBlock =
+                this.unpackStatement(
+                        (Statement) this.visit(ctx.tb));
+        Statement elseBlock =
+                this.unpackStatement(
+                        asBoolean(ctx.ELSE())
+                                ? (Statement) this.visit(ctx.fb)
+                                : EmptyStatement.INSTANCE);
+
+        return this.configureAST(new IfStatement(booleanExpression, ifBlock, elseBlock), ctx);
     }
 
     @Override
@@ -239,7 +244,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         Pair<Parameter, Expression> controlPair = this.visitForControl(ctx.forControl());
 
         return this.configureAST(
-                new ForStatement(controlPair.getKey(), controlPair.getValue(), (Statement) this.visit(ctx.statement())),
+                new ForStatement(controlPair.getKey(), controlPair.getValue(), this.unpackStatement((Statement) this.visit(ctx.statement()))),
                 ctx);
     }
 
@@ -318,7 +323,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         new BooleanExpression(conditionExpression), conditionExpression);
 
         return this.configureAST(
-                new WhileStatement(booleanExpression, (Statement) this.visit(ctx.statement())),
+                new WhileStatement(booleanExpression, this.unpackStatement((Statement) this.visit(ctx.statement()))),
                 ctx);
     }
 
@@ -3197,6 +3202,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private BinaryExpression createBinaryExpression(ExpressionContext left, Token op, ExpressionContext right) {
         return new BinaryExpression((Expression) this.visit(left), this.createGroovyToken(op), (Expression) this.visit(right));
+    }
+
+    private Statement unpackStatement(Statement statement) {
+        if (statement instanceof DeclarationListStatement) {
+            // this.createBlockStatement(statement); // TODO if DeclarationListStatement contains more than 1 declarations, maybe it's better to create a block to hold them
+            return ((DeclarationListStatement) statement).getDeclarationStatements().get(0);
+        }
+
+        return statement;
     }
 
     private BlockStatement createBlockStatement(Statement... statements) {

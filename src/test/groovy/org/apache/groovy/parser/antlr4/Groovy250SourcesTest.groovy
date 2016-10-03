@@ -1203,11 +1203,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/gls/property/MetaClassOverridingTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/gls/scope/BlockScopeVisibilityTest.groovy"() {
         unzipAndTest("src/test/gls/scope/BlockScopeVisibilityTest.groovy", [])
     }
-    */
 
     void "test src/test/gls/scope/ClassVariableHidingTest.groovy"() {
         unzipAndTest("src/test/gls/scope/ClassVariableHidingTest.groovy", [])

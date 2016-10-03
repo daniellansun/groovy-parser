@@ -49,3 +49,8 @@ while(true) {
         break out2;
     }
 }
+
+
+while (false)
+    int number = 1
+
