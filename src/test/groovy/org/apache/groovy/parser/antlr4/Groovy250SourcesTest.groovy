@@ -1135,11 +1135,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/gls/annotations/closures/JavaCompatibilityParameterized.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/gls/ch06/s05/GName1Test.groovy"() {
         unzipAndTest("src/test/gls/ch06/s05/GName1Test.groovy", [])
     }
-    */
 
     void "test src/test/gls/ch08/s04/FormalParameterTest.groovy"() {
         unzipAndTest("src/test/gls/ch08/s04/FormalParameterTest.groovy", [])
