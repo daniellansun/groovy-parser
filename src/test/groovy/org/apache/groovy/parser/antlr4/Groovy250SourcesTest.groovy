@@ -1584,11 +1584,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/ForLoopWithLocalVariablesTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/GStringTest.groovy"() {
         unzipAndTest("src/test/groovy/GStringTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/GeneratorTest.groovy"() {
         unzipAndTest("src/test/groovy/GeneratorTest.groovy", [])

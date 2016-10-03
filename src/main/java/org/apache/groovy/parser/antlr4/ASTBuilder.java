@@ -2575,6 +2575,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     Expression expression = this.visitGstringValue(e);
 
                     if (expression instanceof ClosureExpression && !asBoolean(e.closure().ARROW())) {
+                        List<Statement> statementList = ((BlockStatement) ((ClosureExpression) expression).getCode()).getStatements();
+
+                        if (statementList.stream().allMatch(x -> !asBoolean(x))) {
+                            return this.configureAST(new ConstantExpression(null), e);
+                        }
+
                         return this.configureAST(new MethodCallExpression(expression, CALL_STR, new ArgumentListExpression()), e);
                     }
 
