@@ -44,8 +44,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1919,25 +1917,17 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 if (expression instanceof ConstantExpression && !insidePar) {
                     ConstantExpression constantExpression = (ConstantExpression) expression;
 
-                    Object value = constantExpression.getValue();
-
-                    if (value instanceof Integer) {
-                        value = -((Integer) value);
-                    } else if (value instanceof Long) {
-                        value = -((Long) value);
-                    } else if (value instanceof Float) {
-                        value = -((Float) value);
-                    } else if (value instanceof Double) {
-                        value = -((Double) value);
-                    } else if (value instanceof BigDecimal) {
-                        value = ((BigDecimal) value).negate();
-                    } else if (value instanceof BigInteger) {
-                        value = ((BigInteger) value).negate();
-                    } else {
-                        throw createParsingFailedException("Unexprected value: " + value, ctx);
+                    String integerLiteralText = constantExpression.getNodeMetaData(INTEGER_LITERAL_TEXT);
+                    if (asBoolean((Object) integerLiteralText)) {
+                        return this.configureAST(new ConstantExpression(Numbers.parseInteger(null, SUB_STR + integerLiteralText)), ctx);
                     }
 
-                    return this.configureAST(new ConstantExpression(value, false), ctx);
+                    String floatingPointLiteralText = constantExpression.getNodeMetaData(FLOATING_POINT_LITERAL_TEXT);
+                    if (asBoolean((Object) floatingPointLiteralText)) {
+                        return this.configureAST(new ConstantExpression(Numbers.parseDecimal(SUB_STR + floatingPointLiteralText)), ctx);
+                    }
+
+                    throw new GroovyBugError("Failed to find the original number literal text: " + constantExpression.getText());
                 }
 
                 return this.configureAST(new UnaryMinusExpression(expression), ctx);
@@ -2457,6 +2447,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         ConstantExpression constantExpression = new ConstantExpression(Numbers.parseInteger(null, text), !text.startsWith(SUB_STR));
         constantExpression.putNodeMetaData(IS_NUMERIC, true);
+        constantExpression.putNodeMetaData(INTEGER_LITERAL_TEXT, text);
 
         return this.configureAST(constantExpression, ctx);
     }
@@ -2467,6 +2458,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         ConstantExpression constantExpression = new ConstantExpression(Numbers.parseDecimal(text), !text.startsWith(SUB_STR));
         constantExpression.putNodeMetaData(IS_NUMERIC, true);
+        constantExpression.putNodeMetaData(FLOATING_POINT_LITERAL_TEXT, text);
 
         return this.configureAST(constantExpression, ctx);
     }
@@ -3831,6 +3823,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String CLASS_DECLARATION_CLASS_NODE = "_CLASS_DECLARATION_CLASS_NODE";
     private static final String VARIABLE_DECLARATION_VARIABLE_TYPE = "_VARIABLE_DECLARATION_VARIABLE_TYPE";
     private static final String ANONYMOUS_INNER_CLASS_SUPER_CLASS = "_ANONYMOUS_INNER_CLASS_SUPER_CLASS";
+    private static final String INTEGER_LITERAL_TEXT = "_INTEGER_LITERAL_TEXT";
+    private static final String FLOATING_POINT_LITERAL_TEXT = "_FLOATING_POINT_LITERAL_TEXT";
 
     private static final String CLASS_NAME = "_CLASS_NAME";
 }

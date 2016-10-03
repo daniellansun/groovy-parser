@@ -40,7 +40,7 @@ class GroovyParserTest extends GroovyTestCase {
     void tearDown() {}
 
     void "test groovy core - Comments"() {
-        doTest('core/Comments.groovy');
+        doTest('core/Comments.groovy', [ExpressionStatement]);
     }
 
     void "test groovy core - PackageDeclaration"() {

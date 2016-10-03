@@ -743,11 +743,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/spec/test/SwingASTTransformsTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/spec/test/SyntaxTest.groovy"() {
         unzipAndTest("src/spec/test/SyntaxTest.groovy", [])
     }
-    */
 
     void "test src/spec/test/TestingASTTransformsTest.groovy"() {
         unzipAndTest("src/spec/test/TestingASTTransformsTest.groovy", [])
