@@ -3197,6 +3197,10 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private ConstantExpression createConstantExpression(Expression expression) {
+        if (expression instanceof ConstantExpression) {
+            return (ConstantExpression) expression;
+        }
+
         return this.configureAST(new ConstantExpression(expression.getText()), expression);
     }
 

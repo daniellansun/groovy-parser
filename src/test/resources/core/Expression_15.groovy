@@ -111,3 +111,15 @@ person*.child[1, 2 + 6, *[3, 4]]*.@child*.@child()?.@child().@child()?.child?.@c
 
 (obj.x)()
 (obj.@x)()
+
+find x:
+        1 confirm right
+
+
+find x:
+        1,
+        y:
+                2 confirm right
+
+a b 1 2
+

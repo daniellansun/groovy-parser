@@ -1263,11 +1263,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/gls/syntax/Gep3OrderDslTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/gls/syntax/Gep3Test.groovy"() {
         unzipAndTest("src/test/gls/syntax/Gep3Test.groovy", [])
     }
-    */
 
     void "test src/test/gls/syntax/MethodCallValidationTest.groovy"() {
         unzipAndTest("src/test/gls/syntax/MethodCallValidationTest.groovy", [])

@@ -916,8 +916,8 @@ mapEntryList
     ;
 
 mapEntry
-    :   mapEntryLabel COLON expression
-    |   MUL COLON expression
+    :   mapEntryLabel COLON nls expression
+    |   MUL COLON nls expression
     ;
 
 mapEntryLabel
@@ -963,7 +963,7 @@ argumentList
     :   (   expressionListElement
         |   mapEntry
         )
-        (   COMMA
+        (   COMMA nls
             (   expressionListElement
             |   mapEntry
             )
