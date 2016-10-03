@@ -380,11 +380,11 @@ formalParameterList
     ;
 
 formalParameter
-    :   variableModifiersOpt type? variableDeclaratorId (ASSIGN nls expression)?
+    :   variableModifiersOpt type?          variableDeclaratorId (ASSIGN nls expression)?
     ;
 
 lastFormalParameter
-    :   variableModifiersOpt (type? ELLIPSIS)? variableDeclaratorId (ASSIGN nls expression)?
+    :   variableModifiersOpt type? ELLIPSIS variableDeclaratorId (ASSIGN nls expression)?
     ;
 
 methodBody
