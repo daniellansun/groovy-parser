@@ -878,7 +878,7 @@ primary
     :   identifier                                                                          #identifierPrmrAlt
     |   literal                                                                             #literalPrmrAlt
     |   gstring                                                                             #gstringPrmrAlt
-    |   NEW creator                                                                         #newPrmrAlt
+    |   NEW nls creator                                                                     #newPrmrAlt
     |   THIS                                                                                #thisPrmrAlt
     |   SUPER                                                                               #superPrmrAlt
     |   parExpression                                                                       #parenPrmrAlt
@@ -925,7 +925,7 @@ mapEntryLabel
     ;
 
 creator
-    :   createdName arguments anonymousInnerClassDeclaration[0]?
+    :   createdName nls arguments anonymousInnerClassDeclaration[0]?
     |   createdName (LBRACK expression RBRACK)+ (b+=LBRACK RBRACK)*
     ;
 

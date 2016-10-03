@@ -1792,11 +1792,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/NestedClassTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/NewExpressionTest.groovy"() {
         unzipAndTest("src/test/groovy/NewExpressionTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/NoPackageTest.groovy"() {
         unzipAndTest("src/test/groovy/NoPackageTest.groovy", [])
@@ -1822,11 +1820,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/OverrideTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/PlusEqualsTest.groovy"() {
         unzipAndTest("src/test/groovy/PlusEqualsTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/PostfixTest.groovy"() {
         unzipAndTest("src/test/groovy/PostfixTest.groovy", [])
@@ -1880,11 +1876,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/RangeTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/ReadLineTest.groovy"() {
         unzipAndTest("src/test/groovy/ReadLineTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/RegularExpressionsTest.groovy"() {
         unzipAndTest("src/test/groovy/RegularExpressionsTest.groovy", [])
@@ -1922,11 +1916,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/SingletonBugTest.groovy", [])
     }
 
-    /* FIXME
     void "test src/test/groovy/SliceTest.groovy"() {
         unzipAndTest("src/test/groovy/SliceTest.groovy", [])
     }
-    */
 
     void "test src/test/groovy/SocketTest.groovy"() {
         unzipAndTest("src/test/groovy/SocketTest.groovy", [])
