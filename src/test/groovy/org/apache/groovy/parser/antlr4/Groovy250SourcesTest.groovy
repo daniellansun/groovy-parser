@@ -37,11 +37,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("benchmark/bench/ackermann.groovy", [])
     }
 
-    /* FIXME SEE https://github.com/danielsun1106/groovy-parser/issues/2
     void "test benchmark/bench/ary.groovy"() {
         unzipAndTest("benchmark/bench/ary.groovy", [])
     }
-    */
 
     void "test benchmark/bench/binarytrees.groovy"() {
         unzipAndTest("benchmark/bench/binarytrees.groovy", [])

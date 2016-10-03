@@ -29,3 +29,5 @@ import java.lang.annotation.Target
     boolean synchronize2() default
             false
 }
+
+@interface a {}

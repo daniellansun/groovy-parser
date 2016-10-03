@@ -612,23 +612,24 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         final ClassNode outerClass = classNodeStack.peek();
         ClassNode classNode;
+        String className = ctx.identifier().getText();
         if (asBoolean(ctx.ENUM())) {
             classNode =
                     EnumHelper.makeEnumNode(
-                            asBoolean(outerClass) ? ctx.className().getText() : packageName + ctx.className().getText(),
+                            asBoolean(outerClass) ? className : packageName + className,
                             modifiers, null, outerClass);
         } else {
             if (asBoolean(outerClass)) {
                 classNode =
                         new InnerClassNode(
                                 outerClass,
-                                outerClass.getName() + "$" + ctx.className().getText(),
+                                outerClass.getName() + "$" + className,
                                 modifiers | (outerClass.isInterface() ? Opcodes.ACC_STATIC : 0),
                                 ClassHelper.OBJECT_TYPE);
             } else {
                 classNode =
                         new ClassNode(
-                                packageName + ctx.className().getText(),
+                                packageName + className,
                                 modifiers,
                                 ClassHelper.OBJECT_TYPE);
             }
@@ -636,7 +637,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         this.configureAST(classNode, ctx);
-        classNode.putNodeMetaData(CLASS_NAME, ctx.className().getText());
+        classNode.putNodeMetaData(CLASS_NAME, className);
         classNode.setSyntheticPublic(syntheticPublic);
 
         if (asBoolean(ctx.TRAIT())) {

@@ -41,3 +41,4 @@ enum E3 {
 
 
 
+enum e {}

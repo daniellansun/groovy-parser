@@ -217,7 +217,7 @@ locals[ int t ]
         |   AT INTERFACE { $t = 3; }
         |   TRAIT { $t = 4; }
         )
-        className nls
+        identifier nls
 
         (
             { 3 != $t }?
