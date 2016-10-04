@@ -6084,11 +6084,9 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/commands/DisplayCommand.groovy", [])
     }
 
-    /* FIXME    SEE https://github.com/danielsun1106/groovy-parser/issues/5
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/commands/DocCommand.groovy"() {
-        unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/commands/DocCommand.groovy", [])
+        unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/commands/DocCommand.groovy", [], ['for \'java.awt.Desktop\'.': 'for "java.awt.Desktop".'])
     }
-    */
 
     void "test subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/commands/EditCommand.groovy"() {
         unzipAndTest("subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/commands/EditCommand.groovy", [])
