@@ -183,11 +183,13 @@ class TestUtils {
         String result = "";
 
         def zf = new ZipFile(new File(path));
-        zf.withCloseable {
+        try {
             def is = new BufferedInputStream(zf.getInputStream(new ZipEntry(entryName)));
-            is.withCloseable {
-                result = is.getText("UTF-8");
-            }
+            result = is.getText("UTF-8");
+        } catch (Exception e) {
+            log.severe(e.message);
+        } finally {
+            zf.close();
         }
 
         return result;
