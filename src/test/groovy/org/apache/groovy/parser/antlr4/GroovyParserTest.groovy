@@ -25,7 +25,8 @@ import org.codehaus.groovy.ast.stmt.AssertStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
 import org.codehaus.groovy.syntax.Token
 
-import static org.apache.groovy.parser.antlr4.TestUtils.doTest;
+import static org.apache.groovy.parser.antlr4.TestUtils.doTest
+import static org.apache.groovy.parser.antlr4.TestUtils.doRunAndTest
 
 /**
  * Some basic test cases for the new parser
@@ -73,6 +74,7 @@ class GroovyParserTest extends GroovyTestCase {
         doTest('core/Annotation_07.groovy');
         doTest('core/Annotation_08.groovy');
         doTest('core/Annotation_09.groovy');
+        doRunAndTest('core/Annotation_10x.groovy');
     }
 
     void "test groovy core - Literal"() {

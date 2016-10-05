@@ -8,6 +8,7 @@ import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 import org.apache.groovy.parser.antlr4.util.GroovySourceGenerator
 import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.stmt.*
+import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.syntax.Token
 
 import java.util.zip.ZipEntry
@@ -193,6 +194,35 @@ class TestUtils {
         }
 
         return result;
+    }
+
+    static doRunAndTest(String path) {
+        assert executeScript(path);
+    }
+
+    static executeScript(String path) {
+        executeScript(createAntlr4Shell(), "$RESOURCES_PATH/$path")
+    }
+
+    static executeScript(gsh, String path) {
+        def file = new File(path);
+        def content = file.text;
+
+        try {
+            gsh.evaluate(content);
+            log.info("Evaluated $file")
+            return true;
+        } catch (Throwable t) {
+            log.severe("Failed $file: ${t.getMessage()}");
+            return false;
+        }
+    }
+
+    static createAntlr4Shell() {
+        CompilerConfiguration configuration = new CompilerConfiguration(CompilerConfiguration.DEFAULT)
+        configuration.pluginFactory = new Antlr4PluginFactory()
+
+        return new GroovyShell(configuration);
     }
 
     public static final List COMMON_IGNORE_CLASS_LIST = Collections.unmodifiableList([AssertStatement, BreakStatement, ConstructorNode, ExpressionStatement, FieldNode, ForStatement, GenericsType, IfStatement, MethodNode, Parameter, PropertyNode, ReturnStatement, ThrowStatement, Token, WhileStatement]);
