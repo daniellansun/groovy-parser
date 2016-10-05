@@ -18,3 +18,11 @@ assert 1 \
         3 :    \
         'hello, world'
 
+assert 1 \
+        + 2 * \
+\
+        3 :    \
+\
+\
+'hello, world'
+

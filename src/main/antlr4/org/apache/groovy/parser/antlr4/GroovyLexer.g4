@@ -755,7 +755,7 @@ ELLIPSIS : '...';
 //
 // Whitespace, line escape and comments
 //
-WS  :  ([ \t\u000C]+ | LineEscape)     -> skip
+WS  :  ([ \t\u000C]+ | LineEscape+)     -> skip
     ;
 
 
