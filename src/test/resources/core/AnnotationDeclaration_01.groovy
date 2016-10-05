@@ -30,4 +30,10 @@ import java.lang.annotation.Target
             false
 }
 
-@interface a {}
+@interface a {
+
+}
+
+@interface b {
+    String name()
+}

@@ -960,10 +960,13 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                             new ExpressionStatement(
                                     this.visitElementValue(ctx.elementValue())),
                             ctx.elementValue());
+
                 }
 
                 modifiers |= classNode.isInterface() ? Opcodes.ACC_ABSTRACT : 0;
                 methodNode = classNode.addMethod(methodName, modifiers, returnType, parameters, exceptions, code);
+
+                methodNode.setAnnotationDefault(asBoolean(ctx.elementValue()));
             }
 
             modifierManager.attachAnnotations(methodNode);
