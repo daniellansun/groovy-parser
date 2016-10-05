@@ -183,9 +183,9 @@ class TestUtils {
         String result = "";
 
         def zf = new ZipFile(new File(path));
-        zf.withAutoCloseable {
+        zf.withCloseable {
             def is = new BufferedInputStream(zf.getInputStream(new ZipEntry(entryName)));
-            is.withAutoCloseable {
+            is.withCloseable {
                 result = is.getText("UTF-8");
             }
         }
