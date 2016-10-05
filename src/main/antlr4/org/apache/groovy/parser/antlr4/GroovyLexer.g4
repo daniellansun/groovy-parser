@@ -753,14 +753,11 @@ AT : '@';
 ELLIPSIS : '...';
 
 //
-// Whitespace and comments
+// Whitespace, line escape and comments
 //
-WS  :  [ \t\u000C]+     -> skip
+WS  :  ([ \t\u000C]+ | LineEscape)     -> skip
     ;
 
-LINE_ESCAPE
-    :   LineEscape
-    ;
 
 // Inside (...) and [...] but not {...}, ignore newlines.
 NL  : '\r'? '\n'            { this.ignoreTokenInsideParens(); }

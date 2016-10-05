@@ -1053,9 +1053,7 @@ keywords
     ;
 
 nls
-    :   (   NL
-        |   LINE_ESCAPE
-        )*
+    :   NL*
     ;
 
 sep :   SEMI NL*
