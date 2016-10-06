@@ -20,6 +20,7 @@ package org.apache.groovy.parser.antlr4;
 
 import groovy.lang.IntRange;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.groovy.parser.antlr4.util.StringUtils;
@@ -74,12 +75,32 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         this.parser.setErrorHandler(new BailErrorStrategy());
 
-        this.setupErrorListener(this.parser);
+    }
+
+    private GroovyParserRuleContext buildCST(PredictionMode predictionMode) {
+        parser.getInterpreter().setPredictionMode(predictionMode);
+
+        if (PredictionMode.SLL.equals(predictionMode)) {
+            parser.removeErrorListeners();
+        } else {
+            ((CommonTokenStream) parser.getInputStream()).reset();
+            this.setupErrorListener(parser);
+        }
+
+        return parser.compilationUnit();
+    }
+
+    private GroovyParserRuleContext buildCST() {
+        try {
+            return buildCST(PredictionMode.SLL);
+        } catch (Exception e) {
+            return buildCST(PredictionMode.LL);
+        }
     }
 
     public ModuleNode buildAST() {
         try {
-            return (ModuleNode) this.visit(parser.compilationUnit());
+            return (ModuleNode) this.visit(this.buildCST());
         } catch (CompilationFailedException e) {
             LOGGER.log(Level.SEVERE, "Failed to build AST", e);
 
