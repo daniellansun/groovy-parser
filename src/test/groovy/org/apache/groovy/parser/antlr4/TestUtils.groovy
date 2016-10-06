@@ -27,11 +27,11 @@ class TestUtils {
     public static final String RESOURCES_PATH = new File(DEFAULT_RESOURCES_PATH).exists() ? DEFAULT_RESOURCES_PATH : 'src/test/resources';
 
     static doTest(String path) {
-        doTest(path, ASTComparatorCategory.DEFAULT_CONFIGURATION)
+        return doTest(path, ASTComparatorCategory.DEFAULT_CONFIGURATION)
     }
 
     static doTest(String path, List ignoreClazzList) {
-        doTest(path, addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST))
+        return doTest(path, addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST))
     }
 
     static doTest(String path, conf) {
@@ -50,11 +50,15 @@ class TestUtils {
         if (diffInMillis >= 500) {
             log.warning "${path}\t\t\t\t\tdiff:${diffInMillis / 1000}s,\tnew:${newElapsedTime / 1000}s,\told:${oldElapsedTime / 1000}s."
         }
+
+        return [newAST, oldAST]
     }
 
+    /*
     static unzipAndTest(String path, String entryName) {
         unzipAndTest(path, entryName, ASTComparatorCategory.DEFAULT_CONFIGURATION)
     }
+    */
 
     /*
     static unzipAndTest(String path, String entryName, List ignoreClazzList) {

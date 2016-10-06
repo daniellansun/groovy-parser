@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @date 2016/08/14
  */
 public class AtnManager {
+    private static final int CACHE_THRESHOLD = 50;
     private final Class ownerClass;
     private final ATN atn;
     private static final Map<Class, AtnWrapper> ATN_MAP = new HashMap<Class, AtnWrapper>() {
@@ -70,7 +71,7 @@ public class AtnManager {
         }
 
         public ATN checkAndClear() {
-            if (0 != counter.incrementAndGet() % 100) {
+            if (0 != counter.incrementAndGet() % CACHE_THRESHOLD) {
                 return atn;
             }
 
