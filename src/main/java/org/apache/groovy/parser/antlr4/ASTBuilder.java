@@ -519,7 +519,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public ReturnStatement visitReturnStmtAlt(ReturnStmtAltContext ctx) {
         return this.configureAST(new ReturnStatement(asBoolean(ctx.expression())
                         ? (Expression) this.visit(ctx.expression())
-                        : new ConstantExpression(null)),
+                        : ConstantExpression.EMPTY_EXPRESSION),
                 ctx);
     }
 
@@ -2256,7 +2256,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             Expression[] empties;
             if (asBoolean(ctx.b)) {
                 empties = new Expression[ctx.b.size()];
-                Arrays.setAll(empties, i -> new ConstantExpression(null));
+                Arrays.setAll(empties, i -> ConstantExpression.EMPTY_EXPRESSION);
             } else {
                 empties = new Expression[0];
             }
@@ -3413,7 +3413,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private void addEmptyReturnStatement() {
-        moduleNode.addStatement(new ReturnStatement(new ConstantExpression(null)));
+        moduleNode.addStatement(new ReturnStatement(ConstantExpression.EMPTY_EXPRESSION));
     }
 
     private void addPackageInfoClassNode() {
