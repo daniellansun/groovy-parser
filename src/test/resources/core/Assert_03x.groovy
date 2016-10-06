@@ -1,29 +1,18 @@
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 
-testBinaryExpression()
+testPostfixExpression()
 
 /***********************************/
-void testBinaryExpression() {
-    isRendered """
-assert a * b
-       | | |
-       0 0 1
-        """, {
-        def a = 0
-        def b = 1
-        assert a * b
-    }
 
+void testPostfixExpression() {
     isRendered """
-assert a[b]
-       |||
-       ||0
-       |false
-       [false]
+assert x++ == null
+       ||  |
+       |0  false
+       0
         """, {
-        def a = [false]
-        def b = 0
-        assert a[b]
+        def x = 0
+        assert x++ == null
     }
 }
 

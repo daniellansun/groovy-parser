@@ -1889,7 +1889,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(ctx.op)) {
             return this.configureAST(
                     new PostfixExpression(pathExpr, createGroovyToken(ctx.op)),
-                    ctx);
+                    ctx.op/*powerassert requires different column for values, so we have to copy the location of op*/);
         }
 
         return this.configureAST(pathExpr, ctx);
