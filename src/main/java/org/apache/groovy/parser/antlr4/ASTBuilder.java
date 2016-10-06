@@ -1826,11 +1826,12 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Pair<Token, Expression> visitIndexPropertyArgs(IndexPropertyArgsContext ctx) {
         List<Expression> expressionList = this.visitExpressionList(ctx.expressionList());
-        Expression indexExpr;
+
 
         if (expressionList.size() == 1) {
             Expression expr = expressionList.get(0);
 
+            Expression indexExpr;
             if (expr instanceof SpreadExpression) { // e.g. a[*[1, 2]]
                 ListExpression listExpression = new ListExpression(expressionList);
                 listExpression.setWrapped(false);
@@ -1839,14 +1840,15 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             } else { // e.g. a[1]
                 indexExpr = expr;
             }
-        } else { // e.g. a[1, 2]
-            ListExpression listExpression = new ListExpression(expressionList);
-            listExpression.setWrapped(true);
 
-            indexExpr = listExpression;
+            return new Pair<>(ctx.LBRACK().getSymbol(), indexExpr);
         }
 
-        return new Pair<>(ctx.LBRACK().getSymbol(), this.configureAST(indexExpr, ctx));
+        // e.g. a[1, 2]
+        ListExpression listExpression = new ListExpression(expressionList);
+        listExpression.setWrapped(true);
+
+        return new Pair<>(ctx.LBRACK().getSymbol(), this.configureAST(listExpression, ctx));
     }
 
     @Override
