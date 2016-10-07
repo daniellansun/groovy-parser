@@ -7,10 +7,10 @@ The brand new parser can parse Groovy source code and construct the related AST,
 
 Currently almost all features of Groovy are available, the parser is being testing. After all test cases passes, some new features will be added:
 
-* do-while loop
+* do-while loop(DONE)
 * identical operation`===`
 * lambda expression
-* groovydoc attached to AST node as metadata
+* groovydoc attached to AST node as metadata(DONE)
 * etc.
 
 If you want to give it a try, make sure your machine have `JDK 8+` installed first, then follow the steps:

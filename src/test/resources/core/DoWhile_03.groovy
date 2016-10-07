@@ -8,4 +8,4 @@ do {
     j++
 } while (true)
 
-assert i == 4
+assert j == 3

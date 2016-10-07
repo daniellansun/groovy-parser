@@ -214,7 +214,7 @@ class TestUtils {
 
         try {
             gsh.evaluate(content);
-            log.info("Evaluated $file")
+//            log.info("Evaluated $file")
             return true;
         } catch (Throwable t) {
             log.severe("Failed $file: ${t.getMessage()}");
