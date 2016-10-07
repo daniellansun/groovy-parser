@@ -166,6 +166,10 @@ class GroovyParserTest extends GroovyTestCase {
         doRunAndTest('core/Expression_21x.groovy');
     }
 
+    void "test groovy core - IdenticalOp"() {
+        doRunAndTest('core/IdenticalOp_01x.groovy');
+    }
+
     void "test groovy core - Assert"() {
         doTest('core/Assert_01.groovy');
         doRunAndTest('core/Assert_02x.groovy');
@@ -187,9 +191,9 @@ class GroovyParserTest extends GroovyTestCase {
     }
 
     void "test groovy core - DoWhile"() {
-        doRunAndTest('core/DoWhile_01.groovy');
-        doRunAndTest('core/DoWhile_02.groovy');
-        doRunAndTest('core/DoWhile_03.groovy');
+        doRunAndTest('core/DoWhile_01x.groovy');
+        doRunAndTest('core/DoWhile_02x.groovy');
+        doRunAndTest('core/DoWhile_03x.groovy');
     }
 
     void "test groovy core - TryCatch"() {

@@ -3960,9 +3960,11 @@ class Groovy250ScriptsTest extends GroovyTestCase {
         unzipAndTest("scripts/EqualsAndHashCodeTransformTest_006.groovy", [])
     }
 
+    /* moved to core/IdenticalOp_01x.groovy
     void "test EqualsTest_001.groovy"() {
         unzipAndTest("scripts/EqualsTest_001.groovy", [])
     }
+    */
 
     void "test ExpandoMetaClassTest_001.groovy"() {
         unzipAndTest("scripts/ExpandoMetaClassTest_001.groovy", [])
