@@ -186,6 +186,12 @@ class GroovyParserTest extends GroovyTestCase {
         doTest('core/While_01.groovy');
     }
 
+    void "test groovy core - DoWhile"() {
+        doRunAndTest('core/DoWhile_01.groovy');
+        doRunAndTest('core/DoWhile_02.groovy');
+        doRunAndTest('core/DoWhile_03.groovy');
+    }
+
     void "test groovy core - TryCatch"() {
         doTest('core/TryCatch_01.groovy');
     }

@@ -357,6 +357,24 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public DoWhileStatement visitDoWhileStmtAlt(DoWhileStmtAltContext ctx) {
+        Expression conditionExpression = this.visitParExpression(ctx.parExpression());
+
+        // wrap the original BooleanExpression with NotExpression to workaround bugs of "org.codehaus.groovy.classgen.asm.StatementWriter#writeDoWhileLoop"
+        BooleanExpression booleanExpression =
+                new NotExpression( // an imagined expression, no node location needed
+                        this.configureAST(
+                                new BooleanExpression(conditionExpression), conditionExpression));
+
+        Statement loopBlock = this.unpackStatement((Statement) this.visit(ctx.statement()));
+
+        return this.configureAST(
+                new DoWhileStatement(booleanExpression, asBoolean(loopBlock) ? loopBlock : EmptyStatement.INSTANCE),
+                ctx);
+    }
+
+
+    @Override
     public TryCatchStatement visitTryCatchStmtAlt(TryCatchStmtAltContext ctx) {
         TryCatchStatement tryCatchStatement =
                 new TryCatchStatement((Statement) this.visit(ctx.block()),
@@ -3949,6 +3967,8 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     /**
      * Attach doc comment to member node as meta data
+     * <p>
+     * TODO add a switch to turn on or off the doc attachment, which impacts the performance somehow
      */
     private void attachDocCommentAsMetaData(ASTNode node, GroovyParserRuleContext ctx) {
         if (!asBoolean(node) || !asBoolean(ctx)) {

@@ -85,7 +85,7 @@ clean.dependsOn cleanGeneratedSources
 antlr4.dependsOn clean
 
 ext {
-    asmVersion = '5.0.3'
+    asmVersion = '6.0_ALPHA'
     antlr4Version = '4.5.3'
     groovyVersion = '2.5.0-SNAPSHOT'
     junitVersion = '4.12'
@@ -94,13 +94,14 @@ ext {
 dependencies {
 //    antlr4 "org.antlr:antlr4:$antlr4Version"
     antlr4 "com.tunnelvisionlabs:antlr4:$antlr4Version"
-    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
 
     compile "org.ow2.asm:asm:$asmVersion"
     compile "org.ow2.asm:asm-analysis:$asmVersion"
     compile "org.ow2.asm:asm-commons:$asmVersion"
     compile "org.ow2.asm:asm-tree:$asmVersion"
     compile "org.ow2.asm:asm-util:$asmVersion"
+
+    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
 
     testCompile "junit:junit:$junitVersion"
 }

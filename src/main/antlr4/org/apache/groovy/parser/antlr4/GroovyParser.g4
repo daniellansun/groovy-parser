@@ -542,7 +542,7 @@ statement
     |   IF parExpression nls tb=statement (nls ELSE nls fb=statement)?                      #ifElseStmtAlt
     |   FOR LPAREN forControl RPAREN nls statement                                          #forStmtAlt
     |   WHILE parExpression nls statement                                                   #whileStmtAlt
-//TODO    |   DO statement WHILE parExpression sep                                                #doWhileStmtAlt
+    |   DO nls statement nls WHILE parExpression                                            #doWhileStmtAlt
     |   TRY nls block ((nls catchClause)+ (nls finallyBlock)? | nls finallyBlock)           #tryCatchStmtAlt
 //TODO    |   TRY resourceSpecification block catchClause* finallyBlock?                          #tryResourceStmtAlt
     |   SWITCH parExpression nls LBRACE nls switchBlockStatementGroup* nls RBRACE           #switchStmtAlt
