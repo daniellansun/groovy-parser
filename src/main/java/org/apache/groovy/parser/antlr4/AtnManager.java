@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @date 2016/08/14
  */
 public class AtnManager {
-    private static final int CACHE_THRESHOLD = 50;
+    private static final int CACHE_THRESHOLD;
     private final Class ownerClass;
     private final ATN atn;
     private static final Map<Class, AtnWrapper> ATN_MAP = new HashMap<Class, AtnWrapper>() {
@@ -40,6 +40,21 @@ public class AtnManager {
             put(GroovyLangParser.class, new AtnWrapper(GroovyLangParser._ATN));
         }
     };
+
+    static {
+        int t = 50;
+
+        try {
+            t = Integer.parseInt(System.getProperty("groovy.antlr4.cache.threshold"));
+
+            // cache threshold should be at least 50 for better performance
+            t = t < 50 ? 50 : t;
+        } catch (Exception e) {
+            // ignored
+        }
+
+        CACHE_THRESHOLD = t;
+    }
 
     public AtnManager(GroovyLangLexer lexer) {
         this.ownerClass = lexer.getClass();
