@@ -61,9 +61,9 @@ import static org.codehaus.groovy.runtime.DefaultGroovyMethods.last;
  * @author <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * @date 2016/08/14
  */
-public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements GroovyParserVisitor<Object> {
+public class AstBuilder extends GroovyParserBaseVisitor<Object> implements GroovyParserVisitor<Object> {
 
-    public ASTBuilder(SourceUnit sourceUnit, ClassLoader classLoader) {
+    public AstBuilder(SourceUnit sourceUnit, ClassLoader classLoader) {
         this.sourceUnit = sourceUnit;
         this.moduleNode = new ModuleNode(sourceUnit);
 
@@ -4082,7 +4082,7 @@ public class ASTBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String PACKAGE_INFO_FILE_NAME = PACKAGE_INFO + ".groovy";
     private static final String GROOVY_TRANSFORM_TRAIT = "groovy.transform.Trait";
     private static final Set<String> PRIMITIVE_TYPE_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("boolean", "char", "byte", "short", "int", "long", "float", "double")));
-    private static final Logger LOGGER = Logger.getLogger(ASTBuilder.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AstBuilder.class.getName());
 
     private static final String DOC_COMMENT_PREFIX = "/**";
 

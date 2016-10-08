@@ -39,7 +39,7 @@ public class Antlr4ParserPlugin implements ParserPlugin {
 
     @Override
     public ModuleNode buildAST(SourceUnit sourceUnit, java.lang.ClassLoader classLoader, Reduction cst) throws ParserException {
-        ASTBuilder builder = new ASTBuilder(sourceUnit, classLoader);
+        AstBuilder builder = new AstBuilder(sourceUnit, classLoader);
         return builder.buildAST();
     }
 }

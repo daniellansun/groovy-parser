@@ -5,7 +5,7 @@ import org.apache.groovy.parser.AbstractParser
 import org.apache.groovy.parser.Antlr2Parser
 import org.apache.groovy.parser.Antlr4Parser
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
-import org.apache.groovy.parser.antlr4.util.GroovySourceGenerator
+import org.apache.groovy.parser.antlr4.util.AstDumper
 import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.stmt.*
 import org.codehaus.groovy.control.CompilerConfiguration
@@ -161,7 +161,7 @@ class TestUtils {
     }
 
     static genSrc(ModuleNode ast) {
-        return new GroovySourceGenerator(ast).gen();
+        return new AstDumper(ast).gen();
     }
 
     static profile(Closure c) {

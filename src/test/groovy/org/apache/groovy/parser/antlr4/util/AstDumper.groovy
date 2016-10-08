@@ -37,10 +37,10 @@ import java.lang.reflect.Modifier
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * @date    2016/08/16
  */
-class GroovySourceGenerator {
+class AstDumper {
     private ModuleNode ast;
 
-    public GroovySourceGenerator(ModuleNode ast) {
+    public AstDumper(ModuleNode ast) {
         this.ast = ast;
     }
 
@@ -59,7 +59,7 @@ class GroovySourceGenerator {
                 visitor.call(new SourceUnit((String) null, (ReaderSource) null, null, null, null) {
                     @Override
                     public ModuleNode getAST() {
-                        return GroovySourceGenerator.this.ast;
+                        return AstDumper.this.ast;
                     }
                 }, null, it)
             }

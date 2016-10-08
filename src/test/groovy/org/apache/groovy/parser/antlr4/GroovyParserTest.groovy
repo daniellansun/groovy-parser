@@ -50,30 +50,30 @@ class GroovyParserTest extends GroovyTestCase {
         def (newAST, oldAST) = doTest('core/Comments_02.groovy');
         List<ClassNode> classes = new ArrayList<>(newAST.classes).sort { c1, c2 -> c1.name <=> c2.name };
 
-        assert classes[0].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')            == '/** * test class Comments */'
-        assert classes[0].fields[0].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**     * test Comments.SOME_VAR     */'
-        assert classes[0].fields[1].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**     * test Comments.SOME_VAR2     */'
-        assert classes[0].fields[2].nodeMetaData[ASTBuilder.DOC_COMMENT] == null
-        assert classes[0].declaredConstructors[0].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**     * test Comments.constructor1     */'
-        assert classes[0].methods[0].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**     * test Comments.m1     */'
-        assert classes[0].methods[1].nodeMetaData[ASTBuilder.DOC_COMMENT] == null
-        assert classes[0].methods[2].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**     * test Comments.m3     */'
+        assert classes[0].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')            == '/** * test class Comments */'
+        assert classes[0].fields[0].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**     * test Comments.SOME_VAR     */'
+        assert classes[0].fields[1].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**     * test Comments.SOME_VAR2     */'
+        assert classes[0].fields[2].nodeMetaData[AstBuilder.DOC_COMMENT] == null
+        assert classes[0].declaredConstructors[0].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**     * test Comments.constructor1     */'
+        assert classes[0].methods[0].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**     * test Comments.m1     */'
+        assert classes[0].methods[1].nodeMetaData[AstBuilder.DOC_COMMENT] == null
+        assert classes[0].methods[2].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**     * test Comments.m3     */'
 
-        assert classes[1].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')            == '/**     * test class InnerClazz     */'
-        assert classes[1].fields[0].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**         * test InnerClazz.SOME_VAR3         */'
-        assert classes[1].fields[1].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**         * test InnerClazz.SOME_VAR4         */'
-        assert classes[1].methods[0].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**         * test Comments.m4         */'
-        assert classes[1].methods[1].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**         * test Comments.m5         */'
+        assert classes[1].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')            == '/**     * test class InnerClazz     */'
+        assert classes[1].fields[0].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**         * test InnerClazz.SOME_VAR3         */'
+        assert classes[1].fields[1].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**         * test InnerClazz.SOME_VAR4         */'
+        assert classes[1].methods[0].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**         * test Comments.m4         */'
+        assert classes[1].methods[1].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**         * test Comments.m5         */'
 
-        assert classes[2].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')            == '/**     * test class InnerEnum     */'
-        assert classes[2].fields[0].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**         * InnerEnum.NEW         */'
-        assert classes[2].fields[1].nodeMetaData[ASTBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**         * InnerEnum.OLD         */'
+        assert classes[2].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')            == '/**     * test class InnerEnum     */'
+        assert classes[2].fields[0].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**         * InnerEnum.NEW         */'
+        assert classes[2].fields[1].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**         * InnerEnum.OLD         */'
 
-        assert classes[3].nodeMetaData[ASTBuilder.DOC_COMMENT] == null
+        assert classes[3].nodeMetaData[AstBuilder.DOC_COMMENT] == null
 
-        assert classes[4].fields[0].nodeMetaData[ASTBuilder.DOC_COMMENT] == null
+        assert classes[4].fields[0].nodeMetaData[AstBuilder.DOC_COMMENT] == null
 
-        assert classes[5].nodeMetaData[ASTBuilder.DOC_COMMENT] == null
+        assert classes[5].nodeMetaData[AstBuilder.DOC_COMMENT] == null
     }
 
     void "test groovy core - PackageDeclaration"() {

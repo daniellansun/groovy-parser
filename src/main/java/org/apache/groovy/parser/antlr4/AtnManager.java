@@ -19,7 +19,6 @@
 package org.apache.groovy.parser.antlr4;
 
 import org.antlr.v4.runtime.atn.ATN;
-import org.antlr.v4.runtime.atn.ATNDeserializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,8 +36,8 @@ public class AtnManager {
     private final ATN atn;
     private static final Map<Class, AtnWrapper> ATN_MAP = new HashMap<Class, AtnWrapper>() {
         {
-            put(GroovyLangLexer.class, new AtnWrapper(new ATNDeserializer().deserialize(GroovyLangLexer._serializedATN.toCharArray()), GroovyLangLexer.class));
-            put(GroovyLangParser.class, new AtnWrapper(new ATNDeserializer().deserialize(GroovyLangParser._serializedATN.toCharArray()), GroovyLangParser.class));
+            put(GroovyLangLexer.class, new AtnWrapper(GroovyLangLexer._ATN));
+            put(GroovyLangParser.class, new AtnWrapper(GroovyLangParser._ATN));
         }
     };
 
@@ -62,12 +61,10 @@ public class AtnManager {
 
     private static class AtnWrapper {
         private final ATN atn;
-        private final Class ownerClass;
         private final AtomicLong counter = new AtomicLong(0);
 
-        public AtnWrapper(ATN atn, Class ownerClass) {
+        public AtnWrapper(ATN atn) {
             this.atn = atn;
-            this.ownerClass = ownerClass;
         }
 
         public ATN checkAndClear() {
@@ -75,7 +72,7 @@ public class AtnManager {
                 return atn;
             }
 
-            synchronized (this.ownerClass) {
+            synchronized (this) {
                 atn.clearDFA();
             }
 
