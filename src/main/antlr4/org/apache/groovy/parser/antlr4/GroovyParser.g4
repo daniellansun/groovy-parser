@@ -541,7 +541,7 @@ loopStatement
 locals[ Map<String, Object> dynaScope = new ListHashMap<>() ]
     :   FOR LPAREN forControl RPAREN nls statement                                                          #forStmtAlt
     |   WHILE parExpression nls statement                                                                   #whileStmtAlt
-    |   DO nls statement nls WHILE parExpression                                                            #doWhileStmtAlt
+    //|   DO nls statement nls WHILE parExpression                                                            #doWhileStmtAlt
     ;
 
 continueStatement

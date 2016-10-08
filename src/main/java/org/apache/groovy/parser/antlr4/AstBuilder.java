@@ -361,6 +361,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
+    /*
     @Override
     public DoWhileStatement visitDoWhileStmtAlt(DoWhileStmtAltContext ctx) {
         Expression conditionExpression = this.visitParExpression(ctx.parExpression());
@@ -377,6 +378,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 new DoWhileStatement(booleanExpression, asBoolean(loopBlock) ? loopBlock : EmptyStatement.INSTANCE),
                 ctx);
     }
+    */
 
 
     @Override
