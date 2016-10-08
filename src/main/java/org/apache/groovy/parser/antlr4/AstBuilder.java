@@ -2116,6 +2116,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitEqualityExprAlt(EqualityExprAltContext ctx) {
+        /*
         if (IDENTICAL == ctx.op.getType() || NOT_IDENTICAL == ctx.op.getType()) {
             Expression expr =
                     this.configureAST(
@@ -2131,7 +2132,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             return expr;
         }
-
+        */
 
         return this.configureAST(
                 this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
@@ -4093,7 +4094,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String VALUE_STR = "value";
     private static final String DOLLAR_STR = "$";
     private static final String CALL_STR = "call";
-    private static final String IS_STR = "is";
+//    private static final String IS_STR = "is";
     private static final String THIS_STR = "this";
     private static final String SUPER_STR = "super";
     private static final String PACKAGE_INFO = "package-info";
