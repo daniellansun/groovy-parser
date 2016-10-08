@@ -200,6 +200,10 @@ class TestUtils {
         return result;
     }
 
+    static doRunAndShouldFail(String path) {
+        assert !executeScript(path);
+    }
+
     static doRunAndTest(String path) {
         assert executeScript(path);
     }

@@ -37,27 +37,32 @@ class SyntaxErrorTest extends GroovyTestCase {
     void tearDown() {}
 
     void "test groovy core - List"() {
-        shouldFail('fail/List_01.groovy');
+        TestUtils.shouldFail('fail/List_01.groovy');
     }
 
     void "test groovy core - Expression"() {
-        shouldFail('fail/Expression_01.groovy');
-        shouldFail('fail/Expression_02.groovy');
-        shouldFail('fail/Expression_03.groovy');
+        TestUtils.shouldFail('fail/Expression_01.groovy');
+        TestUtils.shouldFail('fail/Expression_02.groovy');
+        TestUtils.shouldFail('fail/Expression_03.groovy');
 //        shouldFail('fail/Expression_04.groovy', true);
 //        shouldFail('fail/Expression_05.groovy', true);
-        shouldFail('fail/Expression_06.groovy');
-        shouldFail('fail/Expression_07.groovy');
-        shouldFail('fail/Expression_08.groovy');
-        shouldFail('fail/Expression_09.groovy');
+        TestUtils.shouldFail('fail/Expression_06.groovy');
+        TestUtils.shouldFail('fail/Expression_07.groovy');
+        TestUtils.shouldFail('fail/Expression_08.groovy');
+        TestUtils.shouldFail('fail/Expression_09.groovy');
     }
 
     void "test groovy core - Switch"() {
-        shouldFail('fail/Switch_01.groovy');
+        TestUtils.shouldFail('fail/Switch_01.groovy');
     }
 
     void "test groovy core - LocalVariableDeclaration"() {
-        shouldFail('fail/LocalVariableDeclaration_01.groovy');
+        TestUtils.shouldFail('fail/LocalVariableDeclaration_01.groovy');
+    }
+
+    void "test groovy core - While"() {
+        TestUtils.doRunAndShouldFail('fail/While_01x.groovy');
+        TestUtils.doRunAndShouldFail('fail/While_02x.groovy');
     }
 
     void "test CompilerErrorTest_001.groovy"() {
@@ -79,6 +84,7 @@ class SyntaxErrorTest extends GroovyTestCase {
     void "test GStringEndTest_001.groovy"() {
         unzipScriptAndShouldFail("scripts/GStringEndTest_001.groovy", [])
     }
+
 
     /**************************************/
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
