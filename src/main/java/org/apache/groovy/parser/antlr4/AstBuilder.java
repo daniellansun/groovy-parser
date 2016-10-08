@@ -265,6 +265,11 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public Statement visitLoopStmtAlt(LoopStmtAltContext ctx) {
+        return this.configureAST((Statement) this.visit(ctx.loopStatement()), ctx);
+    }
+
+    @Override
     public ForStatement visitForStmtAlt(ForStmtAltContext ctx) {
         Pair<Parameter, Expression> controlPair = this.visitForControl(ctx.forControl());
 
@@ -579,7 +584,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public BreakStatement visitBreakStmtAlt(BreakStmtAltContext ctx) {
+    public BreakStatement visitBreakStatement(BreakStatementContext ctx) {
         String label = asBoolean(ctx.identifier())
                 ? this.visitIdentifier(ctx.identifier())
                 : null;
@@ -588,12 +593,23 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public ContinueStatement visitContinueStmtAlt(ContinueStmtAltContext ctx) {
+    public BreakStatement visitBreakStmtAlt(BreakStmtAltContext ctx) {
+        return this.configureAST(this.visitBreakStatement(ctx.breakStatement()), ctx);
+    }
+
+    @Override
+    public ContinueStatement visitContinueStatement(ContinueStatementContext ctx) {
         String label = asBoolean(ctx.identifier())
                 ? this.visitIdentifier(ctx.identifier())
                 : null;
 
         return this.configureAST(new ContinueStatement(label), ctx);
+
+    }
+
+    @Override
+    public ContinueStatement visitContinueStmtAlt(ContinueStmtAltContext ctx) {
+        return this.configureAST(this.visitContinueStatement(ctx.continueStatement()), ctx);
     }
 
     @Override

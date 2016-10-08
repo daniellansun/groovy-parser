@@ -24,3 +24,14 @@ for (;;)
 
 int i
 for (i = 0; i < 5; i++);
+
+
+
+
+for (Object child in children()) {
+    if (child instanceof String) {
+        break
+    } else {
+        continue
+    }
+}

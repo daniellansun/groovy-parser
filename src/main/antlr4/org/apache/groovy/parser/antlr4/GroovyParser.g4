@@ -47,7 +47,6 @@ options {
 }
 
 @members {
-    private boolean allowContinueStatement = false;
 
     public static class GroovyParserRuleContext extends ParserRuleContext {
         private Map metaDataMap = null;
@@ -538,31 +537,45 @@ variableNames
     :   LPAREN variableDeclaratorId (COMMA variableDeclaratorId)+ RPAREN
     ;
 
+loopStatement
+locals[ Map<String, Object> dynaScope = new ListHashMap<>() ]
+    :   FOR LPAREN forControl RPAREN nls statement                                                          #forStmtAlt
+    |   WHILE parExpression nls statement                                                                   #whileStmtAlt
+    |   DO nls statement nls WHILE parExpression                                                            #doWhileStmtAlt
+    ;
+
+continueStatement
+locals[ boolean isInsideLoop ]
+@init {
+    try {
+        $isInsideLoop = null != $loopStatement::dynaScope;
+    } catch(NullPointerException e) {
+        $isInsideLoop = false;
+    }
+}
+    :   CONTINUE
+        { $isInsideLoop }?<fail={"the continue statement is only allowed inside loops"}>
+        identifier?
+    ;
+
+breakStatement
+    :   BREAK identifier?
+    ;
+
 statement
     :   block                                                                                               #blockStmtAlt
     |   ASSERT ce=expression ((COLON | COMMA) nls me=expression)?                                           #assertStmtAlt
     |   IF parExpression nls tb=statement (nls ELSE nls fb=statement)?                                      #ifElseStmtAlt
-
-    |   FOR LPAREN forControl RPAREN nls
-        { allowContinueStatement = true; } statement { allowContinueStatement = false; }                    #forStmtAlt
-
-    |   WHILE parExpression nls
-        { allowContinueStatement = true; } statement { allowContinueStatement = false; }                    #whileStmtAlt
-
-    |   DO nls
-        { allowContinueStatement = true; } statement { allowContinueStatement = false; }
-        nls WHILE parExpression                                                                             #doWhileStmtAlt
-
+    |   loopStatement                                                                                       #loopStmtAlt
     |   TRY nls block ((nls catchClause)+ (nls finallyBlock)? | nls finallyBlock)                           #tryCatchStmtAlt
 //TODO    |   TRY resourceSpecification block catchClause* finallyBlock?                                          #tryResourceStmtAlt
     |   SWITCH parExpression nls LBRACE nls switchBlockStatementGroup* nls RBRACE                           #switchStmtAlt
     |   SYNCHRONIZED parExpression nls block                                                                #synchronizedStmtAlt
     |   RETURN expression?                                                                                  #returnStmtAlt
     |   THROW expression                                                                                    #throwStmtAlt
-    |   BREAK identifier?                                                                                   #breakStmtAlt
 
-    |   CONTINUE { allowContinueStatement }?<fail={"the continue statement is only allowed inside loops"}>
-        identifier?                                                                                         #continueStmtAlt
+    |   breakStatement                                                                                      #breakStmtAlt
+    |   continueStatement                                                                                   #continueStmtAlt
 
     |   identifier COLON nls statement                                                                      #labeledStmtAlt
 
