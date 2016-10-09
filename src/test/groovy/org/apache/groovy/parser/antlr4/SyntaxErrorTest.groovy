@@ -60,9 +60,18 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.shouldFail('fail/LocalVariableDeclaration_01.groovy');
     }
 
-    void "test groovy core - While"() {
-        TestUtils.doRunAndShouldFail('fail/While_01x.groovy');
-        TestUtils.doRunAndShouldFail('fail/While_02x.groovy');
+    void "test groovy core - Continue"() {
+        TestUtils.doRunAndShouldFail('fail/Continue_01x.groovy');
+        TestUtils.doRunAndShouldFail('fail/Continue_02x.groovy');
+    }
+
+    void "test groovy core - Break"() {
+        TestUtils.doRunAndShouldFail('fail/Break_01x.groovy');
+        TestUtils.doRunAndShouldFail('fail/Break_02x.groovy');
+    }
+
+    void "test groovy core - UnexpectedCharacter"() {
+        TestUtils.doRunAndShouldFail('fail/UnexpectedCharacter_01x.groovy');
     }
 
     void "test CompilerErrorTest_001.groovy"() {

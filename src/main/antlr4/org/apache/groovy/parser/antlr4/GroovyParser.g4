@@ -537,11 +537,16 @@ variableNames
     :   LPAREN variableDeclaratorId (COMMA variableDeclaratorId)+ RPAREN
     ;
 
+switchStatement
+locals[ Map<String, Object> dynaScope = new ListHashMap<>() ]
+    :   SWITCH parExpression nls LBRACE nls switchBlockStatementGroup* nls RBRACE
+    ;
+
 loopStatement
 locals[ Map<String, Object> dynaScope = new ListHashMap<>() ]
     :   FOR LPAREN forControl RPAREN nls statement                                                          #forStmtAlt
     |   WHILE parExpression nls statement                                                                   #whileStmtAlt
-    //|   DO nls statement nls WHILE parExpression                                                            #doWhileStmtAlt
+//TODO |   DO nls statement nls WHILE parExpression                                                            #doWhileStmtAlt
     ;
 
 continueStatement
@@ -559,7 +564,23 @@ locals[ boolean isInsideLoop ]
     ;
 
 breakStatement
-    :   BREAK identifier?
+locals[ boolean isInsideLoop, boolean isInsideSwitch ]
+@init {
+    try {
+        $isInsideLoop = null != $loopStatement::dynaScope;
+    } catch(NullPointerException e) {
+        $isInsideLoop = false;
+    }
+
+    try {
+        $isInsideSwitch = null != $switchStatement::dynaScope;
+    } catch(NullPointerException e) {
+        $isInsideSwitch = false;
+    }
+}
+    :   BREAK
+        { $isInsideLoop || $isInsideSwitch }?<fail={"the break statement is only allowed inside loops or switches"}>
+        identifier?
     ;
 
 statement
@@ -569,7 +590,7 @@ statement
     |   loopStatement                                                                                       #loopStmtAlt
     |   TRY nls block ((nls catchClause)+ (nls finallyBlock)? | nls finallyBlock)                           #tryCatchStmtAlt
 //TODO    |   TRY resourceSpecification block catchClause* finallyBlock?                                          #tryResourceStmtAlt
-    |   SWITCH parExpression nls LBRACE nls switchBlockStatementGroup* nls RBRACE                           #switchStmtAlt
+    |   switchStatement                                                                                     #switchStmtAlt
     |   SYNCHRONIZED parExpression nls block                                                                #synchronizedStmtAlt
     |   RETURN expression?                                                                                  #returnStmtAlt
     |   THROW expression                                                                                    #throwStmtAlt

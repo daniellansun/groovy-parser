@@ -74,7 +74,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 new CommonTokenStream(this.lexer));
 
         this.parser.setErrorHandler(new BailErrorStrategy());
-
     }
 
     private GroovyParserRuleContext buildCST(PredictionMode predictionMode) {
@@ -447,6 +446,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public SwitchStatement visitSwitchStmtAlt(SwitchStmtAltContext ctx) {
+        return this.configureAST(this.visitSwitchStatement(ctx.switchStatement()), ctx);
+    }
+
+    public SwitchStatement visitSwitchStatement(SwitchStatementContext ctx) {
         List<Statement> statementList =
                 ctx.switchBlockStatementGroup().stream()
                         .map(this::visitSwitchBlockStatementGroup)
@@ -482,7 +485,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         defaultStatementListSize == 0 ? EmptyStatement.INSTANCE : defaultStatementList.get(0)
                 ),
                 ctx);
+
     }
+
 
     @Override
     @SuppressWarnings({"unchecked"})
