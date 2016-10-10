@@ -20,6 +20,7 @@ package org.apache.groovy.parser.antlr4;
 
 import org.antlr.v4.runtime.atn.ATN;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -34,12 +35,13 @@ public class AtnManager {
     private static final int CACHE_THRESHOLD;
     private final Class ownerClass;
     private final ATN atn;
-    private static final Map<Class, AtnWrapper> ATN_MAP = new HashMap<Class, AtnWrapper>() {
-        {
-            put(GroovyLangLexer.class, new AtnWrapper(GroovyLangLexer._ATN));
-            put(GroovyLangParser.class, new AtnWrapper(GroovyLangParser._ATN));
-        }
-    };
+    private static final Map<Class, AtnWrapper> ATN_MAP =
+            Collections.unmodifiableMap(new HashMap<Class, AtnWrapper>() {
+                {
+                    put(GroovyLangLexer.class, new AtnWrapper(GroovyLangLexer._ATN));
+                    put(GroovyLangParser.class, new AtnWrapper(GroovyLangParser._ATN));
+                }
+            });
 
     static {
         int t = 50;

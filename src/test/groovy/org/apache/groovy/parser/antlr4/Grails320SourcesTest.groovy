@@ -661,11 +661,9 @@ class Grails320SourcesTest extends GroovyTestCase {
         unzipAndTest("grails-core/src/main/groovy/org/grails/core/cfg/GroovyConfigPropertySourceLoader.groovy", [])
     }
 
-    /* FIXME
     void "test grails-core/src/main/groovy/org/grails/core/exceptions/DefaultErrorsPrinter.groovy"() {
         unzipAndTest("grails-core/src/main/groovy/org/grails/core/exceptions/DefaultErrorsPrinter.groovy", [])
     }
-    */
 
     void "test grails-core/src/main/groovy/org/grails/core/io/CachingPathMatchingResourcePatternResolver.groovy"() {
         unzipAndTest("grails-core/src/main/groovy/org/grails/core/io/CachingPathMatchingResourcePatternResolver.groovy", [])
@@ -755,11 +753,9 @@ class Grails320SourcesTest extends GroovyTestCase {
         unzipAndTest("grails-core/src/test/groovy/grails/util/GrailsArrayUtilsSpec.groovy", [])
     }
 
-    /* FIXME
     void "test grails-core/src/test/groovy/grails/util/GrailsMetaClassUtilsSpec.groovy"() {
         unzipAndTest("grails-core/src/test/groovy/grails/util/GrailsMetaClassUtilsSpec.groovy", [])
     }
-    */
 
     void "test grails-core/src/test/groovy/grails/util/GrailsStringUtilsSpec.groovy"() {
         unzipAndTest("grails-core/src/test/groovy/grails/util/GrailsStringUtilsSpec.groovy", [])
@@ -4601,11 +4597,9 @@ class Grails320SourcesTest extends GroovyTestCase {
         unzipAndTest("grails-web/build.gradle", [])
     }
 
-    /* FIXME
     void "test grails-web/src/main/groovy/grails/web/servlet/plugins/GrailsWebPluginManager.groovy"() {
         unzipAndTest("grails-web/src/main/groovy/grails/web/servlet/plugins/GrailsWebPluginManager.groovy", [])
     }
-    */
 
     void "test grails-web/src/main/groovy/org/grails/web/servlet/HttpServletRequestExtension.groovy"() {
         unzipAndTest("grails-web/src/main/groovy/org/grails/web/servlet/HttpServletRequestExtension.groovy", [])

@@ -233,5 +233,5 @@ class TestUtils {
         return new GroovyShell(configuration);
     }
 
-    public static final List COMMON_IGNORE_CLASS_LIST = Collections.unmodifiableList([AssertStatement, BreakStatement, ConstructorNode, ExpressionStatement, FieldNode, ForStatement, GenericsType, IfStatement, MethodNode, Parameter, PropertyNode, ReturnStatement, ThrowStatement, Token, WhileStatement]);
+    public static final List COMMON_IGNORE_CLASS_LIST = Collections.unmodifiableList([AssertStatement, BreakStatement, ConstructorNode, ContinueStatement, ExpressionStatement, FieldNode, ForStatement, GenericsType, IfStatement, MethodNode, Parameter, PropertyNode, ReturnStatement, ThrowStatement, Token, WhileStatement]);
 }
