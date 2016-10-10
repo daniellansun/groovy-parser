@@ -3408,11 +3408,9 @@ class Gradle310SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/util/TextUtilTest.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/core/src/test/groovy/org/gradle/util/VersionNumberTest.groovy"() {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/util/VersionNumberTest.groovy", [])
     }
-    */
 
     void "test subprojects/core/src/test/groovy/org/gradle/util/internal/ArgumentsSplitterTest.groovy"() {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/util/internal/ArgumentsSplitterTest.groovy", [])
@@ -8478,7 +8476,7 @@ class Gradle310SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/internal-performance-testing/src/main/groovy/org/gradle/performance/fixture/HonestProfilerCollector.groovy", [])
     }
 
-    /* FIXME
+    /* FIXME SEE https://github.com/danielsun1106/groovy-parser/issues/11
     void "test subprojects/internal-performance-testing/src/main/groovy/org/gradle/performance/fixture/InvocationSpec.groovy"() {
         unzipAndTest("subprojects/internal-performance-testing/src/main/groovy/org/gradle/performance/fixture/InvocationSpec.groovy", [])
     }
