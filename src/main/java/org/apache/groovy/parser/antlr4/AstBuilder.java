@@ -1367,7 +1367,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
 
             methodCallExpression = (MethodCallExpression) baseExpr;
-        } else if (baseExpr instanceof BinaryExpression) { // e.g. a[x] b
+        } else if (baseExpr instanceof BinaryExpression // e.g. a[x] b
+                || baseExpr instanceof ConstructorCallExpression // e.g. new A() b
+                ) {
             methodCallExpression =
                     this.configureAST(
                             new MethodCallExpression(
@@ -2122,13 +2124,14 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitEqualityExprAlt(EqualityExprAltContext ctx) {
+        // TODO refine the implementation of identical operation via class generation
         if (IDENTICAL == ctx.op.getType() || NOT_IDENTICAL == ctx.op.getType()) {
             Expression expr =
                     this.configureAST(
                             new MethodCallExpression(
                                     (Expression) this.visit(ctx.left),
                                     IS_STR,
-                                    new ArgumentListExpression((Expression) this.visit(ctx.right))),
+                                    this.configureAST(new ArgumentListExpression((Expression) this.visit(ctx.right)), ctx.right)),
                             ctx);
 
             if (NOT_IDENTICAL == ctx.op.getType()) {
@@ -4040,6 +4043,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private String findDocCommentByNode(ParserRuleContext node) {
+        if (!asBoolean(node)) {
+            return null;
+        }
+
         if (node instanceof ClassBodyContext) {
             return null;
         }

@@ -2858,7 +2858,7 @@ class Gradle310SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/execution/SelectedTaskExecutionActionTest.groovy", [])
     }
 
-    /* FIXME
+    /* FIXME SEE https://github.com/danielsun1106/groovy-parser/issues/10
     void "test subprojects/core/src/test/groovy/org/gradle/execution/TaskNameResolverTest.groovy"() {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/execution/TaskNameResolverTest.groovy", [])
     }
@@ -3260,11 +3260,9 @@ class Gradle310SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/listener/ActionBroadcastTest.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/core/src/test/groovy/org/gradle/plugin/internal/PluginIdTest.groovy"() {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/plugin/internal/PluginIdTest.groovy", [])
     }
-    */
 
     void "test subprojects/core/src/test/groovy/org/gradle/plugin/use/internal/PluginRequestCollectorTest.groovy"() {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/plugin/use/internal/PluginRequestCollectorTest.groovy", [])

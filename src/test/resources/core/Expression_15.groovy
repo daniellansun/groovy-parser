@@ -129,3 +129,5 @@ ResolveOptions resolveOptions = new ResolveOptions()\
             .setConfs(['default'] as String[])\
             .setOutputReport(false)\
             .setValidate(args.containsKey('validate') ? args.validate : false)
+
+new A("b") C.d()
