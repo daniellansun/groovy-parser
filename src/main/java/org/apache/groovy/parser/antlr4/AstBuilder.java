@@ -132,9 +132,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             // if groovy source file only contains blank(including EOF), add "return null" to the AST
             if (this.isBlankScript(ctx)) {
                 this.addEmptyReturnStatement();
-                return moduleNode;
             }
         }
+
+        this.configureScriptClassNode();
 
         return moduleNode;
     }
@@ -2121,7 +2122,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitEqualityExprAlt(EqualityExprAltContext ctx) {
-        /*
         if (IDENTICAL == ctx.op.getType() || NOT_IDENTICAL == ctx.op.getType()) {
             Expression expr =
                     this.configureAST(
@@ -2137,7 +2137,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             return expr;
         }
-        */
 
         return this.configureAST(
                 this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
@@ -3492,21 +3491,11 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private boolean isBlankScript(CompilationUnitContext ctx) {
-        long blankCnt =
-                ctx.children.stream()
-                        .filter(e -> e instanceof NlsContext
-                                || e instanceof PackageDeclarationContext
-                                || e instanceof SepContext
-                                || e instanceof ImportStmtAltContext
-                                || e instanceof TerminalNode && (((TerminalNode) e).getSymbol().getType() == EOF)
-                        ).count();
-
-
-        return blankCnt == ctx.children.size();
+        return moduleNode.getStatementBlock().isEmpty() && moduleNode.getMethods().isEmpty() && moduleNode.getClasses().isEmpty();
     }
 
     private void addEmptyReturnStatement() {
-        moduleNode.addStatement(new ReturnStatement(ConstantExpression.EMPTY_EXPRESSION));
+        moduleNode.addStatement(ReturnStatement.RETURN_NULL_OR_VOID);
     }
 
     private void addPackageInfoClassNode() {
@@ -3542,6 +3531,27 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         );
     }
 
+    /**
+     * set the script source position
+     */
+    private void configureScriptClassNode() {
+        ClassNode scriptClassNode = moduleNode.getScriptClassDummy();
+
+        if (!asBoolean(scriptClassNode)) {
+            return;
+        }
+
+        List<Statement> statements = moduleNode.getStatementBlock().getStatements();
+        if (!statements.isEmpty()) {
+            Statement firstStatement = statements.get(0);
+            Statement lastStatement = statements.get(statements.size() - 1);
+
+            scriptClassNode.setSourcePosition(firstStatement);
+            scriptClassNode.setLastColumnNumber(lastStatement.getLastColumnNumber());
+            scriptClassNode.setLastLineNumber(lastStatement.getLastLineNumber());
+        }
+
+    }
 
     /**
      * Sets location(lineNumber, colNumber, lastLineNumber, lastColumnNumber) for node using standard context information.
@@ -4099,7 +4109,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String VALUE_STR = "value";
     private static final String DOLLAR_STR = "$";
     private static final String CALL_STR = "call";
-//    private static final String IS_STR = "is";
+    private static final String IS_STR = "is";
     private static final String THIS_STR = "this";
     private static final String SUPER_STR = "super";
     private static final String PACKAGE_INFO = "package-info";
