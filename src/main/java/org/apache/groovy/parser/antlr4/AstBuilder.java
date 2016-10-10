@@ -2903,10 +2903,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(ctx.classOrInterfaceType())) {
             ctx.classOrInterfaceType().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, ctx.getNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR));
             classNode = this.visitClassOrInterfaceType(ctx.classOrInterfaceType());
-
-            if (asBoolean(ctx.LBRACK())) {
-                classNode.setGenericsTypes(null); // clear array's generics type info. Groovy's bug? array's generics type will be ignored. e.g. List<String>[]... p
-            }
         }
 
         if (asBoolean(ctx.primitiveType())) {
@@ -2914,6 +2910,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         if (asBoolean(ctx.LBRACK())) {
+            // clear array's generics type info. Groovy's bug? array's generics type will be ignored. e.g. List<String>[]... p
+            classNode.setGenericsTypes(null);
+            classNode.setUsingGenerics(false);
+
             for (int i = 0, n = ctx.LBRACK().size(); i < n; i++) {
                 classNode = this.configureAST(classNode.makeArray(), classNode);
             }

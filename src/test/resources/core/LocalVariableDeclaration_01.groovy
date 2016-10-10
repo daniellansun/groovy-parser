@@ -104,3 +104,7 @@ for(;;)
 for(;;)
         def a = 9, b = 10
 
+
+
+Class<String>[] c
+Class<?>[] c2

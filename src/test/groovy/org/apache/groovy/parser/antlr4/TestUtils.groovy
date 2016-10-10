@@ -194,7 +194,11 @@ class TestUtils {
         } catch (Exception e) {
             log.severe(e.message);
         } finally {
-            zf.close();
+            try {
+                zf.close();
+            } catch(Exception e) {
+                // IGNORED
+            }
         }
 
         return result;
@@ -233,5 +237,5 @@ class TestUtils {
         return new GroovyShell(configuration);
     }
 
-    public static final List COMMON_IGNORE_CLASS_LIST = Collections.unmodifiableList([AssertStatement, BreakStatement, ConstructorNode, ContinueStatement, ExpressionStatement, FieldNode, ForStatement, GenericsType, IfStatement, MethodNode, Parameter, PropertyNode, ReturnStatement, ThrowStatement, Token, WhileStatement]);
+    public static final List COMMON_IGNORE_CLASS_LIST = Collections.unmodifiableList([AssertStatement, BreakStatement, ConstructorNode, ContinueStatement, ExpressionStatement, FieldNode, ForStatement, GenericsType, IfStatement, MethodNode, PackageNode, Parameter, PropertyNode, ReturnStatement, ThrowStatement, Token, WhileStatement]);
 }
