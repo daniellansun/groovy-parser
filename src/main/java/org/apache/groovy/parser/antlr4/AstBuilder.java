@@ -3353,8 +3353,13 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private Statement unpackStatement(Statement statement) {
         if (statement instanceof DeclarationListStatement) {
-            // this.createBlockStatement(statement); // TODO if DeclarationListStatement contains more than 1 declarations, maybe it's better to create a block to hold them
-            return ((DeclarationListStatement) statement).getDeclarationStatements().get(0);
+            List<ExpressionStatement> expressionStatementList = ((DeclarationListStatement) statement).getDeclarationStatements();
+
+            if (1 == expressionStatementList.size()) {
+                return expressionStatementList.get(0);
+            }
+
+            return this.configureAST(this.createBlockStatement(statement), statement); // if DeclarationListStatement contains more than 1 declarations, maybe it's better to create a block to hold them
         }
 
         return statement;

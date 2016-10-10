@@ -61,3 +61,46 @@ def cc = {
 int xx = b c d e
 
 @Field static List list = [1, 2, 3]
+
+if (false)
+        def a = 5
+
+if(false)
+        def a, b = 10
+
+if(false)
+        def a = 9, b = 10
+
+if (false)
+        def a = 5
+else
+        def b = 2
+
+if(false)
+        def a, b = 10
+else
+        def a, b = 8
+
+if(false)
+        def a = 9, b = 10
+else
+        def a = 6, b = 8
+
+while(false)
+        def a = 5
+
+while(false)
+        def a, b = 10
+
+while(false)
+        def a = 9, b = 10
+
+for(;;)
+        def a = 5
+
+for(;;)
+        def a, b = 10
+
+for(;;)
+        def a = 9, b = 10
+
