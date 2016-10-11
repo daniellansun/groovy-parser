@@ -1466,7 +1466,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitParExpression(ParExpressionContext ctx) {
-        Expression expression = this.configureAST((Expression) this.visit(ctx.expression()), ctx);
+        Expression expression = this.configureAST(((ExpressionStatement) this.visit(ctx.statementExpression())).getExpression(), ctx);
 
         expression.putNodeMetaData(IS_INSIDE_PARENTHESES, true);
 

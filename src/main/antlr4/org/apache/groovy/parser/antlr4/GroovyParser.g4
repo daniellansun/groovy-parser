@@ -678,7 +678,7 @@ castParExpression
     ;
 
 parExpression
-    :   LPAREN expression RPAREN
+    :   LPAREN statementExpression RPAREN
     ;
 
 expressionList
