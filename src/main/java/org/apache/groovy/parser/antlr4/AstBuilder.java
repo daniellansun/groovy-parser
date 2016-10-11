@@ -1610,38 +1610,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 return this.configureAST(methodCallExpression, ctx);
             }
 
-
-            if (baseExpr instanceof ClosureExpression) { // e.g. {a, b -> a + b }(1, 2)
-                MethodCallExpression methodCallExpression =
-                        new MethodCallExpression(
-                                baseExpr,
-                                CALL_STR,
-                                argumentsExpr
-                        );
-
-                methodCallExpression.setImplicitThis(false);
-
-                return this.configureAST(methodCallExpression, ctx);
-            }
-
-            // e.g. m()()
-            if (baseExpr instanceof MethodCallExpression) {
-                MethodCallExpression methodCallExpression =
-                        new MethodCallExpression(
-                                baseExpr,
-                                CALL_STR,
-                                argumentsExpr
-                        );
-
-                methodCallExpression.setImplicitThis(false);
-
-                return this.configureAST(methodCallExpression, ctx);
-            }
-
-
             if (baseExpr instanceof VariableExpression) { // void and primitive type AST node must be an instance of VariableExpression
                 String baseExprText = baseExpr.getText();
-                if ("void".equals(baseExprText)) { // e.g. void()
+                if (VOID_STR.equals(baseExprText)) { // e.g. void()
                     MethodCallExpression methodCallExpression =
                             new MethodCallExpression(
                                     this.createConstantExpression(baseExpr),
@@ -1693,7 +1664,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 return this.configureAST(methodCallExpression, ctx);
             }
 
-            // e.g. 1(), 1.1(), ((int) 1 / 2)(1, 2)
+            // e.g. 1(), 1.1(), ((int) 1 / 2)(1, 2), {a, b -> a + b }(1, 2), m()()
             MethodCallExpression methodCallExpression =
                     new MethodCallExpression(baseExpr, CALL_STR, argumentsExpr);
             methodCallExpression.setImplicitThis(false);
@@ -1765,7 +1736,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
 
 
-            if (baseExpr instanceof PropertyExpression) {
+            if (baseExpr instanceof PropertyExpression) { // e.g. obj.m {  }
                 PropertyExpression propertyExpression = (PropertyExpression) baseExpr;
 
                 MethodCallExpression methodCallExpression =
@@ -4124,6 +4095,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String IS_STR = "is";
     private static final String THIS_STR = "this";
     private static final String SUPER_STR = "super";
+    private static final String VOID_STR = "void";
     private static final String PACKAGE_INFO = "package-info";
     private static final String PACKAGE_INFO_FILE_NAME = PACKAGE_INFO + ".groovy";
     private static final String GROOVY_TRANSFORM_TRAIT = "groovy.transform.Trait";

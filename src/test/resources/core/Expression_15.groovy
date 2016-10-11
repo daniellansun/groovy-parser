@@ -131,3 +131,7 @@ ResolveOptions resolveOptions = new ResolveOptions()\
             .setValidate(args.containsKey('validate') ? args.validate : false)
 
 new A("b") C.d()
+
+m()()
+
+a = {a,b-> }()
