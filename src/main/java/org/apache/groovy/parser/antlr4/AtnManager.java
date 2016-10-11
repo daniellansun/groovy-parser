@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @date 2016/08/14
  */
 public class AtnManager {
+    private static final String CACHE_THRESHOLD_NAME = "groovy.antlr4.cache.threshold";
     private static final int CACHE_THRESHOLD;
     private final Class ownerClass;
     private final ATN atn;
@@ -47,7 +48,7 @@ public class AtnManager {
         int t = 50;
 
         try {
-            t = Integer.parseInt(System.getProperty("groovy.antlr4.cache.threshold"));
+            t = Integer.parseInt(System.getProperty(CACHE_THRESHOLD_NAME));
 
             // cache threshold should be at least 50 for better performance
             t = t < 50 ? 50 : t;
