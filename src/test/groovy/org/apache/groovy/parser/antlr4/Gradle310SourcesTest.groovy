@@ -9182,17 +9182,13 @@ class Gradle310SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/language-java/src/integTest/groovy/org/gradle/language/java/JarBinaryTypeVariantsTest.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/language-java/src/integTest/groovy/org/gradle/language/java/JavaCompilationAgainstApiJarIntegrationTest.groovy"() {
         unzipAndTest("subprojects/language-java/src/integTest/groovy/org/gradle/language/java/JavaCompilationAgainstApiJarIntegrationTest.groovy", [])
     }
-    */
 
-    /* FIXME
     void "test subprojects/language-java/src/integTest/groovy/org/gradle/language/java/JavaCompilationAgainstDependenciesIntegrationTest.groovy"() {
         unzipAndTest("subprojects/language-java/src/integTest/groovy/org/gradle/language/java/JavaCompilationAgainstDependenciesIntegrationTest.groovy", [])
     }
-    */
 
     void "test subprojects/language-java/src/integTest/groovy/org/gradle/language/java/JavaCompilerContinuousIntegrationTest.groovy"() {
         unzipAndTest("subprojects/language-java/src/integTest/groovy/org/gradle/language/java/JavaCompilerContinuousIntegrationTest.groovy", [])
@@ -9210,11 +9206,9 @@ class Gradle310SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/language-java/src/integTest/groovy/org/gradle/language/java/JavaLanguageCustomLibraryDependencyResolutionIntegrationTest.groovy", [])
     }
 
-    /* FIXME
     void "test subprojects/language-java/src/integTest/groovy/org/gradle/language/java/JavaLanguageDependencyResolutionIntegrationTest.groovy"() {
         unzipAndTest("subprojects/language-java/src/integTest/groovy/org/gradle/language/java/JavaLanguageDependencyResolutionIntegrationTest.groovy", [])
     }
-    */
 
     void "test subprojects/language-java/src/integTest/groovy/org/gradle/language/java/JavaLanguageExternalDependencyResolutionIntegrationTest.groovy"() {
         unzipAndTest("subprojects/language-java/src/integTest/groovy/org/gradle/language/java/JavaLanguageExternalDependencyResolutionIntegrationTest.groovy", [])
