@@ -14,6 +14,13 @@ public class Comments {
     public static final String SOME_VAR3 = 'SOME_VAR3';
 
     /**
+     * test Comments.SOME_VAR4
+     */
+    // no groovydoc for SOME_VAR4
+    public static final String SOME_VAR4 = 'SOME_VAR4';
+
+
+    /**
      * test Comments.constructor1
      */
     public Comments() {

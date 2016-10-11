@@ -54,6 +54,7 @@ class GroovyParserTest extends GroovyTestCase {
         assert classes[0].fields[0].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**     * test Comments.SOME_VAR     */'
         assert classes[0].fields[1].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '')  == '/**     * test Comments.SOME_VAR2     */'
         assert classes[0].fields[2].nodeMetaData[AstBuilder.DOC_COMMENT] == null
+        assert classes[0].fields[3].nodeMetaData[AstBuilder.DOC_COMMENT] == null
         assert classes[0].declaredConstructors[0].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**     * test Comments.constructor1     */'
         assert classes[0].methods[0].nodeMetaData[AstBuilder.DOC_COMMENT].replaceAll(/\r?\n/, '') == '/**     * test Comments.m1     */'
         assert classes[0].methods[1].nodeMetaData[AstBuilder.DOC_COMMENT] == null

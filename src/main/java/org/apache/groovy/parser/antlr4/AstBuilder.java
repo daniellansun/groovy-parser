@@ -4030,7 +4030,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         String docCommentNodeText = null;
         boolean sameTypeNodeBefore = false;
-        out:
         for (ParseTree child : parentContext.children) {
 
             if (node == child) {
@@ -4059,17 +4058,25 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                             ? ((NlsContext) child).NL()
                             : ((SepContext) child).NL();
 
-            if (0 == nlList.size()) {
+            int nlListSize = nlList.size();
+            if (0 == nlListSize) {
                 continue;
             }
 
-            for (int i = nlList.size() - 1; i >= 0; i--) {
+            for (int i = nlListSize - 1; i >= 0; i--) {
                 String text = nlList.get(i).getText();
+
+                if (text.matches("\\s+")) {
+                    continue;
+                }
 
                 if (text.startsWith(DOC_COMMENT_PREFIX)) {
                     docCommentNodeText = text;
-                    continue out;
+                } else {
+                    docCommentNodeText = null;
                 }
+
+                break;
             }
         }
 
