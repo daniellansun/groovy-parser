@@ -66,6 +66,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public AstBuilder(SourceUnit sourceUnit, ClassLoader classLoader) {
         this.sourceUnit = sourceUnit;
         this.moduleNode = new ModuleNode(sourceUnit);
+        this.classLoader = classLoader; // unused for the time being
 
         this.lexer = new GroovyLangLexer(
                 new ANTLRInputStream(
@@ -124,7 +125,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     }
                 });
 
-        this.classNodeList.stream().forEach(moduleNode::addClass);
+        this.classNodeList.forEach(moduleNode::addClass);
 
         if (this.isPackageInfoDeclaration()) {
             this.addPackageInfoClassNode();
@@ -4084,11 +4085,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
         }
 
-        throw new GroovyBugError("node can not be found"); // The exception should never be thrown!
+        throw new GroovyBugError("node can not be found: " + node.getText()); // The exception should never be thrown!
     }
 
     private final ModuleNode moduleNode;
     private final SourceUnit sourceUnit;
+    private final ClassLoader classLoader; // Our ClassLoader, which provides information on external types
     private final GroovyLangLexer lexer;
     private final GroovyLangParser parser;
     private final List<ClassNode> classNodeList = new LinkedList<>();
