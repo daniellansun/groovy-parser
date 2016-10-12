@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  * The concrete compiler configuration can be specified by the sub-classes of the base parser(e.g. Antlr2Parser, Antlr4Parser)
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/08/14
+ * Created on    2016/08/14
  */
 public abstract class AbstractParser {
     private static final Logger LOGGER = Logger.getLogger(AbstractParser.class.getName());

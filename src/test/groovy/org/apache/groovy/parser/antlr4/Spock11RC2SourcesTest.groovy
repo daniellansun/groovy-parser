@@ -24,7 +24,7 @@ import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
  * Add Spock 1.1 RC-2 sources as test cases
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/10/09
+ * Created on    2016/10/12
  */
 class Spock11RC2SourcesTest extends GroovyTestCase {
 

@@ -24,7 +24,7 @@ import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
  * Add Grails 3.2.0 sources as test cases
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/10/09
+ * Created on    2016/10/09
  */
 class Grails320SourcesTest extends GroovyTestCase {
 

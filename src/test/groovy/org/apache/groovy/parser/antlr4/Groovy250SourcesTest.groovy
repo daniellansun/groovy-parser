@@ -24,7 +24,7 @@ import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
  * Add Groovy 2.5.0 sources as test cases
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/09/22
+ * Created on    2016/09/22
  */
 class Groovy250SourcesTest extends GroovyTestCase {
 

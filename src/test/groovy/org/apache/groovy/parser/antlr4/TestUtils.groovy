@@ -18,7 +18,7 @@ import java.util.zip.ZipFile
  * Utilities for test
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/09/21
+ * Created on    2016/09/21
  */
 
 @Log

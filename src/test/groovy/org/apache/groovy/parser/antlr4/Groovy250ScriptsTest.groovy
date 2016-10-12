@@ -30,7 +30,7 @@ import org.codehaus.groovy.syntax.Token
  * Add Groovy 2.5.0 scripts as test cases
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/09/21
+ * Created on    2016/09/21
  */
 class Groovy250ScriptsTest extends GroovyTestCase {
 

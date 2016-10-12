@@ -29,7 +29,7 @@ import org.codehaus.groovy.syntax.Reduction;
  * A parser plugin for the new parser
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/08/14
+ * Created on    2016/08/14
  */
 public class Antlr4ParserPlugin implements ParserPlugin {
     @Override

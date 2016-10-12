@@ -8,7 +8,7 @@ import org.codehaus.groovy.control.CompilerConfiguration
  * A console for evaluating the new parser
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/09/04
+ * Created on    2016/09/04
  */
 class GroovyConsole {
     private Console console;

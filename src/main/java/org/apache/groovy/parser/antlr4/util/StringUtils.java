@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  * Utilities for handling strings
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/08/20
+ * Created on    2016/08/20
  */
 public class StringUtils {
     public static String replaceHexEscapes(String text) {

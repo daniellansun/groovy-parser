@@ -27,7 +27,7 @@ import static org.apache.groovy.parser.antlr4.GroovyParser.*;
  * Some semantic predicates for altering the behaviour of the lexer and parser
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/08/20
+ * Created on    2016/08/20
  */
 public class SemanticPredicates {
     public static boolean isFollowedByWhiteSpaces(CharStream cs) {

@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Manage ATN for lexer and parser to avoid memory leak
  *
  * @author <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date 2016/08/14
+ * Created on 2016/08/14
  */
 public class AtnManager {
     private static final String CACHE_THRESHOLD_NAME = "groovy.antlr4.cache.threshold";

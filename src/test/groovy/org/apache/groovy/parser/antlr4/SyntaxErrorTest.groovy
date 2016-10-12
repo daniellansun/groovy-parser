@@ -27,7 +27,7 @@ import static org.apache.groovy.parser.antlr4.TestUtils.shouldFail
  * Some syntax error test cases for the new parser
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/09/02
+ * Created on    2016/09/02
  */
 class SyntaxErrorTest extends GroovyTestCase {
     public static final String RESOURCES_PATH = 'src/test/resources';

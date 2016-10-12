@@ -24,7 +24,7 @@ import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
  * Add Gradle 3.1 sources as test cases
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/10/09
+ * Created on    2016/10/09
  */
 class Gradle310SourcesTest extends GroovyTestCase {
 

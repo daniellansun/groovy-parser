@@ -35,7 +35,7 @@ import java.lang.reflect.Modifier
  * It is useful to verify the equality of new and old parser.
  *
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * @date    2016/08/16
+ * Created on    2016/08/16
  */
 class AstDumper {
     private ModuleNode ast;
