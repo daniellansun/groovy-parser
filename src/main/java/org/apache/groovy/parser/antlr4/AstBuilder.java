@@ -1361,8 +1361,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                     (PropertyExpression) baseExpr, arguments),
                             arguments);
 
-        } else if (baseExpr instanceof MethodCallExpression) { // e.g. m {} a  OR  m(...) a
+        } else if (baseExpr instanceof MethodCallExpression && !isTrue(baseExpr, IS_INSIDE_PARENTHESES)) { // e.g. m {} a, b  OR  m(...) a, b
             if (asBoolean(arguments)) {
+                // The error should never be thrown.
                 throw new GroovyBugError("When baseExpr is a instance of MethodCallExpression, which should follow NO argumentList");
             }
 

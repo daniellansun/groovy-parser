@@ -53,3 +53,7 @@ find x:
                 2 confirm right
 
 a b 1 2
+
+
+(obj.m1(1, 2)) m2(3, 4)
+obj.m1(1, 2) m2(3, 4)

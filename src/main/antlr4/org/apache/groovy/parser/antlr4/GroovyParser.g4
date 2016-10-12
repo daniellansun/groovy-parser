@@ -586,7 +586,7 @@ locals[ boolean isInsideLoop, boolean isInsideSwitch ]
 statement
     :   block                                                                                               #blockStmtAlt
     |   ASSERT ce=expression ((COLON | COMMA) nls me=expression)?                                           #assertStmtAlt
-    |   IF parExpression nls tb=statement (nls ELSE nls fb=statement)?                                      #ifElseStmtAlt
+    |   IF parExpression nls tb=statement ((nls | sep) ELSE nls fb=statement)?                                      #ifElseStmtAlt
     |   loopStatement                                                                                       #loopStmtAlt
     |   TRY nls block ((nls catchClause)+ (nls finallyBlock)? | nls finallyBlock)                           #tryCatchStmtAlt
 //TODO    |   TRY resourceSpecification block catchClause* finallyBlock?                                          #tryResourceStmtAlt
