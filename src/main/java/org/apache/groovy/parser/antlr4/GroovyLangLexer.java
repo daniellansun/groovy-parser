@@ -2,6 +2,7 @@ package org.apache.groovy.parser.antlr4;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.LexerNoViableAltException;
 import org.antlr.v4.runtime.atn.ATN;
 import org.antlr.v4.runtime.atn.LexerATNSimulator;
 
@@ -16,6 +17,11 @@ public class GroovyLangLexer extends GroovyLexer {
         super(input);
 
         this.setInterpreter(new PositionAdjustingLexerATNSimulator(this, new AtnManager(this).getATN()));
+    }
+
+    @Override
+    public void recover(LexerNoViableAltException e) {
+        throw e; // if some lexical error occurred, stop parsing!
     }
 
     @Override

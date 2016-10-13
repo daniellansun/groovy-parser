@@ -81,10 +81,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         parser.getInterpreter().setPredictionMode(predictionMode);
 
         if (PredictionMode.SLL.equals(predictionMode)) {
-            parser.removeErrorListeners();
+            this.removeErrorListeners();
         } else {
             ((CommonTokenStream) parser.getInputStream()).reset();
-            this.setupErrorListener(parser);
+            this.addErrorListeners();
         }
 
         return parser.compilationUnit();
@@ -3671,10 +3671,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return text;
     }
 
-    @SuppressWarnings({"unchecked"})
-    private void setupErrorListener(GroovyLangParser parser) {
-        parser.removeErrorListeners();
-        parser.addErrorListener(new ANTLRErrorListener() {
+    private ANTLRErrorListener createANTLRErrorListener() {
+        return new ANTLRErrorListener() {
             @Override
             public void syntaxError(
                     Recognizer recognizer,
@@ -3683,7 +3681,20 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
                 sourceUnit.getErrorCollector().addFatalError(new SyntaxErrorMessage(new SyntaxException(msg, line, charPositionInLine + 1), sourceUnit));
             }
-        });
+        };
+    }
+
+    private void removeErrorListeners() {
+        lexer.removeErrorListeners();
+        parser.removeErrorListeners();
+    }
+
+    private void addErrorListeners() {
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(this.createANTLRErrorListener());
+
+        parser.removeErrorListeners();
+        parser.addErrorListener(this.createANTLRErrorListener());
     }
 
     private String createExceptionMessage(Throwable t) {

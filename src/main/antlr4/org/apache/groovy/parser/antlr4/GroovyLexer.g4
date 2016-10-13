@@ -778,7 +778,3 @@ SL_COMMENT
 SH_COMMENT
     :   '#!' { 0 == this.tokenIndex }?<fail={"Shebang comment should appear at the first line"}> ~[\r\n\uFFFF]* -> skip
     ;
-
-UNEXPECTED_CHARACTER
-    :   .   { if (true) { throw new AssertionError("Unexpected character: " + getText() + " @" + getLine() + ", " + (getCharPositionInLine() + 1)); } }
-    ;
