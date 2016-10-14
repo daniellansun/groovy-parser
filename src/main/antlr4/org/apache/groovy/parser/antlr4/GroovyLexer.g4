@@ -88,6 +88,8 @@ lexer grammar GroovyLexer;
         parenStack.push(paren);
     }
     private void exitParen() {
+        assert !parenStack.isEmpty(): "Too many '" + getText() + "' @ line " + getLine() + ", column " + (getCharPositionInLine() + 1);
+
         parenStack.pop();
     }
     private boolean isInsideParens() {

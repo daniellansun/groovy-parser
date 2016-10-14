@@ -94,6 +94,10 @@ class SyntaxErrorTest extends GroovyTestCase {
         unzipScriptAndShouldFail("scripts/GStringEndTest_001.groovy", [])
     }
 
+    void "test groovy core - ParExpression"() {
+        TestUtils.doRunAndShouldFail('fail/ParExpression_01x.groovy');
+        TestUtils.doRunAndShouldFail('fail/ParExpression_02x.groovy');
+    }
 
     /**************************************/
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
