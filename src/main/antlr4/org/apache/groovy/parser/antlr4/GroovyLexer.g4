@@ -38,6 +38,8 @@ lexer grammar GroovyLexer;
     import static org.apache.groovy.parser.antlr4.SemanticPredicates.*;
     import java.util.Deque;
     import java.util.ArrayDeque;
+    import java.util.Map;
+    import java.util.HashMap;
     import java.util.Set;
     import java.util.HashSet;
     import java.util.Collections;
@@ -83,12 +85,23 @@ lexer grammar GroovyLexer;
      */
     protected void rollbackOneChar() {}
 
+    private static final Map<String, String> PAREN_MAP = Collections.unmodifiableMap(new HashMap<String, String>() {
+        {
+            put("(", ")");
+            put("[", "]");
+            put("{", "}");
+        }
+    });
     private final Deque<String> parenStack = new ArrayDeque<>();
     private void enterParen(String paren) {
         parenStack.push(paren);
     }
     private void exitParen() {
-        assert !parenStack.isEmpty(): "Too many '" + getText() + "' @ line " + getLine() + ", column " + (getCharPositionInLine() + 1);
+        String paren = parenStack.peek();
+
+        String text = getText();
+        assert null != paren: "Too many '" + text + "' " + genPositionInfo();
+        assert text.equals(PAREN_MAP.get(paren)): "'" + text + "' can not match '" + paren + "' " + genPositionInfo();
 
         parenStack.pop();
     }
@@ -99,13 +112,15 @@ lexer grammar GroovyLexer;
         // Notice: the new lines between "{" and "}" can not be ignored.
         return "(".equals(paren) || "[".equals(paren);
     }
-
     private void ignoreTokenInsideParens() {
         if (!this.isInsideParens()) {
             return;
         }
 
         this.setChannel(Token.HIDDEN_CHANNEL);
+    }
+    private String genPositionInfo() {
+        return "@ line " + getLine() + ", column " + (getCharPositionInLine() + 1);
     }
 
     private void ignoreMultiLineCommentConditionally() {

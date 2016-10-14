@@ -97,6 +97,7 @@ class SyntaxErrorTest extends GroovyTestCase {
     void "test groovy core - ParExpression"() {
         TestUtils.doRunAndShouldFail('fail/ParExpression_01x.groovy');
         TestUtils.doRunAndShouldFail('fail/ParExpression_02x.groovy');
+        TestUtils.doRunAndShouldFail('fail/ParExpression_03x.groovy');
     }
 
     /**************************************/
