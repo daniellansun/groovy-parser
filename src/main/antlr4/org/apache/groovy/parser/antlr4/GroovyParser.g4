@@ -679,6 +679,10 @@ castParExpression
 
 parExpression
     :   LPAREN statementExpression RPAREN
+
+    // !!!Error Alternatives!!!
+    //|   LPAREN statementExpression RPAREN RPAREN+ { notifyErrorListeners("Too many ')'"); } // the "Too many" case has been handled by the lexer
+    |   LPAREN statementExpression               { false }?<fail={ "Missing ')'" }>
     ;
 
 expressionList
@@ -840,11 +844,8 @@ commandArgument
  */
 pathExpression returns [int t]
     :   primary (pathElement { $t = $pathElement.t; })*
-
-    // !!!Error Alternatives!!!
-    //|   LPAREN statementExpression RPAREN RPAREN+ { notifyErrorListeners("Too many ')'"); } // the "Too many" case has been handled by the lexer
-    |   LPAREN statementExpression               { false }?<fail={ "Missing ')'" }>
     ;
+
 
 pathElement returns [int t]
 locals[ boolean isInsideClosure ]
