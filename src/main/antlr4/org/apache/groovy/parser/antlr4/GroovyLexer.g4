@@ -92,9 +92,9 @@ lexer grammar GroovyLexer;
             put("{", "}");
         }
     });
-    private final Deque<String> parenStack = new ArrayDeque<>();
-    private void enterParen(String paren) {
-        parenStack.push(paren);
+    private final Deque<String> parenStack = new ArrayDeque<>(32);
+    private void enterParen() {
+        parenStack.push(getText());
     }
     private void exitParen() {
         String paren = parenStack.peek();
@@ -207,7 +207,7 @@ DollarSlashyGStringCharacter
 
 mode GSTRING_TYPE_SELECTOR_MODE;
 GStringLBrace
-    :   '{' { this.enterParen("{");  } -> type(LBRACE), popMode, pushMode(DEFAULT_MODE)
+    :   '{' { this.enterParen();  } -> type(LBRACE), popMode, pushMode(DEFAULT_MODE)
     ;
 GStringIdentifier
     :   IdentifierInGString -> type(Identifier), popMode, pushMode(GSTRING_PATH_MODE)
@@ -647,11 +647,11 @@ DOLLAR              : '$';
 
 // §3.11 Separators
 
-LPAREN          : '(' { this.enterParen("(");  } -> pushMode(DEFAULT_MODE);
+LPAREN          : '(' { this.enterParen();     } -> pushMode(DEFAULT_MODE);
 RPAREN          : ')' { this.exitParen();      } -> popMode;
-LBRACE          : '{' { this.enterParen("{");  } -> pushMode(DEFAULT_MODE);
+LBRACE          : '{' { this.enterParen();     } -> pushMode(DEFAULT_MODE);
 RBRACE          : '}' { this.exitParen();      } -> popMode;
-LBRACK          : '[' { this.enterParen("[");  } -> pushMode(DEFAULT_MODE);
+LBRACK          : '[' { this.enterParen();     } -> pushMode(DEFAULT_MODE);
 RBRACK          : ']' { this.exitParen();      } -> popMode;
 SEMI            : ';';
 COMMA           : ',';
