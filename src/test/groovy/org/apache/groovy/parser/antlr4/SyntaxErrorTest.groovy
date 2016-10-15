@@ -100,6 +100,14 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.doRunAndShouldFail('fail/ParExpression_03x.groovy');
     }
 
+    void "test groovy core - This"() {
+        TestUtils.doRunAndShouldFail('fail/This_01x.groovy');
+    }
+
+    void "test groovy core - Super"() {
+        TestUtils.doRunAndShouldFail('fail/Super_01x.groovy');
+    }
+
     /**************************************/
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
         ignoreClazzList.addAll(COMMON_IGNORE_CLASS_LIST)

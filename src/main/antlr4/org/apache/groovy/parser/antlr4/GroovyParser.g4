@@ -846,7 +846,6 @@ pathExpression returns [int t]
     :   primary (pathElement { $t = $pathElement.t; })*
     ;
 
-
 pathElement returns [int t]
 locals[ boolean isInsideClosure ]
 @init {

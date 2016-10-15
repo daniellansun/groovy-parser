@@ -985,6 +985,27 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return null;
     }
 
+    private ConstructorCallExpression checkThisAndSuperConstructorCall(Statement statement) {
+        if (!(statement instanceof BlockStatement)) { // method code must be a BlockStatement
+            return null;
+        }
+
+        BlockStatement blockStatement = (BlockStatement) statement;
+        List<Statement> statementList = blockStatement.getStatements();
+
+        for (int i = 0, n = statementList.size(); i < n; i++) {
+            Statement s = statementList.get(i);
+            if (s instanceof ExpressionStatement) {
+                Expression expression = ((ExpressionStatement) s).getExpression();
+                if ((expression instanceof ConstructorCallExpression) && 0 != i) {
+                    return  (ConstructorCallExpression) expression;
+                }
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public MethodNode visitMethodDeclaration(MethodDeclarationContext ctx) {
         List<ModifierNode> modifierNodeList = Collections.emptyList();
@@ -1015,6 +1036,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             if (!asBoolean(ctx.returnType())
                     && asBoolean(ctx.methodBody())
                     && methodName.equals(className)) { // constructor declaration
+
+                ConstructorCallExpression thisOrSuperConstructorCallExpression = this.checkThisAndSuperConstructorCall(code);
+                if (asBoolean(thisOrSuperConstructorCallExpression)) {
+                    throw createParsingFailedException(thisOrSuperConstructorCallExpression.getText() + " should be the first statement in the constructor[" + methodName + "]", thisOrSuperConstructorCallExpression);
+                }
+
                 methodNode =
                         classNode.addConstructor(
                                 modifiers,
@@ -3631,6 +3658,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private CompilationFailedException createParsingFailedException(String msg, ASTNode node) {
+        Objects.requireNonNull(node, "node passed into createParsingFailedException should not be null");
+
         return createParsingFailedException(
                 new SyntaxException(msg,
                         node.getLineNumber(),
