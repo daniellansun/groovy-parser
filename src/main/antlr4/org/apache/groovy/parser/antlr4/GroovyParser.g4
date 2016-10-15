@@ -285,6 +285,7 @@ memberDeclaration[int t]
 /**
  *  t   0: *class member* all kinds of method declaration AND constructor declaration,
  *      1: normal method declaration, 2: abstract method declaration
+ *      3: normal method declaration OR abstract method declaration
  *  ct  9: script, other see the comment of classDeclaration
  */
 methodDeclaration[int t, int ct]
@@ -299,10 +300,10 @@ methodDeclaration[int t, int ct]
         )
         methodName formalParameters (nls THROWS nls qualifiedClassNameList)?
         (
-            { 0 == $t || 1 == $t}?
+            { 0 == $t || 3 == $t || 1 == $t}?
             nls methodBody
         |
-            { 0 == $t || 2 == $t }?
+            { 0 == $t || 3 == $t || 2 == $t }?
             /* no method body */
         )
     ;
@@ -606,8 +607,9 @@ statement
     |   typeDeclaration                                                                                     #typeDeclarationStmtAlt
     |   localVariableDeclaration                                                                            #localVariableDeclarationStmtAlt
 
+    // validate the method in the AstBuilder#visitMethodDeclaration, e.g. method without method body is not allowed
     |   { !SemanticPredicates.isInvalidMethodDeclaration(_input) }?
-        methodDeclaration[1, 9]                                                                             #methodDeclarationStmtAlt
+        methodDeclaration[3, 9]                                                                             #methodDeclarationStmtAlt
 
     |   statementExpression                                                                                 #expressionStmtAlt
 

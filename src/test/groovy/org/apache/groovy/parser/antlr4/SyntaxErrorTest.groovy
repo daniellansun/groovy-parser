@@ -108,6 +108,16 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.doRunAndShouldFail('fail/Super_01x.groovy');
     }
 
+    void "test groovy core - AbstractMethod"() {
+        TestUtils.doRunAndShouldFail('fail/AbstractMethod_01x.groovy');
+        TestUtils.doRunAndShouldFail('fail/AbstractMethod_02x.groovy');
+        TestUtils.doRunAndShouldFail('fail/AbstractMethod_03x.groovy');
+        TestUtils.doRunAndShouldFail('fail/AbstractMethod_04x.groovy');
+        TestUtils.doRunAndShouldFail('fail/AbstractMethod_05x.groovy');
+        TestUtils.doRunAndShouldFail('fail/AbstractMethod_06x.groovy');
+    }
+
+
     /**************************************/
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
         ignoreClazzList.addAll(COMMON_IGNORE_CLASS_LIST)
