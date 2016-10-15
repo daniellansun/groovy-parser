@@ -3679,11 +3679,17 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
     */
 
-    private CompilationFailedException createParsingFailedException(Exception e) {
+    private CompilationFailedException createParsingFailedException(SyntaxException e) {
+        this.collectSyntaxError(e);
+
         return new CompilationFailedException(
                 CompilePhase.PARSING.getPhaseNumber(),
                 this.sourceUnit,
                 e);
+    }
+
+    private void collectSyntaxError(SyntaxException e) {
+        sourceUnit.getErrorCollector().addFatalError(new SyntaxErrorMessage(e, sourceUnit));
     }
 
     private String readSourceCode(SourceUnit sourceUnit) {
@@ -3708,7 +3714,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     Object offendingSymbol, int line, int charPositionInLine,
                     String msg, RecognitionException e) {
 
-                sourceUnit.getErrorCollector().addFatalError(new SyntaxErrorMessage(new SyntaxException(msg, line, charPositionInLine + 1), sourceUnit));
+                collectSyntaxError(new SyntaxException(msg, line, charPositionInLine + 1));
             }
         };
     }
