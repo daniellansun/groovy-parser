@@ -135,6 +135,10 @@ class GroovyParserTest extends GroovyTestCase {
         doTest('core/Closure_10.groovy', [Parameter]);
     }
 
+    void "test groovy core - Lambda"() {
+        doRunAndTest('core/Lambda_01x.groovy');
+    }
+
     void "test groovy core - List"() {
         doTest('core/List_01.groovy');
     }
