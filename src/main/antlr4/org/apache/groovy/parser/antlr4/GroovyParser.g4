@@ -441,6 +441,27 @@ gstringPath
     :   identifier GStringPathPart*
     ;
 
+
+// LAMBDA EXPRESSION
+lambda
+	:	lambdaParameters nls ARROW nls lambdaBody
+	;
+
+lambdaParameters
+    :   LPAREN formalParameterList? RPAREN
+
+    // { a -> a * 2 } can be parsed as a lambda expression in a block, but we expect a closure.
+    // So it is better to put parameters in the parentheses and the following single parameter without parentheses is limited
+//  |   variableDeclaratorId
+    ;
+
+lambdaBody
+	:	block
+	|	statementExpression
+	;
+
+
+// CLOSURE
 closure
 locals[ Map<String, Object> dynaScope = new ListHashMap<>() ]
     :   LBRACE nls (formalParameterList? nls ARROW nls)? blockStatementsOpt RBRACE
@@ -940,6 +961,7 @@ primary
     |   SUPER                                                                               #superPrmrAlt
     |   parExpression                                                                       #parenPrmrAlt
     |   closure                                                                             #closurePrmrAlt
+    |   lambda                                                                              #lambdaPrmrAlt
     |   list                                                                                #listPrmrAlt
     |   map                                                                                 #mapPrmrAlt
     |   builtInType                                                                         #typePrmrAlt

@@ -1510,13 +1510,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitParExpression(ParExpressionContext ctx) {
-        Expression expression = this.configureAST(((ExpressionStatement) this.visit(ctx.statementExpression())).getExpression(), ctx);
+        Expression expression = ((ExpressionStatement) this.visit(ctx.statementExpression())).getExpression();
 
         expression.putNodeMetaData(IS_INSIDE_PARENTHESES, true);
 
-        return expression;
+        return this.configureAST(expression, ctx);
     }
-
 
     @Override
     public Expression visitPathExpression(PathExpressionContext ctx) {
@@ -2317,6 +2316,16 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public ClosureExpression visitClosurePrmrAlt(ClosurePrmrAltContext ctx) {
+        return this.configureAST(this.visitClosure(ctx.closure()), ctx);
+    }
+
+    @Override
+    public ClosureExpression visitLambdaPrmrAlt(LambdaPrmrAltContext ctx) {
+        return this.configureAST(this.visitLambda(ctx.lambda()), ctx);
+    }
+
+    @Override
     public ListExpression visitListPrmrAlt(ListPrmrAltContext ctx) {
         return this.configureAST(
                 this.visitList(ctx.list()),
@@ -2327,7 +2336,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public MapExpression visitMapPrmrAlt(MapPrmrAltContext ctx) {
         return this.configureAST(this.visitMap(ctx.map()), ctx);
     }
-
 
     @Override
     public VariableExpression visitTypePrmrAlt(TypePrmrAltContext ctx) {
@@ -2764,6 +2772,55 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(variableExpression, ctx);
     }
 // } gstring       --------------------------------------------------------------------
+
+    /**
+     * parse lambda expression as closure
+     *
+     * @param ctx LambdaContext instance
+     * @return  ClosureExpression instance
+     */
+    @Override
+    public ClosureExpression visitLambda(LambdaContext ctx) {
+        Parameter[] parameters = this.visitLambdaParameters(ctx.lambdaParameters());
+        Statement code = this.visitLambdaBody(ctx.lambdaBody());
+
+        return this.configureAST(new ClosureExpression(parameters, code), ctx);
+    }
+
+    @Override
+    public Parameter[] visitLambdaParameters(LambdaParametersContext ctx) {
+        /*
+        if (asBoolean(ctx.variableDeclaratorId())) {
+            return new Parameter[] {
+                    this.configureAST(
+                            new Parameter(
+                                    ClassHelper.OBJECT_TYPE,
+                                    this.visitVariableDeclaratorId(ctx.variableDeclaratorId()).getName()
+                            ),
+                            ctx.variableDeclaratorId()
+                    )
+            };
+        }
+        */
+
+        return asBoolean(ctx.formalParameterList())
+                ? this.visitFormalParameterList(ctx.formalParameterList())
+                : null;
+    }
+
+
+    @Override
+    public Statement visitLambdaBody(LambdaBodyContext ctx) {
+        if (asBoolean(ctx.statementExpression())) {
+            return this.configureAST((Statement) this.visit(ctx.statementExpression()), ctx);
+        }
+
+        if (asBoolean(ctx.block())) {
+            return this.configureAST(this.visitBlock(ctx.block()), ctx);
+        }
+
+        throw createParsingFailedException("Unsupported lambda body: " + ctx.getText(), ctx);
+    }
 
 
     @Override
