@@ -456,8 +456,8 @@ lambdaParameters
     ;
 
 lambdaBody
-	:	statementExpression
-	|	block
+	:	block
+	|	statementExpression
 	;
 
 
