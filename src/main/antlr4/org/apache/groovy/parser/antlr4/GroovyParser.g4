@@ -340,6 +340,7 @@ variableDeclaratorId
 variableInitializer
     :   arrayInitializer
     |   statementExpression
+    |   standardLambda
     ;
 
 arrayInitializer
@@ -444,20 +445,31 @@ gstringPath
 
 // LAMBDA EXPRESSION
 lambda
+options { baseContext = standardLambda; }
 	:	lambdaParameters nls ARROW nls lambdaBody
 	;
 
+standardLambda
+	:	standardLambdaParameters nls ARROW nls lambdaBody
+	;
+
 lambdaParameters
-    :   LPAREN formalParameterList? RPAREN
+options { baseContext = standardLambdaParameters; }
+    :   formalParameters
 
     // { a -> a * 2 } can be parsed as a lambda expression in a block, but we expect a closure.
     // So it is better to put parameters in the parentheses and the following single parameter without parentheses is limited
-//  |   variableDeclaratorId
+//    |   variableDeclaratorId
+    ;
+
+standardLambdaParameters
+    :   formalParameters
+    |   variableDeclaratorId
     ;
 
 lambdaBody
 	:	block
-	|	statementExpression
+	|	expression
 	;
 
 
@@ -701,7 +713,7 @@ castParExpression
     ;
 
 parExpression
-    :   LPAREN statementExpression RPAREN
+    :   LPAREN (statementExpression | standardLambda) RPAREN
 
     // !!!Error Alternatives!!!
     //|   LPAREN statementExpression RPAREN RPAREN+ { notifyErrorListeners("Too many ')'"); } // the "Too many" case has been handled by the lexer
@@ -818,7 +830,7 @@ expression
                            |   MOD_ASSIGN
                            |   POWER_ASSIGN
                            ) nls
-                     right=statementExpression                                              #assignmentExprAlt
+                     (statementExpression | standardLambda)                                 #assignmentExprAlt
     ;
 
 commandExpression
@@ -1031,21 +1043,37 @@ typeArgumentsOrDiamond
 
 arguments
     :   LPAREN
-        (   argumentList?
-        |   argumentList COMMA
+        (   enhancedArgumentList?
+        |   enhancedArgumentList COMMA
         )
         RPAREN
     ;
 
 argumentList
-    :   (   expressionListElement
-        |   mapEntry
-        )
+options { baseContext = enhancedArgumentList; }
+    :   argumentListElement
         (   COMMA nls
-            (   expressionListElement
-            |   mapEntry
-            )
+            argumentListElement
         )*
+    ;
+
+enhancedArgumentList
+    :   enhancedArgumentListElement
+        (   COMMA nls
+            enhancedArgumentListElement
+        )*
+    ;
+
+argumentListElement
+options { baseContext = enhancedArgumentListElement; }
+    :   expressionListElement
+    |   mapEntry
+    ;
+
+enhancedArgumentListElement
+    :   expressionListElement
+    |   standardLambda
+    |   mapEntry
     ;
 
 stringLiteral

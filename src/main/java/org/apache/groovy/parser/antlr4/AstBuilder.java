@@ -1355,6 +1355,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     ctx);
         }
 
+        if (asBoolean(ctx.standardLambda())) {
+            return this.configureAST(this.visitStandardLambda(ctx.standardLambda()), ctx);
+        }
+
         throw createParsingFailedException("Unsupported variable initializer: " + ctx.getText(), ctx);
     }
 
@@ -1394,7 +1398,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Expression visitCommandExpression(CommandExpressionContext ctx) {
         Expression baseExpr = this.visitPathExpression(ctx.pathExpression());
-        Expression arguments = this.visitArgumentList(ctx.argumentList());
+        Expression arguments = this.visitEnhancedArgumentList(ctx.enhancedArgumentList());
 
         MethodCallExpression methodCallExpression;
         if (baseExpr instanceof PropertyExpression) { // e.g. obj.a 1, 2
@@ -1460,7 +1464,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         Expression primaryExpr = (Expression) this.visit(ctx.primary());
 
-        if (asBoolean(ctx.argumentList())) { // e.g. x y a b
+        if (asBoolean(ctx.enhancedArgumentList())) { // e.g. x y a b
             if (baseExpr instanceof PropertyExpression) { // the branch should never reach, because a.b.c will be parsed as a path expression, not a method call
                 throw createParsingFailedException("Unsupported command argument: " + ctx.getText(), ctx);
             }
@@ -1470,7 +1474,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     new MethodCallExpression(
                             baseExpr,
                             this.createConstantExpression(primaryExpr),
-                            this.visitArgumentList(ctx.argumentList())
+                            this.visitEnhancedArgumentList(ctx.enhancedArgumentList())
                     );
             methodCallExpression.setImplicitThis(false);
 
@@ -1510,7 +1514,15 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitParExpression(ParExpressionContext ctx) {
-        Expression expression = ((ExpressionStatement) this.visit(ctx.statementExpression())).getExpression();
+        Expression expression;
+
+        if (asBoolean(ctx.statementExpression())) {
+            expression = ((ExpressionStatement) this.visit(ctx.statementExpression())).getExpression();
+        } else if (asBoolean(ctx.standardLambda())) {
+            expression = this.visitStandardLambda(ctx.standardLambda());
+        } else {
+            throw createParsingFailedException("Unsupported parentheses expression: " + ctx.getText(), ctx);
+        }
 
         expression.putNodeMetaData(IS_INSIDE_PARENTHESES, true);
 
@@ -1843,29 +1855,40 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitArguments(ArgumentsContext ctx) {
-        if (!asBoolean(ctx) || !asBoolean(ctx.argumentList())) {
+        if (!asBoolean(ctx) || !asBoolean(ctx.enhancedArgumentList())) {
             return new ArgumentListExpression();
         }
 
-        return this.configureAST(this.visitArgumentList(ctx.argumentList()), ctx);
+        return this.configureAST(this.visitEnhancedArgumentList(ctx.enhancedArgumentList()), ctx);
     }
 
     @Override
-    public Expression visitArgumentList(ArgumentListContext ctx) {
+    public Expression visitEnhancedArgumentList(EnhancedArgumentListContext ctx) {
         if (!asBoolean(ctx)) {
             return null;
         }
 
-        List<Expression> expressionList = this.createExpressionList(ctx.expressionListElement());
-        List<MapEntryExpression> mapEntryExpressionList = this.createMapEntryList(ctx.mapEntry());
+        List<Expression> expressionList = new LinkedList<>();
+        List<MapEntryExpression> mapEntryExpressionList = new LinkedList<>();
 
-        if (!asBoolean(ctx.mapEntry())) { // e.g. arguments like  1, 2
+        ctx.enhancedArgumentListElement().stream()
+                .map(this::visitEnhancedArgumentListElement)
+                .forEach(e -> {
+
+            if (e instanceof MapEntryExpression) {
+                mapEntryExpressionList.add((MapEntryExpression) e);
+            } else {
+                expressionList.add(e);
+            }
+        });
+
+        if (!asBoolean(mapEntryExpressionList)) { // e.g. arguments like  1, 2 OR  someArg, e -> e
             return this.configureAST(
                     new ArgumentListExpression(expressionList),
                     ctx);
         }
 
-        if (!asBoolean(ctx.expressionListElement())) { // e.g. arguments like  x: 1, y: 2
+        if (!asBoolean(expressionList)) { // e.g. arguments like  x: 1, y: 2
             return this.configureAST(
                     new TupleExpression(
                             this.configureAST(
@@ -1874,7 +1897,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     ctx);
         }
 
-        if (asBoolean(ctx.mapEntry()) && asBoolean(ctx.expressionListElement())) { // e.g. arguments like x: 1, 'a', y: 2, 'b', z: 3
+        if (asBoolean(mapEntryExpressionList) && asBoolean(expressionList)) { // e.g. arguments like x: 1, 'a', y: 2, 'b', z: 3
             ArgumentListExpression argumentListExpression = new ArgumentListExpression(expressionList);
             argumentListExpression.getExpressions().add(0, new MapExpression(mapEntryExpressionList)); // TODO: confirm BUG OR NOT? All map entries will be put at first, which is not friendly to Groovy developers
 
@@ -1883,6 +1906,24 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         throw createParsingFailedException("Unsupported argument list: " + ctx.getText(), ctx);
     }
+
+    @Override
+    public Expression visitEnhancedArgumentListElement(EnhancedArgumentListElementContext ctx) {
+        if (asBoolean(ctx.expressionListElement())) {
+            return this.configureAST(this.visitExpressionListElement(ctx.expressionListElement()), ctx);
+        }
+
+        if (asBoolean(ctx.standardLambda())) {
+            return this.configureAST(this.visitStandardLambda(ctx.standardLambda()), ctx);
+        }
+
+        if (asBoolean(ctx.mapEntry())) {
+            return this.configureAST(this.visitMapEntry(ctx.mapEntry()), ctx);
+        }
+
+        throw createParsingFailedException("Unsupported enhanced argument list element: " + ctx.getText(), ctx);
+    }
+
 
     @Override
     public ConstantExpression visitStringLiteral(StringLiteralContext ctx) {
@@ -2243,7 +2284,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     new BinaryExpression(
                             this.configureAST(new TupleExpression(leftExpr), ctx.left),
                             this.createGroovyToken(ctx.op),
-                            ((ExpressionStatement) this.visit(ctx.right)).getExpression()),
+                            asBoolean(ctx.statementExpression())
+                                    ? ((ExpressionStatement) this.visit(ctx.statementExpression())).getExpression()
+                                    : this.visitStandardLambda(ctx.standardLambda())),
                     ctx);
         }
 
@@ -2270,9 +2313,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 new BinaryExpression(
                         leftExpr,
                         this.createGroovyToken(ctx.op),
-                        ((ExpressionStatement) this.visit(ctx.right)).getExpression()),
-                ctx
-        );
+                        asBoolean(ctx.statementExpression())
+                                ? ((ExpressionStatement) this.visit(ctx.statementExpression())).getExpression()
+                                : this.visitStandardLambda(ctx.standardLambda())),
+                ctx);
     }
 
 // } expression    --------------------------------------------------------------------
@@ -2322,7 +2366,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClosureExpression visitLambdaPrmrAlt(LambdaPrmrAltContext ctx) {
-        return this.configureAST(this.visitLambda(ctx.lambda()), ctx);
+        return this.configureAST(this.visitStandardLambda(ctx.standardLambda()), ctx);
     }
 
     @Override
@@ -2773,23 +2817,19 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 // } gstring       --------------------------------------------------------------------
 
-    /**
-     * parse lambda expression as closure
-     *
-     * @param ctx LambdaContext instance
-     * @return  ClosureExpression instance
-     */
     @Override
-    public ClosureExpression visitLambda(LambdaContext ctx) {
-        Parameter[] parameters = this.visitLambdaParameters(ctx.lambdaParameters());
-        Statement code = this.visitLambdaBody(ctx.lambdaBody());
+    public LambdaExpression visitStandardLambda(StandardLambdaContext ctx) {
+        return this.configureAST(this.createLambda(ctx.standardLambdaParameters(), ctx.lambdaBody()), ctx);
+    }
 
-        return this.configureAST(new ClosureExpression(parameters, code), ctx);
+    private LambdaExpression createLambda(StandardLambdaParametersContext standardLambdaParametersContext, LambdaBodyContext lambdaBodyContext) {
+        return new LambdaExpression(
+                this.visitStandardLambdaParameters(standardLambdaParametersContext),
+                this.visitLambdaBody(lambdaBodyContext));
     }
 
     @Override
-    public Parameter[] visitLambdaParameters(LambdaParametersContext ctx) {
-        /*
+    public Parameter[] visitStandardLambdaParameters(StandardLambdaParametersContext ctx) {
         if (asBoolean(ctx.variableDeclaratorId())) {
             return new Parameter[] {
                     this.configureAST(
@@ -2801,18 +2841,20 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     )
             };
         }
-        */
 
-        return asBoolean(ctx.formalParameterList())
-                ? this.visitFormalParameterList(ctx.formalParameterList())
-                : null;
+        Parameter[] parameters = this.visitFormalParameters(ctx.formalParameters());
+
+        if (0 == parameters.length) {
+            return null;
+        }
+
+        return parameters;
     }
-
 
     @Override
     public Statement visitLambdaBody(LambdaBodyContext ctx) {
-        if (asBoolean(ctx.statementExpression())) {
-            return this.configureAST((Statement) this.visit(ctx.statementExpression()), ctx);
+        if (asBoolean(ctx.expression())) {
+            return this.configureAST(new ExpressionStatement((Expression) this.visit(ctx.expression())), ctx);
         }
 
         if (asBoolean(ctx.block())) {
@@ -2821,7 +2863,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         throw createParsingFailedException("Unsupported lambda body: " + ctx.getText(), ctx);
     }
-
 
     @Override
     public ClosureExpression visitClosure(ClosureContext ctx) {
