@@ -23,6 +23,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.groovy.parser.antlr4.internal.DescriptiveErrorStrategy;
 import org.apache.groovy.parser.antlr4.util.StringUtils;
 import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.antlr.EnumHelper;
@@ -74,7 +75,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         this.parser = new GroovyLangParser(
                 new CommonTokenStream(this.lexer));
 
-        this.parser.setErrorHandler(new BailErrorStrategy());
+        this.parser.setErrorHandler(new DescriptiveErrorStrategy());
     }
 
     private GroovyParserRuleContext buildCST(PredictionMode predictionMode) {
@@ -101,10 +102,14 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public ModuleNode buildAST() {
         try {
             return (ModuleNode) this.visit(this.buildCST());
-        } catch (CompilationFailedException e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to build AST", e);
 
-            throw e;
+            if (e instanceof CompilationFailedException) {
+                throw e;
+            } else {
+                throw createParsingFailedException(e);
+            }
         }
     }
 
@@ -3792,17 +3797,25 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
     */
 
-    private CompilationFailedException createParsingFailedException(SyntaxException e) {
-        this.collectSyntaxError(e);
+    private CompilationFailedException createParsingFailedException(Throwable t) {
+        if (t instanceof SyntaxException) {
+            this.collectSyntaxError((SyntaxException) t);
+        } else if (t instanceof Exception) {
+            this.collectException((Exception) t);
+        }
 
         return new CompilationFailedException(
                 CompilePhase.PARSING.getPhaseNumber(),
                 this.sourceUnit,
-                e);
+                t);
     }
 
     private void collectSyntaxError(SyntaxException e) {
         sourceUnit.getErrorCollector().addFatalError(new SyntaxErrorMessage(e, sourceUnit));
+    }
+
+    private void collectException(Exception e) {
+        sourceUnit.getErrorCollector().addException(e, this.sourceUnit);
     }
 
     private String readSourceCode(SourceUnit sourceUnit) {
