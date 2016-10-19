@@ -37,3 +37,11 @@ int sum = 0;
 })
 assert 6 == sum;
 
+def c = { (e) -> e * 2 }
+assert 6 == c()(3)
+
+c = { (e) -> { e * 2 } }
+assert 6 == c()(3)
+
+
+
