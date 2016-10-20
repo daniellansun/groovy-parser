@@ -896,6 +896,7 @@ locals[ boolean isInsideClosure ]
         ( SPREAD_DOT nls (AT | nonWildcardTypeArguments)?       // Spread operator:  x*.y  ===  x?.collect{it.y}
         | OPTIONAL_DOT nls (AT | nonWildcardTypeArguments)?     // Optional-null operator:  x?.y  === (x==null)?null:x.y
         | MEMBER_POINTER nls                                    // Member pointer operator: foo.&y == foo.metaClass.getMethodPointer(foo, "y")
+        | METHOD_REFERENCE nls                                  // Method reference: System.out::println
         | DOT nls (AT | nonWildcardTypeArguments)?              // The all-powerful dot.
         )
         namePart

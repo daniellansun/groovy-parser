@@ -632,6 +632,7 @@ SPREAD_DOT          : '*.';
 OPTIONAL_DOT        : '?.';
 ELVIS               : '?:';
 MEMBER_POINTER      : '.&';
+METHOD_REFERENCE    : '::';
 REGEX_FIND          : '=~';
 REGEX_MATCH         : '==~';
 POWER               : '**';

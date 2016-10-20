@@ -1571,6 +1571,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 }
             } else if (asBoolean(ctx.MEMBER_POINTER())) { // e.g. obj.&m
                 return this.configureAST(new MethodPointerExpression(baseExpr, namePartExpr), ctx);
+            } else if (asBoolean(ctx.METHOD_REFERENCE())) { // e.g. obj::m
+                return this.configureAST(new MethodReferenceExpression(baseExpr, namePartExpr), ctx);
             } else if (asBoolean(ctx.SPREAD_DOT())) {
                 if (asBoolean(ctx.AT())) { // e.g. obj*.@a
                     AttributeExpression attributeExpression = new AttributeExpression(baseExpr, namePartExpr, true);
