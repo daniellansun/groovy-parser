@@ -102,13 +102,13 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public ModuleNode buildAST() {
         try {
             return (ModuleNode) this.visit(this.buildCST());
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to build AST", e);
+        } catch (Throwable t) {
+            LOGGER.log(Level.SEVERE, "Failed to build AST", t);
 
-            if (e instanceof CompilationFailedException) {
-                throw e;
+            if (t instanceof CompilationFailedException) {
+                throw t;
             } else {
-                throw createParsingFailedException(e);
+                throw createParsingFailedException(t);
             }
         }
     }
