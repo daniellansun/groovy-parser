@@ -796,3 +796,8 @@ SL_COMMENT
 SH_COMMENT
     :   '#!' { 0 == this.tokenIndex }?<fail={"Shebang comment should appear at the first line"}> ~[\r\n\uFFFF]* -> skip
     ;
+
+// Unexpected characters will be handled by groovy parser later.
+UNEXPECTED_CHAR
+    :   .
+    ;
