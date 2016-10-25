@@ -40,10 +40,7 @@ import org.codehaus.groovy.util.SingleKeyHashMap;
 import org.objectweb.asm.ClassVisitor;
 
 import java.beans.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -1005,10 +1002,32 @@ public class MetaClassImpl implements MetaClass, MutableMetaClass {
         final Class ownerClass = owner instanceof Class ? (Class) owner : owner.getClass();
         final MetaClass ownerMetaClass = registry.getMetaClass(ownerClass);
 
-        // try to invoke method with original arguments first, which can match most of use cases
+        // To conform to "Least Surprise" principle, try to invoke method with original arguments first, which can match most of use cases
         try {
             return ownerMetaClass.invokeMethod(ownerClass, owner, methodName, arguments, false, false);
         } catch (MissingMethodExceptionNoStack e) {
+            // CONSTRUCTOR REFERENCE
+            if (owner instanceof Class && MethodClosure.NEW.equals(methodName)) {
+                if (ownerClass.isArray()) {
+                    int[] sizeArray = new int[arguments.length];
+
+                    for (int i = 0, n = sizeArray.length; i < n; i++) {
+                        Object argument = arguments[i];
+
+                        if (argument instanceof Integer) {
+                            sizeArray[i] = (Integer) argument;
+                        } else {
+                            sizeArray[i] = Integer.parseInt(String.valueOf(argument));
+                        }
+                    }
+
+                    return Array.newInstance(ownerClass, sizeArray);
+                }
+
+                return ownerMetaClass.invokeConstructor(arguments);
+            }
+
+            // METHOD REFERENCE
             // if and only if the owner is a class and the method closure can be related to some instance methods,
             // try to invoke method with adjusted arguments(first argument is the actual owner) again.
             // otherwise throw the MissingMethodExceptionNoStack.

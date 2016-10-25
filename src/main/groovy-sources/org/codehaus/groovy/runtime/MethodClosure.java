@@ -32,7 +32,8 @@ import java.util.List;
  * @author <a href="mailto:james@coredevelopers.net">James Strachan</a>
  */
 public class MethodClosure extends Closure {
-    public static final String IS_ALL_METHODS_STATIC = "allMethodStatic";
+    public static final String NEW = "new";
+    public static final String IS_ALL_METHODS_STATIC = "isAllMethodStatic";
     public static boolean ALLOW_RESOLVE = false;
     private static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
 

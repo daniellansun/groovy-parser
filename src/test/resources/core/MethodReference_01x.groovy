@@ -15,6 +15,7 @@ assert ['Hi, Jochen', 'Hi, Paul', 'Hi, Daniel'] == [new Person('Jochen'), new Pe
 
 // class::staticMethod
 assert ['Jochen', 'Paul', 'Daniel'] == [new Person('Jochen'), new Person('Paul'), new Person('Daniel')].stream().map(Person::getText).collect(Collectors.toList())
+assert ['Jochen', 'Paul', 'Daniel'] == [new Person('Jochen'), new Person('Paul'), new Person('Daniel')].stream().map(BasePerson::getText).collect(Collectors.toList())
 
 // instance::staticMethod
 assert ['J', 'P', 'D'] == [new Person('Jochen'), new Person('Paul'), new Person('Daniel')].stream().map(robot::firstCharOfName).collect(Collectors.toList())
@@ -24,7 +25,13 @@ assert ['Jochen', 'Paul', 'Daniel'] == [new Person('Jochen'), new Person('Paul')
 
 
 // ----------------------------------
-class Person {
+class BasePerson {
+    public static String getText(Person p) {
+        return p.name;
+    }
+}
+
+class Person extends BasePerson {
     private String name;
 
     public Person(String name) {
@@ -35,9 +42,6 @@ class Person {
         return this.name;
     }
 
-    public static String getText(Person p) {
-        return p.name;
-    }
 }
 class Robot {
     public String greet(Person p) {
@@ -48,3 +52,17 @@ class Robot {
         return p.getName().charAt(0);
     }
 }
+
+def mr = String::toUpperCase
+assert 'ABC' == mr('abc')
+assert 'ABC' == String::toUpperCase('abc')
+
+assert new HashSet() == HashSet::new()
+assert new String() == String::new()
+assert 1 == Integer::new(1)
+assert new String[0] == String[]::new(0)
+assert new String[0] == String[]::new('0')
+assert new String[1][2] == String[][]::new(1, 2)
+assert new String[1][2][3] == String[][][]::new(1, 2, 3)
+
+assert [new String[1], new String[2], new String[3]] == [1, 2, 3].stream().map(String[]::new).collect(Collectors.toList())
