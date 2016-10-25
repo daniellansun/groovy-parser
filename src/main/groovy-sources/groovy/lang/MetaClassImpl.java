@@ -997,6 +997,36 @@ public class MetaClassImpl implements MetaClass, MutableMetaClass {
         return invokeMethod(theClass, object, methodName, originalArguments, false, false);
     }
 
+    private Object invokeMethodClosure(Object object, String methodName, Object[] arguments) {
+        final MethodClosure mc = (MethodClosure) object;
+        final Object owner = mc.getOwner();
+
+        methodName = mc.getMethod();
+        final Class ownerClass = owner instanceof Class ? (Class) owner : owner.getClass();
+        final MetaClass ownerMetaClass = registry.getMetaClass(ownerClass);
+
+        // try to invoke method with original arguments first, which can match most of use cases
+        try {
+            return ownerMetaClass.invokeMethod(ownerClass, owner, methodName, arguments, false, false);
+        } catch (MissingMethodExceptionNoStack e) {
+            // if and only if the owner is a class and the method closure can be related to some instance methods,
+            // try to invoke method with adjusted arguments(first argument is the actual owner) again.
+            // otherwise throw the MissingMethodExceptionNoStack.
+            if (!(owner instanceof Class
+                    && !((Boolean) mc.getProperty(MethodClosure.IS_ALL_METHODS_STATIC)).booleanValue())) {
+
+                throw e;
+            }
+
+            if (arguments.length <= 0) {
+                return invokeMissingMethod(object, methodName, arguments);
+            }
+
+            Object newOwner = arguments[0];
+            Object[] newArguments = Arrays.copyOfRange(arguments, 1, arguments.length);
+            return ownerMetaClass.invokeMethod(ownerClass, newOwner, methodName, newArguments, false, false);
+        }
+    }
 
     /**
      * <p>Invokes a method on the given receiver for the specified arguments. The sender is the class that invoked the method on the object.
@@ -1042,17 +1072,12 @@ public class MetaClassImpl implements MetaClass, MutableMetaClass {
         final boolean isClosure = object instanceof Closure;
         if (isClosure) {
             final Closure closure = (Closure) object;
-
             final Object owner = closure.getOwner();
 
             if (CLOSURE_CALL_METHOD.equals(methodName) || CLOSURE_DO_CALL_METHOD.equals(methodName)) {
                 final Class objectClass = object.getClass();
                 if (objectClass == MethodClosure.class) {
-                    final MethodClosure mc = (MethodClosure) object;
-                    methodName = mc.getMethod();
-                    final Class ownerClass = owner instanceof Class ? (Class) owner : owner.getClass();
-                    final MetaClass ownerMetaClass = registry.getMetaClass(ownerClass);
-                    return ownerMetaClass.invokeMethod(ownerClass, owner, methodName, arguments, false, false);
+                    return this.invokeMethodClosure(object, methodName, arguments);
                 } else if (objectClass == CurriedClosure.class) {
                     final CurriedClosure cc = (CurriedClosure) object;
                     // change the arguments for an uncurried call
