@@ -132,6 +132,30 @@ public class MethodClosure extends Closure {
         return clazz;
     }
 
+    /**
+     * Reduce the dimension of array
+     * TODO move it to common utilities class
+     *
+     * @param clazz the type of array
+     * @param dim the target dimension
+     * @return the result array
+     */
+    public static Class reduceDimension(Class clazz, int dim) {
+        if (!clazz.isArray()) {
+            return null;
+        }
+
+        if (dim < 0) {
+            throw new IllegalArgumentException("The target dimension should not be less than zero: " + dim);
+        }
+
+        while (clazz.isArray() && dimension(clazz) > dim) {
+            clazz = clazz.getComponentType();
+        }
+
+        return clazz;
+    }
+
     /*
      * Create a new array of parameter type.
      *
