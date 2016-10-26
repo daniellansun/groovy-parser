@@ -20,8 +20,11 @@ package org.codehaus.groovy.runtime;
 
 import groovy.lang.Closure;
 import groovy.lang.MetaMethod;
+import org.codehaus.groovy.reflection.CachedConstructor;
+import org.codehaus.groovy.reflection.ReflectionCache;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -55,10 +58,7 @@ public class MethodClosure extends Closure {
         for (MetaMethod m : methods) {
             Class[] newParameterTypes = this.makeParameterTypes(owner, m);
 
-            if (newParameterTypes.length > this.maximumNumberOfParameters) {
-                this.maximumNumberOfParameters = newParameterTypes.length;
-                this.parameterTypes = newParameterTypes;
-            }
+            this.setParameterTypesAndNumber(newParameterTypes);
 
             if (m.isStatic()) {
                 staticMethodCnt++;
@@ -66,6 +66,51 @@ public class MethodClosure extends Closure {
         }
 
         this.allMethodStatic = staticMethodCnt == methods.size();
+
+        if (NEW.equals(method)) {
+            if (clazz.isArray()) {
+                Class[] sizeTypes = new Class[dimension(clazz)];
+                Arrays.fill(sizeTypes, int.class);
+
+                this.setParameterTypesAndNumber(sizeTypes);
+            } else {
+                for (CachedConstructor c : ReflectionCache.getCachedClass(clazz).getConstructors()) {
+                    Class[] newParameterTypes = c.getNativeParameterTypes();
+
+                    this.setParameterTypesAndNumber(newParameterTypes);
+                }
+            }
+        }
+    }
+
+    private void setParameterTypesAndNumber(Class[] newParameterTypes) {
+        if (!(newParameterTypes.length > this.maximumNumberOfParameters)) {
+            return;
+        }
+
+        this.maximumNumberOfParameters = newParameterTypes.length;
+        this.parameterTypes = newParameterTypes;
+    }
+
+    /**
+     * Calculate the dimension of array
+     * TODO move it to more common utilities class
+     *
+     * @param clazz
+     * @return the dimension of array
+     */
+    public static Integer dimension(Class clazz) {
+        if (!clazz.isArray()) {
+            return null;
+        }
+
+        int result = 0;
+        while (clazz.isArray()) {
+            result++;
+            clazz = clazz.getComponentType();
+        }
+
+        return result;
     }
 
     /*
