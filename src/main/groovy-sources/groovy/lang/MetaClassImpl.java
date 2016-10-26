@@ -1009,6 +1009,10 @@ public class MetaClassImpl implements MetaClass, MutableMetaClass {
             // CONSTRUCTOR REFERENCE
             if (owner instanceof Class && MethodClosure.NEW.equals(methodName)) {
                 if (ownerClass.isArray()) {
+                    if (0 == arguments.length) {
+                        throw new GroovyRuntimeException("The arguments(specifying size) are required to create array[" + ownerClass.getCanonicalName() + "]");
+                    }
+
                     int arrayDimension = MethodClosure.dimension(ownerClass);
 
                     if (arguments.length > arrayDimension) {
