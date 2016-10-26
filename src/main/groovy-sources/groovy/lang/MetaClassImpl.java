@@ -1009,6 +1009,12 @@ public class MetaClassImpl implements MetaClass, MutableMetaClass {
             // CONSTRUCTOR REFERENCE
             if (owner instanceof Class && MethodClosure.NEW.equals(methodName)) {
                 if (ownerClass.isArray()) {
+                    int arrayDimension = MethodClosure.dimension(ownerClass);
+
+                    if (arguments.length != arrayDimension) {
+                        throw new GroovyRuntimeException("The length[\" + arguments.length + \"] of arguments should be same with the dimensions[" + arrayDimension + "] of array");
+                    }
+
                     int[] sizeArray = new int[arguments.length];
 
                     for (int i = 0, n = sizeArray.length; i < n; i++) {
@@ -1021,7 +1027,7 @@ public class MetaClassImpl implements MetaClass, MutableMetaClass {
                         }
                     }
 
-                    return Array.newInstance(ownerClass, sizeArray);
+                    return Array.newInstance(MethodClosure.elementType(ownerClass), sizeArray);
                 }
 
                 return ownerMetaClass.invokeConstructor(arguments);

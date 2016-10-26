@@ -94,9 +94,9 @@ public class MethodClosure extends Closure {
 
     /**
      * Calculate the dimension of array
-     * TODO move it to more common utilities class
+     * TODO move it to common utilities class
      *
-     * @param clazz
+     * @param clazz the type of array
      * @return the dimension of array
      */
     public static Integer dimension(Class clazz) {
@@ -111,6 +111,25 @@ public class MethodClosure extends Closure {
         }
 
         return result;
+    }
+
+    /**
+     * Get the type of array elements
+     * TODO move it to common utilities class
+     *
+     * @param clazz the type of array
+     * @return the type of elements
+     */
+    public static Class elementType(Class clazz) {
+        if (!clazz.isArray()) {
+            return null;
+        }
+
+        while (clazz.isArray()) {
+            clazz = clazz.getComponentType();
+        }
+
+        return clazz;
     }
 
     /*

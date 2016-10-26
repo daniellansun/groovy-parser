@@ -66,3 +66,4 @@ assert new String[1][2] == String[][]::new(1, 2)
 assert new String[1][2][3] == String[][][]::new(1, 2, 3)
 
 assert [new String[1], new String[2], new String[3]] == [1, 2, 3].stream().map(String[]::new).collect(Collectors.toList())
+assert [1, 2, 3] as String[] == [1, 2, 3].stream().map(String::valueOf).toArray(String[]::new)
