@@ -1012,7 +1012,7 @@ public class MetaClassImpl implements MetaClass, MutableMetaClass {
                     int arrayDimension = MethodClosure.dimension(ownerClass);
 
                     if (arguments.length != arrayDimension) {
-                        throw new GroovyRuntimeException("The length[\" + arguments.length + \"] of arguments should be same with the dimensions[" + arrayDimension + "] of array");
+                        throw new GroovyRuntimeException("The length[" + arguments.length + "] of arguments should be same with the dimensions[" + arrayDimension + "] of array[" + ownerClass.getCanonicalName() + "]");
                     }
 
                     int[] sizeArray = new int[arguments.length];
