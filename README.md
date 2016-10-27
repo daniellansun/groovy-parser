@@ -9,7 +9,8 @@ Currently almost all features of Groovy are available, the parser is being testi
 
 * do-while loop
 * identical operation(`===`, `!==`)(DONE)
-* lambda expression
+* lambda expression(DONE)
+* method reference and constructor reference(DONE)
 * groovydoc attached to AST node as metadata(DONE)
 * etc.
 
