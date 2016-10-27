@@ -21,6 +21,7 @@ package org.apache.groovy.parser.antlr4;
 import groovy.lang.IntRange;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.groovy.parser.antlr4.internal.DescriptiveErrorStrategy;
@@ -103,13 +104,19 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         try {
             return (ModuleNode) this.visit(this.buildCST());
         } catch (Throwable t) {
-            LOGGER.log(Level.SEVERE, "Failed to build AST", t);
+            CompilationFailedException cfe;
 
             if (t instanceof CompilationFailedException) {
-                throw t;
+                cfe = (CompilationFailedException) t;
+            } else if (t instanceof ParseCancellationException) {
+                cfe = createParsingFailedException(t.getCause());
             } else {
-                throw createParsingFailedException(t);
+                cfe = createParsingFailedException(t);
             }
+
+            LOGGER.log(Level.SEVERE, "Failed to build AST", cfe);
+
+            throw cfe;
         }
     }
 
