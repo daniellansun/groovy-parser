@@ -1046,7 +1046,7 @@ public class MetaClassImpl implements MetaClass, MutableMetaClass {
             // try to invoke method with adjusted arguments(first argument is the actual owner) again.
             // otherwise throw the MissingMethodExceptionNoStack.
             if (!(owner instanceof Class
-                    && !((Boolean) mc.getProperty(MethodClosure.IS_ALL_METHODS_STATIC)).booleanValue())) {
+                    && ((Boolean) mc.getProperty(MethodClosure.ANY_INSTANCE_METHOD_EXISTS)).booleanValue())) {
 
                 throw e;
             }

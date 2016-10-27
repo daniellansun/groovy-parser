@@ -36,12 +36,12 @@ import java.util.List;
  */
 public class MethodClosure extends Closure {
     public static final String NEW = "new";
-    public static final String IS_ALL_METHODS_STATIC = "isAllMethodStatic";
+    public static final String ANY_INSTANCE_METHOD_EXISTS = "anyInstanceMethodExists";
     public static boolean ALLOW_RESOLVE = false;
     private static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
 
     private final String method;
-    private final boolean allMethodStatic;
+    private final boolean anyInstanceMethodExists; // whether the method closure is related to instance method
 
     public MethodClosure(Object owner, String method) {
         super(owner);
@@ -54,18 +54,18 @@ public class MethodClosure extends Closure {
 
         List<MetaMethod> methods = InvokerHelper.getMetaClass(clazz).respondsTo(owner, method);
 
-        int staticMethodCnt = 0;
+        int instanceMethodCnt = 0;
         for (MetaMethod m : methods) {
             Class[] newParameterTypes = this.makeParameterTypes(owner, m);
 
             this.setParameterTypesAndNumber(newParameterTypes);
 
-            if (m.isStatic()) {
-                staticMethodCnt++;
+            if (!m.isStatic()) {
+                instanceMethodCnt++;
             }
         }
 
-        this.allMethodStatic = staticMethodCnt == methods.size();
+        this.anyInstanceMethodExists = instanceMethodCnt > 0;
 
         if (NEW.equals(method)) {
             if (clazz.isArray()) {
@@ -204,8 +204,8 @@ public class MethodClosure extends Closure {
     public Object getProperty(String property) {
         if ("method".equals(property)) {
             return getMethod();
-        } else if (IS_ALL_METHODS_STATIC.equals(property)) {
-            return this.allMethodStatic;
+        } else if (ANY_INSTANCE_METHOD_EXISTS.equals(property)) {
+            return this.anyInstanceMethodExists;
         } else return super.getProperty(property);
     }
 }
