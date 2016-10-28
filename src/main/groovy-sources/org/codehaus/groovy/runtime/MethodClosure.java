@@ -69,7 +69,7 @@ public class MethodClosure extends Closure {
 
         if (NEW.equals(method)) {
             if (clazz.isArray()) {
-                Class[] sizeTypes = new Class[dimension(clazz)];
+                Class[] sizeTypes = new Class[ArrayTypeUtils.dimension(clazz)];
                 Arrays.fill(sizeTypes, int.class);
 
                 this.setParameterTypesAndNumber(sizeTypes);
@@ -90,70 +90,6 @@ public class MethodClosure extends Closure {
 
         this.maximumNumberOfParameters = newParameterTypes.length;
         this.parameterTypes = newParameterTypes;
-    }
-
-    /**
-     * Calculate the dimension of array
-     * TODO move it to common utilities class
-     *
-     * @param clazz the type of array
-     * @return the dimension of array
-     */
-    public static Integer dimension(Class clazz) {
-        if (!clazz.isArray()) {
-            return null;
-        }
-
-        int result = 0;
-        while (clazz.isArray()) {
-            result++;
-            clazz = clazz.getComponentType();
-        }
-
-        return result;
-    }
-
-    /**
-     * Get the type of array elements
-     * TODO move it to common utilities class
-     *
-     * @param clazz the type of array
-     * @return the type of elements
-     */
-    public static Class elementType(Class clazz) {
-        if (!clazz.isArray()) {
-            return null;
-        }
-
-        while (clazz.isArray()) {
-            clazz = clazz.getComponentType();
-        }
-
-        return clazz;
-    }
-
-    /**
-     * Reduce the dimension of array
-     * TODO move it to common utilities class
-     *
-     * @param clazz the type of array
-     * @param dim the target dimension
-     * @return the result array
-     */
-    public static Class reduceDimension(Class clazz, int dim) {
-        if (!clazz.isArray()) {
-            return null;
-        }
-
-        if (dim < 0) {
-            throw new IllegalArgumentException("The target dimension should not be less than zero: " + dim);
-        }
-
-        while (clazz.isArray() && dimension(clazz) > dim) {
-            clazz = clazz.getComponentType();
-        }
-
-        return clazz;
     }
 
     /*

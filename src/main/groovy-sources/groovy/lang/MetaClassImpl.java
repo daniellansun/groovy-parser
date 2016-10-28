@@ -1013,7 +1013,7 @@ public class MetaClassImpl implements MetaClass, MutableMetaClass {
                         throw new GroovyRuntimeException("The arguments(specifying size) are required to create array[" + ownerClass.getCanonicalName() + "]");
                     }
 
-                    int arrayDimension = MethodClosure.dimension(ownerClass);
+                    int arrayDimension = ArrayTypeUtils.dimension(ownerClass);
 
                     if (arguments.length > arrayDimension) {
                         throw new GroovyRuntimeException("The length[" + arguments.length + "] of arguments should not be greater than the dimensions[" + arrayDimension + "] of array[" + ownerClass.getCanonicalName() + "]");
@@ -1033,8 +1033,8 @@ public class MetaClassImpl implements MetaClass, MutableMetaClass {
 
                     Class arrayType =
                             arguments.length == arrayDimension
-                                    ? MethodClosure.elementType(ownerClass) // Just for better performance, though we can use reduceDimension only
-                                    : MethodClosure.reduceDimension(ownerClass, (arrayDimension - arguments.length));
+                                    ? ArrayTypeUtils.elementType(ownerClass) // Just for better performance, though we can use reduceDimension only
+                                    : ArrayTypeUtils.reduceDimension(ownerClass, (arrayDimension - arguments.length));
                     return Array.newInstance(arrayType, sizeArray);
                 }
 
