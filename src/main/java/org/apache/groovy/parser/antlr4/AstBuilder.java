@@ -2196,23 +2196,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitEqualityExprAlt(EqualityExprAltContext ctx) {
-        // TODO refine the implementation of identical operation via class generation
-        if (IDENTICAL == ctx.op.getType() || NOT_IDENTICAL == ctx.op.getType()) {
-            Expression expr =
-                    this.configureAST(
-                            new MethodCallExpression(
-                                    (Expression) this.visit(ctx.left),
-                                    IS_STR,
-                                    this.configureAST(new ArgumentListExpression((Expression) this.visit(ctx.right)), ctx.right)),
-                            ctx);
-
-            if (NOT_IDENTICAL == ctx.op.getType()) {
-                expr = this.configureAST(new NotExpression(expr), ctx);
-            }
-
-            return expr;
-        }
-
         return this.configureAST(
                 this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
                 ctx);
