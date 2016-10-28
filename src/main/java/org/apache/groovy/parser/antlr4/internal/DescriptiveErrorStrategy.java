@@ -27,7 +27,7 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
  * Provide friendly error messages when parsing errors occurred.
  *
  * @author <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * Created on 2016/10/19
+ *         Created on 2016/10/19
  */
 public class DescriptiveErrorStrategy extends BailErrorStrategy {
     @Override
@@ -47,6 +47,14 @@ public class DescriptiveErrorStrategy extends BailErrorStrategy {
         }
 
         throw new ParseCancellationException(e);
+    }
+
+    @Override
+    public Token recoverInline(Parser recognizer)
+            throws RecognitionException {
+
+        this.recover(recognizer, new InputMismatchException(recognizer)); // stop parsing
+        return null;
     }
 
     protected String createNoViableAlternativeErrorMessage(Parser recognizer, NoViableAltException e) {
