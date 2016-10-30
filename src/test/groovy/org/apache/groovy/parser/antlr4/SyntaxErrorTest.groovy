@@ -119,6 +119,7 @@ class SyntaxErrorTest extends GroovyTestCase {
 
     void "test groovy core - CustomOperator"() {
         TestUtils.doRunAndShouldFail('fail/CustomOperator_01x.groovy');
+        TestUtils.doRunAndShouldFail('fail/CustomOperator_02x.groovy');
     }
 
     /**************************************/

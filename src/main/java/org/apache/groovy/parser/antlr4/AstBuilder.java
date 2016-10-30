@@ -2282,6 +2282,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         CustomOperator customOperator =
                 CustomOperatorRegistry.getInstance().getOperator(ctx.op.getText());
 
+        if (!asBoolean(customOperator)) {
+            throw createParsingFailedException("Custom operator[" + ctx.op.getText() + "] has not been defined", ctx.op);
+        }
+
         ArgumentListExpression argumentListExpression =
                 new ArgumentListExpression(Arrays.asList((Expression) this.visit(ctx.left), (Expression) this.visit(ctx.right)));
 
@@ -3834,7 +3838,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         node.getLastColumnNumber()));
     }
 
-    /*
     private CompilationFailedException createParsingFailedException(String msg, Token token) {
         return createParsingFailedException(
                 new SyntaxException(msg,
@@ -3843,7 +3846,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         token.getLine(),
                         token.getCharPositionInLine() + 1 + token.getText().length()));
     }
-    */
 
     private CompilationFailedException createParsingFailedException(Throwable t) {
         if (t instanceof SyntaxException) {
