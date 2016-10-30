@@ -747,6 +747,9 @@ expression
     // ~(BNOT)/!(LNOT) (level 1)
     |   (BITNOT | NOT) nls expression                                                       #unaryNotExprAlt
 
+    // custom operator(e.g. `>:`)  (level 1.5)
+    |   left=expression op=CUSTOM_OP nls right=expression                                   #customOpExprAlt
+
     // math power operator (**) (level 2)
     |   left=expression op=POWER nls right=expression                                       #powerExprAlt
 
@@ -804,9 +807,6 @@ expression
 
     // logical or (||)  (level 13)
     |   left=expression op=OR nls right=expression                                          #logicalOrExprAlt
-
-    // custom operator(e.g. `>:`)  (level 13.5)
-    |   left=expression op=CUSTOM_OP nls right=expression                                   #customOpExprAlt
 
     // conditional test (level 14)
     |   <assoc=right> con=expression
