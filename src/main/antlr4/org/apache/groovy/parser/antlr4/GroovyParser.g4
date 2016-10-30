@@ -805,6 +805,9 @@ expression
     // logical or (||)  (level 13)
     |   left=expression op=OR nls right=expression                                          #logicalOrExprAlt
 
+    // custom operator(e.g. `>:`)  (level 13.5)
+    |   left=expression op=CUSTOM_OP nls right=expression                                   #customOpExprAlt
+
     // conditional test (level 14)
     |   <assoc=right> con=expression
         (   nls QUESTION nls tb=expression nls COLON nls

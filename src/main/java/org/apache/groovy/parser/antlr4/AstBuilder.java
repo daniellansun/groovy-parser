@@ -18,6 +18,8 @@
  */
 package org.apache.groovy.parser.antlr4;
 
+import groovy.lang.CustomOperator;
+import groovy.lang.CustomOperatorRegistry;
 import groovy.lang.IntRange;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
@@ -1016,6 +1018,13 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return null;
     }
 
+    private String translateCustomOperatorToValidMethodName(String operator) {
+        StringBuilder sb = new StringBuilder();
+        operator.chars().forEach(sb::append);
+        return "co$" + Long.toHexString(Long.parseLong(sb.toString()));
+    }
+
+
     @Override
     public MethodNode visitMethodDeclaration(MethodDeclarationContext ctx) {
         List<ModifierNode> modifierNodeList = Collections.emptyList();
@@ -1028,9 +1037,20 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         ModifierManager modifierManager = new ModifierManager(modifierNodeList);
         String methodName = this.visitMethodName(ctx.methodName());
+        String originalMethodName = methodName;
         ClassNode returnType = this.visitReturnType(ctx.returnType());
         Parameter[] parameters = this.visitFormalParameters(ctx.formalParameters());
         ClassNode[] exceptions = this.visitQualifiedClassNameList(ctx.qualifiedClassNameList());
+
+        boolean isCustomOperator = methodName.matches("`.+`");
+        if (isCustomOperator) {
+            if (!modifierManager.contains(STATIC)) {
+                throw createParsingFailedException("Custom operator method should be declared static", ctx);
+            }
+
+            // We should rename the custom operator, otherwise it is a invalid method name: java.lang.ClassFormatError: Illegal method name "`>?`" in class ConsoleScript0
+            methodName = this.translateCustomOperatorToValidMethodName(methodName);
+        }
 
         anonymousInnerClassesDefinedInMethodStack.push(new LinkedList<>());
         Statement code = this.visitMethodBody(ctx.methodBody());
@@ -1080,7 +1100,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         } else { // script method declaration
             methodNode =
                     new MethodNode(
-                            this.visitMethodName(ctx.methodName()),
+                            methodName,
                             modifierManager.contains(PRIVATE) ? Opcodes.ACC_PRIVATE : Opcodes.ACC_PUBLIC,
                             returnType,
                             parameters,
@@ -1119,7 +1139,23 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
         }
 
+        // custom operator
+        if (isCustomOperator) {
+            this.registerCustomOperator(
+                    originalMethodName,
+                    CustomOperator.newInstance(
+                            originalMethodName,
+                            asBoolean(classNode) ? classNode.getName() : moduleNode.getScriptClassDummy().getName(),
+                            methodNode.getName()
+                    )
+            );
+        }
+
         return methodNode;
+    }
+
+    private void registerCustomOperator(String operator, CustomOperator customOperator) {
+        CustomOperatorRegistry.getInstance().setOperator(customOperator.getOperator(), customOperator);
     }
 
     @Override
@@ -2240,6 +2276,28 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
                 ctx);
     }
+
+    @Override
+    public MethodCallExpression visitCustomOpExprAlt(CustomOpExprAltContext ctx) {
+        CustomOperator customOperator =
+                CustomOperatorRegistry.getInstance().getOperator(ctx.op.getText());
+
+        ArgumentListExpression argumentListExpression =
+                new ArgumentListExpression(Arrays.asList((Expression) this.visit(ctx.left), (Expression) this.visit(ctx.right)));
+
+        MethodCallExpression methodCallExpression =
+                new MethodCallExpression(
+                        new ClassExpression(ClassHelper.make(customOperator.getClassName())), // imagined node, so no node position available
+                        customOperator.getMethodName(),
+                        argumentListExpression // imagined node, so no node position available
+                );
+
+        methodCallExpression.setImplicitThis(false);
+        methodCallExpression.setSafe(true);
+
+        return this.configureAST(methodCallExpression, ctx.op);
+    }
+
 
     @Override
     public Expression visitConditionalExprAlt(ConditionalExprAltContext ctx) {

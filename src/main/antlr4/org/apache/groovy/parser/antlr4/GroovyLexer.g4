@@ -641,6 +641,7 @@ SPACESHIP           : '<=>';
 IDENTICAL           : '===';
 NOT_IDENTICAL       : '!==';
 ARROW               : '->';
+CUSTOM_OP           : '`' ~[ \t\u000C]+ '`';
 
 fragment
 DOLLAR              : '$';

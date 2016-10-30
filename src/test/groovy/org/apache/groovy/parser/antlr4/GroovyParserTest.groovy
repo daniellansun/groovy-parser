@@ -290,4 +290,8 @@ class GroovyParserTest extends GroovyTestCase {
     void "test groovy core - Unicode"() {
         doTest('core/Unicode_01.groovy');
     }
+
+    void "test groovy core - CustomOperator"() {
+        doRunAndTest('core/CustomOperator_01x.groovy')
+    }
 }
