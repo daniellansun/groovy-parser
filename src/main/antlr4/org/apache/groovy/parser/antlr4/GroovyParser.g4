@@ -475,7 +475,7 @@ lambdaBody
 
 // CLOSURE
 closure
-locals[ Map<String, Object> dynaScope = new ListHashMap<>() ]
+locals[ String footprint = "" ]
     :   LBRACE nls (formalParameterList? nls ARROW nls)? blockStatementsOpt RBRACE
     ;
 
@@ -572,12 +572,12 @@ variableNames
     ;
 
 switchStatement
-locals[ Map<String, Object> dynaScope = new ListHashMap<>() ]
+locals[ String footprint = "" ]
     :   SWITCH parExpression nls LBRACE nls switchBlockStatementGroup* nls RBRACE
     ;
 
 loopStatement
-locals[ Map<String, Object> dynaScope = new ListHashMap<>() ]
+locals[ String footprint = "" ]
     :   FOR LPAREN forControl RPAREN nls statement                                                          #forStmtAlt
     |   WHILE parExpression nls statement                                                                   #whileStmtAlt
     |   DO nls statement nls WHILE parExpression                                                            #doWhileStmtAlt
@@ -587,7 +587,7 @@ continueStatement
 locals[ boolean isInsideLoop ]
 @init {
     try {
-        $isInsideLoop = null != $loopStatement::dynaScope;
+        $isInsideLoop = null != $loopStatement::footprint;
     } catch(NullPointerException e) {
         $isInsideLoop = false;
     }
@@ -601,13 +601,13 @@ breakStatement
 locals[ boolean isInsideLoop, boolean isInsideSwitch ]
 @init {
     try {
-        $isInsideLoop = null != $loopStatement::dynaScope;
+        $isInsideLoop = null != $loopStatement::footprint;
     } catch(NullPointerException e) {
         $isInsideLoop = false;
     }
 
     try {
-        $isInsideSwitch = null != $switchStatement::dynaScope;
+        $isInsideSwitch = null != $switchStatement::footprint;
     } catch(NullPointerException e) {
         $isInsideSwitch = false;
     }
@@ -885,7 +885,7 @@ pathElement returns [int t]
 locals[ boolean isInsideClosure ]
 @init {
     try {
-        $isInsideClosure = null != $closure::dynaScope;
+        $isInsideClosure = null != $closure::footprint;
     } catch(NullPointerException e) {
         $isInsideClosure = false;
     }

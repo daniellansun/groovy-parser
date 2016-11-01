@@ -117,6 +117,9 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.doRunAndShouldFail('fail/AbstractMethod_06x.groovy');
     }
 
+    void "test groovy core - DoWhile"() {
+        TestUtils.doRunAndShouldFail('fail/DoWhile_01x.groovy');
+    }
 
     /**************************************/
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
