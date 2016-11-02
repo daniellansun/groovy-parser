@@ -617,13 +617,29 @@ locals[ boolean isInsideLoop, boolean isInsideSwitch ]
         identifier?
     ;
 
+tryCatchStatement
+locals[boolean resourcesExists = false]
+    :   TRY (resources { $resourcesExists = true; })? nls
+        block
+        (
+            (nls catchClause)+
+            (nls finallyBlock)?
+        |
+            nls finallyBlock
+        |
+            // try-with-resources can have no catche and finally clauses
+            { $resourcesExists }?<fail={"catch or finally clauses are required for try-catch statement"}>
+        )
+    ;
+
 statement
     :   block                                                                                               #blockStmtAlt
     |   ASSERT ce=expression ((COLON | COMMA) nls me=expression)?                                           #assertStmtAlt
-    |   IF parExpression nls tb=statement ((nls | sep) ELSE nls fb=statement)?                                      #ifElseStmtAlt
+    |   IF parExpression nls tb=statement ((nls | sep) ELSE nls fb=statement)?                              #ifElseStmtAlt
     |   loopStatement                                                                                       #loopStmtAlt
-    |   TRY nls block ((nls catchClause)+ (nls finallyBlock)? | nls finallyBlock)                           #tryCatchStmtAlt
-//TODO    |   TRY resourceSpecification block catchClause* finallyBlock?                                          #tryResourceStmtAlt
+
+    |   tryCatchStatement                                                                                   #tryCatchStmtAlt
+
     |   switchStatement                                                                                     #switchStmtAlt
     |   SYNCHRONIZED parExpression nls block                                                                #synchronizedStmtAlt
     |   RETURN expression?                                                                                  #returnStmtAlt
@@ -661,19 +677,19 @@ finallyBlock
     :   FINALLY nls block
     ;
 
-/* TODO
-resourceSpecification
-    :   LPAREN resources SEMI? RPAREN
-    ;
 
 resources
+    :   LPAREN resourceList SEMI? RPAREN
+    ;
+
+resourceList
     :   resource (SEMI resource)*
     ;
 
 resource
-    :   variableModifier* classOrInterfaceType variableDeclaratorId ASSIGN expression
+    :   localVariableDeclaration
     ;
-*/
+
 
 /** Matches cases then statements, both of which are mandatory.
  *  To handle empty cases at the end, we add switchLabel* to statement.

@@ -391,13 +391,21 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
-
     @Override
     public TryCatchStatement visitTryCatchStmtAlt(TryCatchStmtAltContext ctx) {
+        return this.configureAST(this.visitTryCatchStatement(ctx.tryCatchStatement()), ctx);
+    }
+
+    @Override
+    public TryCatchStatement visitTryCatchStatement(TryCatchStatementContext ctx) {
         TryCatchStatement tryCatchStatement =
                 new TryCatchStatement((Statement) this.visit(ctx.block()),
                         this.visitFinallyBlock(ctx.finallyBlock()));
 
+        if (asBoolean(ctx.resources())) {
+            this.visitResources(ctx.resources()).stream()
+                    .forEach(tryCatchStatement::addResource);
+        }
 
         ctx.catchClause().stream().map(this::visitCatchClause)
                 .reduce(new LinkedList<CatchStatement>(), (r, e) -> {
@@ -407,6 +415,27 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 .forEach(tryCatchStatement::addCatch);
 
         return this.configureAST(tryCatchStatement, ctx);
+    }
+
+    @Override
+    public List<ExpressionStatement> visitResources(ResourcesContext ctx) {
+        return this.visitResourceList(ctx.resourceList());
+    }
+
+    @Override
+    public List<ExpressionStatement> visitResourceList(ResourceListContext ctx) {
+        return ctx.resource().stream().map(this::visitResource).collect(Collectors.toList());
+    }
+
+    @Override
+    public ExpressionStatement visitResource(ResourceContext ctx) {
+        List<ExpressionStatement> declarationStatements = this.visitLocalVariableDeclaration(ctx.localVariableDeclaration()).getDeclarationStatements();
+
+        if (declarationStatements.size() > 1) {
+            throw createParsingFailedException("Multi resources can not be declared in one statement", ctx);
+        }
+
+        return declarationStatements.get(0);
     }
 
     /**
