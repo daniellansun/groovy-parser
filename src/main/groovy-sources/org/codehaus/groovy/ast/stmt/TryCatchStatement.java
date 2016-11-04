@@ -84,6 +84,16 @@ public class TryCatchStatement extends Statement {
         return null;
     }
 
+    /**
+     * @return the resource statement of the given index or null
+     */
+    public ExpressionStatement getResourceStatement(int idx) {
+        if (idx >= 0 && idx < resourceStatements.size()) {
+            return resourceStatements.get(idx);
+        }
+        return null;
+    }
+
     public void setTryStatement(Statement tryStatement) {
         this.tryStatement = tryStatement;
     }

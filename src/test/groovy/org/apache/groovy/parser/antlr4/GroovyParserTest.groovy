@@ -215,6 +215,10 @@ class GroovyParserTest extends GroovyTestCase {
         doTest('core/TryCatch_01.groovy');
     }
 
+    void "test groovy core - TryWithResources"() {
+        doRunAndTest('core/TryWithResources_01x.groovy');
+    }
+
     void "test groovy core - Switch"() {
         doTest('core/Switch_01.groovy');
     }
