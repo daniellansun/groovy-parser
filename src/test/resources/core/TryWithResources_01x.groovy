@@ -1,3 +1,5 @@
+import groovy.transform.CompileStatic
+
 import java.io.*
 
 
@@ -206,4 +208,34 @@ try (Resource r1 = new Resource(1)) {
 assert Resource.closedResourceIds == [7, 6, 5, 4, 2, 1]
 assert 25 == a
 
+// test case 15
+@CompileStatic
+void tryWithResources() {
+    Resource.closedResourceIds = []
+    int cs = 1;
+    try (Resource r1 = new Resource(1)) {
+        cs += 2;
+        try (Resource r2 = new Resource(2);Resource r4 = new Resource(4)) {
+            cs += 3;
+            try (Resource r5 = new Resource(5);Resource r6 = new Resource(6);Resource r7 = new Resource(7)) {
+                cs += 4;
+                try {
+                    try (Resource r3 = new Resource(3)) {
+                        cs += 5;
+                    }
+                } catch (IOException e) {
+                    assert Resource.exMsg == e.getMessage()
+                }
+            }
+        } catch(Exception e) {
+            // ignored
+        } finally {
+            cs += 10
+        }
+    }
+    assert Resource.closedResourceIds == [7, 6, 5, 4, 2, 1]
+    assert 25 == cs
+}
+
+tryWithResources()
 
