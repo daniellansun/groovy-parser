@@ -67,3 +67,115 @@ try {
     assert suppressedExceptions[0].getMessage() == Resource.exMsg
 }
 assert Resource.closedResourceIds == []
+
+
+// test case 5
+Resource.closedResourceIds = []
+a = 1;
+try (Resource r1 = new Resource(5);
+Resource r2 = new Resource(6);) {
+    a = 2;
+}
+assert Resource.closedResourceIds == [6, 5]
+assert 2 == a
+
+// test case 6
+Resource.closedResourceIds = []
+a = 1;
+try (Resource r1 = new Resource(5);
+Resource r2 = new Resource(6);
+Resource r3 = new Resource(7);) {
+    a = 2;
+}
+assert Resource.closedResourceIds == [7, 6, 5]
+assert 2 == a
+
+
+// test case 7
+Resource.closedResourceIds = []
+try (Resource r1 = new Resource(7)) {
+    throw new FileNotFoundException(exMsg)
+} catch(FileNotFoundException e) {
+    assert exMsg == e.getMessage()
+}
+assert Resource.closedResourceIds == [7]
+
+// test case 8
+Resource.closedResourceIds = []
+try (Resource r1 = new Resource(7);
+Resource r2 = new Resource(8)) {
+    throw new FileNotFoundException(exMsg)
+} catch(FileNotFoundException e) {
+    assert exMsg == e.getMessage()
+}
+assert Resource.closedResourceIds == [8, 7]
+
+
+// test case 9
+Resource.closedResourceIds = []
+a = 1;
+try (Resource r1 = new Resource(3)) {
+    a = 2;
+} catch (IOException e) {
+    assert Resource.exMsg == e.getMessage()
+}
+assert 2 == a;
+assert Resource.closedResourceIds == []
+
+
+// test case 10
+Resource.closedResourceIds = []
+a = 1;
+try (Resource r1 = new Resource(3);
+Resource r2 = new Resource(4)) {
+    a = 2;
+} catch (IOException e) {
+    assert Resource.exMsg == e.getMessage()
+}
+assert 2 == a;
+assert Resource.closedResourceIds == [4]
+
+// test case 11
+Resource.closedResourceIds = []
+a = 1;
+try (Resource r0 = new Resource(2);
+Resource r1 = new Resource(3);
+Resource r2 = new Resource(4)) {
+    a = 2;
+} catch (IOException e) {
+    assert Resource.exMsg == e.getMessage()
+}
+assert 2 == a;
+assert Resource.closedResourceIds == [4, 2]
+
+
+// test case 12
+Resource.closedResourceIds = []
+try (Resource r1 = new Resource(3);
+Resource r2 = new Resource(4)) {
+    throw new FileNotFoundException(exMsg)
+} catch(FileNotFoundException e) {
+    assert exMsg == e.getMessage()
+
+    def suppressedExceptions = e.getSuppressed();
+    assert suppressedExceptions.length == 1
+    assert suppressedExceptions[0] instanceof IOException
+    assert suppressedExceptions[0].getMessage() == Resource.exMsg
+}
+assert Resource.closedResourceIds == [4]
+
+// test case 13
+Resource.closedResourceIds = []
+try (Resource r0 = new Resource(2);
+Resource r1 = new Resource(3);
+Resource r2 = new Resource(4)) {
+    throw new FileNotFoundException(exMsg)
+} catch(FileNotFoundException e) {
+    assert exMsg == e.getMessage()
+
+    def suppressedExceptions = e.getSuppressed();
+    assert suppressedExceptions.length == 1
+    assert suppressedExceptions[0] instanceof IOException
+    assert suppressedExceptions[0].getMessage() == Resource.exMsg
+}
+assert Resource.closedResourceIds == [4, 2]

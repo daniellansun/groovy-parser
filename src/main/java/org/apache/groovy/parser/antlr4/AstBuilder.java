@@ -484,9 +484,34 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
      *   Finallyopt
      */
     private Statement transformExtendedTryWithResourcesStatement(TryCatchStatement tryCatchStatement) {
-        // TODO
+        /*
+         *  try ResourceSpecification
+         *      Block
+         */
+        TryCatchStatement newTryWithResourcesStatement =
+                new TryCatchStatement(
+                        tryCatchStatement.getTryStatement(),
+                        EmptyStatement.INSTANCE);
+        tryCatchStatement.getResourceStatements().forEach(newTryWithResourcesStatement::addResource);
 
-        return tryCatchStatement;
+
+        /*
+         *   try {
+         *       << the following try-with-resources has been transformed >>
+         *       try ResourceSpecification
+         *           Block
+         *   }
+         *   Catchesopt
+         *   Finallyopt
+         */
+        TryCatchStatement newTryCatchStatement =
+                new TryCatchStatement(
+                        this.createBlockStatement(this.transformTryCatchStatement(newTryWithResourcesStatement)),
+                        tryCatchStatement.getFinallyStatement());
+
+        tryCatchStatement.getCatchStatements().forEach(newTryCatchStatement::addCatch);
+
+        return newTryCatchStatement;
     }
 
     /*
@@ -558,7 +583,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         tailResourceStatements.stream().forEach(newTryCatchStatement::addResource);
 
         newTryCatchStatement.addCatch(this.createCatchBlockForOuterNewTryCatchStatement(primaryExcName));
-        this.appendStatementsToBlockStatement(blockStatement, newTryCatchStatement);
+        this.appendStatementsToBlockStatement(blockStatement, this.transformTryCatchStatement(newTryCatchStatement));
 
 
         return this.configureAST(blockStatement, tryCatchStatement);
