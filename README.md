@@ -11,6 +11,7 @@ Currently almost all features of Groovy are available. In addition, the followin
 * identical operator(`===`, `!==`)(DONE)
 * lambda expression(DONE)
 * method reference and constructor reference(DONE)
+* try-with-resources(DONE)
 * groovydoc attached to AST node as metadata(DONE)
 * etc.
 

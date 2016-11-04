@@ -32,7 +32,7 @@ public class TryWithResourcesASTTransformation {
      * @param tryCatchStatement the try-with-resources statement to transform
      * @return try-catch-finally statement, which contains no resources clause
      */
-    public Statement transformTryCatchStatement(TryCatchStatement tryCatchStatement) {
+    public Statement transform(TryCatchStatement tryCatchStatement) {
         if (!asBoolean(tryCatchStatement.getResourceStatements())) {
             return tryCatchStatement;
         }
@@ -116,7 +116,7 @@ public class TryWithResourcesASTTransformation {
          */
         TryCatchStatement newTryCatchStatement =
                 new TryCatchStatement(
-                        astBuilder.createBlockStatement(this.transformTryCatchStatement(newTryWithResourcesStatement)),
+                        astBuilder.createBlockStatement(this.transform(newTryWithResourcesStatement)),
                         tryCatchStatement.getFinallyStatement());
 
         tryCatchStatement.getCatchStatements().forEach(newTryCatchStatement::addCatch);
@@ -193,7 +193,7 @@ public class TryWithResourcesASTTransformation {
         tailResourceStatements.stream().forEach(newTryCatchStatement::addResource);
 
         newTryCatchStatement.addCatch(this.createCatchBlockForOuterNewTryCatchStatement(primaryExcName));
-        astBuilder.appendStatementsToBlockStatement(blockStatement, this.transformTryCatchStatement(newTryCatchStatement));
+        astBuilder.appendStatementsToBlockStatement(blockStatement, this.transform(newTryCatchStatement));
 
         return blockStatement;
     }

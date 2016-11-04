@@ -417,7 +417,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 .forEach(tryCatchStatement::addCatch);
 
         return this.configureAST(
-                tryWithResourcesASTTransformation.transformTryCatchStatement(
+                tryWithResourcesASTTransformation.transform(
                         this.configureAST(tryCatchStatement, ctx)),
                 ctx);
     }
