@@ -24,6 +24,7 @@ import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.groovy.parser.antlr4.internal.AtnManager;
 import org.apache.groovy.parser.antlr4.internal.DescriptiveErrorStrategy;
 import org.apache.groovy.parser.antlr4.util.StringUtils;
 import org.codehaus.groovy.GroovyBugError;
@@ -81,6 +82,17 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         this.tryWithResourcesASTTransformation = new TryWithResourcesASTTransformation(this);
     }
 
+    private GroovyParserRuleContext buildCST() {
+        // parsing have to wait util clearing is complete.
+        synchronized (AtnManager.class) {
+            try {
+                return buildCST(PredictionMode.SLL);
+            } catch (Exception e) {
+                return buildCST(PredictionMode.LL);
+            }
+        }
+    }
+
     private GroovyParserRuleContext buildCST(PredictionMode predictionMode) {
         parser.getInterpreter().setPredictionMode(predictionMode);
 
@@ -92,14 +104,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         return parser.compilationUnit();
-    }
-
-    private GroovyParserRuleContext buildCST() {
-        try {
-            return buildCST(PredictionMode.SLL);
-        } catch (Exception e) {
-            return buildCST(PredictionMode.LL);
-        }
     }
 
     public ModuleNode buildAST() {

@@ -92,7 +92,7 @@ public class AtnManager {
                 return atn;
             }
 
-            synchronized (this) {
+            synchronized (AtnManager.class) {
                 atn.clearDFA();
             }
 
