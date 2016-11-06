@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Manage ATN for lexer and parser to avoid memory leak
@@ -34,6 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Created on 2016/08/14
  */
 public class AtnManager {
+    public static final ReentrantReadWriteLock RRWL = new ReentrantReadWriteLock();
     private static final String CACHE_THRESHOLD_NAME = "groovy.antlr4.cache.threshold";
     private static final int CACHE_THRESHOLD;
     private final Class ownerClass;
@@ -92,8 +94,11 @@ public class AtnManager {
                 return atn;
             }
 
-            synchronized (AtnManager.class) {
+            RRWL.writeLock().lock();
+            try {
                 atn.clearDFA();
+            } finally {
+                RRWL.writeLock().unlock();
             }
 
             return atn;

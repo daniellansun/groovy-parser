@@ -83,14 +83,19 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private GroovyParserRuleContext buildCST() {
+        GroovyParserRuleContext result;
+
         // parsing have to wait util clearing is complete.
-        synchronized (AtnManager.class) {
-            try {
-                return buildCST(PredictionMode.SLL);
-            } catch (Exception e) {
-                return buildCST(PredictionMode.LL);
-            }
+        AtnManager.RRWL.readLock().lock();
+        try {
+            result = buildCST(PredictionMode.SLL);
+        } catch (Exception e) {
+            result = buildCST(PredictionMode.LL);
+        } finally {
+            AtnManager.RRWL.readLock().unlock();
         }
+
+        return result;
     }
 
     private GroovyParserRuleContext buildCST(PredictionMode predictionMode) {
