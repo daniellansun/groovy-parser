@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Created on 2016/08/14
  */
 public class AtnManager {
-    public static final ReentrantReadWriteLock RRWL = new ReentrantReadWriteLock();
+    public static final ReentrantReadWriteLock RRWL = new ReentrantReadWriteLock(true);
     private static final String CACHE_THRESHOLD_NAME = "groovy.antlr4.cache.threshold";
     private static final int CACHE_THRESHOLD;
     private final Class ownerClass;
