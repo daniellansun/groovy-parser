@@ -910,7 +910,7 @@ locals[ boolean isInsideClosure ]
 
         // AT: foo.@bar selects the field (or attribute), not property
         ( SPREAD_DOT nls (AT | nonWildcardTypeArguments)?       // Spread operator:  x*.y  ===  x?.collect{it.y}
-        | OPTIONAL_DOT nls (AT | nonWildcardTypeArguments)?     // Optional-null operator:  x?.y  === (x==null)?null:x.y
+        | SAFE_DOT nls (AT | nonWildcardTypeArguments)?         // Optional-null operator:  x?.y  === (x==null)?null:x.y
         | METHOD_POINTER nls                                    // Method pointer operator: foo.&y == foo.metaClass.getMethodPointer(foo, "y")
         | METHOD_REFERENCE nls                                  // Method reference: System.out::println
         | DOT nls (AT | nonWildcardTypeArguments)?              // The all-powerful dot.
@@ -974,7 +974,7 @@ dynamicMemberName
  *  The brackets may also be empty, as in T[].  This is how Groovy names array types.
  */
 indexPropertyArgs
-    :   LBRACK expressionList? RBRACK
+    :   QUESTION? LBRACK expressionList? RBRACK
     ;
 
 namedPropertyArgs

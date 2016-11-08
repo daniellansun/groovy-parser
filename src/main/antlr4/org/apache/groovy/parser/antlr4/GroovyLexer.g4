@@ -629,7 +629,7 @@ NullLiteral
 RANGE_INCLUSIVE     : '..';
 RANGE_EXCLUSIVE     : '..<';
 SPREAD_DOT          : '*.';
-OPTIONAL_DOT        : '?.';
+SAFE_DOT            : '?.';
 ELVIS               : '?:';
 METHOD_POINTER      : '.&';
 METHOD_REFERENCE    : '::';
@@ -648,12 +648,13 @@ DOLLAR              : '$';
 
 // §3.11 Separators
 
-LPAREN          : '(' { this.enterParen();     } -> pushMode(DEFAULT_MODE);
-RPAREN          : ')' { this.exitParen();      } -> popMode;
-LBRACE          : '{' { this.enterParen();     } -> pushMode(DEFAULT_MODE);
-RBRACE          : '}' { this.exitParen();      } -> popMode;
-LBRACK          : '[' { this.enterParen();     } -> pushMode(DEFAULT_MODE);
-RBRACK          : ']' { this.exitParen();      } -> popMode;
+LPAREN          : '('  { this.enterParen();     } -> pushMode(DEFAULT_MODE);
+RPAREN          : ')'  { this.exitParen();      } -> popMode;
+LBRACE          : '{'  { this.enterParen();     } -> pushMode(DEFAULT_MODE);
+RBRACE          : '}'  { this.exitParen();      } -> popMode;
+LBRACK          : '['  { this.enterParen();     } -> pushMode(DEFAULT_MODE);
+RBRACK          : ']'  { this.exitParen();      } -> popMode;
+
 SEMI            : ';';
 COMMA           : ',';
 DOT             : '.';
