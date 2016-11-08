@@ -1644,7 +1644,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             Pair<Token, Expression> pair = this.visitIndexPropertyArgs(ctx.indexPropertyArgs());
 
             return this.configureAST(
-                    new BinaryExpression(baseExpr, createGroovyToken(pair.getKey()), pair.getValue()),
+                    new BinaryExpression(baseExpr, createGroovyToken(pair.getKey()), pair.getValue(), asBoolean(ctx.indexPropertyArgs().QUESTION())),
                     ctx);
         }
 

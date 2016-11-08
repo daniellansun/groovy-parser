@@ -510,7 +510,7 @@ public class BinaryExpressionHelper {
 
         // ensure VariableArguments are read, not stored
         compileStack.pushLHS(false);
-        controller.getInvocationWriter().makeSingleArgumentCall(receiver, message, arguments);
+        controller.getInvocationWriter().makeSingleArgumentCall(receiver, message, arguments, binExp.isSafe());
         compileStack.popLHS();        
     }
 

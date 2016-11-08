@@ -208,6 +208,7 @@ class GroovyParserTest extends GroovyTestCase {
         doRunAndTest('core/DoWhile_01x.groovy');
         doRunAndTest('core/DoWhile_02x.groovy');
         doRunAndTest('core/DoWhile_03x.groovy');
+        doRunAndTest('core/DoWhile_04x.groovy');
     }
 
 
@@ -218,6 +219,11 @@ class GroovyParserTest extends GroovyTestCase {
     void "test groovy core - TryWithResources"() {
         doRunAndTest('core/TryWithResources_01x.groovy');
     }
+
+    void "test groovy core - SafeIndex"() {
+        doRunAndTest('core/SafeIndex_01x.groovy');
+    }
+
 
     void "test groovy core - Switch"() {
         doTest('core/Switch_01.groovy');
