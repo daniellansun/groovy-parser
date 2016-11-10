@@ -12,6 +12,7 @@ Currently almost all features of Groovy are available. In addition, the followin
 * lambda expression(DONE)
 * method reference and constructor reference(DONE)
 * try-with-resources(DONE)
+* safe index(e.g. nullableVar?[1, 2])(DONE)
 * groovydoc attached to AST node as metadata(DONE)
 * etc.
 
