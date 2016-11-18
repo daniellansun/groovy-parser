@@ -2214,39 +2214,48 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         CastExpression.asExpression(this.visitType(ctx.type()), (Expression) this.visit(ctx.left)),
                         ctx);
 
-            case INSTANCEOF: {
+            case INSTANCEOF:
+            case NOT_INSTANCEOF: {
                 ctx.type().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, true);
                 BinaryExpression binaryExpression =
                         this.configureAST(
                                 new BinaryExpression((Expression) this.visit(ctx.left),
-                                        this.createGroovyToken(ctx.op),
+                                        INSTANCEOF == ctx.op.getType()
+                                                ? this.createGroovyToken(ctx.op)
+                                                : this.createGroovyToken(ctx.op.getText().substring(1), ctx.op.getLine(), ctx.op.getCharPositionInLine() + 2),
                                         this.configureAST(new ClassExpression(this.visitType(ctx.type())), ctx.type())),
                                 ctx
                         );
 
-                if (!asBoolean(ctx.NOT())) {
+                if (INSTANCEOF == ctx.op.getType()) {
                     return binaryExpression;
                 }
 
-                return this.configureAST(new NotExpression(binaryExpression), ctx.NOT());
+                return this.configureAST(new NotExpression(binaryExpression), ctx.op);
             }
+
 
             case LE:
             case GE:
             case GT:
             case LT:
-            case IN: {
+            case IN:
+                return this.configureAST(
+                        this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                        ctx
+                );
+            case NOT_IN: {
                 BinaryExpression binaryExpression =
                         this.configureAST(
-                                this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
+                                new BinaryExpression(
+                                        (Expression) this.visit(ctx.left),
+                                        this.createGroovyToken(ctx.op.getText().substring(1), ctx.op.getLine(), ctx.op.getCharPositionInLine() + 2),
+                                        (Expression) this.visit(ctx.right)
+                                ),
                                 ctx
                         );
 
-                if (!asBoolean(ctx.NOT())) {
-                    return binaryExpression;
-                }
-
-                return this.configureAST(new NotExpression(binaryExpression), ctx.NOT());
+                return this.configureAST(new NotExpression(binaryExpression), ctx.op);
             }
 
             default:
@@ -3707,6 +3716,15 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 text,
                 token.getLine(),
                 token.getCharPositionInLine() + 1
+        );
+    }
+
+    private org.codehaus.groovy.syntax.Token createGroovyToken(String text, int startLine, int startColumn) {
+        return new org.codehaus.groovy.syntax.Token(
+                Types.lookup(text, Types.ANY),
+                text,
+                startLine,
+                startColumn
         );
     }
 

@@ -268,11 +268,12 @@ fragment DollarSlashyStringCharacter
     ;
 
 // Groovy keywords
-AS            : 'as';
-DEF           : 'def';
-IN            : 'in';
-TRAIT         : 'trait';
-THREADSAFE    : 'threadsafe';
+AS              : 'as';
+DEF             : 'def';
+IN              : 'in';
+TRAIT           : 'trait';
+THREADSAFE      : 'threadsafe';
+
 
 // §3.9 Keywords
 BuiltInPrimitiveType
@@ -641,6 +642,8 @@ SPACESHIP           : '<=>';
 IDENTICAL           : '===';
 NOT_IDENTICAL       : '!==';
 ARROW               : '->';
+NOT_INSTANCEOF      : '!instanceof';
+NOT_IN              : '!in';
 
 fragment
 DOLLAR              : '$';

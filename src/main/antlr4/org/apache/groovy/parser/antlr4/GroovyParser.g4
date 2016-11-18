@@ -788,9 +788,8 @@ expression
         right=expression                                                                    #shiftExprAlt
 
     // boolean relational expressions (level 7)
-    |   left=expression      op=AS                nls type                                       #relationalExprAlt
-    |   left=expression NOT? op=INSTANCEOF        nls type                                       #relationalExprAlt
-    |   left=expression NOT? op=(LE | GE | GT | LT | IN) nls right=expression                    #relationalExprAlt
+    |   left=expression op=(AS | INSTANCEOF | NOT_INSTANCEOF) nls type                      #relationalExprAlt
+    |   left=expression op=(LE | GE | GT | LT | IN | NOT_IN)  nls right=expression          #relationalExprAlt
 
     // equality/inequality (==/!=) (level 8)
     |   left=expression
