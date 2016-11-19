@@ -2207,7 +2207,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitRelationalExprAlt(RelationalExprAltContext ctx) {
-
         switch (ctx.op.getType()) {
             case AS:
                 return this.configureAST(
@@ -2215,48 +2214,23 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         ctx);
 
             case INSTANCEOF:
-            case NOT_INSTANCEOF: {
+            case NOT_INSTANCEOF:
                 ctx.type().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, true);
-                BinaryExpression binaryExpression =
-                        this.configureAST(
-                                new BinaryExpression((Expression) this.visit(ctx.left),
-                                        INSTANCEOF == ctx.op.getType()
-                                                ? this.createGroovyToken(ctx.op)
-                                                : this.createGroovyToken(ctx.op.getText().substring(1), ctx.op.getLine(), ctx.op.getCharPositionInLine() + 2),
-                                        this.configureAST(new ClassExpression(this.visitType(ctx.type())), ctx.type())),
-                                ctx
-                        );
-
-                if (INSTANCEOF == ctx.op.getType()) {
-                    return binaryExpression;
-                }
-
-                return this.configureAST(new NotExpression(binaryExpression), ctx.op);
-            }
-
+                return this.configureAST(
+                        new BinaryExpression((Expression) this.visit(ctx.left),
+                                this.createGroovyToken(ctx.op),
+                                this.configureAST(new ClassExpression(this.visitType(ctx.type())), ctx.type())),
+                        ctx);
 
             case LE:
             case GE:
             case GT:
             case LT:
             case IN:
+            case NOT_IN:
                 return this.configureAST(
                         this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
-                        ctx
-                );
-            case NOT_IN: {
-                BinaryExpression binaryExpression =
-                        this.configureAST(
-                                new BinaryExpression(
-                                        (Expression) this.visit(ctx.left),
-                                        this.createGroovyToken(ctx.op.getText().substring(1), ctx.op.getLine(), ctx.op.getCharPositionInLine() + 2),
-                                        (Expression) this.visit(ctx.right)
-                                ),
-                                ctx
-                        );
-
-                return this.configureAST(new NotExpression(binaryExpression), ctx.op);
-            }
+                        ctx);
 
             default:
                 throw createParsingFailedException("Unsupported relational expression: " + ctx.getText(), ctx);
