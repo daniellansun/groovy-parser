@@ -13,6 +13,6 @@ before_install:
   - chmod +x gradlew
 before_script:
   - ./gradlew --version
-script: travis_wait 60 ./gradlew -Dfile.encoding=UTF-8 -Dgroovy.antlr4.cache.threshold=100 test jacocoTestReport
+script: travis_wait 60 ./gradlew -Dfile.encoding=UTF-8 -Dgroovy.antlr4.cache.threshold=100 -DenableExtractingDocComment=true test jacocoTestReport
 after_success:
   - ./gradlew coveralls
