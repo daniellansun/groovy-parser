@@ -131,9 +131,9 @@ task groovyConsole(type: JavaExec, dependsOn:[classes]) {
 
 test {
     if (JavaVersion.current().isJava8Compatible()) {
-        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-Dgroovy.antlr4.cache.threshold=100", "-Dextract.doc.comment=true"
+        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-Dgroovy.antlr4.cache.threshold=100", "-Dgroovy.extract.doc.comment=true"
     } else {
-        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-XX:PermSize=64m", "-XX:MaxPermSize=192m", "-Dgroovy.antlr4.cache.threshold=100", "-Dextract.doc.comment=true"
+        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-XX:PermSize=64m", "-XX:MaxPermSize=192m", "-Dgroovy.antlr4.cache.threshold=100", "-Dgroovy.extract.doc.comment=true"
     }
 
     def headless = System.properties['java.awt.headless']

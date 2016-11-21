@@ -4305,7 +4305,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         throw new GroovyBugError("node can not be found: " + node.getText()); // The exception should never be thrown!
     }
 
-    private static final String EXTRACT_DOC_COMMENT = "extract.doc.comment";
+    private static final String EXTRACT_DOC_COMMENT = "groovy.extract.doc.comment";
     private static final boolean EXTRACTING_DOC_COMMENT_ENABLED;
 
     static {
