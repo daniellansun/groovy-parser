@@ -1,7 +1,7 @@
 # groovy-parser(parrot)
 [![Build Status](https://travis-ci.org/danielsun1106/groovy-parser.svg?branch=master)](https://travis-ci.org/danielsun1106/groovy-parser)
 [![Coverage Status](https://coveralls.io/repos/github/danielsun1106/groovy-parser/badge.svg)](https://coveralls.io/github/danielsun1106/groovy-parser)
-[![Java 8+](https://img.shields.io/badge/java-8+-4c7e9f.svg)]
+[![Java 8+](https://img.shields.io/badge/java-8+-4c7e9f.svg)](http://java.oracle.com)
 [![Apache License 2](https://img.shields.io/badge/license-APL2-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 
