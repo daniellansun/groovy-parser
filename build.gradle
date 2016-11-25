@@ -115,14 +115,14 @@ sourceSets.test.java.srcDirs += file("$srcTest/groovy-sources");
 
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.1'
+    gradleVersion = '3.2.1'
 }
 
 task groovyConsole(type: JavaExec, dependsOn:[classes]) {
     if (JavaVersion.current().isJava8Compatible()) {
-        jvmArgs '-ea', "-Xms256m", "-Xmx512m"
+        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-Dgroovy.antlr4=true", "-Dgroovy.extract.doc.comment=true"
     } else {
-        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-XX:PermSize=64m", "-XX:MaxPermSize=192m"
+        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-XX:PermSize=64m", "-XX:MaxPermSize=192m", "-Dgroovy.antlr4=true", "-Dgroovy.extract.doc.comment=true"
     }
 
     main = 'org.apache.groovy.parser.antlr4.ui.GroovyConsole'
