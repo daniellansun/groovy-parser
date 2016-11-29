@@ -19,7 +19,7 @@
 package org.apache.groovy.parser.antlr4;
 
 /**
- * Created by Daniel on 2016/11/29.
+ * Represents a syntax error of groovy program
  */
 public class GroovySyntaxError extends AssertionError {
     public GroovySyntaxError(String message) {
