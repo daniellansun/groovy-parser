@@ -22,7 +22,8 @@ import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.Parser;
 
 /**
- * Created by Daniel on 2016/11/30.
+ * Because antlr4 does not support generating parser with specified interface,
+ * we have to create a super class for it and implement the interface.
  */
 public abstract class AbstractParser extends Parser implements SyntaxErrorReportable {
     public AbstractParser(TokenStream input) {

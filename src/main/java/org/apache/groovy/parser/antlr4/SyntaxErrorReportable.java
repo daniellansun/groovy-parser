@@ -19,7 +19,7 @@
 package org.apache.groovy.parser.antlr4;
 
 /**
- * Created by Daniel on 2016/11/30.
+ * A SyntaxErrorReportable is a recognizer that can report syntax error
  */
 public interface SyntaxErrorReportable {
     default void require(boolean condition, String msg) {
