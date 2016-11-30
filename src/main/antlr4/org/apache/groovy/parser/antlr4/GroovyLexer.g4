@@ -169,9 +169,12 @@ options {
         this.setChannel(Token.HIDDEN_CHANNEL);
     }
 
+    @Override
     public int getSyntaxErrorSource() {
         return GroovySyntaxError.LEXER;
     }
+
+    @Override
     public String genPositionInfo() {
         return " @ line " + getLine() + ", column " + (getCharPositionInLine() + 1);
     }

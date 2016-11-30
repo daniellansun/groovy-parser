@@ -105,9 +105,12 @@ options {
         }
     }
 
+    @Override
     public int getSyntaxErrorSource() {
         return GroovySyntaxError.PARSER;
     }
+
+    @Override
     public String genPositionInfo() {
         Token token = _input.LT(-1);
 
