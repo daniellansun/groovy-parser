@@ -18,27 +18,14 @@
  */
 package org.apache.groovy.parser.antlr4;
 
-import java.util.IllegalFormatCodePointException;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.Lexer;
 
 /**
- * Represents a syntax error of groovy program
+ * Created by Daniel on 2016/11/30.
  */
-public class GroovySyntaxError extends AssertionError {
-    public static final int LEXER = 0;
-    public static final int PARSER = 1;
-    private int source;
-
-    public GroovySyntaxError(String message, int source) {
-        super(message, null);
-
-        if (source != LEXER && source != PARSER) {
-            throw new IllegalArgumentException("Invalid syntax error source: " + source);
-        }
-
-        this.source = source;
-    }
-
-    public int getSource() {
-        return source;
+public abstract class AbstractLexer extends Lexer implements SyntaxErrorReportable {
+    public AbstractLexer(CharStream input) {
+        super(input);
     }
 }
