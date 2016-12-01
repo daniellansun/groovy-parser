@@ -749,14 +749,7 @@ castParExpression
     ;
 
 parExpression
-    :   LPAREN (statementExpression | standardLambda)
-        (   RPAREN
-        |   { require(false, "Missing ')'"); }
-        )
-
-    // !!!Error Alternatives!!!
-    //|   LPAREN statementExpression RPAREN RPAREN+ { notifyErrorListeners("Too many ')'"); } // the "Too many" case has been handled by the lexer
-    //|   LPAREN statementExpression               { false }?<fail={ "Missing ')'" }>  // FIXME Impact the performance quite a lot: 26min#297 -> 31min#300
+    :   LPAREN (statementExpression | standardLambda) rparen
     ;
 
 expressionList
@@ -1193,6 +1186,13 @@ keywords
     |   PUBLIC
     |   PROTECTED
     |   PRIVATE
+    ;
+
+rparen
+    :   RPAREN
+    |
+        // !!!Error Alternatives!!!
+        { require(false, "Missing ')'"); }
     ;
 
 nls
