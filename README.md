@@ -10,7 +10,7 @@ The new parser(Parrot) can parse Groovy source code and construct the related AS
 Currently almost all features of Groovy are available. In addition, the following new features have been added:
 
 * do-while loop(DONE)
-* new operators: identity operators(`===`, `!==`), `!in`, `!instanceof`(DONE)
+* new operators: identity operators(`===`, `!==`), elvis assignment(i.e. `?=`), `!in`, `!instanceof`(DONE)
 * lambda expression(DONE)
 * method reference and constructor reference(DONE)
 * try-with-resources(DONE)
