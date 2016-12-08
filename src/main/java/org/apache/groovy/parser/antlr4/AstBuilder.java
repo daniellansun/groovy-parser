@@ -809,12 +809,22 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         classNode.addAnnotations(modifierManager.getAnnotations());
         classNode.setGenericsTypes(this.visitTypeParameters(ctx.typeParameters()));
 
-        if (asBoolean(ctx.CLASS()) || asBoolean(ctx.TRAIT())) { // class OR trait
+        boolean isInterface = asBoolean(ctx.INTERFACE()) && !asBoolean(ctx.AT());
+        boolean isInterfaceWithDefaultMethods = false;
+
+        // declaring interface with default method
+        if (isInterface && this.containsDefaultMethods(ctx)) {
+            isInterfaceWithDefaultMethods = true;
+            classNode.addAnnotation(new AnnotationNode(ClassHelper.make(GROOVY_TRANSFORM_TRAIT)));
+            classNode.putNodeMetaData(IS_INTERFACE_WITH_DEFAULT_METHODS, true);
+        }
+
+        if (asBoolean(ctx.CLASS()) || asBoolean(ctx.TRAIT()) || isInterfaceWithDefaultMethods) { // class OR trait OR interface with default methods
             classNode.setSuperClass(this.visitType(ctx.sc));
             classNode.setInterfaces(this.visitTypeList(ctx.is));
 
             this.initUsingGenerics(classNode);
-        } else if (asBoolean(ctx.INTERFACE()) && !asBoolean(ctx.AT())) { // interface(NOT annotation)
+        } else if (isInterface) { // interface(NOT annotation)
             classNode.setModifiers(classNode.getModifiers() | Opcodes.ACC_INTERFACE | Opcodes.ACC_ABSTRACT);
 
             classNode.setSuperClass(ClassHelper.OBJECT_TYPE);
@@ -861,6 +871,26 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         this.attachDocCommentAsMetaData(classNode, ctx);
 
         return classNode;
+    }
+
+    @SuppressWarnings({"unchecked"})
+    private boolean containsDefaultMethods(ClassDeclarationContext ctx) {
+        List<MethodDeclarationContext> methodDeclarationContextList =
+                (List<MethodDeclarationContext>) ctx.classBody().classBodyDeclaration().stream()
+                .map(ClassBodyDeclarationContext::memberDeclaration)
+                .filter(Objects::nonNull)
+                .map(e -> (Object) e.methodDeclaration())
+                .filter(Objects::nonNull).reduce(new LinkedList<MethodDeclarationContext>(), (r, e) -> {
+                    MethodDeclarationContext methodDeclarationContext = (MethodDeclarationContext) e;
+
+                    if (createModifierManager(methodDeclarationContext).contains(DEFAULT)) {
+                        ((List) r).add(methodDeclarationContext);
+                    }
+
+                    return r;
+        });
+
+        return !methodDeclarationContextList.isEmpty();
     }
 
     @Override
@@ -1092,8 +1122,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return null;
     }
 
-    @Override
-    public MethodNode visitMethodDeclaration(MethodDeclarationContext ctx) {
+    private ModifierManager createModifierManager(MethodDeclarationContext ctx) {
         List<ModifierNode> modifierNodeList = Collections.emptyList();
 
         if (asBoolean(ctx.modifiers())) {
@@ -1102,7 +1131,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             modifierNodeList = this.visitModifiersOpt(ctx.modifiersOpt());
         }
 
-        ModifierManager modifierManager = new ModifierManager(modifierNodeList);
+        return new ModifierManager(modifierNodeList);
+    }
+
+    @Override
+    public MethodNode visitMethodDeclaration(MethodDeclarationContext ctx) {
+        ModifierManager modifierManager = createModifierManager(ctx);
         String methodName = this.visitMethodName(ctx.methodName());
         ClassNode returnType = this.visitReturnType(ctx.returnType());
         Parameter[] parameters = this.visitFormalParameters(ctx.formalParameters());
@@ -1144,7 +1178,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
                 }
 
-                modifiers |= classNode.isInterface() ? Opcodes.ACC_ABSTRACT : 0;
+                modifiers |= classNode.isInterface() || (isTrue(classNode, IS_INTERFACE_WITH_DEFAULT_METHODS) && !modifierManager.contains(DEFAULT)) ? Opcodes.ACC_ABSTRACT : 0;
                 methodNode = classNode.addMethod(methodName, modifiers, returnType, parameters, exceptions, code);
 
                 methodNode.setAnnotationDefault(asBoolean(ctx.elementValue()));
@@ -4153,6 +4187,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 put(ABSTRACT, Opcodes.ACC_ABSTRACT);
                 put(FINAL, Opcodes.ACC_FINAL);
                 put(STRICTFP, Opcodes.ACC_STRICT);
+                put(DEFAULT, 0); // TODO FIND THE ASM OPCODE FOR DEFAULT MODIFIER
             }
         };
 
@@ -4388,6 +4423,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String IS_SWITCH_DEFAULT = "_IS_SWITCH_DEFAULT";
     private static final String IS_NUMERIC = "_IS_NUMERIC";
     private static final String IS_STRING = "_IS_STRING";
+    private static final String IS_INTERFACE_WITH_DEFAULT_METHODS = "_IS_INTERFACE_WITH_DEFAULT_METHODS";
 
     private static final String PATH_EXPRESSION_BASE_EXPR = "_PATH_EXPRESSION_BASE_EXPR";
     private static final String PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES = "_PATH_EXPRESSION_BASE_EXPR_GENERICS_TYPES";
