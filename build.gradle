@@ -95,6 +95,7 @@ dependencies {
 //    antlr4 "org.antlr:antlr4:$antlr4Version"
 //    antlr4 "com.tunnelvisionlabs:antlr4:$antlr4Version"
     antlr4 files("lib/antlr4.jar")
+    compile 'org.abego.treelayout:org.abego.treelayout.core:1.0.3'
 
 //    compile "org.ow2.asm:asm:$asmVersion"
 //    compile "org.ow2.asm:asm-analysis:$asmVersion"
