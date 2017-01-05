@@ -86,7 +86,7 @@ antlr4.dependsOn clean
 
 ext {
 //    asmVersion = '6.0_ALPHA'
-    antlr4Version = '4.6'
+    antlr4Version = '4.6.0.1'
 //    groovyVersion = '2.5.0-SNAPSHOT'
     junitVersion = '4.12'
 }
