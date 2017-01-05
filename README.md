@@ -13,6 +13,7 @@ Currently almost all features of Groovy are available. In addition, the followin
 * lambda expression(DONE)
 * method reference and constructor reference(DONE)
 * try-with-resources(DONE)
+* code block(DONE)
 * default method(DONE)
 * new operators: identity operators(`===`, `!==`), elvis assignment(i.e. `?=`), `!in`, `!instanceof`(DONE)
 * safe index(e.g. nullableVar?[1, 2])(DONE)
