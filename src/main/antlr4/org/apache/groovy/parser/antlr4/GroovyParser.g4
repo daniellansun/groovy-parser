@@ -325,6 +325,16 @@ methodDeclaration[int t, int ct]
         )
     ;
 
+methodDeclarationNoAbstract
+options { baseContext = methodDeclaration; }
+    :   (   modifiersOpt  typeParameters? returnType[9]
+        |   modifiers  typeParameters? returnType[9]?
+        )
+        methodName formalParameters (nls THROWS nls qualifiedClassNameList)?
+        nls methodBody
+    ;
+
+
 methodName
     :   identifier
     |   stringLiteral
@@ -685,7 +695,7 @@ statement
 
     // validate the method in the AstBuilder#visitMethodDeclaration, e.g. method without method body is not allowed
     |   { !SemanticPredicates.isInvalidMethodDeclaration(_input) }?
-        methodDeclaration[3, 9]                                                                             #methodDeclarationStmtAlt
+        methodDeclarationNoAbstract                                                                             #methodDeclarationStmtAlt
 
     |   statementExpression                                                                                 #expressionStmtAlt
 
