@@ -580,15 +580,16 @@ localVariableDeclaration
  *  t   0: local variable declaration; 1: field declaration
  */
 variableDeclaration[int t]
-    :   (   { 0 == $t }? variableModifiersOpt
-        |   { 1 == $t }? modifiersOpt
-        )
-        type variableDeclarators
-    |
+    :
         (   { 0 == $t }? variableModifiers
         |   { 1 == $t }? modifiers
         )
         type? variableDeclarators
+    |
+        (   { 0 == $t }? variableModifiersOpt
+        |   { 1 == $t }? modifiersOpt
+        )
+        type variableDeclarators
     |
         (   { 0 == $t }? variableModifiers
         |   { 1 == $t }? modifiers

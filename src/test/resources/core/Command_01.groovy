@@ -13,3 +13,5 @@ obj.<Integer, Double>a b(1, 3), c(2, 4), d(3, 5)
 println a
 // println a = 1  // breaking change
 println a == 1
+
+result.addAll allElements()
