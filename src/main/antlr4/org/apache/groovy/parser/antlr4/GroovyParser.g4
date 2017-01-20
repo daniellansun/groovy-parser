@@ -310,11 +310,10 @@ methodDeclaration[int t, int ct]
     :   { 3 == $ct }?
         returnType[$ct] methodName LPAREN rparen (DEFAULT nls elementValue)?
     |
-        (   modifiersOpt  typeParameters? returnType[$ct]
-        |   modifiers  typeParameters? returnType[$ct]?
-        |
-            { 0 == $t }?
+        (   { 0 == $t }?
             modifiersOpt typeParameters?
+        |   modifiersOpt  typeParameters? returnType[$ct]
+        |   modifiers  typeParameters? returnType[$ct]?
         )
         methodName formalParameters (nls THROWS nls qualifiedClassNameList)?
         (
@@ -371,7 +370,7 @@ type
     ;
 
 classOrInterfaceType
-    :   qualifiedStandardClassName typeArguments?
+    :   qualifiedClassName typeArguments?
     ;
 
 primitiveType
@@ -432,9 +431,13 @@ qualifiedClassName
     :   (qualifiedNameElement DOT)* identifier
     ;
 
+/*
+// !!!Breaking change: Groovy 3.0 allows lowercase type name, e.g. `a b=c`
+// but `a b` is a method call
 qualifiedStandardClassName
     :   (qualifiedNameElement DOT)* (className DOT)* className
     ;
+*/
 
 literal
     :   IntegerLiteral                                                                      #integerLiteralAlt
@@ -559,7 +562,8 @@ blockStatement
     ;
 
 localVariableDeclaration
-    :   variableDeclaration[0]
+    :   { !SemanticPredicates.isInvalidLocalVariableDeclaration(_input) }?
+        variableDeclaration[0]
     ;
 
 /**

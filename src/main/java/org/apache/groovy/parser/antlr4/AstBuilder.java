@@ -3239,8 +3239,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClassNode visitClassOrInterfaceType(ClassOrInterfaceTypeContext ctx) {
-        ctx.qualifiedStandardClassName().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, ctx.getNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR));
-        ClassNode classNode = this.visitQualifiedStandardClassName(ctx.qualifiedStandardClassName());
+        ctx.qualifiedClassName().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, ctx.getNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR));
+        ClassNode classNode = this.visitQualifiedClassName(ctx.qualifiedClassName());
 
         if (asBoolean(ctx.typeArguments())) {
             classNode.setGenericsTypes(
@@ -3498,15 +3498,14 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public ClassNode visitQualifiedClassName(QualifiedClassNameContext ctx) {
         ClassNode result = ClassHelper.make(ctx.getText());
 
-        /*
         if (!isTrue(ctx, IS_INSIDE_INSTANCEOF_EXPR)) { // type in the "instanceof" expression should not have proxy to redirect to it
             result = this.proxyClassNode(result);
         }
-        */
 
         return this.configureAST(result, ctx);
     }
 
+    /*
     @Override
     public ClassNode visitQualifiedStandardClassName(QualifiedStandardClassNameContext ctx) {
         ClassNode result = ClassHelper.make(ctx.getText());
@@ -3517,6 +3516,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         return this.configureAST(result, ctx);
     }
+    */
 
     private ClassNode proxyClassNode(ClassNode classNode) {
         if (!classNode.isUsingGenerics()) {
@@ -4257,7 +4257,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
      * <p>
      * Created by Daniel.Sun on 2016/08/23.
      */
-    private static class ModifierNode extends ASTNode {
+    public static class ModifierNode extends ASTNode {
         private Integer type;
         private Integer opCode; // ASM opcode
         private String text;
@@ -4265,7 +4265,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         private boolean repeatable;
 
         public static final int ANNOTATION_TYPE = -999;
-        private static final Map<Integer, Integer> MAP = new HashMap<Integer, Integer>() {
+        public static final Map<Integer, Integer> MODIFIER_OPCODE_MAP = new HashMap<Integer, Integer>() {
             {
                 put(ANNOTATION_TYPE, 0);
                 put(DEF, 0);
@@ -4288,7 +4288,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         public ModifierNode(Integer type) {
             this.type = type;
-            this.opCode = MAP.get(type);
+            this.opCode = MODIFIER_OPCODE_MAP.get(type);
             this.repeatable = ANNOTATION_TYPE == type; // Only annotations are repeatable
 
             if (!asBoolean((Object) this.opCode)) {
