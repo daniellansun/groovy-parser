@@ -216,11 +216,11 @@ typeParameter
     ;
 
 typeBound
-    :   standardType (BITAND nls standardType)*
+    :   type (BITAND nls type)*
     ;
 
 typeList
-    :   standardType (COMMA nls standardType)*
+    :   type (COMMA nls type)*
     ;
 
 
@@ -247,7 +247,7 @@ locals[ int t ]
                         // Only interface can extend more than one super class
                         {1 == $t}? scs=typeList
                     |
-                        sc=standardType
+                        sc=type
                     )
                 nls)?
             |
@@ -395,8 +395,8 @@ typeArguments
     ;
 
 typeArgument
-    :   standardType
-    |   QUESTION ((EXTENDS | SUPER) nls standardType)?
+    :   type
+    |   QUESTION ((EXTENDS | SUPER) nls type)?
     ;
 
 qualifiedClassNameList
@@ -413,11 +413,11 @@ formalParameterList
     ;
 
 formalParameter
-    :   variableModifiersOpt standardType?          variableDeclaratorId (ASSIGN nls expression)?
+    :   variableModifiersOpt type?          variableDeclaratorId (ASSIGN nls expression)?
     ;
 
 lastFormalParameter
-    :   variableModifiersOpt standardType? ELLIPSIS variableDeclaratorId (ASSIGN nls expression)?
+    :   variableModifiersOpt type? ELLIPSIS variableDeclaratorId (ASSIGN nls expression)?
     ;
 
 methodBody
@@ -755,14 +755,14 @@ forUpdate
     ;
 
 enhancedForControl
-    :   variableModifiersOpt standardType? variableDeclaratorId (COLON | IN) expression
+    :   variableModifiersOpt type? variableDeclaratorId (COLON | IN) expression
     ;
 
 
 // EXPRESSIONS
 
 castParExpression
-    :   LPAREN standardType rparen
+    :   LPAREN type rparen
     ;
 
 parExpression
@@ -821,7 +821,7 @@ expression
         right=expression                                                                    #shiftExprAlt
 
     // boolean relational expressions (level 7)
-    |   left=expression op=(AS | INSTANCEOF | NOT_INSTANCEOF) nls standardType                      #relationalExprAlt
+    |   left=expression op=(AS | INSTANCEOF | NOT_INSTANCEOF) nls type                      #relationalExprAlt
     |   left=expression op=(LE | GE | GT | LT | IN | NOT_IN)  nls right=expression          #relationalExprAlt
 
     // equality/inequality (==/!=) (level 8)
