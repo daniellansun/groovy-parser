@@ -216,11 +216,11 @@ typeParameter
     ;
 
 typeBound
-    :   type (BITAND nls type)*
+    :   standardType (BITAND nls standardType)*
     ;
 
 typeList
-    :   type (COMMA nls type)*
+    :   standardType (COMMA nls standardType)*
     ;
 
 
@@ -247,7 +247,7 @@ locals[ int t ]
                         // Only interface can extend more than one super class
                         {1 == $t}? scs=typeList
                     |
-                        sc=type
+                        sc=standardType
                     )
                 nls)?
             |
@@ -325,16 +325,6 @@ methodDeclaration[int t, int ct]
         )
     ;
 
-methodDeclarationNoAbstract
-options { baseContext = methodDeclaration; }
-    :   (   modifiersOpt  typeParameters? returnType[9]
-        |   modifiers  typeParameters? returnType[9]?
-        )
-        methodName formalParameters (nls THROWS nls qualifiedClassNameList)?
-        nls methodBody
-    ;
-
-
 methodName
     :   identifier
     |   stringLiteral
@@ -342,7 +332,7 @@ methodName
 
 returnType[int ct]
     :
-        type
+        standardType
     |
         // annotation method can not have void return type
         { 3 != $ct }? VOID
@@ -374,13 +364,26 @@ arrayInitializer
     :   LBRACK (variableInitializer (COMMA variableInitializer)* (COMMA)? )? RBRACK
     ;
 
+standardType
+options { baseContext = type; }
+    :   primitiveType (LBRACK RBRACK)*
+    |   standardClassOrInterfaceType (LBRACK RBRACK)*
+    ;
+
 type
     :   primitiveType (LBRACK RBRACK)*
     |   classOrInterfaceType (LBRACK RBRACK)*
     ;
 
 classOrInterfaceType
-    :   qualifiedClassName typeArguments?
+    :   (   qualifiedClassName
+        |   qualifiedStandardClassName
+        ) typeArguments?
+    ;
+
+standardClassOrInterfaceType
+options { baseContext = classOrInterfaceType; }
+    :   qualifiedStandardClassName typeArguments?
     ;
 
 primitiveType
@@ -392,8 +395,8 @@ typeArguments
     ;
 
 typeArgument
-    :   type
-    |   QUESTION ((EXTENDS | SUPER) nls type)?
+    :   standardType
+    |   QUESTION ((EXTENDS | SUPER) nls standardType)?
     ;
 
 qualifiedClassNameList
@@ -410,11 +413,11 @@ formalParameterList
     ;
 
 formalParameter
-    :   variableModifiersOpt type?          variableDeclaratorId (ASSIGN nls expression)?
+    :   variableModifiersOpt standardType?          variableDeclaratorId (ASSIGN nls expression)?
     ;
 
 lastFormalParameter
-    :   variableModifiersOpt type? ELLIPSIS variableDeclaratorId (ASSIGN nls expression)?
+    :   variableModifiersOpt standardType? ELLIPSIS variableDeclaratorId (ASSIGN nls expression)?
     ;
 
 methodBody
@@ -441,13 +444,9 @@ qualifiedClassName
     :   (qualifiedNameElement DOT)* identifier
     ;
 
-/*
-// !!!Breaking change: Groovy 3.0 allows lowercase type name, e.g. `a b=c`
-// but `a b` is a method call
 qualifiedStandardClassName
     :   (qualifiedNameElement DOT)* (className DOT)* className
     ;
-*/
 
 literal
     :   IntegerLiteral                                                                      #integerLiteralAlt
@@ -580,8 +579,7 @@ localVariableDeclaration
  *  t   0: local variable declaration; 1: field declaration
  */
 variableDeclaration[int t]
-    :
-        (   { 0 == $t }? variableModifiers
+    :   (   { 0 == $t }? variableModifiers
         |   { 1 == $t }? modifiers
         )
         type? variableDeclarators
@@ -696,7 +694,7 @@ statement
 
     // validate the method in the AstBuilder#visitMethodDeclaration, e.g. method without method body is not allowed
     |   { !SemanticPredicates.isInvalidMethodDeclaration(_input) }?
-        methodDeclarationNoAbstract                                                                             #methodDeclarationStmtAlt
+        methodDeclaration[3, 9]                                                                             #methodDeclarationStmtAlt
 
     |   statementExpression                                                                                 #expressionStmtAlt
 
@@ -757,14 +755,14 @@ forUpdate
     ;
 
 enhancedForControl
-    :   variableModifiersOpt type? variableDeclaratorId (COLON | IN) expression
+    :   variableModifiersOpt standardType? variableDeclaratorId (COLON | IN) expression
     ;
 
 
 // EXPRESSIONS
 
 castParExpression
-    :   LPAREN type rparen
+    :   LPAREN standardType rparen
     ;
 
 parExpression
@@ -823,7 +821,7 @@ expression
         right=expression                                                                    #shiftExprAlt
 
     // boolean relational expressions (level 7)
-    |   left=expression op=(AS | INSTANCEOF | NOT_INSTANCEOF) nls type                      #relationalExprAlt
+    |   left=expression op=(AS | INSTANCEOF | NOT_INSTANCEOF) nls standardType                      #relationalExprAlt
     |   left=expression op=(LE | GE | GT | LT | IN | NOT_IN)  nls right=expression          #relationalExprAlt
 
     // equality/inequality (==/!=) (level 8)

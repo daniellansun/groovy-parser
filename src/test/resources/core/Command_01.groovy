@@ -15,3 +15,4 @@ println a
 println a == 1
 
 result.addAll allElements()
+task someTask() {}

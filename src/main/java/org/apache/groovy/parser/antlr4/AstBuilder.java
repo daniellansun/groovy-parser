@@ -3239,8 +3239,14 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClassNode visitClassOrInterfaceType(ClassOrInterfaceTypeContext ctx) {
-        ctx.qualifiedClassName().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, ctx.getNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR));
-        ClassNode classNode = this.visitQualifiedClassName(ctx.qualifiedClassName());
+        ClassNode classNode;
+        if (asBoolean(ctx.qualifiedClassName())) {
+            ctx.qualifiedClassName().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, ctx.getNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR));
+            classNode = this.visitQualifiedClassName(ctx.qualifiedClassName());
+        } else {
+            ctx.qualifiedStandardClassName().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, ctx.getNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR));
+            classNode = this.visitQualifiedStandardClassName(ctx.qualifiedStandardClassName());
+        }
 
         if (asBoolean(ctx.typeArguments())) {
             classNode.setGenericsTypes(
@@ -3496,18 +3502,15 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClassNode visitQualifiedClassName(QualifiedClassNameContext ctx) {
-        ClassNode result = ClassHelper.make(ctx.getText());
-
-        if (!isTrue(ctx, IS_INSIDE_INSTANCEOF_EXPR)) { // type in the "instanceof" expression should not have proxy to redirect to it
-            result = this.proxyClassNode(result);
-        }
-
-        return this.configureAST(result, ctx);
+        return this.createClassNode(ctx);
     }
 
-    /*
     @Override
     public ClassNode visitQualifiedStandardClassName(QualifiedStandardClassNameContext ctx) {
+        return this.createClassNode(ctx);
+    }
+
+    private ClassNode createClassNode(GroovyParserRuleContext ctx) {
         ClassNode result = ClassHelper.make(ctx.getText());
 
         if (!isTrue(ctx, IS_INSIDE_INSTANCEOF_EXPR)) { // type in the "instanceof" expression should not have proxy to redirect to it
@@ -3516,7 +3519,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         return this.configureAST(result, ctx);
     }
-    */
 
     private ClassNode proxyClassNode(ClassNode classNode) {
         if (!classNode.isUsingGenerics()) {
