@@ -32,3 +32,97 @@ $ ./gradlew groovyConsole
 
 Feel free to report any issue you found, and pull requests are always welcome.
 
+```groovy                                                                                                                                                                 
+                                                                                                    
+                     ...                                                                            
+                 .fLjtttttti.                                                                       
+                ,fi,t;jtjjjji,                                                                      
+                ::t, ;.i . :Lji.                                                                    
+                ,GDD: ,.  ,tft ,:                                                                   
+                DDEDi.   ,i:,;.LL;                                                                  
+                EEEKEL, .:,;:.;#tL,                                                                 
+               ;DEEWKKf..L.:; ;Wf:;:                                                                
+               GDDKWKWKK.f.;.;..,.:i                                                                
+               GGEWEWWWW;:Df:.:f: :t,                                                               
+               LfKW#W#EWf. E. jLLL:ti                                                               
+               GjKWWWWWEf.  .E:   Lf;,                                                              
+               LtKKWWDWGj     LDDf.Lii                                                              
+               GjKWW#W##j         GGi;,                                                             
+               LfEWW####iD         fj;;                                                             
+               jG##EWW,fK##         Gi;i                                                            
+               fG###LDtDWKW.        .f;i:                                                           
+               :L##W#EDGWW#,        .t,;;                                                           
+                fWW##KDEWW#j         E;,;:                                                          
+                LDKWDKKW#W#K,        Et,,;;                                                         
+                ,tDEEWW#####D       .ELi,,;                                                         
+                 ijDKD#####WK.      ;DEi;,,,                                                        
+                  . GEGW###WG ..  .:DEKi;,,;,                                                       
+                    iGDKWWKEt...  jGEEKLi,,;i:                                                      
+                     :;GDEG:j#tfDDGEKEEft,,,,,:                                                     
+                     .,jLW#WEDDDDDDEKEELt,,,,,;:                                                    
+                      L#WDEDDDEEDEEKKEGfj,,,:i;,,                                                   
+                      jGEGDDDDEEDEEEEEDft,,,,;,;fj                                                  
+                      :DEDDDEEEEEEEKKDDjt,:,,,;,tit                                                 
+                       GLDDDDGDDDEKEEGLi,::,,,iii,ij,                                               
+                       LDEEEGGDDDEDDLfji,::::,;iiii;;i.                                             
+                       GDLGfLDDDEDfjjti,,::::,,;ttiti,jLDL,                                         
+                       GGELfLGGLjjtiti;,::,,,;;ijt,;;jfjtjKj                                        
+                       tfLGfLGfjjjtii,,:::,;;tttttjjjjjtfttGDi                                      
+                       iijjfjfjjtii;;::,::,tftttjjjjjjtttfii;Gi                                     
+                       ,ijtittttjii;,,,,:;ititttjjtttttttiit;,LL;.                                  
+                       :,ii,;;,:,,;;,,:,;jttjttLfjtttijtiii;ti;,D;;                                 
+                       :,,;,,,:::,,,,::,itjttiijfitiijjttii;jt;ttD,;                                
+                       :,,,:::,,,,:::,,tfjtttiifttiitttiiittjfDftiti;.                              
+                       j:,,::::,,,,,:::jjftjtttjitiitffiiiiiiLLLji;i;i                              
+                       L::,,,:,::::::::tjtjjjtttiiiittftii;ttiffjtti;ft                             
+                       jf:,:,:,::::::,,iffftjtitttttiifjttittffjtGfitiji                            
+                       ,f,,::::::,:,::,jjjfjtttjjtitjitttttiiiittjtfjiLti                           
+                       .fL,:,::,::::::,tjjjjitttttijjtfttjttiiiitjtijtftt:                          
+                        jLi:,::::::,,,,;LjfLtittittttfjtjttiiitiiiiitfttjtj                         
+                         LL:::,::,:::,,;;ttjttjfitttttjtjiitiitjjjjjtjjjtLij                        
+                         fG,::,,,,::,,,,;jtLjtfjjtttitjjjiiii;ttttjjtitfjtjit                       
+                         :Lt:,,,,,,,::,;,;jtjGjjtiittitjttiiitfitttjLjijfLG;ftG                     
+                          jfL:,,,,,,::,,,;fjjjjjjtjttitttttittfjjtttLjifjfjtLj#D.                   
+                           fLt,,,,,,,,,,,;itjf,;tjjtttttitjttiijffjtGGtjLjtGftt#KG                  
+                           jLG,,,,,,,,,,,;;fjji;iijtttttitjititjjjttjGLjjLtfLfiE#K:                 
+                            jG:,,,,,,,,,,;;ttjittjtjffttttjtLfGLjjttiGGfjGjfLGjtEEWE.               
+                             LLf,,,,,,,,,;;;fjLjtitjjftttjttfDLLjjjtjGGfLfGjLfLjjGLKED.             
+                             tDG,,,,,,,,,;;;;jGfjttjjLjitftLGfLLLjfjjfGLLLLfjLLfttKGDDG             
+                              LGL,,,,,,,,,;;;fLLfjjttjfLGLLLDfGLGfjfLfLLfGDLfLLEftLELDGDj           
+                              :LDi,;,,,,,;,;;iLDLfjjjjLLDLLLGffGGLffLLfLfEDEfLELGjGfDDDLDi          
+                               .LLG,,,,,,;,;;;fGLLLfjffLGGGLfDLLLGDDGLLfL#KEKK#GLLjLfWEWGGf         
+                                ::Lf,,,,,,;;;iLLGfLLffffLDDDfLGLffGDDGLfD##WGE#GLffjLL##WGDj        
+                                   tf,,,,,;,;;jLGGGLGGLLGGDDDGfLfffKDGDGDEK##LDGGLLfGGW##W#GG       
+                                    :.,,,,;;;;tDLGEGGGGGLGDEEGLLffEWEEGGGDEW#LLDGGfLLGf##GDDG       
+                                       ,;;;;;;iDDLGEGGGDDDDGEEGGGEDE#WKDGGDDEGLLGGGDDGGD###WWj      
+                                        :;;;;;;G;iLDEDDDDEEEEKGGLGDGDK#DGGGLGDGDLGDDGGGLE#WKKD,     
+                                         ,;;;;;L,ijGGEDDDDEKDKLGLGDEGGEDGGGGLGGGKGGDGGGLLDEEEEG     
+                                          :;;;;;;;iiGDGDDDDKEKLLDGGGGGLGEDEDDEDDDGKLDDDDGt   ;.     
+                                           ;,;;ii;i;fGGEDDEKWKjLLGGGGGGLDDGEDEDDDDDDGDDDGfE         
+                                           ;;tiiitti;tGDDDDEKfjjGDDDLLDDDDDDDDKEEDDDEEDEWGGDEKj     
+                                           ,;ittiit;,;jDDDEDKttjjffWDDGDEDDDEEEWEEEDEEEEEDDK#WWD    
+                                           .;;itjff,,;iitDDDEittjjffLGKDDDDEDEDK#EEEEEEKKEDEK###ED  
+                                            ;;;itj;,;;;iijjti;;tjjfLGGDEWEEEKKWKK#EEEEEKKDEKGGDW#WD:
+                                            :;;iji,,,,,;i;t,;;;tjfLGDDEEEEKLLLfttGKKKKKWEGDDW##GDEKK
+                                             ,;;t;,,:::,,,,,,,;iffGGDDGGGDKEf,itiiLDDEEDDEDGGGLE#GDK
+                                             ;;;tj,,:::,,,,,; .:ffLfLLDfffKEGGi;iijEDKGGLfLfGffjGWWf
+                                              ;ii,;,,,,,,,,,,    :ttfjfGfjDEGftftGDtDGDEKGGtjj.fjifK
+                                              ;;i,,,,,::,::,.     . jfjLLfLDDfLfjLtDGEK#KGfLfEG  ;ji
+                                              :i;,:::::,,.:,          tfftjLLEKEGGDfLfLGEDLjLjf,    
+                                               i,,,::,,,  ,.           fLfjfffLLKKGLfffLLDGLjftG    
+                                               :;,,,,,,   .            tLttiitfDGjGDEDfjLEDGGLLj;   
+                                                ,,,:,,,                  L;tttjfGDjLDEDGLf#DDGLLLj  
+                                                ,,:,,;                   LtitttjGDjjLGEDLjt#KDGLLLj;
+                                                i,,,;,                    t. jttffEfjfGEEDjtj#EDLLGf
+                          tjj.     ,         :. ;,,,i:                        jjjjGDjjLGDEDfff#GGGLL
+                        ;DGLL,itifjt;j;;,:,,;:..:;;iEGiGGj                     :ffLG .jfGDDDELGG#EGG
+                       iG, ,.ittttfjtti;:::;;j;;:ifL;tit;D;                     ,fLLi  ;fGDGDDDGf#DD
+                       . :jfLtitiittitt;;;;;;iittt;i,;;.  G                       GEED    i  GDDGDLW
+                         ,;tf    itijij;t,,,ii;ijiiti.i   j                        DKKL    .   f.jK#
+                                             ........ .   .                       :;,:.     ..:i:tLG
+                                                                                  ....    ...... ...
+  .....                                                                                             
+  .....  ......:. ...:                                            ... .   .... .... ...... .. ..... 
+                                                                                                    
+
+```
