@@ -1560,7 +1560,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public ListExpression visitArrayInitializer(ArrayInitializerContext ctx) {
+    public ListExpression visitVariableInitializers(VariableInitializersContext ctx) {
         return this.configureAST(
                 new ListExpression(
                         ctx.variableInitializer().stream()
@@ -1569,6 +1569,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
+    @Override
+    public ListExpression visitArrayInitializer(ArrayInitializerContext ctx) {
+        return this.configureAST(this.visitVariableInitializers(ctx.variableInitializers()), ctx);
+    }
 
     @Override
     public Statement visitBlock(BlockContext ctx) {

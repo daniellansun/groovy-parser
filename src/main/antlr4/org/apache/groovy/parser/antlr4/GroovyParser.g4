@@ -360,8 +360,26 @@ variableInitializer
     |   standardLambda
     ;
 
+variableInitializers
+    :   (   variableInitializer nls
+            (   (COMMA nls variableInitializer nls)*
+            |   (COMMA nls variableInitializer nls)+
+            )
+            nls COMMA?
+         )?
+    ;
+
+variableInitializersForJavaStyleArrayInitializer
+options { baseContext = variableInitializers; }
+    :   (   variableInitializer nls
+            (COMMA nls variableInitializer nls)+
+            nls COMMA?
+         )?
+    ;
+
 arrayInitializer
-    :   LBRACK (variableInitializer (COMMA variableInitializer)* (COMMA)? )? RBRACK
+    :   LBRACK variableInitializers RBRACK
+    |   LBRACE nls variableInitializersForJavaStyleArrayInitializer nls RBRACE
     ;
 
 standardType
