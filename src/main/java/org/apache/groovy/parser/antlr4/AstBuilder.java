@@ -1542,10 +1542,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return EmptyExpression.INSTANCE;
         }
 
-        if (asBoolean(ctx.arrayInitializer())) {
-            return this.configureAST(this.visitArrayInitializer(ctx.arrayInitializer()), ctx);
-        }
-
         if (asBoolean(ctx.statementExpression())) {
             return this.configureAST(
                     ((ExpressionStatement) this.visit(ctx.statementExpression())).getExpression(),
@@ -1561,6 +1557,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ListExpression visitVariableInitializers(VariableInitializersContext ctx) {
+        if (!asBoolean(ctx)) {
+            return new ListExpression();
+        }
+
         return this.configureAST(
                 new ListExpression(
                         ctx.variableInitializer().stream()

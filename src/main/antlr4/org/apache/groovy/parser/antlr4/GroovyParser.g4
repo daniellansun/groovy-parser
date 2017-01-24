@@ -355,31 +355,12 @@ variableDeclaratorId
     ;
 
 variableInitializer
-    :   arrayInitializer
-    |   statementExpression
+    :   statementExpression
     |   standardLambda
     ;
 
 variableInitializers
-    :   (   variableInitializer nls
-            (   (COMMA nls variableInitializer nls)*
-            |   (COMMA nls variableInitializer nls)+
-            )
-            nls COMMA?
-         )?
-    ;
-
-variableInitializersForJavaStyleArrayInitializer
-options { baseContext = variableInitializers; }
-    :   (   variableInitializer nls
-            (COMMA nls variableInitializer nls)+
-            nls COMMA?
-         )?
-    ;
-
-arrayInitializer
-    :   LBRACK variableInitializers RBRACK
-    |   LBRACE nls variableInitializersForJavaStyleArrayInitializer nls RBRACE
+    :   variableInitializer nls (COMMA nls variableInitializer nls)* nls COMMA?
     ;
 
 standardType
@@ -1103,7 +1084,11 @@ mapEntryLabel
 
 creator
     :   createdName nls arguments anonymousInnerClassDeclaration[0]?
-    |   createdName (LBRACK expression RBRACK)+ (b+=LBRACK RBRACK)*
+    |   createdName (LBRACK expression RBRACK)+ (b+=LBRACK RBRACK)* arrayInitializer?
+    ;
+
+arrayInitializer
+    :   LBRACE nls variableInitializers? nls RBRACE
     ;
 
 /**
