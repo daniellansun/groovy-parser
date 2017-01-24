@@ -1084,7 +1084,8 @@ mapEntryLabel
 
 creator
     :   createdName nls arguments anonymousInnerClassDeclaration[0]?
-    |   createdName (LBRACK expression RBRACK)+ (b+=LBRACK RBRACK)* arrayInitializer?
+    |   createdName (LBRACK expression RBRACK)+ (b+=LBRACK RBRACK)*
+    |   createdName (b+=LBRACK RBRACK)+ arrayInitializer
     ;
 
 arrayInitializer
