@@ -705,6 +705,7 @@ SPACESHIP           : '<=>';
 IDENTICAL           : '===';
 NOT_IDENTICAL       : '!==';
 ARROW               : '->';
+IMPLIES             : '=>';
 
 // !internalPromise will be parsed as !in ternalPromise, so semantic predicates are necessary
 NOT_INSTANCEOF      : '!instanceof' { isFollowedBy(_input, ' ', '\t', '\r', '\n') }?;
