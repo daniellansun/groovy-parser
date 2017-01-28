@@ -9,17 +9,16 @@ The new parser(Parrot) can parse Groovy source code and construct the related AS
 
 Currently almost all features of Groovy are available. In addition, the following new features have been added:
 
-* do-while loop(DONE)
-* lambda expression(DONE)
-* method reference and constructor reference(DONE)
-* try-with-resources(DONE)
-* code block(DONE)
-* array initializer of Java style(DONE)
-* default method(DONE)
-* new operators: identity operators(`===`, `!==`), elvis assignment(i.e. `?=`), `!in`, `!instanceof`(DONE)
-* safe index(e.g. nullableVar?[1, 2])(DONE)
-* groovydoc attached to AST node as metadata(DONE)
-* etc.
+* do-while loop, standard loop(e.g. `for(int i = 0, j = 10; i < j; i++, j--) {..}`)
+* lambda expression
+* method reference and constructor reference
+* try-with-resources(i.e. ARM)
+* code block(e.g. `{..}`)
+* array initializer of Java style
+* default method of interface
+* new operators: identity operators(`===`, `!==`), elvis assignment(i.e. `?=`), `!in`, `!instanceof`
+* safe index(e.g. `nullableVar?[1, 2]`)
+* groovydoc attached to AST node as metadata
 
 **(Notice: All available features are executable)**
 
