@@ -771,14 +771,14 @@ ELVIS_ASSIGN    : '?=';
 CapitalizedIdentifier
     :   [A-Z] JavaLetterOrDigit*
 
-    // Groovy's identifier can be unicode escape
+    // FIXME REMOVE THE FOLLOWING ALTERNATIVE. Groovy's identifier can be unicode escape(e.g. def \u4e00\u9fa5 = '123'), which will impact the performance and is pointless to support IMO
     |   [A-Z] (JavaLetterOrDigit | UnicodeEscape)*
     ;
 
 Identifier
     :   JavaLetter JavaLetterOrDigit*
 
-    // Groovy's identifier can be unicode escape
+    // FIXME REMOVE THE FOLLOWING ALTERNATIVE. Groovy's identifier can be unicode escape(e.g. def \u4e00\u9fa5 = '123'), which will impact the performance and is pointless to support IMO
     |   (JavaLetter | UnicodeEscape) (JavaLetterOrDigit | UnicodeEscape)*
     ;
 
