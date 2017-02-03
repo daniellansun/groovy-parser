@@ -13,8 +13,8 @@ Currently all features of Groovy are available. In addition, the following new f
 * lambda expression
 * method reference and constructor reference
 * try-with-resources(i.e. ARM)
-* code block(e.g. `{..}`)
-* array initializer of Java style
+* code block(i.e. `{..}`)
+* array initializer of Java style(e.g. `new int[] {1, 2, 3}`)
 * default method of interface
 * new operators: identity operators(`===`, `!==`), elvis assignment(`?=`), `!in`, `!instanceof`
 * safe index(e.g. `nullableVar?[1, 2]`)
