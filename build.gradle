@@ -117,7 +117,7 @@ sourceSets.test.java.srcDirs += file("$srcTest/groovy-sources");
 
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.3'
+    gradleVersion = '3.4.1'
 }
 
 task groovyConsole(type: JavaExec, dependsOn:[classes]) {
