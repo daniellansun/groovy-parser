@@ -16,7 +16,7 @@ The new parser(Parrot) can parse Groovy source code and construct the related AS
 * default method of interface
 * new operators: identity operators(`===`, `!==`), elvis assignment(`?=`), `!in`, `!instanceof`
 * safe index(e.g. `nullableVar?[1, 2]`)
-* groovydoc attached to AST node as metadata
+* runtime groovydoc, groovydoc attached to AST node as metadata
 
 **JVM system properties to control parsing:**
 
