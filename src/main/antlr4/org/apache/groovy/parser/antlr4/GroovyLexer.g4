@@ -286,7 +286,14 @@ GStringPathPart
     :   '.' IdentifierInGString
     ;
 RollBackOne
-    :   . -> popMode, channel(HIDDEN)
+    :   . {
+            // a trick to handle GStrings like "At $date"<EOF> properly
+            if ('"' == _input.LA(-1) && '"' != _input.LA(-2) && EOF == _input.LA(1)) {
+                setType(GStringEnd);
+            } else {
+                setChannel(HIDDEN);
+            }
+          } -> popMode
     ;
 
 
