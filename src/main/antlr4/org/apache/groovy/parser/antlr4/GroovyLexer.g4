@@ -153,8 +153,7 @@ options {
 
         require(null != paren, "Too many '" + text + "'");
         require(text.equals(PAREN_MAP.get(paren.getText())),
-                "'" + text + "' " + genPositionInfo() + " can not match '" + paren.getText() + "' " + formatPositionInfo(paren.getLine(), paren.getColumn()),
-                false);
+                "'" + paren.getText() + "'" + new PositionInfo(paren.getLine(), paren.getColumn()) + " can not match '" + text + "'");
 
         parenStack.pop();
     }
@@ -190,8 +189,13 @@ options {
     }
 
     @Override
-    public String genPositionInfo() {
-        return formatPositionInfo(getLine(), getCharPositionInLine() + 1);
+    public int getErrorLine() {
+        return getLine();
+    }
+
+    @Override
+    public int getErrorColumn() {
+        return getCharPositionInLine() + 1;
     }
 }
 

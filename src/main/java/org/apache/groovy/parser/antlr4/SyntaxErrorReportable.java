@@ -30,17 +30,23 @@ public interface SyntaxErrorReportable {
         this.throwSyntaxError(msg, toAttachPositionInfo);
     }
     default void require(boolean condition, String msg) {
-        require(condition, msg, true);
+        require(condition, msg, false);
     }
 
     default void throwSyntaxError(String msg, boolean toAttachPositionInfo) {
-        throw new GroovySyntaxError(msg + (toAttachPositionInfo ? this.genPositionInfo() : ""), this.getSyntaxErrorSource());
-    }
-
-    default String formatPositionInfo(int line, int column) {
-        return " @ line " + line + ", column " + column;
+        PositionInfo positionInfo = this.genPositionInfo();
+        throw new GroovySyntaxError(msg + (toAttachPositionInfo ? positionInfo.toString() : ""),
+                this.getSyntaxErrorSource(),
+                positionInfo.getLine(),
+                positionInfo.getColumn()
+        );
     }
 
     int getSyntaxErrorSource();
-    String genPositionInfo();
+    default PositionInfo genPositionInfo() {
+        return new PositionInfo(getErrorLine(), getErrorColumn());
+    }
+
+    int getErrorLine();
+    int getErrorColumn();
 }

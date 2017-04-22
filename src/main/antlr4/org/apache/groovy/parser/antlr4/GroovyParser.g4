@@ -111,14 +111,25 @@ options {
     }
 
     @Override
-    public String genPositionInfo() {
+    public int getErrorLine() {
         Token token = _input.LT(-1);
 
         if (null == token) {
-            return "";
+            return -1;
         }
 
-        return formatPositionInfo(token.getLine(), token.getCharPositionInLine() + 1 + token.getText().length());
+        return token.getLine();
+    }
+
+    @Override
+    public int getErrorColumn() {
+        Token token = _input.LT(-1);
+
+        if (null == token) {
+            return -1;
+        }
+
+        return token.getCharPositionInLine() + 1 + token.getText().length();
     }
 }
 

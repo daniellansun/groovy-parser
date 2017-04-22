@@ -4051,6 +4051,15 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private CompilationFailedException createParsingFailedException(Throwable t) {
         if (t instanceof SyntaxException) {
             this.collectSyntaxError((SyntaxException) t);
+        } else if (t instanceof GroovySyntaxError) {
+            GroovySyntaxError groovySyntaxError = (GroovySyntaxError) t;
+
+            this.collectSyntaxError(
+                    new SyntaxException(
+                            groovySyntaxError.getMessage(),
+                            groovySyntaxError,
+                            groovySyntaxError.getLine(),
+                            groovySyntaxError.getColumn()));
         } else if (t instanceof Exception) {
             this.collectException((Exception) t);
         }
