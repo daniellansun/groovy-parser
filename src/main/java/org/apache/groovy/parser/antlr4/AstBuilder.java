@@ -1320,6 +1320,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         modifiers |= !modifierManager.contains(STATIC) && (classNode.isInterface() || (isTrue(classNode, IS_INTERFACE_WITH_DEFAULT_METHODS) && !modifierManager.contains(DEFAULT))) ? Opcodes.ACC_ABSTRACT : 0;
+
+        MethodNode sameSigMethodNode = classNode.getDeclaredMethod(methodName, parameters);
+        if (null != sameSigMethodNode) {
+            throw createParsingFailedException("The method " +  sameSigMethodNode.getText() + " duplicates another method of the same signature", ctx);
+        }
+
         methodNode = classNode.addMethod(methodName, modifiers, returnType, parameters, exceptions, code);
 
         methodNode.setAnnotationDefault(asBoolean(ctx.elementValue()));
