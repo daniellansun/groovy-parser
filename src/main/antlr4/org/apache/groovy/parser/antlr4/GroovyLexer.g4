@@ -287,7 +287,7 @@ GStringPathPart
     ;
 RollBackOne
     :   . {
-            // a trick to handle GStrings like "At $date"<EOF> properly
+            // a trick to handle GStrings followed by EOF properly
             if ('"' == _input.LA(-1) && '"' != _input.LA(-2) && EOF == _input.LA(1)) {
                 setType(GStringEnd);
             } else {
