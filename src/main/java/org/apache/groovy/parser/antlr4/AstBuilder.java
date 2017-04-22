@@ -4305,9 +4305,13 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return parameter;
         }
 
+        public int clearVisibilityModifiers(int modifiers) {
+            return modifiers & ~Opcodes.ACC_PUBLIC & ~Opcodes.ACC_PROTECTED & ~Opcodes.ACC_PRIVATE;
+        }
+
         public MethodNode processMethodNode(MethodNode mn) {
             modifierNodeList.forEach(e -> {
-                mn.setModifiers(mn.getModifiers() | e.getOpcode());
+                mn.setModifiers((e.isVisibilityModifier() ? clearVisibilityModifiers(mn.getModifiers()) : mn.getModifiers()) | e.getOpcode());
 
                 if (e.isAnnotation()) {
                     mn.addAnnotation(e.getAnnotationNode());
