@@ -288,7 +288,7 @@ GStringPathPart
 RollBackOne
     :   . {
             // a trick to handle GStrings followed by EOF properly
-            if (EOF == _input.LA(1) && '"' == _input.LA(-1)) {
+            if (EOF == _input.LA(1) && ('"' == _input.LA(-1) || '/' == _input.LA(-1))) {
                 setType(GStringEnd);
             } else {
                 setChannel(HIDDEN);
