@@ -126,6 +126,7 @@ class GroovyParserTest extends GroovyTestCase {
         doTest('core/GString_02.groovy');
         doTest('core/GString_03.groovy');
         doTest('core/GString_04.groovy');
+        doTest('core/GString_05.groovy');
     }
 
     void "test groovy core - Closure"() {
