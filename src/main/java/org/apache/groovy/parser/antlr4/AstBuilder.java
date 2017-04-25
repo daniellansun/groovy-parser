@@ -39,6 +39,7 @@ import org.codehaus.groovy.ast.AnnotatedNode;
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.ConstructorNode;
 import org.codehaus.groovy.ast.EnumConstantClassNode;
 import org.codehaus.groovy.ast.FieldNode;
 import org.codehaus.groovy.ast.GenericsType;
@@ -133,6 +134,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -1254,14 +1256,14 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         this.configureAST(methodNode, ctx);
 
-        validateMethodDeclaration(ctx, methodNode);
+        validateMethodDeclaration(ctx, methodNode, modifierManager);
 
         groovydocManager.handle(methodNode, ctx);
 
         return methodNode;
     }
 
-    private void validateMethodDeclaration(MethodDeclarationContext ctx, MethodNode methodNode) {
+    private void validateMethodDeclaration(MethodDeclarationContext ctx, MethodNode methodNode, ModifierManager modifierManager) {
         boolean isAbstractMethod = methodNode.isAbstract();
         boolean hasMethodBody = asBoolean(methodNode.getCode());
 
@@ -1273,6 +1275,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             if (!isAbstractMethod && !hasMethodBody) { // non-abstract method without body in the non-script(e.g. class, enum, trait) is not allowed!
                 throw createParsingFailedException("You defined a method[" + methodNode.getName() + "] without body. Try adding a method body, or declare it abstract", methodNode);
             }
+        }
+
+        if (methodNode instanceof ConstructorNode) {
+            modifierManager.validate((ConstructorNode) methodNode);
         }
     }
 
@@ -1339,19 +1345,17 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         throw createParsingFailedException("The method " +  sameSigMethodNode.getText() + " duplicates another method of the same signature", ctx);
     }
 
-    private MethodNode createConstructorNodeForClass(String methodName, Parameter[] parameters, ClassNode[] exceptions, Statement code, ClassNode classNode, int modifiers) {
-        MethodNode methodNode;ConstructorCallExpression thisOrSuperConstructorCallExpression = this.checkThisAndSuperConstructorCall(code);
+    private ConstructorNode createConstructorNodeForClass(String methodName, Parameter[] parameters, ClassNode[] exceptions, Statement code, ClassNode classNode, int modifiers) {
+        ConstructorCallExpression thisOrSuperConstructorCallExpression = this.checkThisAndSuperConstructorCall(code);
         if (asBoolean(thisOrSuperConstructorCallExpression)) {
             throw createParsingFailedException(thisOrSuperConstructorCallExpression.getText() + " should be the first statement in the constructor[" + methodName + "]", thisOrSuperConstructorCallExpression);
         }
 
-        methodNode =
-                classNode.addConstructor(
-                        modifiers,
-                        parameters,
-                        exceptions,
-                        code);
-        return methodNode;
+        return classNode.addConstructor(
+                modifiers,
+                parameters,
+                exceptions,
+                code);
     }
 
     @Override
@@ -4226,6 +4230,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
     }
 
+    private static final Map<Class, List<Integer>> INVALID_MODIFIERS_MAP = Collections.unmodifiableMap(new HashMap<Class, List<Integer>>() {
+        {
+            put(ConstructorNode.class, Arrays.asList(STATIC, FINAL, ABSTRACT, NATIVE));
+        }
+    });
+
     /**
      * Process modifiers for AST nodes
      * <p>
@@ -4260,6 +4270,15 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     }
                 }
             }
+        }
+
+        public void validate(ConstructorNode constructorNode) {
+            List<Integer> invalidModifierList = INVALID_MODIFIERS_MAP.get(ConstructorNode.class);
+            modifierNodeList.forEach(e -> {
+                if (invalidModifierList.contains(e.getType())) {
+                    throw createParsingFailedException("Constructor has an incorrect modifier '" + e + "'.", constructorNode);
+                }
+            });
         }
 
         // t    1: class modifiers value; 2: class member modifiers value
@@ -4298,6 +4317,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         public boolean contains(int modifierType) {
             return modifierNodeList.stream().anyMatch(e -> modifierType == e.getType());
+        }
+
+        public Optional<ModifierNode> get(int modifierType) {
+            return modifierNodeList.stream().filter(e -> modifierType == e.getType()).findFirst();
         }
 
         public boolean containsAnnotations() {
