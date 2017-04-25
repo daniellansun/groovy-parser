@@ -3447,7 +3447,13 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         if (asBoolean(ctx.statement())) {
-            return (Statement) this.visit(ctx.statement()); //this.configureAST((Statement) this.visit(ctx.statement()), ctx);
+            Object astNode = this.visit(ctx.statement()); //this.configureAST((Statement) this.visit(ctx.statement()), ctx);
+
+            if (astNode instanceof MethodNode) {
+                throw createParsingFailedException("Method definition not expected here", ctx);
+            } else {
+                return (Statement) astNode;
+            }
         }
 
         throw createParsingFailedException("Unsupported block statement: " + ctx.getText(), ctx);
