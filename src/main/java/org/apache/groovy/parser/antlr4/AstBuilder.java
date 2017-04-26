@@ -393,14 +393,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return this.visitEnhancedForControl(ctx.enhancedForControl());
         }
 
-        if (asBoolean(ctx.SEMI())) { // e.g. for(int i = 0; i < 10; i++) {}
-            ClosureListExpression closureListExpression = new ClosureListExpression();
-
-            closureListExpression.addExpression(this.visitForInit(ctx.forInit()));
-            closureListExpression.addExpression(asBoolean(ctx.expression()) ? (Expression) this.visit(ctx.expression()) : EmptyExpression.INSTANCE);
-            closureListExpression.addExpression(this.visitForUpdate(ctx.forUpdate()));
-
-            return new Pair<>(ForStatement.FOR_LOOP_DUMMY, closureListExpression);
+        if (asBoolean(ctx.classicalForControl())) { // e.g. for(int i = 0; i < 10; i++) {}
+            return this.visitClassicalForControl(ctx.classicalForControl());
         }
 
         throw createParsingFailedException("Unsupported for control: " + ctx.getText(), ctx);
@@ -461,6 +455,16 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return new Pair<>(parameter, (Expression) this.visit(ctx.expression()));
     }
 
+    @Override
+    public Pair<Parameter, Expression> visitClassicalForControl(ClassicalForControlContext ctx) {
+        ClosureListExpression closureListExpression = new ClosureListExpression();
+
+        closureListExpression.addExpression(this.visitForInit(ctx.forInit()));
+        closureListExpression.addExpression(asBoolean(ctx.expression()) ? (Expression) this.visit(ctx.expression()) : EmptyExpression.INSTANCE);
+        closureListExpression.addExpression(this.visitForUpdate(ctx.forUpdate()));
+
+        return new Pair<>(ForStatement.FOR_LOOP_DUMMY, closureListExpression);
+    }
 
     @Override
     public WhileStatement visitWhileStmtAlt(WhileStmtAltContext ctx) {

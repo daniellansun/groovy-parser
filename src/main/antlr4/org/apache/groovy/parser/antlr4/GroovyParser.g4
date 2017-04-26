@@ -367,6 +367,9 @@ variableDeclaratorId
 variableInitializer
     :   statementExpression
     |   standardLambda
+
+    // !!!ERROR ALTERNATIVE!!!
+    |   closureListExpression { false }?<fail={"Expression list of the form (a; b; c) is not supported in this context"}>
     ;
 
 variableInitializers
@@ -761,7 +764,15 @@ switchLabel
 
 forControl
     :   enhancedForControl
-    |   forInit? SEMI expression? SEMI forUpdate?
+    |   classicalForControl
+    ;
+
+enhancedForControl
+    :   variableModifiersOpt type? variableDeclaratorId (COLON | IN) expression
+    ;
+
+classicalForControl
+    :   forInit? SEMI expression? SEMI forUpdate?
     ;
 
 forInit
@@ -771,10 +782,6 @@ forInit
 
 forUpdate
     :   expressionList[false]
-    ;
-
-enhancedForControl
-    :   variableModifiersOpt type? variableDeclaratorId (COLON | IN) expression
     ;
 
 
@@ -1000,6 +1007,10 @@ locals[ boolean isInsideClosure ]
 
     |   namedPropertyArgs
         { $t = 5; }
+
+    // !!!ERROR ALTERNATIVE!!!
+    |   nls closureListExpression (nls statement)?
+        { false }?<fail={"Expression list of the form (a; b; c) is not supported in this context"}>
     ;
 
 /**
@@ -1046,6 +1057,10 @@ indexPropertyArgs
 
 namedPropertyArgs
     :   LBRACK mapEntryList RBRACK
+    ;
+
+closureListExpression
+    :   LPAREN statementExpression (SEMI statementExpression)+ RPAREN
     ;
 
 primary

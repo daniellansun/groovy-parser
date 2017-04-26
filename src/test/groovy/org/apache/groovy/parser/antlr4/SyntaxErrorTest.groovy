@@ -155,6 +155,13 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.shouldFail('fail/ConstructorDeclaration_01.groovy');
     }
 
+    void "test groovy core - ClosureListExpression"() {
+        TestUtils.shouldFail('fail/ClosureListExpression_01.groovy');
+        TestUtils.shouldFail('fail/ClosureListExpression_02.groovy');
+        TestUtils.shouldFail('fail/ClosureListExpression_03.groovy');
+        TestUtils.shouldFail('fail/ClosureListExpression_04.groovy');
+    }
+
     /**************************************/
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
         ignoreClazzList.addAll(COMMON_IGNORE_CLASS_LIST)
