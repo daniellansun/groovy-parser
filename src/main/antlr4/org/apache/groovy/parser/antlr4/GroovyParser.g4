@@ -368,8 +368,9 @@ variableInitializer
     :   statementExpression
     |   standardLambda
 
-    // !!!ERROR ALTERNATIVE!!!
+    /* !!!ERROR ALTERNATIVE!!! POOR PERFORMANCE!
     |   closureListExpression { false }?<fail={"Expression list of the form (a; b; c) is not supported in this context"}>
+    */
     ;
 
 variableInitializers
@@ -1008,9 +1009,10 @@ locals[ boolean isInsideClosure ]
     |   namedPropertyArgs
         { $t = 5; }
 
-    // !!!ERROR ALTERNATIVE!!!
+    /* !!!ERROR ALTERNATIVE!!! POOR PERFORMANCE!
     |   nls closureListExpression (nls statement)?
         { false }?<fail={"Expression list of the form (a; b; c) is not supported in this context"}>
+    */
     ;
 
 /**
@@ -1059,9 +1061,11 @@ namedPropertyArgs
     :   LBRACK mapEntryList RBRACK
     ;
 
+/* referenced by error alternatives, which are commented
 closureListExpression
     :   LPAREN statementExpression (SEMI statementExpression)+ RPAREN
     ;
+*/
 
 primary
     :   identifier                                                                          #identifierPrmrAlt
