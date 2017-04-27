@@ -1281,6 +1281,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
         }
 
+        modifierManager.validate(methodNode);
+
         if (methodNode instanceof ConstructorNode) {
             modifierManager.validate((ConstructorNode) methodNode);
         }
@@ -4237,6 +4239,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final Map<Class, List<Integer>> INVALID_MODIFIERS_MAP = Collections.unmodifiableMap(new HashMap<Class, List<Integer>>() {
         {
             put(ConstructorNode.class, Arrays.asList(STATIC, FINAL, ABSTRACT, NATIVE));
+            put(MethodNode.class, Arrays.asList(VOLATILE, TRANSIENT));
         }
     });
 
@@ -4276,11 +4279,18 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
         }
 
+        public void validate(MethodNode methodNode) {
+            validate(INVALID_MODIFIERS_MAP.get(MethodNode.class), methodNode);
+        }
+
         public void validate(ConstructorNode constructorNode) {
-            List<Integer> invalidModifierList = INVALID_MODIFIERS_MAP.get(ConstructorNode.class);
+            validate(INVALID_MODIFIERS_MAP.get(ConstructorNode.class), constructorNode);
+        }
+
+        private void validate(List<Integer> invalidModifierList, MethodNode methodNode) {
             modifierNodeList.forEach(e -> {
                 if (invalidModifierList.contains(e.getType())) {
-                    throw createParsingFailedException("Constructor has an incorrect modifier '" + e + "'.", constructorNode);
+                    throw createParsingFailedException(methodNode.getClass().getSimpleName().replace("Node", "") + " has an incorrect modifier '" + e + "'.", methodNode);
                 }
             });
         }
