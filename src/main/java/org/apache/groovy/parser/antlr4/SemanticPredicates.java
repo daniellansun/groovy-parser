@@ -109,7 +109,7 @@ public class SemanticPredicates {
     }
 
     private static final Set<Integer> MODIFIER_SET =
-            Collections.unmodifiableSet(AstBuilder.ModifierNode.MODIFIER_OPCODE_MAP.keySet());
+            Collections.unmodifiableSet(ModifierNode.MODIFIER_OPCODE_MAP.keySet());
     /**
      * Distinguish between local variable declaration and method call, e.g. `a b`
      */

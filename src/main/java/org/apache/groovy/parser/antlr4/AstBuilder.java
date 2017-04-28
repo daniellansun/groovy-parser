@@ -35,7 +35,6 @@ import org.apache.groovy.parser.antlr4.util.StringUtils;
 import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.antlr.EnumHelper;
 import org.codehaus.groovy.ast.ASTNode;
-import org.codehaus.groovy.ast.AnnotatedNode;
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
@@ -134,7 +133,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -856,7 +854,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         List<ModifierNode> modifierNodeList = ctx.getNodeMetaData(TYPE_DECLARATION_MODIFIERS);
         Objects.requireNonNull(modifierNodeList, "modifierNodeList should not be null");
 
-        ModifierManager modifierManager = new ModifierManager(modifierNodeList);
+        ModifierManager modifierManager = new ModifierManager(this, modifierNodeList);
         int modifiers = modifierManager.getClassModifiersOpValue();
 
         boolean syntheticPublic = ((modifiers & Opcodes.ACC_SYNTHETIC) != 0);
@@ -1220,7 +1218,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             modifierNodeList = this.visitModifiersOpt(ctx.modifiersOpt());
         }
 
-        return new ModifierManager(modifierNodeList);
+        return new ModifierManager(this, modifierNodeList);
     }
 
     @Override
@@ -1421,7 +1419,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             modifierNodeList = this.visitModifiersOpt(ctx.modifiersOpt());
         }
 
-        return new ModifierManager(modifierNodeList);
+        return new ModifierManager(this, modifierNodeList);
     }
 
     private DeclarationListStatement createMultiAssignmentDeclarationListStatement(VariableDeclarationContext ctx, ModifierManager modifierManager) {
@@ -3702,7 +3700,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         Parameter parameter =
-                new ModifierManager(this.visitVariableModifiersOpt(variableModifiersOptContext))
+                new ModifierManager(this, this.visitVariableModifiersOpt(variableModifiersOptContext))
                         .processParameter(
                                 this.configureAST(
                                         new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext).getName()),
@@ -4233,297 +4231,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         @Override
         public int hashCode() {
             return Objects.hash(key, value);
-        }
-    }
-
-    private static final Map<Class, List<Integer>> INVALID_MODIFIERS_MAP = Collections.unmodifiableMap(new HashMap<Class, List<Integer>>() {
-        {
-            put(ConstructorNode.class, Arrays.asList(STATIC, FINAL, ABSTRACT, NATIVE));
-            put(MethodNode.class, Arrays.asList(VOLATILE/*, TRANSIENT*/));
-        }
-    });
-
-    /**
-     * Process modifiers for AST nodes
-     * <p>
-     * Created by Daniel.Sun on 2016/08/27.
-     */
-    private class ModifierManager {
-        private List<ModifierNode> modifierNodeList;
-
-        public ModifierManager(List<ModifierNode> modifierNodeList) {
-            this.validate(modifierNodeList);
-            this.modifierNodeList = Collections.unmodifiableList(asBoolean((Object) modifierNodeList) ? modifierNodeList : Collections.emptyList());
-        }
-
-        private void validate(List<ModifierNode> modifierNodeList) {
-            Map<ModifierNode, Integer> modifierNodeCounter = new LinkedHashMap<>(modifierNodeList.size());
-            int visibilityModifierCnt = 0;
-
-            for (ModifierNode modifierNode : modifierNodeList) {
-                Integer cnt = modifierNodeCounter.get(modifierNode);
-
-                if (null == cnt) {
-                    modifierNodeCounter.put(modifierNode, 1);
-                } else if (1 == cnt && !modifierNode.isRepeatable()) {
-                    throw createParsingFailedException("Cannot repeat modifier[" + modifierNode.getText() + "]", modifierNode);
-                }
-
-                if (modifierNode.isVisibilityModifier()) {
-                    visibilityModifierCnt++;
-
-                    if (visibilityModifierCnt > 1) {
-                        throw createParsingFailedException("Cannot specify modifier[" + modifierNode.getText() + "] when access scope has already been defined", modifierNode);
-                    }
-                }
-            }
-        }
-
-        public void validate(MethodNode methodNode) {
-            validate(INVALID_MODIFIERS_MAP.get(MethodNode.class), methodNode);
-        }
-
-        public void validate(ConstructorNode constructorNode) {
-            validate(INVALID_MODIFIERS_MAP.get(ConstructorNode.class), constructorNode);
-        }
-
-        private void validate(List<Integer> invalidModifierList, MethodNode methodNode) {
-            modifierNodeList.forEach(e -> {
-                if (invalidModifierList.contains(e.getType())) {
-                    throw createParsingFailedException(methodNode.getClass().getSimpleName().replace("Node", "") + " has an incorrect modifier '" + e + "'.", methodNode);
-                }
-            });
-        }
-
-        // t    1: class modifiers value; 2: class member modifiers value
-        private int calcModifiersOpValue(int t) {
-            int result = 0;
-
-            for (ModifierNode modifierNode : modifierNodeList) {
-                result |= modifierNode.getOpcode();
-            }
-
-            if (!this.containsVisibilityModifier()) {
-                if (1 == t) {
-                    result |= Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PUBLIC;
-                } else if (2 == t) {
-                    result |= Opcodes.ACC_PUBLIC;
-                }
-            }
-
-            return result;
-        }
-
-        public int getClassModifiersOpValue() {
-            return this.calcModifiersOpValue(1);
-        }
-
-        public int getClassMemberModifiersOpValue() {
-            return this.calcModifiersOpValue(2);
-        }
-
-        public List<AnnotationNode> getAnnotations() {
-            return modifierNodeList.stream()
-                    .filter(ModifierNode::isAnnotation)
-                    .map(ModifierNode::getAnnotationNode)
-                    .collect(Collectors.toList());
-        }
-
-        public boolean contains(int modifierType) {
-            return modifierNodeList.stream().anyMatch(e -> modifierType == e.getType());
-        }
-
-        public Optional<ModifierNode> get(int modifierType) {
-            return modifierNodeList.stream().filter(e -> modifierType == e.getType()).findFirst();
-        }
-
-        public boolean containsAnnotations() {
-            return modifierNodeList.stream().anyMatch(ModifierNode::isAnnotation);
-        }
-
-        public boolean containsVisibilityModifier() {
-            return modifierNodeList.stream().anyMatch(ModifierNode::isVisibilityModifier);
-        }
-
-        public boolean containsNonVisibilityModifier() {
-            return modifierNodeList.stream().anyMatch(ModifierNode::isNonVisibilityModifier);
-        }
-
-        public Parameter processParameter(Parameter parameter) {
-            modifierNodeList.forEach(e -> {
-                parameter.setModifiers(parameter.getModifiers() | e.getOpcode());
-
-                if (e.isAnnotation()) {
-                    parameter.addAnnotation(e.getAnnotationNode());
-                }
-            });
-
-            return parameter;
-        }
-
-        public int clearVisibilityModifiers(int modifiers) {
-            return modifiers & ~Opcodes.ACC_PUBLIC & ~Opcodes.ACC_PROTECTED & ~Opcodes.ACC_PRIVATE;
-        }
-
-        public MethodNode processMethodNode(MethodNode mn) {
-            modifierNodeList.forEach(e -> {
-                mn.setModifiers((e.isVisibilityModifier() ? clearVisibilityModifiers(mn.getModifiers()) : mn.getModifiers()) | e.getOpcode());
-
-                if (e.isAnnotation()) {
-                    mn.addAnnotation(e.getAnnotationNode());
-                }
-            });
-
-            return mn;
-        }
-
-        public VariableExpression processVariableExpression(VariableExpression ve) {
-            modifierNodeList.forEach(e -> {
-                ve.setModifiers(ve.getModifiers() | e.getOpcode());
-
-                // local variable does not attach annotations
-            });
-
-            return ve;
-        }
-
-        public <T extends AnnotatedNode> T attachAnnotations(T node) {
-            this.getAnnotations().forEach(node::addAnnotation);
-
-            return node;
-        }
-    }
-
-    /**
-     * Represents a modifier, which is better to place in the package org.codehaus.groovy.ast
-     * <p>
-     * Created by Daniel.Sun on 2016/08/23.
-     */
-    public static class ModifierNode extends ASTNode {
-        private Integer type;
-        private Integer opcode; // ASM opcode
-        private String text;
-        private AnnotationNode annotationNode;
-        private boolean repeatable;
-
-        public static final int ANNOTATION_TYPE = -999;
-        public static final Map<Integer, Integer> MODIFIER_OPCODE_MAP = Collections.unmodifiableMap(new HashMap<Integer, Integer>() {
-            {
-                put(ANNOTATION_TYPE, 0);
-                put(DEF, 0);
-
-                put(NATIVE, Opcodes.ACC_NATIVE);
-                put(SYNCHRONIZED, Opcodes.ACC_SYNCHRONIZED);
-                put(TRANSIENT, Opcodes.ACC_TRANSIENT);
-                put(VOLATILE, Opcodes.ACC_VOLATILE);
-
-                put(PUBLIC, Opcodes.ACC_PUBLIC);
-                put(PROTECTED, Opcodes.ACC_PROTECTED);
-                put(PRIVATE, Opcodes.ACC_PRIVATE);
-                put(STATIC, Opcodes.ACC_STATIC);
-                put(ABSTRACT, Opcodes.ACC_ABSTRACT);
-                put(FINAL, Opcodes.ACC_FINAL);
-                put(STRICTFP, Opcodes.ACC_STRICT);
-                put(DEFAULT, 0); // no flag for specifying a default method in the JVM spec, hence no ACC_DEFAULT flag in ASM
-            }
-        });
-
-        public ModifierNode(Integer type) {
-            this.type = type;
-            this.opcode = MODIFIER_OPCODE_MAP.get(type);
-            this.repeatable = ANNOTATION_TYPE == type; // Only annotations are repeatable
-
-            if (!asBoolean((Object) this.opcode)) {
-                throw new IllegalArgumentException("Unsupported modifier type: " + type);
-            }
-        }
-
-        /**
-         * @param type the modifier type, which is same as the token type
-         * @param text text of the ast node
-         */
-        public ModifierNode(Integer type, String text) {
-            this(type);
-            this.text = text;
-        }
-
-        /**
-         * @param annotationNode the annotation node
-         * @param text           text of the ast node
-         */
-        public ModifierNode(AnnotationNode annotationNode, String text) {
-            this(ModifierNode.ANNOTATION_TYPE, text);
-            this.annotationNode = annotationNode;
-
-            if (!asBoolean(annotationNode)) {
-                throw new IllegalArgumentException("annotationNode can not be null");
-            }
-        }
-
-        /**
-         * Check whether the modifier is not an imagined modifier(annotation, def)
-         */
-        public boolean isModifier() {
-            return !this.isAnnotation() && !this.isDef();
-        }
-
-        public boolean isVisibilityModifier() {
-            return Objects.equals(PUBLIC, this.type)
-                    || Objects.equals(PROTECTED, this.type)
-                    || Objects.equals(PRIVATE, this.type);
-        }
-
-        public boolean isNonVisibilityModifier() {
-            return this.isModifier() && !this.isVisibilityModifier();
-        }
-
-        public boolean isAnnotation() {
-            return Objects.equals(ANNOTATION_TYPE, this.type);
-        }
-
-        public boolean isDef() {
-            return Objects.equals(DEF, this.type);
-        }
-
-        public Integer getType() {
-            return type;
-        }
-
-        public Integer getOpcode() {
-            return opcode;
-        }
-
-        public boolean isRepeatable() {
-            return repeatable;
-        }
-
-        @Override
-        public String getText() {
-            return text;
-        }
-
-        public AnnotationNode getAnnotationNode() {
-            return annotationNode;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            ModifierNode that = (ModifierNode) o;
-            return Objects.equals(type, that.type) &&
-                    Objects.equals(text, that.text) &&
-                    Objects.equals(annotationNode, that.annotationNode);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(type, text, annotationNode);
-        }
-
-        @Override
-        public String toString() {
-            return this.text;
         }
     }
 
