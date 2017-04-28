@@ -4239,7 +4239,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final Map<Class, List<Integer>> INVALID_MODIFIERS_MAP = Collections.unmodifiableMap(new HashMap<Class, List<Integer>>() {
         {
             put(ConstructorNode.class, Arrays.asList(STATIC, FINAL, ABSTRACT, NATIVE));
-            put(MethodNode.class, Arrays.asList(VOLATILE, TRANSIENT));
+            put(MethodNode.class, Arrays.asList(VOLATILE/*, TRANSIENT*/));
         }
     });
 
