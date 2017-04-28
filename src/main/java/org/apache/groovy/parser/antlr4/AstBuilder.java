@@ -1221,6 +1221,18 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return new ModifierManager(this, modifierNodeList);
     }
 
+    private void validateParametersOfMethodDeclaration(Parameter[] parameters, ClassNode classNode) {
+        if (!classNode.isInterface()) {
+            return;
+        }
+
+        Arrays.stream(parameters).forEach(e -> {
+            if (e.hasInitialExpression()) {
+                throw createParsingFailedException("Cannot specify default value for method parameter '" + e.getName() + " = " + e.getInitialExpression().getText() + "' inside an interface", e);
+            }
+        });
+    }
+
     @Override
     public MethodNode visitMethodDeclaration(MethodDeclarationContext ctx) {
         ModifierManager modifierManager = createModifierManager(ctx);
@@ -1237,6 +1249,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         // if classNode is not null, the method declaration is for class declaration
         ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
         if (asBoolean(classNode)) {
+            validateParametersOfMethodDeclaration(parameters, classNode);
+
             methodNode = createConstructorOrMethodNodeForClass(ctx, modifierManager, methodName, returnType, parameters, exceptions, code, classNode);
         } else { // script method declaration
             methodNode = createScriptMethodNode(modifierManager, methodName, returnType, parameters, exceptions, code);

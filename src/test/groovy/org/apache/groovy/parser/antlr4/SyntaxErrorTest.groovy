@@ -141,7 +141,6 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.doRunAndShouldFail('fail/Modifier_03x.groovy');
         TestUtils.doRunAndShouldFail('fail/Modifier_04x.groovy');
         TestUtils.doRunAndShouldFail('fail/Modifier_05x.groovy');
-        TestUtils.doRunAndShouldFail('fail/Modifier_06x.groovy');
         TestUtils.shouldFail('fail/Modifier_07.groovy');
     }
 
@@ -163,6 +162,11 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.shouldFail('fail/ClosureListExpression_03.groovy');
         TestUtils.shouldFail('fail/ClosureListExpression_04.groovy');
     }
+
+    void "test groovy core - InterfaceDeclaration"() {
+        TestUtils.shouldFail('fail/InterfaceDeclaration_01.groovy');
+    }
+
 
     /**************************************/
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
