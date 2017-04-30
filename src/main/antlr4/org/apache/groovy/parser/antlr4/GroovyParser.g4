@@ -367,10 +367,6 @@ variableDeclaratorId
 variableInitializer
     :   statementExpression
     |   standardLambda
-
-    /* !!!ERROR ALTERNATIVE!!! POOR PERFORMANCE!
-    |   closureListExpression { false }?<fail={"Expression list of the form (a; b; c) is not supported in this context"}>
-    */
     ;
 
 variableInitializers
@@ -384,7 +380,11 @@ options { baseContext = type; }
     ;
 
 type
-    :   primitiveType (LBRACK RBRACK)*
+    :   (   primitiveType
+        |
+            // !!! ERROR ALTERNATIVE !!!
+            VOID { require(false, "void is not allowed here", -4); }
+        ) (LBRACK RBRACK)*
     |   generalClassOrInterfaceType (LBRACK RBRACK)*
     ;
 
@@ -646,7 +646,7 @@ locals[ boolean isInsideLoop ]
     }
 }
     :   CONTINUE
-        { $isInsideLoop }?<fail={"the continue statement is only allowed inside loops"}>
+        { require($isInsideLoop, "the continue statement is only allowed inside loops", -8); }
         identifier?
     ;
 
@@ -666,7 +666,7 @@ locals[ boolean isInsideLoop, boolean isInsideSwitch ]
     }
 }
     :   BREAK
-        { $isInsideLoop || $isInsideSwitch }?<fail={"the break statement is only allowed inside loops or switches"}>
+        { require($isInsideLoop || $isInsideSwitch, "the break statement is only allowed inside loops or switches", -5); }
         identifier?
     ;
 
@@ -801,7 +801,7 @@ expressionList[boolean canSpread]
     ;
 
 expressionListElement[boolean canSpread]
-    :   (   MUL { $canSpread }?<fail={"spread is not allowed here"}>
+    :   (   MUL { require($canSpread, "spread operator is not allowed here", -1); }
         |
         ) expression
     ;
@@ -1008,11 +1008,6 @@ locals[ boolean isInsideClosure ]
 
     |   namedPropertyArgs
         { $t = 5; }
-
-    /* !!!ERROR ALTERNATIVE!!! POOR PERFORMANCE!
-    |   nls closureListExpression (nls statement)?
-        { false }?<fail={"Expression list of the form (a; b; c) is not supported in this context"}>
-    */
     ;
 
 /**
@@ -1091,7 +1086,7 @@ locals[boolean empty = true]
         )?
         (
             COMMA
-            { !$empty }?<fail={"Empty list constructor should not contain any comma(,)"}>
+            { require(!$empty, "Empty list constructor should not contain any comma(,)", -1); }
         )?
         RBRACK
     ;

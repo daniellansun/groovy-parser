@@ -167,6 +167,10 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.shouldFail('fail/InterfaceDeclaration_01.groovy');
     }
 
+    void "test groovy core - void"() {
+        TestUtils.doRunAndShouldFail('fail/Void_01x.groovy');
+    }
+
 
     /**************************************/
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
