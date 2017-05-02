@@ -1056,12 +1056,6 @@ namedPropertyArgs
     :   LBRACK mapEntryList RBRACK
     ;
 
-/* referenced by error alternatives, which are commented
-closureListExpression
-    :   LPAREN statementExpression (SEMI statementExpression)+ RPAREN
-    ;
-*/
-
 primary
     :   identifier                                                                          #identifierPrmrAlt
     |   literal                                                                             #literalPrmrAlt

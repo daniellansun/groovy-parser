@@ -142,8 +142,8 @@ public class SemanticPredicates {
         tokenType = token.getType();
         tokenType3 = ts.LT(index + 2).getType();
 
-        return VOID == tokenType
-                ||  !(BuiltInPrimitiveType == tokenType || MODIFIER_SET.contains(tokenType))
+        return // VOID == tokenType ||
+                !(BuiltInPrimitiveType == tokenType || MODIFIER_SET.contains(tokenType))
                     && Character.isLowerCase(token.getText().codePointAt(0))
                     && !(ASSIGN == tokenType3 || (LT == tokenType2 || LBRACK == tokenType2));
 
