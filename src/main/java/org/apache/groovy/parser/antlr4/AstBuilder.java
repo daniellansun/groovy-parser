@@ -1069,11 +1069,24 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
 
             if (!asBoolean(anonymousInnerClassNode)) {
+                if (expression instanceof ListExpression) {
+                    ListExpression listExpression = new ListExpression();
+                    listExpression.addExpression(expression);
+
+                    return this.configureAST(listExpression, ctx);
+                }
+
                 return expression;
             }
 
             ListExpression listExpression = new ListExpression();
-            listExpression.addExpression(expression);
+
+            if (expression instanceof ListExpression) {
+                ((ListExpression) expression).getExpressions().forEach(listExpression::addExpression);
+            } else {
+                listExpression.addExpression(expression);
+            }
+
             listExpression.addExpression(
                     this.configureAST(
                             new ClassExpression(anonymousInnerClassNode),

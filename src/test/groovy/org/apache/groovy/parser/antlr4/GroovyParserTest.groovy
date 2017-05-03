@@ -307,6 +307,8 @@ class GroovyParserTest extends GroovyTestCase {
         doTest('core/EnumDeclaration_01.groovy');
         doTest('core/EnumDeclaration_02.groovy', [ExpressionStatement]);
         doTest('core/EnumDeclaration_03.groovy');
+        doTest('core/EnumDeclaration_04.groovy');
+        doTest('core/EnumDeclaration_05.groovy');
     }
 
     void "test groovy core - TraitDeclaration"() {
