@@ -3475,10 +3475,11 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.configureAST(
                 this.createBlockStatement(
                         ctx.blockStatement().stream()
-                                .map(this::visitBlockStatement).collect(Collectors.toList())),
+                                .map(this::visitBlockStatement)
+                                .filter(e -> asBoolean(e))
+                                .collect(Collectors.toList())),
                 ctx);
     }
-
 
     @Override
     public Statement visitBlockStatement(BlockStatementContext ctx) {
