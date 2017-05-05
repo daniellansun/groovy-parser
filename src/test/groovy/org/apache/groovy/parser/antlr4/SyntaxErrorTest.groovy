@@ -165,6 +165,7 @@ class SyntaxErrorTest extends GroovyTestCase {
 
     void "test groovy core - InterfaceDeclaration"() {
         TestUtils.shouldFail('fail/InterfaceDeclaration_01.groovy');
+        TestUtils.shouldFail('fail/InterfaceDeclaration_02.groovy');
     }
 
     void "test groovy core - void"() {
