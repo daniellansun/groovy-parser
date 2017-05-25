@@ -365,8 +365,7 @@ variableDeclaratorId
     ;
 
 variableInitializer
-    :   statementExpression
-    |   standardLambda
+    :   enhancedStatementExpression
     ;
 
 variableInitializers
@@ -793,7 +792,12 @@ castParExpression
     ;
 
 parExpression
-    :   LPAREN (statementExpression | standardLambda) rparen
+    :   LPAREN enhancedStatementExpression rparen
+    ;
+
+enhancedStatementExpression
+    :   statementExpression
+    |   standardLambda
     ;
 
 expressionList[boolean canSpread]
@@ -921,7 +925,7 @@ expression
                            |   POWER_ASSIGN
                            |   ELVIS_ASSIGN
                            ) nls
-                     (statementExpression | standardLambda)                                 #assignmentExprAlt
+                     enhancedStatementExpression                                            #assignmentExprAlt
     ;
 
 commandExpression
