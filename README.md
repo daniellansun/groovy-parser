@@ -35,6 +35,36 @@ $ ./gradlew groovyConsole
 
 Feel free to report any issue you found, and pull requests are always welcome.
 
+---
+### FAQ
+
+##### Question(from Slack):
+```
+Can someone explain to me the importance of the Parrot compiler? Basically explain like I am 5?
+```
+##### Answer(by Guillaume Laforge, Project lead of Apache Groovy):
+```
+the syntax of Groovy hasn’t evolved in a long time
+the current / old parser is a bit complicated to evolve
+and is using a very old version of the parsing library
+so any change we’d want to make to the language (a new operator, for example) becomes very complicated
+So we’ve been wanting to upgrade the underlying parser library for a while, but since the library evolved a lot, that also required a rewrite of the grammar of the language
+But there’s another thing to consider
+Groovy’s always been adopted by Java developers easily because of how close to the Java syntax it’s always been
+so most Java programs are also valid Groovy programs
+it’s been important to Groovy’s success to have this source compatibility
+Java 8's been out for a while already
+and we’ve been asked countless times if we’d support this or that particular syntax enhancement from Java 8
+for “copy’n paste compatibility”, if you will
+We decided to upgrade to a newer version of our parsing library (from v2 to v4 of Antlr)
+to allow Groovy’s syntax to continue to evolve
+to also support new operators and things like that
+but to also support Java 8 constructs, for continued compatibility
+And that’s about it
+```
+
+---
+
 ```groovy                                                                                                                                                                 
                                                                                                     
                      ...                                                                            
