@@ -23,7 +23,7 @@ The new parser(Parrot) can parse Groovy source code and construct the related AS
 * `groovy.antlr4.cache.threshold`: how frequently to clear DFA cache(default: 50). **Notice:** The more frequently the DFA cache is cleared, the poorer parsing performance will be(you can not set the value that is less than the default value). But the DFA cache has to be cleared to avoid OutOfMemoryError's occurring. 
 * `groovy.extract.doc.comment`: whether to collect groovydoc while parsing groovy source code(default: false)
 
-*P.S. Parrot is based on the highly optimized version of antlr4(com.tunnelvisionlabs:antlr4), which is licensed under BSD. Since 20161103 Parrot has been contributed to Apache Groovy, but the project will be maintained as a lab to experiment new features for Groovy. You can find it at [the parrot branch of apache/groovy](https://github.com/apache/groovy/tree/parrot/subprojects/groovy-parser-antlr4).*
+*P.S. Parrot is based on the highly optimized version of antlr4(com.tunnelvisionlabs:antlr4), which is licensed under BSD. Since 20161103 Parrot has been contributed to Apache Groovy, but the project will be maintained as a lab to experiment new features for Groovy. You can find it at [apache/groovy](https://github.com/apache/groovy/tree/master/subprojects/parser-antlr4).*
 
 If you want to give it a try, make sure your machine have `JDK 8+` installed first, then follow the steps:
 
