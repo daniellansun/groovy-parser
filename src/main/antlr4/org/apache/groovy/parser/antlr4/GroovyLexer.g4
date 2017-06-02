@@ -447,7 +447,7 @@ IntegerLiteral
     |   BinaryIntegerLiteral
 
     // !!! Error Alternative !!!
-    |   '0' [8-9a-zA-Z] (HexDigit { invalidDigitCount++; })* { require(false, "Invalid octal number", -(invalidDigitCount + 2), true); }
+    |   '0' ([0-9] { invalidDigitCount++; })+ { require(false, "Invalid octal number", -(invalidDigitCount + 1), true); } IntegerTypeSuffix?
     ;
 
 fragment
