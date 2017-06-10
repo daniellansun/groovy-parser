@@ -47,6 +47,7 @@ import org.codehaus.groovy.ast.ImportNode;
 import org.codehaus.groovy.ast.InnerClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.ModuleNode;
+import org.codehaus.groovy.ast.NodeMetaDataHandler;
 import org.codehaus.groovy.ast.PackageNode;
 import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.ast.PropertyNode;
@@ -4103,29 +4104,15 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return astNode;
     }
 
-    private boolean isTrue(GroovyParserRuleContext ctx, String key) {
-        Object nmd = ctx.getNodeMetaData(key);
+    private boolean isTrue(NodeMetaDataHandler nodeMetaDataHandler, String key) {
+        Object nmd = nodeMetaDataHandler.getNodeMetaData(key);
 
         if (null == nmd) {
             return false;
         }
 
         if (!(nmd instanceof Boolean)) {
-            throw new GroovyBugError(ctx + " ctx meta data[" + key + "] is not an instance of Boolean");
-        }
-
-        return (Boolean) nmd;
-    }
-
-    private boolean isTrue(ASTNode node, String key) {
-        Object nmd = node.getNodeMetaData(key);
-
-        if (null == nmd) {
-            return false;
-        }
-
-        if (!(nmd instanceof Boolean)) {
-            throw new GroovyBugError(node + " node meta data[" + key + "] is not an instance of Boolean");
+            throw new GroovyBugError(nodeMetaDataHandler + " node meta data[" + key + "] is not an instance of Boolean");
         }
 
         return (Boolean) nmd;
