@@ -336,17 +336,28 @@ variableInitializers
 
 standardType
 options { baseContext = type; }
-    :   primitiveType (LBRACK RBRACK)*
-    |   standardClassOrInterfaceType (LBRACK RBRACK)*
+    :   annotationsOpt
+        (
+            primitiveType
+        |
+            standardClassOrInterfaceType
+        )
+        (LBRACK RBRACK)*
     ;
 
 type
-    :   (   primitiveType
+    :   annotationsOpt
+        (
+            (
+                primitiveType
+            |
+                 // !!! ERROR ALTERNATIVE !!!
+                 VOID { require(false, "void is not allowed here", -4); }
+            )
         |
-            // !!! ERROR ALTERNATIVE !!!
-            VOID { require(false, "void is not allowed here", -4); }
-        ) (LBRACK RBRACK)*
-    |   generalClassOrInterfaceType (LBRACK RBRACK)*
+                generalClassOrInterfaceType
+        )
+        (LBRACK RBRACK)*
     ;
 
 classOrInterfaceType
@@ -378,8 +389,12 @@ typeArgument
     |   QUESTION ((EXTENDS | SUPER) nls type)?
     ;
 
+annotatedQualifiedClassName
+    :   annotationsOpt qualifiedClassName
+    ;
+
 qualifiedClassNameList
-    :   qualifiedClassName (COMMA nls qualifiedClassName)*
+    :   annotatedQualifiedClassName (COMMA nls annotatedQualifiedClassName)*
     ;
 
 formalParameters
@@ -1096,8 +1111,10 @@ anonymousInnerClassDeclaration[int t]
     ;
 
 createdName
-    :   primitiveType
-    |   qualifiedClassName typeArgumentsOrDiamond?
+    :   annotationsOpt
+        (   primitiveType
+        |   qualifiedClassName typeArgumentsOrDiamond?
+        )
     ;
 
 nonWildcardTypeArguments

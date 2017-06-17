@@ -2819,24 +2819,30 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClassNode visitCreatedName(CreatedNameContext ctx) {
+        ClassNode classNode = null;
+
         if (asBoolean(ctx.qualifiedClassName())) {
-            ClassNode classNode = this.visitQualifiedClassName(ctx.qualifiedClassName());
+            classNode = this.visitQualifiedClassName(ctx.qualifiedClassName());
 
             if (asBoolean(ctx.typeArgumentsOrDiamond())) {
                 classNode.setGenericsTypes(
                         this.visitTypeArgumentsOrDiamond(ctx.typeArgumentsOrDiamond()));
             }
 
-            return this.configureAST(classNode, ctx);
-        }
-
-        if (asBoolean(ctx.primitiveType())) {
-            return this.configureAST(
+            classNode = this.configureAST(classNode, ctx);
+        } else if (asBoolean(ctx.primitiveType())) {
+            classNode = this.configureAST(
                     this.visitPrimitiveType(ctx.primitiveType()),
                     ctx);
         }
 
-        throw createParsingFailedException("Unsupported created name: " + ctx.getText(), ctx);
+        if (!asBoolean(classNode)) {
+            throw createParsingFailedException("Unsupported created name: " + ctx.getText(), ctx);
+        }
+
+        this.visitAnnotationsOpt(ctx.annotationsOpt()).forEach(classNode::addAnnotation);
+
+        return classNode;
     }
 
 
@@ -3358,11 +3364,15 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(ctx.classOrInterfaceType())) {
             ctx.classOrInterfaceType().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, ctx.getNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR));
             classNode = this.visitClassOrInterfaceType(ctx.classOrInterfaceType());
-        }
-
-        if (asBoolean(ctx.primitiveType())) {
+        } else if (asBoolean(ctx.primitiveType())) {
             classNode = this.visitPrimitiveType(ctx.primitiveType());
         }
+
+        if (!asBoolean(classNode)) {
+            throw createParsingFailedException("Unsupported type: " + ctx.getText(), ctx);
+        }
+
+        this.visitAnnotationsOpt(ctx.annotationsOpt()).forEach(classNode::addAnnotation);
 
         if (asBoolean(ctx.LBRACK())) {
             // clear array's generics type info. Groovy's bug? array's generics type will be ignored. e.g. List<String>[]... p
@@ -3372,10 +3382,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             for (int i = 0, n = ctx.LBRACK().size(); i < n; i++) {
                 classNode = this.configureAST(classNode.makeArray(), classNode);
             }
-        }
-
-        if (!asBoolean(classNode)) {
-            throw createParsingFailedException("Unsupported type: " + ctx.getText(), ctx);
         }
 
         return this.configureAST(classNode, ctx);
@@ -3637,13 +3643,22 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public ClassNode visitAnnotatedQualifiedClassName(AnnotatedQualifiedClassNameContext ctx) {
+        ClassNode classNode = this.visitQualifiedClassName(ctx.qualifiedClassName());
+
+        this.visitAnnotationsOpt(ctx.annotationsOpt()).forEach(classNode::addAnnotation);
+
+        return classNode;
+    }
+
+    @Override
     public ClassNode[] visitQualifiedClassNameList(QualifiedClassNameListContext ctx) {
         if (!asBoolean(ctx)) {
             return new ClassNode[0];
         }
 
-        return ctx.qualifiedClassName().stream()
-                .map(this::visitQualifiedClassName)
+        return ctx.annotatedQualifiedClassName().stream()
+                .map(this::visitAnnotatedQualifiedClassName)
                 .toArray(ClassNode[]::new);
     }
 

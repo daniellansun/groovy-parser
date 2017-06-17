@@ -89,6 +89,7 @@ ext {
     antlr4Version = '4.6.0.3'
 //    groovyVersion = '2.5.0-SNAPSHOT'
     junitVersion = '4.12'
+//    checkerVersion = '2.1.12'
 }
 
 dependencies {
@@ -107,6 +108,7 @@ dependencies {
     compile files("lib/groovy-all-3.0.0-SNAPSHOT.jar")
 
     testCompile "junit:junit:$junitVersion"
+//    testCompile "org.checkerframework:checker:$checkerVersion"
 }
 
 // add the generated source files to the list of java sources
