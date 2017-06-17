@@ -1,6 +1,9 @@
 import java.lang.annotation.Retention
 import java.lang.annotation.Target
+import java.lang.reflect.Field
 import java.lang.reflect.Method
+import java.lang.reflect.Parameter
+import java.lang.reflect.TypeVariable
 import java.sql.SQLException
 
 import static java.lang.annotation.ElementType.*
@@ -12,10 +15,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME
 
 class JSR308BaseClass<T> {}
 interface JSR308Interface1<T> {}
-interface JSR308Interface2<T> {}
+interface JSR308Interface2<T extends @JSR308 CharSequence> {}
 
 class JSR308Class extends @JSR308 JSR308BaseClass<@JSR308 List> implements @JSR308 JSR308Interface1<@JSR308 String>, @JSR308 JSR308Interface2<@JSR308 String> {
-    @JSR308 List<@JSR308 String> test(List<? extends @JSR308 Object> list) throws @JSR308 IOException, @JSR308 java.sql.SQLException {
+    @JSR308 private  String name;
+
+    @JSR308 List<@JSR308 String> test(@JSR308 List<? extends @JSR308 Object> list) throws @JSR308 IOException, @JSR308 java.sql.SQLException {
         @JSR308 List<@JSR308 String> localVar = new @JSR308 ArrayList<@JSR308 String>();
 
         try {
@@ -44,3 +49,12 @@ assert [IOException, SQLException] == testMethod.getAnnotatedExceptionTypes().co
 assert 'java.util.List<java.lang.String>' == testMethod.getAnnotatedReturnType().type.typeName
 assert ['java.util.List<?>'] == testMethod.getAnnotatedParameterTypes().collect(e -> e.type.typeName)
 assert JSR308Class.class == testMethod.getAnnotatedReceiverType().type
+
+Parameter listParameter = testMethod.getParameters()[0]
+assert 'java.util.List<?>' == listParameter.getAnnotatedType().type.typeName
+
+Field nameField = JSR308Class.class.getDeclaredField('name');
+assert String.class == nameField.getAnnotatedType().type
+
+TypeVariable tv = JSR308Interface2.class.getTypeParameters()[0]
+assert [CharSequence.class] == tv.getAnnotatedBounds().collect(e -> e.type)
