@@ -262,7 +262,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         PackageNode packageNode = moduleNode.getPackage();
 
-        this.visitAnnotationsOpt(ctx.annotationsOpt()).forEach(packageNode::addAnnotation);
+        packageNode.addAnnotations(this.visitAnnotationsOpt(ctx.annotationsOpt()));
 
         return this.configureAST(packageNode, ctx);
     }
@@ -1028,7 +1028,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         this.visitIdentifier(ctx.identifier()),
                         createEnumConstantInitExpression(ctx.arguments(), anonymousInnerClassNode));
 
-        this.visitAnnotationsOpt(ctx.annotationsOpt()).forEach(enumConstant::addAnnotation);
+        enumConstant.addAnnotations(this.visitAnnotationsOpt(ctx.annotationsOpt()));
 
         groovydocManager.handle(enumConstant, ctx);
 
@@ -2840,7 +2840,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             throw createParsingFailedException("Unsupported created name: " + ctx.getText(), ctx);
         }
 
-        this.visitAnnotationsOpt(ctx.annotationsOpt()).forEach(classNode::addAnnotation);
+        classNode.addAnnotations(this.visitAnnotationsOpt(ctx.annotationsOpt()));
 
         return classNode;
     }
@@ -3372,7 +3372,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             throw createParsingFailedException("Unsupported type: " + ctx.getText(), ctx);
         }
 
-        this.visitAnnotationsOpt(ctx.annotationsOpt()).forEach(classNode::addAnnotation);
+        classNode.addAnnotations(this.visitAnnotationsOpt(ctx.annotationsOpt()));
 
         if (asBoolean(ctx.LBRACK())) {
             // clear array's generics type info. Groovy's bug? array's generics type will be ignored. e.g. List<String>[]... p
@@ -3429,6 +3429,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public GenericsType visitTypeArgument(TypeArgumentContext ctx) {
         if (asBoolean(ctx.QUESTION())) {
             ClassNode baseType = this.configureAST(ClassHelper.makeWithoutCaching(QUESTION_STR), ctx.QUESTION());
+
+            baseType.addAnnotations(this.visitAnnotationsOpt(ctx.annotationsOpt()));
 
             if (!asBoolean(ctx.type())) {
                 GenericsType genericsType = new GenericsType(baseType);

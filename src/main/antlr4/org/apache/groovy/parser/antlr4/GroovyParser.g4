@@ -386,7 +386,7 @@ typeArguments
 
 typeArgument
     :   type
-    |   QUESTION ((EXTENDS | SUPER) nls type)?
+    |   annotationsOpt QUESTION ((EXTENDS | SUPER) nls type)?
     ;
 
 annotatedQualifiedClassName
