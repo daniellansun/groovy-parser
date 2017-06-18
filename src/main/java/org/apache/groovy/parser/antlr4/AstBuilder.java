@@ -3351,6 +3351,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<List<AnnotationNode>> visitDimsOpt(DimsOptContext ctx) {
+        return ctx.annotationsOpt().stream()
+                .map(this::visitAnnotationsOpt)
+                .collect(Collectors.toList());
+    }
 
     // type {       --------------------------------------------------------------------
     @Override
@@ -3374,13 +3380,16 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         classNode.addAnnotations(this.visitAnnotationsOpt(ctx.annotationsOpt()));
 
-        if (asBoolean(ctx.LBRACK())) {
+        List<List<AnnotationNode>> dims = this.visitDimsOpt(ctx.dimsOpt());
+        if (asBoolean(dims)) {
             // clear array's generics type info. Groovy's bug? array's generics type will be ignored. e.g. List<String>[]... p
             classNode.setGenericsTypes(null);
             classNode.setUsingGenerics(false);
 
-            for (int i = 0, n = ctx.LBRACK().size(); i < n; i++) {
+            Collections.reverse(dims);
+            for (int i = 0, n = dims.size(); i < n; i++) {
                 classNode = this.configureAST(classNode.makeArray(), classNode);
+                classNode.addAnnotations(dims.get(i));
             }
         }
 

@@ -334,6 +334,10 @@ variableInitializers
     :   variableInitializer nls (COMMA nls variableInitializer nls)* nls COMMA?
     ;
 
+dimsOpt
+    :   (annotationsOpt LBRACK RBRACK)*
+    ;
+
 standardType
 options { baseContext = type; }
     :   annotationsOpt
@@ -342,7 +346,7 @@ options { baseContext = type; }
         |
             standardClassOrInterfaceType
         )
-        (LBRACK RBRACK)*
+        dimsOpt
     ;
 
 type
@@ -357,7 +361,7 @@ type
         |
                 generalClassOrInterfaceType
         )
-        (LBRACK RBRACK)*
+        dimsOpt
     ;
 
 classOrInterfaceType

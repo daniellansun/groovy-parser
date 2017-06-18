@@ -49,6 +49,10 @@ class JSR308Class extends @JSR308 JSR308BaseClass<@JSR308 List> implements @JSR3
         } catch (@JSR308 Exception e) {
         }
 
+        String @JSR308 [] strs = new String[] { 'a' }
+
+        localVar.add(strs[0])
+
         return localVar
     }
 }
@@ -57,7 +61,7 @@ def jsr308Class = new JSR308Class();
 def list = new ArrayList<@JSR308 String>();
 list.addAll(["1", "2"]);
 def result = jsr308Class.test(list)
-assert list == result
+assert ['1', '2', 'a'] == result
 
 assert 'JSR308BaseClass<java.util.List>' == JSR308Class.class.getAnnotatedSuperclass().type.typeName
 assert ['JSR308Interface1<java.lang.String>', 'JSR308Interface2<java.lang.String>'] == JSR308Class.class.getAnnotatedInterfaces().collect(e -> e.type.typeName)
