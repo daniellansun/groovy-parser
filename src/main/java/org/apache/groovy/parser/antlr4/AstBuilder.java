@@ -3426,10 +3426,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             classNode.setGenericsTypes(null);
             classNode.setUsingGenerics(false);
 
-            for (int i = 0, n = dimList.size(); i < n; i++) {
-                classNode = this.configureAST(classNode.makeArray(), classNode);
-                classNode.addAnnotations(dimList.get(i));
-            }
+            classNode = this.createArrayType(classNode, dimList);
         }
 
         return this.configureAST(classNode, ctx);
