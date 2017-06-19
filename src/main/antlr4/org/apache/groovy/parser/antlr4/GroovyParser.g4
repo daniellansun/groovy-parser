@@ -334,8 +334,12 @@ variableInitializers
     :   variableInitializer nls (COMMA nls variableInitializer nls)* nls COMMA?
     ;
 
+dims
+    :   (annotationsOpt LBRACK RBRACK)+
+    ;
+
 dimsOpt
-    :   (annotationsOpt LBRACK RBRACK)*
+    :   dims?
     ;
 
 standardType
@@ -1098,8 +1102,8 @@ mapEntryLabel
 creator
     :   createdName
         (   nls arguments anonymousInnerClassDeclaration[0]?
-        |   (LBRACK expression RBRACK)+ (b+=LBRACK RBRACK)*
-        |   (b+=LBRACK RBRACK)+ nls arrayInitializer
+        |   (annotationsOpt LBRACK expression RBRACK)+ dimsOpt
+        |   dims nls arrayInitializer
         )
     ;
 

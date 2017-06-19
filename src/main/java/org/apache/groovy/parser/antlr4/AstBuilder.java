@@ -2739,22 +2739,26 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     ctx);
         }
 
-        if (asBoolean(ctx.LBRACK())) { // create array
+        if (asBoolean(ctx.LBRACK()) || asBoolean(ctx.dims())) { // create array
             if (asBoolean(ctx.arrayInitializer())) {
-                ClassNode arrayType = classNode;
-                for (int i = 0, n = ctx.b.size() - 1; i < n; i++) {
-                    arrayType = arrayType.makeArray();
+                ClassNode elementType = classNode;
+                List<List<AnnotationNode>> dimList = this.visitDims(ctx.dims());
+
+                for (int i = 0, n = dimList.size() - 1; i < n; i++) {
+                    elementType = elementType.makeArray();
                 }
 
                 return this.configureAST(
                         new ArrayExpression(
-                                arrayType,
+                                elementType,
                                 this.visitArrayInitializer(ctx.arrayInitializer())),
                         ctx);
             } else {
                 Expression[] empties;
-                if (asBoolean(ctx.b)) {
-                    empties = new Expression[ctx.b.size()];
+                List<List<AnnotationNode>> dimList = this.visitDimsOpt(ctx.dimsOpt());
+
+                if (asBoolean(dimList)) {
+                    empties = new Expression[dimList.size()];
                     Arrays.setAll(empties, i -> ConstantExpression.EMPTY_EXPRESSION);
                 } else {
                     empties = new Expression[0];
@@ -3352,10 +3356,24 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public List<List<AnnotationNode>> visitDims(DimsContext ctx) {
+        List<List<AnnotationNode>> dimList =
+                ctx.annotationsOpt().stream()
+                        .map(this::visitAnnotationsOpt)
+                        .collect(Collectors.toList());
+
+        Collections.reverse(dimList);
+
+        return dimList;
+    }
+
+    @Override
     public List<List<AnnotationNode>> visitDimsOpt(DimsOptContext ctx) {
-        return ctx.annotationsOpt().stream()
-                .map(this::visitAnnotationsOpt)
-                .collect(Collectors.toList());
+        if (!asBoolean(ctx.dims())) {
+            return Collections.emptyList();
+        }
+
+        return this.visitDims(ctx.dims());
     }
 
     // type {       --------------------------------------------------------------------
@@ -3380,16 +3398,15 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         classNode.addAnnotations(this.visitAnnotationsOpt(ctx.annotationsOpt()));
 
-        List<List<AnnotationNode>> dims = this.visitDimsOpt(ctx.dimsOpt());
-        if (asBoolean(dims)) {
+        List<List<AnnotationNode>> dimList = this.visitDimsOpt(ctx.dimsOpt());
+        if (asBoolean(dimList)) {
             // clear array's generics type info. Groovy's bug? array's generics type will be ignored. e.g. List<String>[]... p
             classNode.setGenericsTypes(null);
             classNode.setUsingGenerics(false);
 
-            Collections.reverse(dims);
-            for (int i = 0, n = dims.size(); i < n; i++) {
+            for (int i = 0, n = dimList.size(); i < n; i++) {
                 classNode = this.configureAST(classNode.makeArray(), classNode);
-                classNode.addAnnotations(dims.get(i));
+                classNode.addAnnotations(dimList.get(i));
             }
         }
 
