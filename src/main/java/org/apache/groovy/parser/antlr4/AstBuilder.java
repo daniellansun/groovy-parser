@@ -2740,31 +2740,34 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         if (asBoolean(ctx.LBRACK()) || asBoolean(ctx.dims())) { // create array
+            ArrayExpression arrayExpression;
+            List<List<AnnotationNode>> allDimList;
+
             if (asBoolean(ctx.arrayInitializer())) {
                 ClassNode elementType = classNode;
-                List<List<AnnotationNode>> dimList = this.visitDims(ctx.dims());
+                allDimList = this.visitDims(ctx.dims());
 
-                for (int i = 0, n = dimList.size() - 1; i < n; i++) {
+                for (int i = 0, n = allDimList.size() - 1; i < n; i++) {
                     elementType = elementType.makeArray();
                 }
 
-                return this.configureAST(
+                arrayExpression =
                         new ArrayExpression(
-                                elementType,
-                                this.visitArrayInitializer(ctx.arrayInitializer())),
-                        ctx);
+                            elementType,
+                            this.visitArrayInitializer(ctx.arrayInitializer()));
+
             } else {
                 Expression[] empties;
-                List<List<AnnotationNode>> dimList = this.visitDimsOpt(ctx.dimsOpt());
+                List<List<AnnotationNode>> emptyDimList = this.visitDimsOpt(ctx.dimsOpt());
 
-                if (asBoolean(dimList)) {
-                    empties = new Expression[dimList.size()];
+                if (asBoolean(emptyDimList)) {
+                    empties = new Expression[emptyDimList.size()];
                     Arrays.setAll(empties, i -> ConstantExpression.EMPTY_EXPRESSION);
                 } else {
                     empties = new Expression[0];
                 }
 
-                return this.configureAST(
+                arrayExpression =
                         new ArrayExpression(
                                 classNode,
                                 null,
@@ -2772,12 +2775,31 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                         ctx.expression().stream()
                                                 .map(e -> (Expression) this.visit(e)),
                                         Arrays.stream(empties)
-                                ).collect(Collectors.toList())),
-                        ctx);
+                                ).collect(Collectors.toList()));
+
+
+                List<List<AnnotationNode>> exprDimList = ctx.annotationsOpt().stream().map(this::visitAnnotationsOpt).collect(Collectors.toList());
+                allDimList = new ArrayList<>(exprDimList);
+                Collections.reverse(emptyDimList);
+                allDimList.addAll(emptyDimList);
+                Collections.reverse(allDimList);
             }
+
+            arrayExpression.setType(createArrayType(classNode, allDimList));
+
+            return this.configureAST(arrayExpression, ctx);
         }
 
         throw createParsingFailedException("Unsupported creator: " + ctx.getText(), ctx);
+    }
+
+    private ClassNode createArrayType(ClassNode classNode, List<List<AnnotationNode>> dimList) {
+        ClassNode arrayType = classNode;
+        for (int i = 0, n = dimList.size(); i < n; i++) {
+            arrayType = arrayType.makeArray();
+            arrayType.addAnnotations(dimList.get(i));
+        }
+        return arrayType;
     }
 
 

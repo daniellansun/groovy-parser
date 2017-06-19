@@ -49,11 +49,15 @@ class JSR308Class extends @JSR308 JSR308BaseClass<@JSR308 List> implements @JSR3
         } catch (@JSR308 Exception e) {
         }
 
-        String @JSR308 []  strs = new String[] { 'a' }
-        String @JSR308 [] @JSR308 [] strs2 = new String[][] { new String[] {'a', 'b'} }
+        String @JSR308 []  strs = new String @JSR308 [] { 'a' }
+        String @JSR308 [] @JSR308 [] strs2 = new String @JSR308 [] @JSR308 [] { new String[] {'a', 'b'} }
+        String @JSR308 [] @JSR308 [] @JSR308 [] strs3 = new String @JSR308 [1] @JSR308 [2] @JSR308 []
+        String @JSR308 [] @JSR308 [] @JSR308 [] @JSR308 [] strs4 = new String @JSR308 [1] @JSR308 [2] @JSR308 [] @JSR308 []
 
         localVar.add(strs[0])
         localVar.add(strs2[0][1])
+        assert null != strs3
+        assert null != strs4
 
         return localVar
     }
