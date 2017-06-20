@@ -61,6 +61,8 @@ class JSR308Class extends @JSR308 JSR308BaseClass<@JSR308 List> implements @JSR3
 
         return localVar
     }
+
+    void test2(@JSR308 JSR308Class this) {}
 }
 
 def jsr308Class = new JSR308Class();
@@ -76,7 +78,9 @@ Method testMethod = JSR308Class.class.getDeclaredMethods().find(e -> e.name == '
 assert [IOException, SQLException] == testMethod.getAnnotatedExceptionTypes().collect(e -> e.type)
 assert 'java.util.List<java.lang.String>' == testMethod.getAnnotatedReturnType().type.typeName
 assert ['java.util.List<?>'] == testMethod.getAnnotatedParameterTypes().collect(e -> e.type.typeName)
-assert JSR308Class.class == testMethod.getAnnotatedReceiverType().type
+
+Method test2Method = JSR308Class.class.getDeclaredMethods().find(e -> e.name == 'test2')
+assert JSR308Class.class == test2Method.getAnnotatedReceiverType().type
 
 Parameter listParameter = testMethod.getParameters()[0]
 assert 'java.util.List<?>' == listParameter.getAnnotatedType().type.typeName

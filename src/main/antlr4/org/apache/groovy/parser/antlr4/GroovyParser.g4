@@ -410,8 +410,12 @@ formalParameters
     ;
 
 formalParameterList
-    :   formalParameter (COMMA nls formalParameter)* (COMMA nls lastFormalParameter)?
+    :   (formalParameter | thisFormalParameter) (COMMA nls formalParameter)* (COMMA nls lastFormalParameter)?
     |   lastFormalParameter
+    ;
+
+thisFormalParameter
+    :   type THIS
     ;
 
 formalParameter

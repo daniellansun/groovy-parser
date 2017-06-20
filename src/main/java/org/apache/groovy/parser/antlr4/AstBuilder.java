@@ -3264,6 +3264,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         List<Parameter> parameterList = new LinkedList<>();
 
+        if (asBoolean(ctx.thisFormalParameter())) {
+            parameterList.add(this.visitThisFormalParameter(ctx.thisFormalParameter()));
+        }
+
         if (asBoolean(ctx.formalParameter())) {
             parameterList.addAll(
                     ctx.formalParameter().stream()
@@ -3281,6 +3285,11 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Parameter visitFormalParameter(FormalParameterContext ctx) {
         return this.processFormalParameter(ctx, ctx.variableModifiersOpt(), ctx.type(), null, ctx.variableDeclaratorId(), ctx.expression());
+    }
+
+    @Override
+    public Parameter visitThisFormalParameter(ThisFormalParameterContext ctx) {
+        return this.configureAST(new Parameter(this.visitType(ctx.type()), THIS_STR), ctx);
     }
 
     @Override
@@ -3816,8 +3825,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 new ModifierManager(this, this.visitVariableModifiersOpt(variableModifiersOptContext))
                         .processParameter(
                                 this.configureAST(
-                                        new Parameter(classNode, this.visitVariableDeclaratorId(variableDeclaratorIdContext).getName()),
-                                        ctx)
+                                        new Parameter(
+                                                classNode,
+                                                this.visitVariableDeclaratorId(variableDeclaratorIdContext).getName()
+                                        ),
+                                        ctx
+                                )
                         );
 
         if (asBoolean(expressionContext)) {
