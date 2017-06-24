@@ -3704,7 +3704,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public ClassNode visitAnnotatedQualifiedClassName(AnnotatedQualifiedClassNameContext ctx) {
         ClassNode classNode = this.visitQualifiedClassName(ctx.qualifiedClassName());
 
-        this.visitAnnotationsOpt(ctx.annotationsOpt()).forEach(classNode::addAnnotation);
+        classNode.addAnnotations(this.visitAnnotationsOpt(ctx.annotationsOpt()));
 
         return classNode;
     }
