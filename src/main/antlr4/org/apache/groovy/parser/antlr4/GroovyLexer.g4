@@ -201,22 +201,21 @@ options {
 
 
 // §3.10.5 String Literals
-
 StringLiteral
-    :   '"'      DqStringCharacter*?           '"'
-    |   '\''     SqStringCharacter*?           '\''
+    :   GStringQuotationMark    DqStringCharacter*? GStringQuotationMark
+    |   SqStringQuotationMark   SqStringCharacter*? SqStringQuotationMark
 
     |   Slash      { this.isRegexAllowed() && _input.LA(1) != '*' }?
                  SlashyStringCharacter+?       Slash
 
-    |   TdqStringQuotationMark    TdqStringCharacter*?          TdqStringQuotationMark
-    |   TsqStringQuotationMark TsqStringCharacter*?          TsqStringQuotationMark
-    |   DollarSlashyGStringQuotationMarkBegin     DollarSlashyStringCharacter+? DollarSlashyGStringQuotationMarkEnd
+    |   TdqStringQuotationMark  TdqStringCharacter*?    TdqStringQuotationMark
+    |   TsqStringQuotationMark  TsqStringCharacter*?    TsqStringQuotationMark
+    |   DollarSlashyGStringQuotationMarkBegin   DollarSlashyStringCharacter+?   DollarSlashyGStringQuotationMarkEnd
     ;
 
 // Groovy gstring
 GStringBegin
-    :   '"' DqStringCharacter*? Dollar -> pushMode(DQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    :   GStringQuotationMark DqStringCharacter*? Dollar -> pushMode(DQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 TdqGStringBegin
     :   TdqStringQuotationMark   TdqStringCharacter*? Dollar -> type(GStringBegin), pushMode(TDQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
@@ -230,7 +229,7 @@ DollarSlashyGStringBegin
 
 mode DQ_GSTRING_MODE;
 GStringEnd
-    :   '"'     -> popMode
+    :   GStringQuotationMark     -> popMode
     ;
 GStringPart
     :   Dollar  -> pushMode(GSTRING_TYPE_SELECTOR_MODE)
@@ -315,14 +314,14 @@ SqStringCharacter
 // character in the triple double quotation string. e.g. """a"""
 fragment TdqStringCharacter
     :   ~["\\$]
-    |   '"' { !(_input.LA(1) == '"' && _input.LA(2) == '"') }?
+    |   GStringQuotationMark { !(_input.LA(1) == '"' && _input.LA(2) == '"') }?
     |   EscapeSequence
     ;
 
 // character in the triple single quotation string. e.g. '''a'''
 fragment TsqStringCharacter
     :   ~['\\]
-    |   '\'' { !(_input.LA(1) == '\'' && _input.LA(2) == '\'') }?
+    |   SqStringQuotationMark { !(_input.LA(1) == '\'' && _input.LA(2) == '\'') }?
     |   EscapeSequence
     ;
 
@@ -713,6 +712,16 @@ Slash
 fragment
 Dollar
     :   '$'
+    ;
+
+fragment
+GStringQuotationMark
+    :   '"'
+    ;
+
+fragment
+SqStringQuotationMark
+    :   '\''
     ;
 
 fragment
