@@ -209,9 +209,9 @@ StringLiteral
     |   Slash      { this.isRegexAllowed() && _input.LA(1) != '*' }?
                  SlashyStringCharacter+?       Slash
 
-    |   '"""'    TdqStringCharacter*?          '"""'
-    |   '\'\'\'' TsqStringCharacter*?          '\'\'\''
-    |   '$/'     DollarSlashyStringCharacter+? '/$'
+    |   TdqStringQuotationMark    TdqStringCharacter*?          TdqStringQuotationMark
+    |   TsqStringQuotationMark TsqStringCharacter*?          TsqStringQuotationMark
+    |   DollarSlashyGStringQuotationMarkBegin     DollarSlashyStringCharacter+? DollarSlashyGStringQuotationMarkEnd
     ;
 
 // Groovy gstring
@@ -219,13 +219,13 @@ GStringBegin
     :   '"' DqStringCharacter*? Dollar -> pushMode(DQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 TdqGStringBegin
-    :   '"""'   TdqStringCharacter*? Dollar -> type(GStringBegin), pushMode(TDQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    :   TdqStringQuotationMark   TdqStringCharacter*? Dollar -> type(GStringBegin), pushMode(TDQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 SlashyGStringBegin
     :   Slash { this.isRegexAllowed() && _input.LA(1) != '*' }? SlashyStringCharacter*? Dollar { isFollowedByJavaLetterInGString(_input) }? -> type(GStringBegin), pushMode(SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 DollarSlashyGStringBegin
-    :   '$/' DollarSlashyStringCharacter*? Dollar { isFollowedByJavaLetterInGString(_input) }? -> type(GStringBegin), pushMode(DOLLAR_SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
+    :   DollarSlashyGStringQuotationMarkBegin DollarSlashyStringCharacter*? Dollar { isFollowedByJavaLetterInGString(_input) }? -> type(GStringBegin), pushMode(DOLLAR_SLASHY_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
     ;
 
 mode DQ_GSTRING_MODE;
@@ -241,7 +241,7 @@ GStringCharacter
 
 mode TDQ_GSTRING_MODE;
 TdqGStringEnd
-    :   '"""'    -> type(GStringEnd), popMode
+    :   TdqStringQuotationMark    -> type(GStringEnd), popMode
     ;
 TdqGStringPart
     :   Dollar   -> type(GStringPart), pushMode(GSTRING_TYPE_SELECTOR_MODE)
@@ -263,7 +263,7 @@ SlashyGStringCharacter
 
 mode DOLLAR_SLASHY_GSTRING_MODE;
 DollarSlashyGStringEnd
-    :   '/$'      -> type(GStringEnd), popMode
+    :   DollarSlashyGStringQuotationMarkEnd      -> type(GStringEnd), popMode
     ;
 DollarSlashyGStringPart
     :   Dollar { isFollowedByJavaLetterInGString(_input) }?   -> type(GStringPart), pushMode(GSTRING_TYPE_SELECTOR_MODE)
@@ -716,16 +716,36 @@ Dollar
     ;
 
 fragment
+TdqStringQuotationMark
+    :   '"""'
+    ;
+
+fragment
+TsqStringQuotationMark
+    :   '\'\'\''
+    ;
+
+fragment
+DollarSlashyGStringQuotationMarkBegin
+    :   '$/'
+    ;
+
+fragment
+DollarSlashyGStringQuotationMarkEnd
+    :   '/$'
+    ;
+
+fragment
 DollarSlashEscape
-    :   Dollar Slash Dollar
+    :   '$/$'
     ;
 
 fragment
 DollarDollarEscape
-    :   Dollar Dollar
+    :   '$$'
     ;
-// §3.10.7 The Null Literal
 
+// §3.10.7 The Null Literal
 NullLiteral
     :   'null'
     ;
