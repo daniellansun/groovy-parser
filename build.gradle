@@ -22,11 +22,11 @@ buildscript {
         jcenter()
         mavenCentral()
 
-        maven { url 'http://dl.bintray.com/melix/gradle-javadoc-hotfix-plugin' }
+        maven { url 'https://jitpack.io' }
     }
 
     dependencies {
-        classpath files("lib/antlr4-gradle-plugin-0.1.2-SNAPSHOT.jar");
+        classpath "com.github.danielsun1106:antlr4-gradle-plugin:v0.1.2"
     }
 }
 
