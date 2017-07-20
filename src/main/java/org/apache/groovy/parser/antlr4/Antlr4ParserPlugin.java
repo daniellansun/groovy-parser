@@ -32,14 +32,22 @@ import org.codehaus.groovy.syntax.Reduction;
  * Created on    2016/08/14
  */
 public class Antlr4ParserPlugin implements ParserPlugin {
+    private ModuleNode moduleNode;
+
     @Override
     public Reduction parseCST(SourceUnit sourceUnit, java.io.Reader reader) throws CompilationFailedException {
         return null;
     }
 
     @Override
-    public ModuleNode buildAST(SourceUnit sourceUnit, java.lang.ClassLoader classLoader, Reduction cst) throws ParserException {
+    public ModuleNode buildAST(SourceUnit sourceUnit, ClassLoader classLoader, Reduction cst) throws ParserException {
+        if (null != this.moduleNode) {
+            return this.moduleNode;
+        }
+
         AstBuilder builder = new AstBuilder(sourceUnit, classLoader);
-        return builder.buildAST();
+        this.moduleNode = builder.buildAST();
+
+        return this.moduleNode;
     }
 }
