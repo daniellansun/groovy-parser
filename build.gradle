@@ -24,10 +24,6 @@ buildscript {
 
         maven { url 'https://jitpack.io' }
     }
-
-    dependencies {
-        classpath "com.github.danielsun1106:antlr4-gradle-plugin:v0.1.2"
-    }
 }
 
 plugins {
@@ -40,7 +36,7 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'groovy'
-apply plugin: 'me.champeau.gradle.antlr4'
+apply plugin: 'antlr'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -53,50 +49,39 @@ repositories {
     maven { url 'https://oss.jfrog.org/oss-snapshot-local/' }
 }
 
-def srcBase = "src"
-def srcMain = "$srcBase/main"
-def srcTest = "$srcBase/test"
-def antlr4Source = "$srcMain/antlr4"
-def antlr4OutputRootDir = "$srcMain/generated-sources"
-def antlr4Output = "$antlr4OutputRootDir/org/apache/groovy/parser/antlr4"
+compileJava.dependsOn generateGrammarSource
 
-antlr4 {
-    source = file(antlr4Source)
-    extraArgs = ["-no-listener", "-package", "org.apache.groovy.parser.antlr4"]
-    output = file(antlr4Output)
+final PARSER_PACKAGE_NAME = 'org.apache.groovy.parser.antlr4'
+generateGrammarSource {
+    arguments += ["-visitor", "-no-listener", "-package", PARSER_PACKAGE_NAME]
+
+    doLast {
+        def parserFilePattern = 'Groovy*'
+        def outputPath = generateGrammarSource.outputDirectory.canonicalPath
+        def parserPackagePath = "${outputPath}/${PARSER_PACKAGE_NAME.replace('.', '/')}"
+        file(parserPackagePath).mkdirs()
+        copy {
+            from outputPath
+            into parserPackagePath
+            include parserFilePattern
+        }
+        delete fileTree(outputPath) {
+            include parserFilePattern
+        }
+    }
 }
 
 compileJava.options.encoding = 'UTF-8'
 
-// make the Java compile task depend on the antlr4 task
-compileJava.dependsOn antlr4
-
-// add antlr4 to classpath
-configurations {
-    compile.extendsFrom antlr4
-}
-
-task cleanGeneratedSources(type: Delete) {
-    delete antlr4OutputRootDir
-    file(antlr4OutputRootDir).mkdirs()
-}
-
-clean.dependsOn cleanGeneratedSources
-antlr4.dependsOn clean
 
 ext {
     asmVersion = '6.0_ALPHA'
     antlr4Version = '4.6.0.3'
-//    groovyVersion = '2.5.0-SNAPSHOT'
     junitVersion = '4.12'
-//    checkerVersion = '2.1.12'
 }
 
 dependencies {
-//    antlr4 "org.antlr:antlr4:$antlr4Version"
-    antlr4 "com.tunnelvisionlabs:antlr4:$antlr4Version"
-//    antlr4 files("lib/antlr4.jar")
-//    compile 'org.abego.treelayout:org.abego.treelayout.core:1.0.3'
+    antlr "com.tunnelvisionlabs:antlr4:$antlr4Version"
 
     compile "org.ow2.asm:asm:$asmVersion"
     compile "org.ow2.asm:asm-analysis:$asmVersion"
@@ -104,18 +89,17 @@ dependencies {
     compile "org.ow2.asm:asm-tree:$asmVersion"
     compile "org.ow2.asm:asm-util:$asmVersion"
 
-//    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
     compile files("lib/groovy-all-3.0.0-SNAPSHOT.jar")
 
     testCompile "junit:junit:$junitVersion"
-//    testCompile "org.checkerframework:checker:$checkerVersion"
 }
 
-// add the generated source files to the list of java sources
-sourceSets.main.java.srcDirs += file("$antlr4OutputRootDir");
-sourceSets.main.resources.srcDirs += file("$antlr4Source");
-sourceSets.main.java.srcDirs += file("$srcMain/groovy-sources");
-sourceSets.test.java.srcDirs += file("$srcTest/groovy-sources");
+def srcBase = "src"
+def srcMain = "$srcBase/main"
+def srcTest = "$srcBase/test"
+
+sourceSets.main.java.srcDirs += file("$srcMain/groovy-sources")
+sourceSets.test.java.srcDirs += file("$srcTest/groovy-sources")
 
 
 task wrapper(type: Wrapper) {
