@@ -49,8 +49,6 @@ repositories {
     maven { url 'https://oss.jfrog.org/oss-snapshot-local/' }
 }
 
-compileJava.dependsOn generateGrammarSource
-
 final PARSER_PACKAGE_NAME = 'org.apache.groovy.parser.antlr4'
 generateGrammarSource {
     arguments += ["-visitor", "-no-listener", "-package", PARSER_PACKAGE_NAME]
@@ -71,6 +69,7 @@ generateGrammarSource {
     }
 }
 
+compileJava.dependsOn generateGrammarSource
 compileJava.options.encoding = 'UTF-8'
 
 
