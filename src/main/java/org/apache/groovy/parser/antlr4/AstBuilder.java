@@ -171,23 +171,33 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         this.groovydocManager = new GroovydocManager(this);
     }
 
-    private GroovyParserRuleContext buildCST() {
+    public GroovyParserRuleContext buildCST() throws CompilationFailedException {
+        if (null != this.cst) {
+            return this.cst;
+        }
+
         GroovyParserRuleContext result;
 
-        // parsing have to wait util clearing is complete.
-        AtnManager.RRWL.readLock().lock();
         try {
-            result = buildCST(PredictionMode.SLL);
-        } catch (Throwable t) {
-            // if some syntax error occurred in the lexer, no need to retry the powerful LL mode
-            if (t instanceof GroovySyntaxError && GroovySyntaxError.LEXER == ((GroovySyntaxError) t).getSource()) {
-                throw t;
-            }
+            // parsing have to wait util clearing is complete.
+            AtnManager.RRWL.readLock().lock();
+            try {
+                result = buildCST(PredictionMode.SLL);
+            } catch (Throwable t) {
+                // if some syntax error occurred in the lexer, no need to retry the powerful LL mode
+                if (t instanceof GroovySyntaxError && GroovySyntaxError.LEXER == ((GroovySyntaxError) t).getSource()) {
+                    throw t;
+                }
 
-            result = buildCST(PredictionMode.LL);
-        } finally {
-            AtnManager.RRWL.readLock().unlock();
+                result = buildCST(PredictionMode.LL);
+            } finally {
+                AtnManager.RRWL.readLock().unlock();
+            }
+        } catch (Throwable t) {
+            throw convertException(t);
         }
+
+        this.cst = result;
 
         return result;
     }
@@ -205,23 +215,25 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return parser.compilationUnit();
     }
 
+    public CompilationFailedException convertException(Throwable t) {
+        CompilationFailedException cfe;
+
+        if (t instanceof CompilationFailedException) {
+            cfe = (CompilationFailedException) t;
+        } else if (t instanceof ParseCancellationException) {
+            cfe = createParsingFailedException(t.getCause());
+        } else {
+            cfe = createParsingFailedException(t);
+        }
+
+        return cfe;
+    }
+
     public ModuleNode buildAST() {
         try {
             return (ModuleNode) this.visit(this.buildCST());
         } catch (Throwable t) {
-            CompilationFailedException cfe;
-
-            if (t instanceof CompilationFailedException) {
-                cfe = (CompilationFailedException) t;
-            } else if (t instanceof ParseCancellationException) {
-                cfe = createParsingFailedException(t.getCause());
-            } else {
-                cfe = createParsingFailedException(t);
-            }
-
-//            LOGGER.log(Level.SEVERE, "Failed to build AST", cfe);
-
-            throw cfe;
+            throw convertException(t);
         }
     }
 
@@ -4519,6 +4531,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
     }
 
+    private GroovyParserRuleContext cst;
     private final ModuleNode moduleNode;
     private final SourceUnit sourceUnit;
     private final ClassLoader classLoader; // Our ClassLoader, which provides information on external types
