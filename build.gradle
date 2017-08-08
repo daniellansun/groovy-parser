@@ -75,7 +75,7 @@ compileJava.options.encoding = 'UTF-8'
 
 ext {
     asmVersion = '6.0_ALPHA'
-    antlr4Version = '4.6.0.3'
+    antlr4Version = '4.7'
     junitVersion = '4.12'
 }
 
