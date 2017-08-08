@@ -42,3 +42,6 @@ if(true)
     1;
 else
     0;
+
+if (false) { ;out<<_s[_i]
+}
