@@ -20,8 +20,8 @@ package org.apache.groovy.parser.antlr4;
 
 import groovy.lang.IntRange;
 import org.antlr.v4.runtime.ANTLRErrorListener;
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -122,7 +122,6 @@ import org.objectweb.asm.Opcodes;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -156,9 +155,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         this.moduleNode = new ModuleNode(sourceUnit);
         this.classLoader = classLoader; // unused for the time being
 
-        CharStream charStream =
-                    new ANTLRInputStream(
-                            this.readSourceCode(sourceUnit));
+        CharStream charStream = CharStreams.fromString(this.readSourceCode(sourceUnit));
 
         this.lexer = new GroovyLangLexer(charStream);
         this.parser =
@@ -202,7 +199,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (PredictionMode.SLL.equals(predictionMode)) {
             this.removeErrorListeners();
         } else {
-            ((CommonTokenStream) parser.getInputStream()).reset();
+            parser.getInputStream().seek(0);
             this.addErrorListeners();
         }
 
@@ -2350,17 +2347,17 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (text.startsWith("'''") || text.startsWith("\"\"\"")) {
             text = StringUtils.removeCR(text); // remove CR in the multiline string
 
-            text = text.length() == 6 ? "" : text.substring(3, text.length() - 3);
+            text = StringUtils.trimQuotations(text, 3);
         } else if (text.startsWith("'") || text.startsWith("/") || text.startsWith("\"")) {
             if (text.startsWith("/")) { // the slashy string can span rows, so we have to remove CR for it
                 text = StringUtils.removeCR(text); // remove CR in the multiline string
             }
 
-            text = text.length() == 2 ? "" : text.substring(1, text.length() - 1);
+            text = StringUtils.trimQuotations(text, 1);
         } else if (text.startsWith("$/")) {
             text = StringUtils.removeCR(text);
 
-            text = text.length() == 4 ? "" : text.substring(2, text.length() - 2);
+            text = StringUtils.trimQuotations(text, 2);
         }
 
         //handle escapes.
@@ -4121,14 +4118,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     // the mixins of interface and annotation should be null
     private void hackMixins(ClassNode classNode) {
-        try {
-            // FIXME Hack with visibility.
-            Field field = ClassNode.class.getDeclaredField("mixins");
-            field.setAccessible(true);
-            field.set(classNode, null);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            throw new GroovyBugError("Failed to access mixins field", e);
-        }
+        classNode.setMixins(null);
     }
 
     private static final Map<ClassNode, Object> TYPE_DEFAULT_VALUE_MAP = Maps.of(
