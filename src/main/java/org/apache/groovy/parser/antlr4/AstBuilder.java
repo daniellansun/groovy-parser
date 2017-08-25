@@ -1811,17 +1811,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                             this.createMethodCallExpression(baseExpr, arguments),
                             arguments);
         } else { // e.g. a[x] b, new A() b, etc.
-            methodCallExpression =
-                    this.configureAST(
-                            new MethodCallExpression(
-                                    baseExpr,
-                                    CALL_STR,
-                                    arguments
-                            ),
-                            arguments
-                    );
-
-            methodCallExpression.setImplicitThis(false);
+            methodCallExpression = this.configureAST(this.createCallMethodCallExpression(baseExpr, arguments), arguments);
         }
 
         if (!asBoolean(ctx.commandArgument())) {
@@ -2227,7 +2217,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private MethodCallExpression createCallMethodCallExpression(Expression baseExpr, Expression argumentsExpr) {
         MethodCallExpression methodCallExpression =
                 new MethodCallExpression(baseExpr, CALL_STR, argumentsExpr);
+
         methodCallExpression.setImplicitThis(false);
+
         return methodCallExpression;
     }
 
