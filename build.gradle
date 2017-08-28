@@ -107,22 +107,14 @@ task wrapper(type: Wrapper) {
 }
 
 task groovyConsole(type: JavaExec, dependsOn:[classes]) {
-    if (JavaVersion.current().isJava8Compatible()) {
-        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-Dgroovy.antlr4=true", "-Dgroovy.attach.groovydoc=true"
-    } else {
-        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-XX:PermSize=64m", "-XX:MaxPermSize=192m", "-Dgroovy.antlr4=true", "-Dgroovy.attach.groovydoc=true"
-    }
+    jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-Dgroovy.antlr4=true", "-Dgroovy.attach.groovydoc=true"
 
     main = 'org.apache.groovy.parser.antlr4.ui.GroovyConsole'
     classpath = sourceSets.main.runtimeClasspath
 }
 
 test {
-    if (JavaVersion.current().isJava8Compatible()) {
-        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-Dgroovy.antlr4.cache.threshold=100", "-Dgroovy.attach.groovydoc=true"
-    } else {
-        jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-XX:PermSize=64m", "-XX:MaxPermSize=192m", "-Dgroovy.antlr4.cache.threshold=100", "-Dgroovy.attach.groovydoc=true"
-    }
+    jvmArgs '-ea', "-Xms512m", "-Xmx1g", "-Dgroovy.antlr4.cache.threshold=100", "-Dgroovy.attach.groovydoc=true"
 
     def headless = System.properties['java.awt.headless']
     if (headless == 'true') {
