@@ -69,6 +69,7 @@ generateGrammarSource {
     }
 }
 
+generateGrammarSource.dependsOn clean
 compileJava.dependsOn generateGrammarSource
 compileJava.options.encoding = 'UTF-8'
 
