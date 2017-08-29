@@ -92,15 +92,17 @@ public class StringUtils {
 			text = StringUtils.replaceHexEscapes(text);
 			text = StringUtils.replaceLineEscape(text);
 
+			StringBuilder sb = new StringBuilder(text);
 			if (slashyType == SLASHY) {
-				text = replace(text, Maps.of("\\/", "/"));
+				replace(sb, Maps.of("\\/", "/"));
 			}
 
 			if (slashyType == DOLLAR_SLASHY) {
-				text = replace(text, Maps.of("$$", "$"));
-				text = replace(text, Maps.of("$/", "/"));
+				replace(sb, Maps.of("$$", "$"));
+				replace(sb, Maps.of("$/", "/"));
 			}
 
+			text = sb.toString();
 		} else if (slashyType == NONE_SLASHY) {
 			text = StringUtils.replaceEscapes(text);
 		} else {
@@ -112,7 +114,6 @@ public class StringUtils {
 
 	private static String replaceEscapes(String text) {
 		text = replace(text, Maps.of("\\$", "$"));
-
 		text = StringUtils.replaceLineEscape(text);
 
         return StringUtils.replaceStandardEscapes(replaceHexEscapes(replaceOctalEscapes(text)));
@@ -145,21 +146,29 @@ public class StringUtils {
 		return text.chars().filter(e -> c == e).count();
 	}
 
-	public static String replace(String string, Map<String, String> replacements) {
-		StringBuilder sb = new StringBuilder(string);
+	public static String replace(String str, Map<String, String> replacements) {
+		return replace(new StringBuilder(str), replacements).toString();
+	}
+
+	public static StringBuilder replace(StringBuilder sb, Map<String, String> replacements) {
+
 		for (Map.Entry<String, String> entry : replacements.entrySet()) {
 			String key = entry.getKey();
+			int keyLength = key.length();
+
 			String value = entry.getValue();
+			int valueLength = value.length();
 
 			int start = sb.indexOf(key, 0);
 			while (start > -1) {
-				int end = start + key.length();
-				int nextSearchStart = start + value.length();
+				int end = start + keyLength;
+				int nextSearchStart = start + valueLength;
 				sb.replace(start, end, value);
 				start = sb.indexOf(key, nextSearchStart);
 			}
 		}
-		return sb.toString();
+
+		return sb;
 	}
 
 	/*
