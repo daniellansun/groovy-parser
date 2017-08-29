@@ -171,11 +171,9 @@ public class StringUtils {
 		return sb;
 	}
 
-	/*
 	public static String trimQuotations(String text, int quotationLength) {
 		int length = text.length();
 
-		return length == quotationLength * 2 ? "" : text.substring(quotationLength, length - quotationLength);
+		return length == quotationLength << 1 ? "" : text.substring(quotationLength, length - quotationLength);
 	}
-	*/
 }
