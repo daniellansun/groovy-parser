@@ -80,7 +80,7 @@ public class StringUtils {
 							}
 						});
 
-		return replace(result, Maps.of("\\\\", "\\"));
+		return result.replace("\\\\", "\\");
     }
 
 	public static final int NONE_SLASHY = 0;
@@ -93,12 +93,12 @@ public class StringUtils {
 			text = StringUtils.replaceLineEscape(text);
 
 			if (slashyType == SLASHY) {
-				text = replace(text, Maps.of("\\/", "/"));
+				text = text.replace("\\/", "/");
 			}
 
 			if (slashyType == DOLLAR_SLASHY) {
-				text = replace(text, Maps.of("$$", "$"));
-				text = replace(text, Maps.of("$/", "/"));
+				text = text.replace("$$", "$");
+				text = text.replace("$/", "/");
 			}
 
 		} else if (slashyType == NONE_SLASHY) {
@@ -111,7 +111,7 @@ public class StringUtils {
 	}
 
 	private static String replaceEscapes(String text) {
-		text = replace(text, Maps.of("\\$", "$"));
+		text = text.replace("\\$", "$");
 
 		text = StringUtils.replaceLineEscape(text);
 
@@ -138,28 +138,11 @@ public class StringUtils {
 	}
 
 	public static String removeCR(String text) {
-		return replace(text, Maps.of("\r\n", "\n"));
+        return text.replace("\r\n", "\n");
     }
 
 	public static long countChar(String text, char c) {
 		return text.chars().filter(e -> c == e).count();
-	}
-
-	public static String replace(String string, Map<String, String> replacements) {
-		StringBuilder sb = new StringBuilder(string);
-		for (Map.Entry<String, String> entry : replacements.entrySet()) {
-			String key = entry.getKey();
-			String value = entry.getValue();
-
-			int start = sb.indexOf(key, 0);
-			while (start > -1) {
-				int end = start + key.length();
-				int nextSearchStart = start + value.length();
-				sb.replace(start, end, value);
-				start = sb.indexOf(key, nextSearchStart);
-			}
-		}
-		return sb.toString();
 	}
 
 	/*
