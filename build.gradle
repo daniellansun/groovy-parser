@@ -21,14 +21,26 @@ buildscript {
         mavenLocal()
         jcenter()
         mavenCentral()
-
+        maven { url "https://plugins.gradle.org/m2/" }
         maven { url 'https://jitpack.io' }
     }
 }
 
 plugins {
+    id 'com.gradle.build-scan' version '1.6'
+    id 'me.champeau.buildscan-recipes' version '0.1.7'
+
     id 'com.github.kt3k.coveralls' version '2.6.3'
     id 'jacoco'
+}
+
+buildScan {
+    licenseAgreementUrl = 'https://gradle.com/terms-of-service'
+    licenseAgree = 'yes'
+    publishAlways()
+
+    recipe 'git-commit', baseUrl: 'https://github.com/danielsun1106/groovy-parser/commits/master'
+    recipes 'git-status', 'gc-stats', 'travis-ci'
 }
 
 group 'com.groovyhelp'
