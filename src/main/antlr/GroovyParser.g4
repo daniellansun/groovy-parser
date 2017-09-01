@@ -280,7 +280,7 @@ memberDeclaration[int t]
  */
 methodDeclaration[int t, int ct]
     :   { 3 == $ct }?
-        returnType[$ct] methodName LPAREN rparen (DEFAULT nls elementValue)?
+        returnType[$ct] methodName LPAREN RPAREN (DEFAULT nls elementValue)?
     |
         (   { 0 == $t }?
             modifiersOpt typeParameters?
@@ -406,7 +406,7 @@ qualifiedClassNameList
     ;
 
 formalParameters
-    :   LPAREN formalParameterList? rparen
+    :   LPAREN formalParameterList? RPAREN
     ;
 
 formalParameterList
@@ -596,7 +596,7 @@ variableDeclaration[int t]
     ;
 
 typeNamePairs
-    :   LPAREN typeNamePair (COMMA typeNamePair)* rparen
+    :   LPAREN typeNamePair (COMMA typeNamePair)* RPAREN
     ;
 
 typeNamePair
