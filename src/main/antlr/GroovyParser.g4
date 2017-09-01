@@ -1251,8 +1251,7 @@ rparen
     :   RPAREN
     |
         // !!!Error Alternative, impact the performance of parsing
-        ~LPAREN
-        { require(false, "Missing ')'", -1); }
+        { require(false, "Missing ')'"); }
     ;
 
 nls

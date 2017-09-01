@@ -175,8 +175,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             charStream = CharStreams.fromReader(
                     new BufferedReader(sourceUnit.getSource().getReader()),
                     sourceUnit.getName());
-
-            // charStream = new ANTLRInputStream(new BufferedReader(sourceUnit.getSource().getReader()));
         } catch (IOException e) {
             throw new RuntimeException("Error occurred when reading source code.", e);
         }
