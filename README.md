@@ -38,7 +38,9 @@ $ ./gradlew groovyConsole
 
 Feel free to report any issue you found, and pull requests are always welcome.
 
----
+### Sample Code
+* [Sample code from Apache Groovy 2.6.0 release note](http://groovy-lang.org/releasenotes/groovy-2.6.html)
+
 ### FAQ
 
 ##### Question(from Slack):
