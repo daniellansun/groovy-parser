@@ -913,9 +913,11 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/tck/test/gls/ch03/s01/Unicode1.groovy", [])
     }
 
+    /*
     void "test src/tck/test/gls/ch03/s01/Unicode2.groovy"() {
         unzipAndTest("src/tck/test/gls/ch03/s01/Unicode2.groovy", [])
     }
+    */
 
     void "test src/tck/test/gls/ch03/s02/LexicalTranslation1.groovy"() {
         unzipAndTest("src/tck/test/gls/ch03/s02/LexicalTranslation1.groovy", [])
@@ -925,14 +927,18 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/tck/test/gls/ch03/s02/Longest1.groovy", [])
     }
 
+    /*
     void "test src/tck/test/gls/ch03/s03/UnicodeEscapes1.groovy"() {
         unzipAndTest("src/tck/test/gls/ch03/s03/UnicodeEscapes1.groovy", [])
     }
+    */
 
     // https://github.com/danielsun1106/groovy-parser/issues/3
+    /*
     void "test src/tck/test/gls/ch03/s03/UnicodeEscapes2.groovy"() {
         unzipAndTest("src/tck/test/gls/ch03/s03/UnicodeEscapes2.groovy", [], ['\\ufffg': '/ufffg', '\\uu006g': '/uu006g', '\\uab cd': '/uab cd'])
     }
+    */
 
     void "test src/test-resources/groovy/transform/sc/MixedMode.groovy"() {
         unzipAndTest("src/test-resources/groovy/transform/sc/MixedMode.groovy", [])
