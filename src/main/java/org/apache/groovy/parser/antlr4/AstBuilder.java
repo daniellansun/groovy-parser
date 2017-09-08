@@ -3806,13 +3806,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public String visitIdentifier(IdentifierContext ctx) {
-        String text = ctx.getText();
-
-        if (!text.contains("\\")) {
-            return text;
-        }
-
-        return StringUtils.replaceHexEscapes(text);
+        return ctx.getText();
     }
 
 
