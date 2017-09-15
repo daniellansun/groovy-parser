@@ -20,7 +20,8 @@ package org.apache.groovy.parser.antlr4.util
 
 import groovy.util.logging.Log
 import org.antlr.v4.gui.TestRig
-import org.antlr.v4.runtime.ANTLRInputStream
+import org.antlr.v4.runtime.CharStream
+import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.apache.groovy.parser.antlr4.GroovyLangLexer
 import org.apache.groovy.parser.antlr4.GroovyLangParser
@@ -48,11 +49,12 @@ public class GroovyTestRig extends TestRig {
         byte[] content = inputFile.bytes;
         String text = new String(content, this.encoding ?: 'UTF-8');
 
-        GroovyLangLexer lexer = new GroovyLangLexer(new ANTLRInputStream(text));
+        CharStream charStream = CharStreams.fromReader(new StringReader(text));
+        GroovyLangLexer lexer = new GroovyLangLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GroovyLangParser parser = new GroovyLangParser(tokens);
 
-        this.process(lexer, GroovyLangParser.class, parser, new ByteArrayInputStream(content), new StringReader(text));
+        this.process(lexer, GroovyLangParser.class, parser, charStream);
     }
 
     public static void main(String[] args) {
