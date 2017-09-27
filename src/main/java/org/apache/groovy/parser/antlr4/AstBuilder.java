@@ -1961,11 +1961,11 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             if (asBoolean(ctx.DOT())) {
                 boolean isSafeChain = isTrue(baseExpr, PATH_EXPRESSION_BASE_EXPR_SAFE_CHAIN);
 
-                return getDotExpression(ctx, baseExpr, namePartExpr, genericsTypes, isSafeChain);
+                return createDotExpression(ctx, baseExpr, namePartExpr, genericsTypes, isSafeChain);
             } else if (asBoolean(ctx.SAFE_DOT())) {
-                return getDotExpression(ctx, baseExpr, namePartExpr, genericsTypes, true);
+                return createDotExpression(ctx, baseExpr, namePartExpr, genericsTypes, true);
             } else if (asBoolean(ctx.SAFE_CHAIN_DOT())) { // e.g. obj??.a  OR obj??.@a
-                Expression expression = getDotExpression(ctx, baseExpr, namePartExpr, genericsTypes, true);
+                Expression expression = createDotExpression(ctx, baseExpr, namePartExpr, genericsTypes, true);
                 expression.putNodeMetaData(PATH_EXPRESSION_BASE_EXPR_SAFE_CHAIN, true);
 
                 return expression;
@@ -2203,7 +2203,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         throw createParsingFailedException("Unsupported path element: " + ctx.getText(), ctx);
     }
 
-    private Expression getDotExpression(PathElementContext ctx, Expression baseExpr, Expression namePartExpr, GenericsType[] genericsTypes, boolean safe) {
+    private Expression createDotExpression(PathElementContext ctx, Expression baseExpr, Expression namePartExpr, GenericsType[] genericsTypes, boolean safe) {
         if (asBoolean(ctx.AT())) { // e.g. obj.@a  OR  obj?.@a
             return configureAST(new AttributeExpression(baseExpr, namePartExpr, safe), ctx);
         } else { // e.g. obj.p  OR  obj?.p
