@@ -210,7 +210,7 @@ class SyntaxErrorTest extends GroovyTestCase {
     }
 
     void "test groovy core - MethodCall"() {
-        TestUtils.doRunAndShouldFail('fail/MethodCall_01.groovy');
+        TestUtils.doRunAndShouldFail('fail/MethodCall_01x.groovy');
     }
 
     /**************************************/
