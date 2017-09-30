@@ -1266,9 +1266,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private ModifierManager createModifierManager(MethodDeclarationContext ctx) {
         List<ModifierNode> modifierNodeList = Collections.emptyList();
 
-        if (asBoolean(ctx.modifiers())) {
-            modifierNodeList = this.visitModifiers(ctx.modifiers());
-        } else if (asBoolean(ctx.modifiersOpt())) {
+        if (asBoolean(ctx.modifiersOpt())) {
             modifierNodeList = this.visitModifiersOpt(ctx.modifiersOpt());
         }
 
@@ -1289,6 +1287,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public MethodNode visitMethodDeclaration(MethodDeclarationContext ctx) {
+        if (1 == ctx.t || 2 == ctx.t || 3 == ctx.t) { // 1: normal method declaration; 2: abstract method declaration; 3: normal method declaration OR abstract method declaration
+            if (!(asBoolean(ctx.modifiersOpt().modifiers()) || asBoolean(ctx.returnType()))) {
+                throw createParsingFailedException("Modifiers or return type is required", ctx);
+            }
+        }
+
         ModifierManager modifierManager = createModifierManager(ctx);
         String methodName = this.visitMethodName(ctx.methodName());
         ClassNode returnType = this.visitReturnType(ctx.returnType());
