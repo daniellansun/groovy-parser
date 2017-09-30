@@ -1510,19 +1510,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private ModifierManager createModifierManager(VariableDeclarationContext ctx) {
-        List<ModifierNode> modifierNodeList = Collections.emptyList();
-
-        if (asBoolean(ctx.variableModifiers())) {
-            modifierNodeList = this.visitVariableModifiers(ctx.variableModifiers());
-        } else if (asBoolean(ctx.variableModifiersOpt())) {
-            modifierNodeList = this.visitVariableModifiersOpt(ctx.variableModifiersOpt());
-        } else if (asBoolean(ctx.modifiers())) {
-            modifierNodeList = this.visitModifiers(ctx.modifiers());
-        } else if (asBoolean(ctx.modifiersOpt())) {
-            modifierNodeList = this.visitModifiersOpt(ctx.modifiersOpt());
-        }
-
-        return new ModifierManager(this, modifierNodeList);
+        return new ModifierManager(this, this.visitClassifiedModifiers(ctx.classifiedModifiers()));
     }
 
     private DeclarationListStatement createMultiAssignmentDeclarationListStatement(VariableDeclarationContext ctx, ModifierManager modifierManager) {
@@ -1554,7 +1542,27 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
+    public List<ModifierNode> visitClassifiedModifiers(ClassifiedModifiersContext ctx) {
+        List<ModifierNode> modifierNodeList = Collections.emptyList();
+
+        if (!asBoolean(ctx)) {
+            return modifierNodeList;
+        }
+
+        if (asBoolean(ctx.variableModifiers())) {
+            modifierNodeList = this.visitVariableModifiers(ctx.variableModifiers());
+        } if (asBoolean(ctx.modifiers())) {
+            modifierNodeList = this.visitModifiers(ctx.modifiers());
+        }
+
+        return modifierNodeList;
+    }
+
+
+    @Override
     public DeclarationListStatement visitVariableDeclaration(VariableDeclarationContext ctx) {
+        validateVariableDeclaration(ctx);
+
         ModifierManager modifierManager = this.createModifierManager(ctx);
 
         if (asBoolean(ctx.typeNamePairs())) { // e.g. def (int a, int b) = [1, 2]
@@ -1593,6 +1601,14 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         return configureAST(new DeclarationListStatement(declarationExpressionList), ctx);
+    }
+
+    private void validateVariableDeclaration(VariableDeclarationContext ctx) {
+        if (asBoolean(ctx.variableDeclarators())) { // normal declaration
+            if (!(asBoolean(ctx.classifiedModifiers()) || asBoolean(ctx.type()))) {
+                throw createParsingFailedException("Modifiers or type is required", ctx);
+            }
+        }
     }
 
     private DeclarationListStatement createFieldDeclarationListStatement(VariableDeclarationContext ctx, ModifierManager modifierManager, ClassNode variableType, List<DeclarationExpression> declarationExpressionList, ClassNode classNode) {
