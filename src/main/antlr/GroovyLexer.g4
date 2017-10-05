@@ -206,11 +206,11 @@ StringLiteral
     |   SqStringQuotationMark   SqStringCharacter* SqStringQuotationMark
 
     |   Slash      { this.isRegexAllowed() && _input.LA(1) != '*' }?
-                 SlashyStringCharacter+?       Slash
+                 SlashyStringCharacter+       Slash
 
     |   TdqStringQuotationMark  TdqStringCharacter*    TdqStringQuotationMark
     |   TsqStringQuotationMark  TsqStringCharacter*    TsqStringQuotationMark
-    |   DollarSlashyGStringQuotationMarkBegin   DollarSlashyStringCharacter+?   DollarSlashyGStringQuotationMarkEnd
+    |   DollarSlashyGStringQuotationMarkBegin   DollarSlashyStringCharacter+   DollarSlashyGStringQuotationMarkEnd
     ;
 
 // Groovy gstring
