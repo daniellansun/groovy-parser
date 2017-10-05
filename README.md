@@ -13,6 +13,7 @@ The new parser(Parrot) can parse Groovy source code and construct the related AS
 * try-with-resources(i.e. ARM)
 * code block(i.e. `{..}`)
 * array initializer of Java style(e.g. `new int[] {1, 2, 3}`)
+* if-else expression(e.g. `max = if (a > b) a else b`), switch-case expression
 * default method of interface
 * type annotation
 * new operators: identity operators(`===`, `!==`), elvis assignment(`?=`), `!in`, `!instanceof`
