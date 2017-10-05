@@ -18,13 +18,17 @@
  */
 package org.apache.groovy.parser.antlr4
 
-import org.codehaus.groovy.ast.*
+import org.codehaus.groovy.ast.ClassNode
+import org.codehaus.groovy.ast.FieldNode
+import org.codehaus.groovy.ast.MethodNode
+import org.codehaus.groovy.ast.Parameter
+import org.codehaus.groovy.ast.PropertyNode
 import org.codehaus.groovy.ast.stmt.AssertStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
 import org.codehaus.groovy.syntax.Token
 
-import static org.apache.groovy.parser.antlr4.TestUtils.doRunAndTest
 import static org.apache.groovy.parser.antlr4.TestUtils.doTest
+import static org.apache.groovy.parser.antlr4.TestUtils.doRunAndTest
 
 /**
  * Some basic test cases for the new parser
@@ -366,10 +370,6 @@ class GroovyParserTest extends GroovyTestCase {
 
     void "test groovy core - SafeChainOperator"() {
         doRunAndTest('core/SafeChainOperator.groovy');
-    }
-
-    void "test groovy core - ConditionalStatementAsExpression"() {
-        doRunAndTest('core/ConditionalStatementAsExpression_01x.groovy');
     }
 
     void "test groovy core - BUG"() {
