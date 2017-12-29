@@ -19,6 +19,7 @@ The new parser(Parrot) can parse Groovy source code and construct the related AS
 * safe index(e.g. `nullableVar?[1, 2]`)
 * safe chain(e.g. `nullableVar??.mayReturnNull().mayReturnNull()`)
 * runtime groovydoc(i.e. groovydoc with `@Groovydoc`), groovydoc attached to AST node as metadata
+* specify package scope via the `package` keyword(e.g. `package someMethod() {...}`)
 
 **JVM system properties to control parsing:**
 
