@@ -148,6 +148,7 @@ classOrInterfaceModifier
     :   annotation       // class or interface
     |   m=(   PUBLIC     // class or interface
           |   PROTECTED  // class or interface
+          |   PACKAGE    // class or interface
           |   PRIVATE    // class or interface
           |   STATIC     // class or interface
           |   ABSTRACT   // class or interface
@@ -168,6 +169,7 @@ variableModifier
           // TODO check whether the following modifiers accompany annotations or not. Because the legacy codes(e.g. benchmark/bench/heapsort.groovy) allow to declare the special instance/class fields without annotations, we leave it as it is for the time being
           | PUBLIC
           | PROTECTED
+          | PACKAGE
           | PRIVATE
           | STATIC
           | ABSTRACT

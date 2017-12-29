@@ -372,6 +372,10 @@ class GroovyParserTest extends GroovyTestCase {
         doRunAndTest('core/SafeChainOperator.groovy');
     }
 
+    void "test groovy core - PackageScope"() {
+        doRunAndTest('core/PackageScope_01x.groovy');
+    }
+
     void "test groovy core - BUG"() {
         doRunAndTest('bugs/BUG-GROOVY-4757.groovy');
         doRunAndTest('bugs/BUG-GROOVY-5652.groovy');
