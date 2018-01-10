@@ -92,7 +92,8 @@ compileJava.options.encoding = 'UTF-8'
 ext {
     asmVersion = '6.0_BETA'
     antlr4Version = '4.7'
-    groovyVersion = '3.0.0-SNAPSHOT'
+//    groovyVersion = '3.0.0-SNAPSHOT'
+    groovyVersion = '3.0.0-alpha-1'
     junitVersion = '4.12'
 }
 
@@ -112,7 +113,8 @@ dependencies {
         compile files("lib/groovy-all-${groovyVersion}.jar")
     }
     */
-    compile files("lib/groovy-all-${groovyVersion}.jar")
+    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
+//    compile files("lib/groovy-all-${groovyVersion}.jar")
 
     testCompile "junit:junit:$junitVersion"
 }
