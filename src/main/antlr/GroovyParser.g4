@@ -504,7 +504,6 @@ lambdaBody
 
 // CLOSURE
 closure
-locals[ String footprint = "" ]
     :   LBRACE nls (formalParameterList? nls ARROW nls)? blockStatementsOpt RBRACE
     ;
 
@@ -931,14 +930,6 @@ pathExpression returns [int t]
     ;
 
 pathElement returns [int t]
-locals[ boolean isInsideClosure ]
-@init {
-    try {
-        $isInsideClosure = null != $closure::footprint;
-    } catch(NullPointerException e) {
-        $isInsideClosure = false;
-    }
-}
     :   nls
 
         // AT: foo.@bar selects the field (or attribute), not property

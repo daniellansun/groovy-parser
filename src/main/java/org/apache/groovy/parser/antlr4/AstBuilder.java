@@ -2367,7 +2367,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     // so if this and super is inside the closure, it will not be constructor call.
                     // e.g. src/test/org/codehaus/groovy/transform/MapConstructorTransformTest.groovy:
                     // @MapConstructor(pre={ super(args?.first, args?.last); args = args ?: [:] }, post = { first = first?.toUpperCase() })
-                    if (ctx.isInsideClosure) {
+                    if (visitingClosure) {
                         return configureAST(
                                 new MethodCallExpression(
                                         baseExpr,
@@ -3651,6 +3651,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClosureExpression visitClosure(ClosureContext ctx) {
+        visitingClosure = true;
+
         Parameter[] parameters = asBoolean(ctx.formalParameterList())
                 ? this.visitFormalParameterList(ctx.formalParameterList())
                 : null;
@@ -3660,8 +3662,11 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         Statement code = this.visitBlockStatementsOpt(ctx.blockStatementsOpt());
+        ClosureExpression result = configureAST(new ClosureExpression(parameters, code), ctx);
 
-        return configureAST(new ClosureExpression(parameters, code), ctx);
+        visitingClosure = false;
+
+        return result;
     }
 
     @Override
@@ -4684,6 +4689,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private boolean visitingLoopStatement;
     private boolean visitingSwitchStatement;
     private boolean visitingAssertStatement;
+    private boolean visitingClosure;
 
     private static final String QUESTION_STR = "?";
     private static final String DOT_STR = ".";
