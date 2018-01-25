@@ -570,7 +570,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public AssertStatement visitAssertStatement(AssertStatementContext ctx) {
-        visitingAssertStatement = true;
+        visitingAssertStatementCnt++;
 
         Expression conditionExpression = (Expression) this.visit(ctx.ce);
 
@@ -595,7 +595,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         (Expression) this.visit(ctx.me)),
                 ctx);
 
-        visitingAssertStatement = false;
+        visitingAssertStatementCnt--;
 
         return result;
     }
@@ -642,9 +642,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Statement visitLoopStmtAlt(LoopStmtAltContext ctx) {
-        visitingLoopStatement = true;
+        visitingLoopStatementCnt++;
         Statement result = configureAST((Statement) this.visit(ctx.loopStatement()), ctx);
-        visitingLoopStatement = false;
+        visitingLoopStatementCnt--;
 
         return result;
     }
@@ -906,7 +906,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public SwitchStatement visitSwitchStatement(SwitchStatementContext ctx) {
-        visitingSwitchStatement = true;
+        visitingSwitchStatementCnt++;
 
         List<Statement> statementList =
                 ctx.switchBlockStatementGroup().stream()
@@ -944,7 +944,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ),
                 ctx);
 
-        visitingSwitchStatement = false;
+        visitingSwitchStatementCnt--;
 
         return result;
     }
@@ -1051,7 +1051,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public BreakStatement visitBreakStatement(BreakStatementContext ctx) {
-        if (!visitingLoopStatement && !visitingSwitchStatement) {
+        if (0 == visitingLoopStatementCnt && 0 == visitingSwitchStatementCnt) {
             throw createParsingFailedException("break statement is only allowed inside loops or switches", ctx);
         }
 
@@ -1069,7 +1069,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ContinueStatement visitContinueStatement(ContinueStatementContext ctx) {
-        if (!visitingLoopStatement) {
+        if (0 == visitingLoopStatementCnt) {
             throw createParsingFailedException("continue statement is only allowed inside loops", ctx);
         }
 
@@ -2367,7 +2367,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     // so if this and super is inside the closure, it will not be constructor call.
                     // e.g. src/test/org/codehaus/groovy/transform/MapConstructorTransformTest.groovy:
                     // @MapConstructor(pre={ super(args?.first, args?.last); args = args ?: [:] }, post = { first = first?.toUpperCase() })
-                    if (visitingClosure) {
+                    if (visitingClosureCnt > 0) {
                         return configureAST(
                                 new MethodCallExpression(
                                         baseExpr,
@@ -2744,7 +2744,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(ctx.op)) {
             PostfixExpression postfixExpression = new PostfixExpression(pathExpr, createGroovyToken(ctx.op));
 
-            if (visitingAssertStatement) {
+            if (visitingAssertStatementCnt > 0) {
                 // powerassert requires different column for values, so we have to copy the location of op
                 return configureAST(postfixExpression, ctx.op);
             } else {
@@ -3651,7 +3651,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ClosureExpression visitClosure(ClosureContext ctx) {
-        visitingClosure = true;
+        visitingClosureCnt++;
 
         Parameter[] parameters = asBoolean(ctx.formalParameterList())
                 ? this.visitFormalParameterList(ctx.formalParameterList())
@@ -3664,7 +3664,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         Statement code = this.visitBlockStatementsOpt(ctx.blockStatementsOpt());
         ClosureExpression result = configureAST(new ClosureExpression(parameters, code), ctx);
 
-        visitingClosure = false;
+        visitingClosureCnt--;
 
         return result;
     }
@@ -4686,10 +4686,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private Tuple2<GroovyParserRuleContext, Exception> numberFormatError;
 
-    private boolean visitingLoopStatement;
-    private boolean visitingSwitchStatement;
-    private boolean visitingAssertStatement;
-    private boolean visitingClosure;
+    private int visitingLoopStatementCnt;
+    private int visitingSwitchStatementCnt;
+    private int visitingAssertStatementCnt;
+    private int visitingClosureCnt;
 
     private static final String QUESTION_STR = "?";
     private static final String DOT_STR = ".";
