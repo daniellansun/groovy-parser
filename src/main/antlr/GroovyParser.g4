@@ -641,7 +641,6 @@ tryCatchStatement
     ;
 
 assertStatement
-locals[ String footprint = "" ]
     :   ASSERT ce=expression (nls (COLON | COMMA) nls me=expression)?
     ;
 
@@ -779,14 +778,6 @@ statementExpression
     ;
 
 postfixExpression
-locals[ boolean isInsideAssert ]
-@init {
-    try {
-        $isInsideAssert = null != $assertStatement::footprint;
-    } catch(NullPointerException e) {
-        $isInsideAssert = false;
-    }
-}
     :   pathExpression op=(INC | DEC)?
     ;
 

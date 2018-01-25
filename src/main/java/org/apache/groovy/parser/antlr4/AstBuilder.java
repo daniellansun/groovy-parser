@@ -567,8 +567,11 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     // statement {    --------------------------------------------------------------------
+
     @Override
     public AssertStatement visitAssertStatement(AssertStatementContext ctx) {
+        visitingAssertStatement = true;
+
         Expression conditionExpression = (Expression) this.visit(ctx.ce);
 
         if (conditionExpression instanceof BinaryExpression) {
@@ -588,9 +591,13 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     new AssertStatement(booleanExpression), ctx);
         }
 
-        return configureAST(new AssertStatement(booleanExpression,
+        AssertStatement result = configureAST(new AssertStatement(booleanExpression,
                         (Expression) this.visit(ctx.me)),
                 ctx);
+
+        visitingAssertStatement = false;
+
+        return result;
     }
 
     @Override
@@ -2737,7 +2744,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(ctx.op)) {
             PostfixExpression postfixExpression = new PostfixExpression(pathExpr, createGroovyToken(ctx.op));
 
-            if (ctx.isInsideAssert) {
+            if (visitingAssertStatement) {
                 // powerassert requires different column for values, so we have to copy the location of op
                 return configureAST(postfixExpression, ctx.op);
             } else {
@@ -4676,6 +4683,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private boolean visitingLoopStatement;
     private boolean visitingSwitchStatement;
+    private boolean visitingAssertStatement;
 
     private static final String QUESTION_STR = "?";
     private static final String DOT_STR = ".";
