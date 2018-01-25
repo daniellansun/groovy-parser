@@ -137,7 +137,212 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.apache.groovy.parser.antlr4.GroovyLangParser.*;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ADD;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.AS;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.AdditiveExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.AndExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.AnnotatedQualifiedClassNameContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.AnnotationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.AnnotationNameContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.AnnotationsOptContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.AnonymousInnerClassDeclarationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ArgumentsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ArrayInitializerContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.AssertStatementContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.AssertStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.AssignmentExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.BlockContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.BlockStatementContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.BlockStatementsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.BlockStatementsOptContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.BooleanLiteralAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.BreakStatementContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.BreakStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.BuiltInTypeContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.CASE;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.CastExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.CastParExpressionContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.CatchClauseContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.CatchTypeContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ClassBodyContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ClassBodyDeclarationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ClassDeclarationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ClassNameContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ClassOrInterfaceModifierContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ClassOrInterfaceModifiersContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ClassOrInterfaceModifiersOptContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ClassOrInterfaceTypeContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ClassicalForControlContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ClassifiedModifiersContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ClosureContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ClosurePrmrAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.CommandArgumentContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.CommandExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.CommandExpressionContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.CompilationUnitContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ConditionalExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ConditionalStatementContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ConditionalStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ContinueStatementContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ContinueStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.CreatedNameContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.CreatorContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.DEC;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.DEF;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.DEFAULT;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.DimsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.DimsOptContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.DoWhileStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.DynamicMemberNameContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ElementValueArrayInitializerContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ElementValueContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ElementValuePairContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ElementValuePairsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ElementValuesContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.EnhancedArgumentListContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.EnhancedArgumentListElementContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.EnhancedExpressionContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.EnhancedForControlContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.EnhancedStatementExpressionContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.EnumConstantContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.EnumConstantsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.EqualityExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ExclusiveOrExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ExpressionContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ExpressionInParContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ExpressionListContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ExpressionListElementContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ExpressionStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.FieldDeclarationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.FinallyBlockContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.FloatingPointLiteralAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ForControlContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ForInitContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ForStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ForUpdateContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.FormalParameterContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.FormalParameterListContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.FormalParametersContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.GE;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.GT;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.GroovyParserRuleContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.GstringContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.GstringPathContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.GstringPrmrAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.GstringValueContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.IN;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.INC;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.INSTANCEOF;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.IdentifierContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.IdentifierPrmrAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.IfElseStatementContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ImportDeclarationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ImportStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.InclusiveOrExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.IndexPropertyArgsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.IntegerLiteralAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.KeywordsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.LE;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.LT;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.LabeledStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.LambdaBodyContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.LambdaPrmrAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ListContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ListPrmrAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.LiteralPrmrAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.LocalVariableDeclarationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.LocalVariableDeclarationStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.LogicalAndExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.LogicalOrExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.LoopStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MapContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MapEntryContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MapEntryLabelContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MapEntryListContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MapPrmrAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MemberDeclarationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MethodBodyContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MethodDeclarationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MethodDeclarationStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MethodNameContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ModifierContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ModifiersContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ModifiersOptContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MultipleAssignmentExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MultiplicativeExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.NOT_IN;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.NOT_INSTANCEOF;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.NamePartContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.NamedPropertyArgsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.NewPrmrAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.NonWildcardTypeArgumentsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.NormalExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.NullLiteralAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.PRIVATE;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.PackageDeclarationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ParExpressionContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ParenPrmrAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.PathElementContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.PathExpressionContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.PostfixExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.PostfixExpressionContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.PowerExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.PrimitiveTypeContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.QualifiedClassNameContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.QualifiedClassNameListContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.QualifiedNameContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.QualifiedStandardClassNameContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.RegexExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.RelationalExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ResourceContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ResourceListContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ResourcesContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ReturnStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ReturnTypeContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.STATIC;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.SUB;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ShiftExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.StandardLambdaExpressionContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.StandardLambdaParametersContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.StatementsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.StringLiteralAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.StringLiteralContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.SuperPrmrAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.SwitchBlockStatementGroupContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.SwitchLabelContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.SwitchStatementContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.SynchronizedStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ThisFormalParameterContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ThisPrmrAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ThrowStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TryCatchStatementContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TryCatchStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeArgumentContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeArgumentsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeArgumentsOrDiamondContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeBoundContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeDeclarationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeDeclarationStmtAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeListContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeNamePairContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeNamePairsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeParameterContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeParametersContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypePrmrAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.UnaryAddExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.UnaryNotExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.VariableDeclarationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.VariableDeclaratorContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.VariableDeclaratorIdContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.VariableDeclaratorsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.VariableInitializerContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.VariableInitializersContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.VariableModifierContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.VariableModifiersContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.VariableModifiersOptContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.VariableNamesContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.WhileStmtAltContext;
 import static org.apache.groovy.parser.antlr4.util.PositionConfigureUtils.configureAST;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asBoolean;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.last;
@@ -428,10 +633,13 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return configureAST(new IfStatement(booleanExpression, ifBlock, elseBlock), ctx);
     }
 
-
     @Override
     public Statement visitLoopStmtAlt(LoopStmtAltContext ctx) {
-        return configureAST((Statement) this.visit(ctx.loopStatement()), ctx);
+        visitingLoopStatement = true;
+        Statement result = configureAST((Statement) this.visit(ctx.loopStatement()), ctx);
+        visitingLoopStatement = false;
+
+        return result;
     }
 
     @Override
@@ -687,8 +895,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ctx);
     }
 
+
+
     @Override
     public SwitchStatement visitSwitchStatement(SwitchStatementContext ctx) {
+        visitingSwitchStatement = true;
+
         List<Statement> statementList =
                 ctx.switchBlockStatementGroup().stream()
                         .map(this::visitSwitchBlockStatementGroup)
@@ -717,7 +929,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             throw createParsingFailedException("default case should appear at last", defaultStatementList.get(0));
         }
 
-        return configureAST(
+        SwitchStatement result = configureAST(
                 new SwitchStatement(
                         this.visitExpressionInPar(ctx.expressionInPar()),
                         caseStatementList,
@@ -725,6 +937,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ),
                 ctx);
 
+        visitingSwitchStatement = false;
+
+        return result;
     }
 
 
@@ -829,6 +1044,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public BreakStatement visitBreakStatement(BreakStatementContext ctx) {
+        if (!visitingLoopStatement && !visitingSwitchStatement) {
+            throw createParsingFailedException("break statement is only allowed inside loops or switches", ctx);
+        }
+
         String label = asBoolean(ctx.identifier())
                 ? this.visitIdentifier(ctx.identifier())
                 : null;
@@ -843,6 +1062,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public ContinueStatement visitContinueStatement(ContinueStatementContext ctx) {
+        if (!visitingLoopStatement) {
+            throw createParsingFailedException("continue statement is only allowed inside loops", ctx);
+        }
+
         String label = asBoolean(ctx.identifier())
                 ? this.visitIdentifier(ctx.identifier())
                 : null;
@@ -4450,6 +4673,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private int anonymousInnerClassCounter = 1;
 
     private Tuple2<GroovyParserRuleContext, Exception> numberFormatError;
+
+    private boolean visitingLoopStatement;
+    private boolean visitingSwitchStatement;
 
     private static final String QUESTION_STR = "?";
     private static final String DOT_STR = ".";

@@ -615,48 +615,22 @@ ifElseStatement
     ;
 
 switchStatement
-locals[ String footprint = "" ]
     :   SWITCH expressionInPar nls LBRACE nls switchBlockStatementGroup* nls RBRACE
     ;
 
 loopStatement
-locals[ String footprint = "" ]
     :   FOR LPAREN forControl rparen nls statement                                                            #forStmtAlt
     |   WHILE expressionInPar nls statement                                                                   #whileStmtAlt
     |   DO nls statement nls WHILE expressionInPar                                                            #doWhileStmtAlt
     ;
 
 continueStatement
-locals[ boolean isInsideLoop ]
-@init {
-    try {
-        $isInsideLoop = null != $loopStatement::footprint;
-    } catch(NullPointerException e) {
-        $isInsideLoop = false;
-    }
-}
     :   CONTINUE
-        { require($isInsideLoop, "the continue statement is only allowed inside loops", -8); }
         identifier?
     ;
 
 breakStatement
-locals[ boolean isInsideLoop, boolean isInsideSwitch ]
-@init {
-    try {
-        $isInsideLoop = null != $loopStatement::footprint;
-    } catch(NullPointerException e) {
-        $isInsideLoop = false;
-    }
-
-    try {
-        $isInsideSwitch = null != $switchStatement::footprint;
-    } catch(NullPointerException e) {
-        $isInsideSwitch = false;
-    }
-}
     :   BREAK
-        { require($isInsideLoop || $isInsideSwitch, "the break statement is only allowed inside loops or switches", -5); }
         identifier?
     ;
 
