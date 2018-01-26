@@ -48,7 +48,7 @@ Feel free to report any issue you found, and pull requests are always welcome.
 ```
 Can someone explain to me the importance of the Parrot compiler? Basically explain like I am 5?
 ```
-##### Answer(by Guillaume Laforge, Project lead of Apache Groovy):
+##### Answer(by Guillaume Laforge, Project Lead of Apache Groovy):
 ```
 the syntax of Groovy hasn’t evolved in a long time
 the current / old parser is a bit complicated to evolve
