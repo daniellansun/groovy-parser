@@ -90,7 +90,7 @@ compileJava.options.encoding = 'UTF-8'
 
 
 ext {
-    asmVersion = '6.0_BETA'
+    asmVersion = '6.0'
     antlr4Version = '4.7'
 //    groovyVersion = '3.0.0-SNAPSHOT'
     groovyVersion = '3.0.0-alpha-1'
@@ -98,7 +98,8 @@ ext {
 }
 
 dependencies {
-    antlr "com.tunnelvisionlabs:antlr4:$antlr4Version"
+//    antlr "com.tunnelvisionlabs:antlr4:$antlr4Version"
+    antlr files('lib/antlr4-4.7.1-SNAPSHOT.jar', 'lib/antlr4-runtime-4.7.1-SNAPSHOT.jar', 'lib/antlr4-annotations-4.7.1-SNAPSHOT.jar', 'lib/antlr-runtime-3.5.2.jar', 'lib/ST4-4.0.8.jar', 'lib/org.abego.treelayout.core-1.0.1.jar')
 
     compile "org.ow2.asm:asm:$asmVersion"
     compile "org.ow2.asm:asm-analysis:$asmVersion"
