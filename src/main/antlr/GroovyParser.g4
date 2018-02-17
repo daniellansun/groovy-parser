@@ -1010,7 +1010,10 @@ namedPropertyArgs
     ;
 
 primary
-    :   identifier                                                                          #identifierPrmrAlt
+    :
+        // Append `typeArguments?` to `identifier` to support constructor reference with generics, e.g. HashMap<String, Integer>::new
+        // Though this is not a graceful solution, it is much faster than replacing `builtInType` with `type`
+        identifier typeArguments?                                                           #identifierPrmrAlt
     |   literal                                                                             #literalPrmrAlt
     |   gstring                                                                             #gstringPrmrAlt
     |   NEW nls creator                                                                     #newPrmrAlt
@@ -1021,7 +1024,7 @@ primary
     |   lambdaExpression                                                                    #lambdaPrmrAlt
     |   list                                                                                #listPrmrAlt
     |   map                                                                                 #mapPrmrAlt
-    |   type[true]                                                                          #typePrmrAlt
+    |   builtInType                                                                         #builtInTypePrmrAlt
     ;
 
 list

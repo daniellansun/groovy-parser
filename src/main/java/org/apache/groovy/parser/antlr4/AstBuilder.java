@@ -159,6 +159,7 @@ import static org.apache.groovy.parser.antlr4.GroovyLangParser.BooleanLiteralAlt
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.BreakStatementContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.BreakStmtAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.BuiltInTypeContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.BuiltInTypePrmrAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.CASE;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.CastExprAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.CastParExpressionContext;
@@ -329,7 +330,6 @@ import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeNamePairConte
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeNamePairsContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeParameterContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypeParametersContext;
-import static org.apache.groovy.parser.antlr4.GroovyLangParser.TypePrmrAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.UnaryAddExprAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.UnaryNotExprAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.VariableDeclarationContext;
@@ -3055,7 +3055,16 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     // primary {       --------------------------------------------------------------------
     @Override
-    public VariableExpression visitIdentifierPrmrAlt(IdentifierPrmrAltContext ctx) {
+    public Expression visitIdentifierPrmrAlt(IdentifierPrmrAltContext ctx) {
+        if (asBoolean(ctx.typeArguments())) {
+            ClassNode classNode = ClassHelper.make(ctx.identifier().getText());
+
+            classNode.setGenericsTypes(
+                    this.visitTypeArguments(ctx.typeArguments()));
+
+            return configureAST(new ClassExpression(classNode), ctx);
+        }
+
         return configureAST(new VariableExpression(this.visitIdentifier(ctx.identifier())), ctx);
     }
 
@@ -3113,10 +3122,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public ClassExpression visitTypePrmrAlt(TypePrmrAltContext ctx) {
-        return configureAST(
-                new ClassExpression(this.visitType(ctx.type())),
-                ctx);
+    public ClassExpression visitBuiltInTypePrmrAlt(BuiltInTypePrmrAltContext ctx) {
+        return configureAST(this.visitBuiltInType(ctx.builtInType()), ctx);
     }
 
 
@@ -3359,7 +3366,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     */
 
     @Override
-    public VariableExpression visitBuiltInType(BuiltInTypeContext ctx) {
+    public ClassExpression visitBuiltInType(BuiltInTypeContext ctx) {
         String text;
         if (asBoolean(ctx.VOID())) {
             text = ctx.VOID().getText();
@@ -3369,7 +3376,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             throw createParsingFailedException("Unsupported built-in type: " + ctx, ctx);
         }
 
-        return configureAST(new VariableExpression(text), ctx);
+        return configureAST(new ClassExpression(ClassHelper.make(text)), ctx);
     }
 
 
