@@ -2348,7 +2348,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 return configureAST(methodCallExpression, ctx);
             }
 
-            if (baseExpr instanceof VariableExpression) { // void and primitive type AST node must be an instance of VariableExpression
+            if (baseExpr instanceof ClassExpression) { // void and primitive type AST node must be an instance of ClassExpression
                 String baseExprText = baseExpr.getText();
                 if (VOID_STR.equals(baseExprText)) { // e.g. void()
                     return configureAST(createCallMethodCallExpression(this.createConstantExpression(baseExpr), argumentsExpr), ctx);
@@ -3113,9 +3113,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public VariableExpression visitTypePrmrAlt(TypePrmrAltContext ctx) {
+    public ClassExpression visitTypePrmrAlt(TypePrmrAltContext ctx) {
         return configureAST(
-                this.visitBuiltInType(ctx.builtInType()),
+                new ClassExpression(this.visitType(ctx.type())),
                 ctx);
     }
 
@@ -3864,9 +3864,14 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             classNode = this.visitClassOrInterfaceType(ctx.classOrInterfaceType());
         } else if (asBoolean(ctx.primitiveType())) {
             classNode = this.visitPrimitiveType(ctx.primitiveType());
+        } else if (asBoolean(ctx.VOID())) {
+            if (ctx.allowVoid) {
+                classNode = configureAST(ClassHelper.make(ctx.getText()), ctx.VOID());
+            }
         }
 
         if (!asBoolean(classNode)) {
+            // TODO refine error message for `void`
             throw createParsingFailedException("Unsupported type: " + ctx.getText(), ctx);
         }
 
