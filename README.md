@@ -27,7 +27,7 @@ The new parser(Parrot) can parse Groovy source code and construct the related AS
 * `groovy.attach.runtime.groovydoc`: whether to attach `@Groovydoc` annotation to all members which have groovydoc(i.e. `/** ... */`)
 * `groovy.extract.doc.comment`: whether to collect groovydoc while parsing groovy source code(default: false). **DEPRECATED, USE `groovy.attach.groovydoc` INSTEAD** 
 
-*P.S. Parrot is based on the highly optimized version of antlr4(com.tunnelvisionlabs:antlr4), which is licensed under BSD. Since 20161103 Parrot has been contributed to Apache Groovy, but the project will be maintained as a lab to experiment new features for Groovy. You can find it at [apache/groovy](https://github.com/apache/groovy/tree/master/subprojects/parser-antlr4).*
+**Parrot is based on the highly optimized version of antlr4(com.tunnelvisionlabs:antlr4), which is licensed under BSD. On 20161103 Parrot was contributed to Apache Groovy, but the project will be maintained as a lab to experiment new features for Groovy. You can find it at [apache/groovy](https://github.com/apache/groovy/tree/master/subprojects/parser-antlr4).**
 
 If you want to give it a try, make sure your machine have `JDK 8+` installed first, then follow the steps:
 
