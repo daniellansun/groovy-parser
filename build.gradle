@@ -139,7 +139,7 @@ task groovyConsole(type: JavaExec, dependsOn:[classes]) {
 }
 
 test {
-    jvmArgs '-ea', "-Xms512m", "-Xmx1g", "-Dgroovy.antlr4.cache.threshold=100", "-Dgroovy.attach.groovydoc=true"
+    jvmArgs '-ea', "-Xms512m", "-Xmx1g", "-Dgroovy.antlr4.cache.threshold=200", "-Dgroovy.attach.groovydoc=true"
 
     def headless = System.properties['java.awt.headless']
     if (headless == 'true') {
