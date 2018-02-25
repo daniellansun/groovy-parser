@@ -154,6 +154,8 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.shouldFail('fail/MethodDeclaration_01.groovy');
         TestUtils.doRunAndShouldFail('fail/MethodDeclaration_02x.groovy');
         TestUtils.doRunAndShouldFail('fail/MethodDeclaration_03x.groovy');
+        TestUtils.doRunAndShouldFail('fail/MethodDeclaration_04x.groovy');
+        TestUtils.doRunAndShouldFail('fail/MethodDeclaration_05x.groovy');
     }
 
     void "test groovy core - ConstructorDeclaration"() {
