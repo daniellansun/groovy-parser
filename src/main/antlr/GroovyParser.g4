@@ -432,7 +432,6 @@ qualifiedName
 qualifiedNameElement
     :   identifier
     |   DEF
-    |   VAR
     |   IN
     |   AS
     |   TRAIT
