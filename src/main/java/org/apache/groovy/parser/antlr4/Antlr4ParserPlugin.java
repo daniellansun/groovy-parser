@@ -69,6 +69,32 @@ public class Antlr4ParserPlugin implements ParserPlugin {
 
         AstBuilder builder = new AstBuilder(sourceUnit);
 
+        /*
+        builder.registerInterceptor(new AstBuilder.VisitingInterceptor() {
+            @Override
+            public Object intercept(ParseTree tree, Function<ParseTree, Object> c) {
+                System.out.println("begin1 " + tree.hashCode());
+                Object result = chain(tree, c); // continue intercepting
+                System.out.println("###################");
+                System.out.println("end1 " + tree.hashCode());
+
+                return result;
+            }
+        });
+
+        builder.registerInterceptor(new AstBuilder.VisitingInterceptor() {
+            @Override
+            public Object intercept(ParseTree tree, Function<ParseTree, Object> c) {
+                System.out.println("begin2 " + tree.hashCode());
+                Object result = c.apply(tree); // stop intercepting and complete the actual visiting
+                System.out.println("******************");
+                System.out.println("end2 " + tree.hashCode());
+
+                return result;
+            }
+        });
+        */
+
         return builder.buildAST();
     }
 }
