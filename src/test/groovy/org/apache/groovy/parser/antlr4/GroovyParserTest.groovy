@@ -389,12 +389,10 @@ class GroovyParserTest extends GroovyTestCase {
         doRunAndTest('bugs/BUG-GROOVY-6038.groovy');
         doRunAndTest('bugs/BUG-GROOVY-2324.groovy');
         doTest('bugs/BUG-GROOVY-8161.groovy');
-
         doRunAndTest('bugs/GROOVY-3898.groovy');
         doRunAndTest('bugs/GROOVY-8228.groovy');
-
         doRunAndTest('bugs/BUG-GROOVY-8311.groovy');
-
+        doRunAndTest('bugs/BUG-GROOVY-8426.groovy');
         doTest('bugs/BUG-GROOVY-8511.groovy');
     }
 }
