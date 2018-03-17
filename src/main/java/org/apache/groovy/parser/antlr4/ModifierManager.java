@@ -137,7 +137,7 @@ class ModifierManager {
                 .collect(Collectors.toList());
     }
 
-    public boolean contains(Integer... modifierTypes) {
+    public boolean containsAny(Integer... modifierTypes) {
         List<Integer> modifierTypeList = Arrays.asList(modifierTypes);
         return modifierNodeList.stream().anyMatch(e -> modifierTypeList.contains(e.getType()));
     }

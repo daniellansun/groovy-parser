@@ -1271,7 +1271,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 .filter(Objects::nonNull).reduce(new LinkedList<MethodDeclarationContext>(), (r, e) -> {
                     MethodDeclarationContext methodDeclarationContext = (MethodDeclarationContext) e;
 
-                    if (createModifierManager(methodDeclarationContext).contains(DEFAULT)) {
+                    if (createModifierManager(methodDeclarationContext).containsAny(DEFAULT)) {
                         ((List) r).add(methodDeclarationContext);
                     }
 
@@ -1551,7 +1551,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         ModifierManager modifierManager = createModifierManager(ctx);
 
-        if (modifierManager.contains(VAR)) {
+        if (modifierManager.containsAny(VAR)) {
             throw createParsingFailedException("var cannot be used for method declarations", ctx);
         }
 
@@ -1584,7 +1584,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         asBoolean(ctx.returnType()),
                         modifierManager));
 
-        if (modifierManager.contains(STATIC)) {
+        if (modifierManager.containsAny(STATIC)) {
             for (Parameter parameter : methodNode.getParameters()) {
                 parameter.setInStaticContext(true);
             }
@@ -1635,7 +1635,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
 
             boolean isInterfaceOrAbstractClass = asBoolean(classNode) && classNode.isAbstract() && !classNode.isAnnotationDefinition();
-            if (isInterfaceOrAbstractClass && !modifierManager.contains(DEFAULT) && isAbstractMethod && hasMethodBody) {
+            if (isInterfaceOrAbstractClass && !modifierManager.containsAny(DEFAULT) && isAbstractMethod && hasMethodBody) {
                 throw createParsingFailedException("You defined an abstract method[" + methodNode.getName() + "] with body. Try removing the method body" + (classNode.isInterface() ? ", or declare it default" : ""), methodNode);
             }
         }
@@ -1652,7 +1652,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         methodNode =
                 new MethodNode(
                         methodName,
-                        modifierManager.contains(PRIVATE) ? Opcodes.ACC_PRIVATE : Opcodes.ACC_PUBLIC,
+                        modifierManager.containsAny(PRIVATE) ? Opcodes.ACC_PRIVATE : Opcodes.ACC_PUBLIC,
                         returnType,
                         parameters,
                         exceptions,
@@ -1697,7 +1697,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         }
 
-        modifiers |= !modifierManager.contains(STATIC) && (classNode.isInterface() || (isTrue(classNode, IS_INTERFACE_WITH_DEFAULT_METHODS) && !modifierManager.contains(DEFAULT))) ? Opcodes.ACC_ABSTRACT : 0;
+        modifiers |= !modifierManager.containsAny(STATIC) && (classNode.isInterface() || (isTrue(classNode, IS_INTERFACE_WITH_DEFAULT_METHODS) && !modifierManager.containsAny(DEFAULT))) ? Opcodes.ACC_ABSTRACT : 0;
 
         checkWhetherMethodNodeWithSameSignatureExists(classNode, methodName, parameters, ctx);
 
@@ -4409,7 +4409,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return true;
         }
 
-        if (hasReturnType && (modifierManager.contains(DEF, VAR))) {
+        if (hasReturnType && (modifierManager.containsAny(DEF, VAR))) {
             return true;
         }
 
