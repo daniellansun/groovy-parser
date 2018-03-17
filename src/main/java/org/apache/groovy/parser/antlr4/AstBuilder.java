@@ -4400,38 +4400,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             boolean isAnnotationDeclaration,
             boolean isAnonymousInnerEnumDeclaration,
             boolean hasReturnType,
-            ModifierManager modifierManager
-    ) {
-        return this.isSyntheticPublic(
-                isAnnotationDeclaration,
-                isAnonymousInnerEnumDeclaration,
-                modifierManager.containsAnnotations(),
-                modifierManager.containsVisibilityModifier(),
-                modifierManager.containsNonVisibilityModifier(),
-                hasReturnType,
-                modifierManager.contains(DEF) || modifierManager.contains(VAR));
-    }
-
-    /**
-     * @param isAnnotationDeclaration         whether the method is defined in an annotation
-     * @param isAnonymousInnerEnumDeclaration whether the method is defined in an anonymous inner enum
-     * @param hasAnnotation                   whether the method declaration has annotations
-     * @param hasVisibilityModifier           whether the method declaration contains visibility modifier(e.g. public, protected, private)
-     * @param hasModifier                     whether the method declaration has modifier(e.g. visibility modifier, final, static and so on)
-     * @param hasReturnType                   whether the method declaration has an return type(e.g. String, generic types)
-     * @param hasDef                          whether the method declaration using def keyword
-     * @return the result
-     */
-    private boolean isSyntheticPublic(
-            boolean isAnnotationDeclaration,
-            boolean isAnonymousInnerEnumDeclaration,
-            boolean hasAnnotation,
-            boolean hasVisibilityModifier,
-            boolean hasModifier,
-            boolean hasReturnType,
-            boolean hasDef) {
-
-        if (hasVisibilityModifier) {
+            ModifierManager modifierManager) {
+        if (modifierManager.containsVisibilityModifier()) {
             return false;
         }
 
@@ -4439,16 +4409,15 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return true;
         }
 
-        if (hasDef && hasReturnType) {
+        if (hasReturnType && (modifierManager.contains(DEF, VAR))) {
             return true;
         }
 
-        if (hasModifier || hasAnnotation || !hasReturnType) {
+        if (!hasReturnType || modifierManager.containsNonVisibilityModifier() || modifierManager.containsAnnotations()) {
             return true;
         }
 
         return isAnonymousInnerEnumDeclaration;
-
     }
 
     // the mixins of interface and annotation should be null
