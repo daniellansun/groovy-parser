@@ -20,9 +20,14 @@
 package core;
 
 import java.util.Map as groovy.util.Map
+import java.util.HashMap as groovy.util.HashMap
+
+groovy.util.Map m = new groovy.util.HashMap()
+m.put('a', 1)
+assert 1 == m.a
+
+
 import java.text.SimpleDateFormat as groovy.text.SimpleDateFormat
 
-groovy.util.Map m = [:]
-assert null != m
-def s = new groovy.text.SimpleDateFormat("yyyyMMdd")
-assert null != s
+def s = new groovy.text.SimpleDateFormat('yyyyMMdd')
+assert '20180404' == s.format(s.parse('20180404'))
