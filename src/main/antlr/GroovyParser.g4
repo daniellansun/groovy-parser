@@ -110,9 +110,12 @@ packageDeclaration
     ;
 
 importDeclaration
-    :   annotationsOpt IMPORT STATIC? qualifiedName (DOT MUL | AS alias=identifier)?
+    :   annotationsOpt IMPORT STATIC? qualifiedName (DOT MUL | AS importAlias)?
     ;
 
+importAlias
+    :   qualifiedName
+    ;
 
 typeDeclaration
     :   classOrInterfaceModifiersOpt classDeclaration

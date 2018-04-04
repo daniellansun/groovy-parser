@@ -236,6 +236,7 @@ import static org.apache.groovy.parser.antlr4.GroovyLangParser.INSTANCEOF;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.IdentifierContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.IdentifierPrmrAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.IfElseStatementContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ImportAliasContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.ImportDeclarationContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.ImportStmtAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.InclusiveOrExprAltContext;
@@ -510,7 +511,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         boolean hasStatic = asBoolean(ctx.STATIC());
         boolean hasStar = asBoolean(ctx.MUL());
-        boolean hasAlias = asBoolean(ctx.alias);
+        boolean hasAlias = asBoolean(ctx.importAlias());
 
         List<AnnotationNode> annotationNodeList = this.visitAnnotationsOpt(ctx.annotationsOpt());
 
@@ -534,7 +535,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                         .map(ParseTree::getText)
                                         .collect(Collectors.joining(DOT_STR)));
                 String alias = hasAlias
-                        ? ctx.alias.getText()
+                        ? visitImportAlias(ctx.importAlias())
                         : name;
                 configureAST(classNode, ctx);
 
@@ -554,7 +555,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 String name = last(ctx.qualifiedName().qualifiedNameElement()).getText();
                 ClassNode classNode = ClassHelper.make(qualifiedName);
                 String alias = hasAlias
-                        ? ctx.alias.getText()
+                        ? visitImportAlias(ctx.importAlias())
                         : name;
                 configureAST(classNode, ctx);
 
@@ -565,6 +566,11 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         return configureAST(importNode, ctx);
+    }
+
+    @Override
+    public String visitImportAlias(ImportAliasContext ctx) {
+        return ctx.qualifiedName().getText();
     }
 
     // statement {    --------------------------------------------------------------------

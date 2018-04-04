@@ -100,6 +100,7 @@ class GroovyParserTest extends GroovyTestCase {
         doTest('core/ImportDeclaration_06.groovy');
         doTest('core/ImportDeclaration_07.groovy');
         doTest('core/ImportDeclaration_08.groovy');
+        doRunAndTest('core/ImportDeclaration_09x.groovy');
     }
 
     void "test groovy core - Annotation"() {
