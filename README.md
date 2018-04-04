@@ -18,8 +18,8 @@ The new parser(Parrot) can parse Groovy source code and construct the related AS
 * additional places for type annotations
 * new operators: identity operators(`===`, `!==`), elvis assignment(`?=`), `!in`, `!instanceof`
 * safe index, e.g. `nullableVar?[1, 2]`
-* runtime groovydoc, i.e. groovydoc with `@Groovydoc`; groovydoc attached to AST node as metadata
 * import alias with a package name, e.g. `import groovy.util.XmlSlurper as groovy.xml.parsers.XmlSlurper`
+* runtime groovydoc, i.e. groovydoc with `@Groovydoc`; groovydoc attached to AST node as metadata
 
 **JVM system properties to control parsing:**
 
