@@ -90,7 +90,7 @@ compileJava.options.encoding = 'UTF-8'
 
 ext {
     asmVersion = '6.0'
-    antlr4Version = '4.7'
+    antlr4Version = '4.7.1'
 //    groovyVersion = '3.0.0-SNAPSHOT'
     groovyVersion = '3.0.0-alpha-1'
     junitVersion = '4.12'
