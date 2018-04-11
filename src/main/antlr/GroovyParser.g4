@@ -787,6 +787,7 @@ expression
     // The cast expression must be put before pathExpression to resovle the ambiguities between type casting and call on parentheses expression, e.g. (int)(1 / 2)
     :   castParExpression expression                                                        #castExprAlt
     |   postfixExpression                                                                   #postfixExprAlt
+    |   expression DOT NEW creator[1]                                                       #newNonStaticInnerClassExprAlt
 
     // ~(BNOT)/!(LNOT) (level 1)
     |   (BITNOT | NOT) nls expression                                                       #unaryNotExprAlt
@@ -816,7 +817,7 @@ expression
         right=expression                                                                    #shiftExprAlt
 
     // boolean relational expressions (level 7)
-    |   left=expression nls op=(AS | INSTANCEOF | NOT_INSTANCEOF) nls type           #relationalExprAlt
+    |   left=expression nls op=(AS | INSTANCEOF | NOT_INSTANCEOF) nls type                  #relationalExprAlt
     |   left=expression nls op=(LE | GE | GT | LT | IN | NOT_IN)  nls right=expression      #relationalExprAlt
 
     // equality/inequality (==/!=) (level 8)
@@ -1021,7 +1022,7 @@ primary
         identifier typeArguments?                                                           #identifierPrmrAlt
     |   literal                                                                             #literalPrmrAlt
     |   gstring                                                                             #gstringPrmrAlt
-    |   NEW nls creator                                                                     #newPrmrAlt
+    |   NEW nls creator[0]                                                                  #newPrmrAlt
     |   THIS                                                                                #thisPrmrAlt
     |   SUPER                                                                               #superPrmrAlt
     |   parExpression                                                                       #parenPrmrAlt
@@ -1058,11 +1059,14 @@ mapEntryLabel
     |   primary
     ;
 
-creator
+/**
+ *  t 0: general creation; 1: non-static inner class creation
+ */
+creator[int t]
     :   createdName
-        (   nls arguments anonymousInnerClassDeclaration[0]?
-        |   (annotationsOpt LBRACK expression RBRACK)+ dimsOpt
-        |   dims nls arrayInitializer
+        (   {0 == $t || 1 == $t}? nls arguments anonymousInnerClassDeclaration[0]?
+        |   {0 == $t}?            (annotationsOpt LBRACK expression RBRACK)+ dimsOpt
+        |   {0 == $t}?            dims nls arrayInitializer
         )
     ;
 
