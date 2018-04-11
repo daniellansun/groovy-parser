@@ -47,12 +47,19 @@ options {
     import java.util.HashSet;
     import java.util.Collections;
     import java.util.Arrays;
+    import org.apache.groovy.parser.antlr4.Dialect;
 }
 
 @members {
     private long tokenIndex     = 0;
     private int  lastTokenType  = 0;
     private int  invalidDigitCount = 0;
+    private Dialect dialect = Dialect.GROOVY;
+
+    public GroovyLexer(CharStream input, Dialect dialect) {
+        this(input);
+        this.dialect = dialect;
+    }
 
     /**
      * Record the index and token type of the current token while emitting tokens.

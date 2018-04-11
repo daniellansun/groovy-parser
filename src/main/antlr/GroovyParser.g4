@@ -43,9 +43,15 @@ options {
     import java.util.Map;
     import org.codehaus.groovy.ast.NodeMetaDataHandler;
     import org.apache.groovy.parser.antlr4.SemanticPredicates;
+    import org.apache.groovy.parser.antlr4.Dialect;
 }
 
 @members {
+    private Dialect dialect = Dialect.GROOVY;
+    public GroovyParser(TokenStream input, Dialect dialect) {
+        this(input);
+        this.dialect = dialect;
+    }
 
     public static class GroovyParserRuleContext extends ParserRuleContext implements NodeMetaDataHandler {
         private Map metaDataMap = null;

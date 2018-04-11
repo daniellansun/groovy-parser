@@ -30,9 +30,20 @@ import org.apache.groovy.parser.antlr4.internal.AtnManager;
  * Created on    2016/08/14
  */
 public class GroovyLangParser extends GroovyParser {
+    private Dialect dialect;
+
     public GroovyLangParser(TokenStream input) {
+        this(input, Dialect.GROOVY);
+    }
+
+    public GroovyLangParser(TokenStream input, Dialect dialect) {
         super(input);
+        this.dialect = dialect;
 
         this.setInterpreter(new ParserATNSimulator(this, new AtnManager(this).getATN()));
+    }
+
+    public Dialect getDialect() {
+        return dialect;
     }
 }

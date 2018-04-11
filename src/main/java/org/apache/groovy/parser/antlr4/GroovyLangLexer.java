@@ -14,8 +14,15 @@ import org.apache.groovy.parser.antlr4.internal.AtnManager;
  * Created on 2016/08/14
  */
 public class GroovyLangLexer extends GroovyLexer {
+    private Dialect dialect;
+
     public GroovyLangLexer(CharStream input) {
+        this(input, Dialect.GROOVY);
+    }
+
+    public GroovyLangLexer(CharStream input, Dialect dialect) {
         super(input);
+        this.dialect = dialect;
 
         this.setInterpreter(new PositionAdjustingLexerATNSimulator(this, new AtnManager(this).getATN()));
     }
@@ -41,5 +48,9 @@ public class GroovyLangLexer extends GroovyLexer {
             this.charPositionInLine = charPositionInLine;
             this.consume(input);
         }
+    }
+
+    public Dialect getDialect() {
+        return dialect;
     }
 }
