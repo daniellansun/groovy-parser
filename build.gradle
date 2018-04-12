@@ -93,6 +93,7 @@ ext {
     antlr4Version = '4.7.1'
 //    groovyVersion = '3.0.0-SNAPSHOT'
     groovyVersion = '3.0.0-alpha-1'
+    joorVersion = '0.9.8'
     junitVersion = '4.12'
 }
 
@@ -115,6 +116,7 @@ dependencies {
     compile "org.codehaus.groovy:groovy-all:$groovyVersion"
 //    compile files("lib/groovy-all-${groovyVersion}.jar")
 
+    testCompile "org.jooq:joor-java-8:$joorVersion"
     testCompile "junit:junit:$junitVersion"
 }
 

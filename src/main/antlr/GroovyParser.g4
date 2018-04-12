@@ -1226,5 +1226,6 @@ nls
     :   NL*
     ;
 
-sep :   (NL | SEMI)+
+sep :   { dialect.isSemiColonOptional()  }? (NL | SEMI)+
+    |   { !dialect.isSemiColonOptional() }? SEMI nls
     ;
