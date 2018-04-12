@@ -19,6 +19,7 @@
 package org.apache.groovy.parser.antlr4.util
 
 import groovy.transform.CompileStatic
+import org.apache.groovy.parser.antlr4.AstBuilder
 import org.joor.Reflect
 
 @CompileStatic
@@ -32,10 +33,12 @@ class JavaGroovyComparator {
     }
 
     static Reflect compileStaticGroovy(String src) {
-        System.setProperty("groovy.compile.static.by.default", "true")
-        def result = compileGroovy(src)
-        System.setProperty("groovy.compile.static.by.default", "false")
+        synchronized (AstBuilder) {
+            System.setProperty("groovy.compile.static.by.default", "true")
+            def result = compileGroovy(src)
+            System.setProperty("groovy.compile.static.by.default", "false")
 
-        return result
+            return result
+        }
     }
 }
