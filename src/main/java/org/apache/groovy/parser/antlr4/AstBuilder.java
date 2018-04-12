@@ -274,7 +274,6 @@ import static org.apache.groovy.parser.antlr4.GroovyLangParser.NOT_IN;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.NOT_INSTANCEOF;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.NamePartContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.NamedPropertyArgsContext;
-import static org.apache.groovy.parser.antlr4.GroovyLangParser.NewNonStaticInnerClassExprAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.NewPrmrAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.NonWildcardTypeArgumentsContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.NormalExprAltContext;
@@ -2294,6 +2293,13 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
         }
 
+        if (asBoolean(ctx.creator())) {
+            CreatorContext creatorContext = ctx.creator();
+            creatorContext.putNodeMetaData(ENCLOSING_INSTANCE_EXPRESSION, baseExpr);
+
+            return configureAST(this.visitCreator(creatorContext), ctx);
+        }
+
         if (asBoolean(ctx.indexPropertyArgs())) { // e.g. list[1, 3, 5]
             Tuple2<Token, Expression> tuple = this.visitIndexPropertyArgs(ctx.indexPropertyArgs());
             boolean isSafeChain = isTrue(baseExpr, PATH_EXPRESSION_BASE_EXPR_SAFE_CHAIN);
@@ -2775,16 +2781,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     public Expression visitPostfixExprAlt(PostfixExprAltContext ctx) {
         return this.visitPostfixExpression(ctx.postfixExpression());
     }
-
-    @Override
-    public Expression visitNewNonStaticInnerClassExprAlt(NewNonStaticInnerClassExprAltContext ctx) {
-        Expression enclosingInstanceExpression = (Expression) this.visit(ctx.expression());
-        CreatorContext creatorContext = ctx.creator();
-        creatorContext.putNodeMetaData(ENCLOSING_INSTANCE_EXPRESSION, enclosingInstanceExpression);
-
-        return configureAST(this.visitCreator(creatorContext), ctx);
-    }
-
 
     @Override
     public Expression visitUnaryNotExprAlt(UnaryNotExprAltContext ctx) {

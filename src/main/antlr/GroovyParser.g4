@@ -787,7 +787,6 @@ expression
     // The cast expression must be put before pathExpression to resovle the ambiguities between type casting and call on parentheses expression, e.g. (int)(1 / 2)
     :   castParExpression expression                                                        #castExprAlt
     |   postfixExpression                                                                   #postfixExprAlt
-    |   expression DOT NEW creator[1]                                                       #newNonStaticInnerClassExprAlt
 
     // ~(BNOT)/!(LNOT) (level 1)
     |   (BITNOT | NOT) nls expression                                                       #unaryNotExprAlt
@@ -928,7 +927,7 @@ commandArgument
  *  (Compare to a C lvalue, or LeftHandSide in the JLS section 15.26.)
  *  General expressions are built up from path expressions, using operators like '+' and '='.
  *
- *  t   0: primary, 1: namePart, 2: arguments, 3: closure, 4: indexPropertyArgs, 5: namedPropertyArgs
+ *  t   0: primary, 1: namePart, 2: arguments, 3: closure, 4: indexPropertyArgs, 5: namedPropertyArgs, 6: non-static inner class creator
  */
 pathExpression returns [int t]
     :   primary (pathElement { $t = $pathElement.t; })*
@@ -951,7 +950,9 @@ pathElement returns [int t]
         )
         namePart
         { $t = 1; }
-
+    |
+        DOT nls NEW creator[1]
+        { $t = 6; }
     |   arguments
         { $t = 2; }
 
