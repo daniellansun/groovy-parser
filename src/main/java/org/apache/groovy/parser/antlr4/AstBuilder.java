@@ -3152,8 +3152,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             if (null != enclosingInstanceExpression) {
                 if (arguments instanceof ArgumentListExpression) {
                     ((ArgumentListExpression) arguments).getExpressions().add(0, enclosingInstanceExpression);
-                } else if (arguments instanceof TupleExpression || arguments instanceof NamedArgumentListExpression) {
+                } else if (arguments instanceof TupleExpression) {
                     throw createParsingFailedException("Creating instance of non-static class does not support named parameters", arguments);
+                } else if (arguments instanceof NamedArgumentListExpression) {
+                    throw createParsingFailedException("Unexpected arguments", arguments);
+                } else {
+                    throw createParsingFailedException("Unsupported arguments", arguments); // should never reach here
                 }
             }
 
