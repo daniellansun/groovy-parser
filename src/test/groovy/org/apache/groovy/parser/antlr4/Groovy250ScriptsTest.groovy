@@ -18,6 +18,8 @@
  */
 package org.apache.groovy.parser.antlr4
 
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.stmt.AssertStatement
@@ -32,6 +34,7 @@ import org.codehaus.groovy.syntax.Token
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * Created on    2016/09/21
  */
+@CompileStatic
 class Groovy250ScriptsTest extends GroovyTestCase {
 
     void setUp() {}
@@ -11065,6 +11068,7 @@ class Groovy250ScriptsTest extends GroovyTestCase {
     }
 
     /*************************************/
+    @CompileDynamic
     static unzipAndTest(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:]) {
         ignoreClazzList.addAll(TestUtils.COMMON_IGNORE_CLASS_LIST)
 

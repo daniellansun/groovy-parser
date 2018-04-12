@@ -18,6 +18,8 @@
  */
 package org.apache.groovy.parser.antlr4
 
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 
 /**
@@ -26,6 +28,7 @@ import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * Created on    2016/10/12
  */
+@CompileStatic
 class Geb10SourcesTest extends GroovyTestCase {
 
 
@@ -1667,6 +1670,7 @@ class Geb10SourcesTest extends GroovyTestCase {
 
 
     /*************************************/
+    @CompileDynamic
     static unzipAndTest(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:]) {
         ignoreClazzList.addAll(TestUtils.COMMON_IGNORE_CLASS_LIST)
 
