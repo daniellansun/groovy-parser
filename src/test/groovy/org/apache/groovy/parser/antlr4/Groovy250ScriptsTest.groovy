@@ -18,6 +18,8 @@
  */
 package org.apache.groovy.parser.antlr4
 
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.stmt.AssertStatement
@@ -32,6 +34,7 @@ import org.codehaus.groovy.syntax.Token
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * Created on    2016/09/21
  */
+@CompileStatic
 class Groovy250ScriptsTest extends GroovyTestCase {
 
     void setUp() {}
@@ -11070,12 +11073,6 @@ class Groovy250ScriptsTest extends GroovyTestCase {
 
         TestUtils.unzipAndTest(ZIP_PATH, entryName, TestUtils.addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), replacementsMap)
     }
-
-    /*
-    static unzipAndTest(String entryName) {
-        TestUtils.unzipAndTest(ZIP_PATH, entryName);
-    }
-    */
 
     public static final String ZIP_PATH = "$TestUtils.RESOURCES_PATH/groovy-2.5.0/groovy-2.5.0-SNAPSHOT-20160921-allscripts.zip";
 }

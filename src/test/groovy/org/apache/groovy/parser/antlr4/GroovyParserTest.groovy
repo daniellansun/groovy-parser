@@ -27,8 +27,8 @@ import org.codehaus.groovy.ast.stmt.AssertStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
 import org.codehaus.groovy.syntax.Token
 
-import static org.apache.groovy.parser.antlr4.TestUtils.doTest
 import static org.apache.groovy.parser.antlr4.TestUtils.doRunAndTest
+import static org.apache.groovy.parser.antlr4.TestUtils.doTest
 
 /**
  * Some basic test cases for the new parser

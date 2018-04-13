@@ -18,6 +18,7 @@
  */
 package org.apache.groovy.parser.antlr4
 
+import groovy.transform.CompileStatic
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 
 /**
@@ -26,6 +27,7 @@ import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * Created on    2016/10/12
  */
+@CompileStatic
 class Geb10SourcesTest extends GroovyTestCase {
 
 
@@ -1672,12 +1674,6 @@ class Geb10SourcesTest extends GroovyTestCase {
 
         TestUtils.unzipAndTest(ZIP_PATH, entryName, TestUtils.addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), replacementsMap)
     }
-
-    /*
-    static unzipAndTest(String entryName) {
-        TestUtils.unzipAndTest(ZIP_PATH, entryName);
-    }
-    */
 
     public static final String ZIP_PATH = "$TestUtils.RESOURCES_PATH/geb-1.0/geb-1.0-allsources.zip";
 

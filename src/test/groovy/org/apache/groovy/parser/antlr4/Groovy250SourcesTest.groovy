@@ -18,6 +18,8 @@
  */
 package org.apache.groovy.parser.antlr4
 
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 
 /**
@@ -26,6 +28,7 @@ import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * Created on    2016/09/22
  */
+@CompileStatic
 class Groovy250SourcesTest extends GroovyTestCase {
 
 
@@ -7421,12 +7424,6 @@ class Groovy250SourcesTest extends GroovyTestCase {
 
         TestUtils.unzipAndTest(ZIP_PATH, entryName, TestUtils.addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), replacementsMap)
     }
-
-    /*
-    static unzipAndTest(String entryName) {
-        TestUtils.unzipAndTest(ZIP_PATH, entryName);
-    }
-    */
 
     public static final String ZIP_PATH = "$TestUtils.RESOURCES_PATH/groovy-2.5.0/groovy-2.5.0-SNAPSHOT-20160921-allsources.zip";
 

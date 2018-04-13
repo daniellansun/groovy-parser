@@ -18,6 +18,8 @@
  */
 package org.apache.groovy.parser.antlr4
 
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 
 /**
@@ -26,6 +28,7 @@ import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * Created on    2016/10/12
  */
+@CompileStatic
 class Spock11RC2SourcesTest extends GroovyTestCase {
 
 
@@ -1213,11 +1216,6 @@ class Spock11RC2SourcesTest extends GroovyTestCase {
         TestUtils.unzipAndTest(ZIP_PATH, entryName, TestUtils.addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), replacementsMap)
     }
 
-    /*
-    static unzipAndTest(String entryName) {
-        TestUtils.unzipAndTest(ZIP_PATH, entryName);
-    }
-    */
 
     public static final String ZIP_PATH = "$TestUtils.RESOURCES_PATH/spock-spock-1.1-rc-2/spock-spock-1.1-rc-2-allsources.zip";
 
