@@ -201,7 +201,7 @@ class ASTComparatorCategory {
     static Map<Class, List<String>> configuration = DEFAULT_CONFIGURATION;
 
     @CompileDynamic
-    static void apply(Map<Class, List<String>> config = DEFAULT_CONFIGURATION, Closure cl) {
+    static void apply(config = DEFAULT_CONFIGURATION, Closure cl) {
         configuration = config
         objects.clear()
         use(ASTComparatorCategory, cl)

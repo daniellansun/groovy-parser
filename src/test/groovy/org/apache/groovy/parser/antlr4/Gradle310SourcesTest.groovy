@@ -15927,18 +15927,11 @@ class Gradle310SourcesTest extends GroovyTestCase {
 
 
     /*************************************/
-    @CompileDynamic
     static unzipAndTest(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:]) {
         ignoreClazzList.addAll(TestUtils.COMMON_IGNORE_CLASS_LIST)
 
         TestUtils.unzipAndTest(ZIP_PATH, entryName, TestUtils.addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), replacementsMap)
     }
-
-    /*
-    static unzipAndTest(String entryName) {
-        TestUtils.unzipAndTest(ZIP_PATH, entryName);
-    }
-    */
 
     public static final String ZIP_PATH = "$TestUtils.RESOURCES_PATH/gradle-3.1/gradle-3.1-allsources.zip";
 
