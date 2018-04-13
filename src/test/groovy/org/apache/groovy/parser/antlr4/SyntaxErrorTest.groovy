@@ -18,10 +18,10 @@
  */
 package org.apache.groovy.parser.antlr4
 
+import groovy.transform.CompileStatic
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 
 import static org.apache.groovy.parser.antlr4.TestUtils.COMMON_IGNORE_CLASS_LIST
-import static org.apache.groovy.parser.antlr4.TestUtils.shouldFail
 
 /**
  * Some syntax error test cases for the new parser
@@ -29,6 +29,7 @@ import static org.apache.groovy.parser.antlr4.TestUtils.shouldFail
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * Created on    2016/09/02
  */
+@CompileStatic
 class SyntaxErrorTest extends GroovyTestCase {
     public static final String RESOURCES_PATH = 'src/test/resources';
 
