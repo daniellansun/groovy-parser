@@ -18,6 +18,8 @@
  */
 package org.apache.groovy.parser.antlr4
 
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.FieldNode
 import org.codehaus.groovy.ast.MethodNode
@@ -37,6 +39,7 @@ import static org.apache.groovy.parser.antlr4.TestUtils.doTest
  * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
  * Created on    2016/08/14
  */
+@CompileStatic
 class GroovyParserTest extends GroovyTestCase {
 
     void setUp() {}
@@ -48,6 +51,7 @@ class GroovyParserTest extends GroovyTestCase {
         doTestAttachedComments();
     }
 
+    @CompileDynamic
     private static doTestAttachedComments() {
         def (newAST, oldAST) = doTest('core/Comments_02.groovy');
         List<ClassNode> classes = new ArrayList<>(newAST.classes).sort { c1, c2 -> c1.name <=> c2.name };
