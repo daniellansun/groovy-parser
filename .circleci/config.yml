@@ -44,7 +44,7 @@ jobs:
       # run tests!
       - run:
           name: Run tests
-          command: ./gradlew test jacocoTestReport --no-daemon
+          command: ./gradlew test jacocoTestReport --no-daemon --max-workers 2
           no_output_timeout: 60m
 
       - run:
