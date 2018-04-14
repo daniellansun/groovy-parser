@@ -1,0 +1,25 @@
+# Java Gradle CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2
+jobs:
+  build:
+    machine:
+      enabled: true
+
+    working_directory: ~/repo
+
+    environment:
+      JVM_OPTS: -Xmx2g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSPermGenSweepingEnabled -XX:+IgnoreUnrecognizedVMOptions
+      TERM: dumb
+
+    steps:
+      - checkout
+      - run: chmod +x gradlew
+      - run: ./gradlew --version
+      - run: ./gradlew dependencies
+      - run:
+          name: Run tests
+          command: ./gradlew test --no-daemon
+          no_output_timeout: 60m
