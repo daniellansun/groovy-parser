@@ -22,12 +22,19 @@ package org.apache.groovy.parser.antlr4;
  * Represents a dialect
  *
  * See http://groovy-lang.org/differences.html
- *
- * TODO:
- *  1) Support "Creating Instances of Non-Static Inner Classes" syntax, e.g. y.new X()
  */
 public enum Dialect {
     GROOVY(true, false, false, true, false, true), JAVA(false, true, true, false, true, false);
+
+    public static Dialect getInstance() {
+        String dialectName = System.getProperty("groovy.dialect", "GROOVY").toUpperCase();
+
+        try {
+            return Dialect.valueOf(dialectName);
+        } catch (Exception e) {
+            return GROOVY;
+        }
+    }
 
     private boolean semiColonOptional;                // e.g. Java: println("123");                Groovy: println("123")
     private boolean arrayLiteralSupported;            // e.g. Java: int[] a = {1, 2, 3}            Groovy: int[] a = [1, 2, 3]

@@ -47,7 +47,8 @@ options {
 }
 
 @members {
-    private Dialect dialect = Dialect.GROOVY;
+    protected Dialect dialect;
+
     public GroovyParser(TokenStream input, Dialect dialect) {
         this(input);
         this.dialect = dialect;
@@ -1033,15 +1034,16 @@ primary
     |   THIS                                                                                #thisPrmrAlt
     |   SUPER                                                                               #superPrmrAlt
     |   parExpression                                                                       #parenPrmrAlt
-    |   closure                                                                             #closurePrmrAlt
-    |   lambdaExpression                                                                    #lambdaPrmrAlt
     |   list                                                                                #listPrmrAlt
     |   map                                                                                 #mapPrmrAlt
+    |   { dialect.isClosureSupported() }? closure                                           #closurePrmrAlt
+    |   lambdaExpression                                                                    #lambdaPrmrAlt
     |   builtInType                                                                         #builtInTypePrmrAlt
     ;
 
 list
-    :   LBRACK expressionList[true]? COMMA? RBRACK
+    :   { !dialect.isArrayLiteralSupported() }? LBRACK     expressionList[true]? COMMA?     RBRACK
+    |   {  dialect.isArrayLiteralSupported() }? LBRACE nls expressionList[true]? COMMA? nls RBRACE
     ;
 
 map
@@ -1226,6 +1228,6 @@ nls
     :   NL*
     ;
 
-sep :   { dialect.isSemiColonOptional()  }? (NL | SEMI)+
-    |   { !dialect.isSemiColonOptional() }? SEMI nls
+sep :   (NL | SEMI)+
+//    |   { !dialect.isSemiColonOptional() }? nls SEMI (NL | SEMI)*
     ;

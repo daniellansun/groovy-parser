@@ -54,7 +54,7 @@ options {
     private long tokenIndex     = 0;
     private int  lastTokenType  = 0;
     private int  invalidDigitCount = 0;
-    private Dialect dialect = Dialect.GROOVY;
+    protected Dialect dialect;
 
     public GroovyLexer(CharStream input, Dialect dialect) {
         this(input);

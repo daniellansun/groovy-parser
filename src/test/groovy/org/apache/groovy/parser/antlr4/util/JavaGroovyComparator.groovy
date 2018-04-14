@@ -32,13 +32,13 @@ class JavaGroovyComparator {
         return Reflect.on(new GroovyClassLoader().parseClass(src))
     }
 
-    static Reflect compileStaticGroovy(String src) {
-        synchronized (AstBuilder) {
-            System.setProperty("groovy.compile.static.by.default", "true")
-            def result = compileGroovy(src)
-            System.setProperty("groovy.compile.static.by.default", "false")
+    static synchronized Reflect compileStaticGroovy(String src) {
+        System.setProperty("groovy.compile.static.by.default", "true")
+        System.setProperty("groovy.dialect", "JAVA")
+        def result = compileGroovy(src)
+        System.setProperty("groovy.dialect", "GROOVY")
+        System.setProperty("groovy.compile.static.by.default", "false")
 
-            return result
-        }
+        return result
     }
 }
