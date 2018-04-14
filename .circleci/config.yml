@@ -35,12 +35,12 @@ jobs:
 
       - run: ./gradlew --version
 
-      - run: ./gradlew dependencies
-
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.gradle" }}
+#      - run: ./gradlew dependencies
+#
+#      - save_cache:
+#          paths:
+#            - ~/.gradle
+#          key: v1-dependencies-{{ checksum "build.gradle" }}
 
       # run tests!
       - run:
