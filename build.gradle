@@ -181,6 +181,6 @@ jacocoTestReport {
 }
 
 boolean isRunningOnCI() {
-    new File('.').absolutePath =~ /teamcity|jenkins|hudson|travis|ubuntu/
+    new File('.').absolutePath =~ /teamcity|circleci|jenkins|hudson|travis|ubuntu/
 }
 
