@@ -49,3 +49,4 @@ jobs:
       - run:
           name: Coveralls
           command: ./gradlew coveralls
+
