@@ -51,6 +51,19 @@ class GroovyParserTest extends GroovyTestCase {
         doTestAttachedComments();
     }
 
+    void "test IO stream/reader closed by the parser properly"() {
+        def f = File.createTempFile("Script${System.nanoTime()}", ".groovy")
+        f.text = '''
+            def a = 123
+        '''
+
+        def antlr4Parser = new org.apache.groovy.parser.Antlr4Parser()
+        antlr4Parser.parse(f)
+
+        boolean deleted = f.delete()
+        assert deleted: "Failed to delete file: ${f.getAbsolutePath()}"
+    }
+
     @CompileDynamic
     private static doTestAttachedComments() {
         def (newAST, oldAST) = doTest('core/Comments_02.groovy');
