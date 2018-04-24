@@ -1036,6 +1036,7 @@ primary
 
 list
     :   LBRACK expressionList[true]? COMMA? RBRACK
+    |   arrayInitializer
     ;
 
 map

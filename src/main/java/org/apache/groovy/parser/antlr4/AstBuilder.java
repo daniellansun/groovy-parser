@@ -1827,6 +1827,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return modifierNodeList;
     }
 
+    private ClassNode variableDeclarationType;
+
     @Override
     public DeclarationListStatement visitVariableDeclaration(VariableDeclarationContext ctx) {
         ModifierManager modifierManager = this.createModifierManager(ctx);
@@ -1836,6 +1838,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         ClassNode variableType = this.visitType(ctx.type());
+        if (asBoolean(ctx.type())) {
+            this.variableDeclarationType = variableType;
+        }
+
         ctx.variableDeclarators().putNodeMetaData(VARIABLE_DECLARATION_VARIABLE_TYPE, variableType);
         List<DeclarationExpression> declarationExpressionList = this.visitVariableDeclarators(ctx.variableDeclarators());
 
@@ -1843,7 +1849,11 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         ClassNode classNode = ctx.getNodeMetaData(CLASS_DECLARATION_CLASS_NODE);
 
         if (asBoolean(classNode)) {
-            return createFieldDeclarationListStatement(ctx, modifierManager, variableType, declarationExpressionList, classNode);
+            DeclarationListStatement declarationListStatement = createFieldDeclarationListStatement(ctx, modifierManager, variableType, declarationExpressionList, classNode);
+
+            this.variableDeclarationType = null;
+
+            return declarationListStatement;
         }
 
         declarationExpressionList.forEach(e -> {
@@ -1865,6 +1875,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 declarationExpression.setColumnNumber(ctx.getStart().getCharPositionInLine() + 1);
             }
         }
+
+        this.variableDeclarationType = null;
 
         return configureAST(new DeclarationListStatement(declarationExpressionList), ctx);
     }
@@ -3126,7 +3138,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public ListExpression visitListPrmrAlt(ListPrmrAltContext ctx) {
+    public Expression visitListPrmrAlt(ListPrmrAltContext ctx) {
         return configureAST(
                 this.visitList(ctx.list()),
                 ctx);
@@ -3409,16 +3421,45 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return configureAST(new VariableExpression(text), ctx);
     }
 
+    private int arrayLiteralDim = 0;
+
     @Override
-    public ListExpression visitList(ListContext ctx) {
+    public Expression visitList(ListContext ctx) {
         if (asBoolean(ctx.COMMA()) && !asBoolean(ctx.expressionList())) {
-            throw createParsingFailedException("Empty list constructor should not contain any comma(,)", ctx.COMMA());
+            throw createParsingFailedException("Empty " + (asBoolean(ctx.LBRACK()) ? "list" : "array") + " constructor should not contain any comma(,)", ctx.COMMA());
         }
 
-        return configureAST(
-                new ListExpression(
-                        this.visitExpressionList(ctx.expressionList())),
-                ctx);
+        if (asBoolean(ctx.LBRACK())) { // e.g. [1, 2, 3]
+            return configureAST(
+                    new ListExpression(
+                            this.visitExpressionList(ctx.expressionList())),
+                    ctx);
+        } else if (asBoolean(ctx.arrayInitializer())) { // e.g. {1, 2, 3}
+            if (null == this.variableDeclarationType) {
+                throw createParsingFailedException("array type should be specified when using array literal", ctx);
+            }
+            if (!this.variableDeclarationType.isArray()) {
+                throw createParsingFailedException("The type specified " + this.variableDeclarationType.getName() + " is not array type", ctx);
+            }
+
+            arrayLiteralDim++;
+
+            ClassNode elementType = this.variableDeclarationType;
+            for (int i = 0; i < arrayLiteralDim; i++) {
+                elementType = elementType.getComponentType();
+            }
+
+            ArrayExpression arrayExpression =
+                    new ArrayExpression(
+                            elementType,
+                            this.visitArrayInitializer(ctx.arrayInitializer()));
+
+            arrayLiteralDim--;
+
+            return configureAST(arrayExpression, ctx);
+        }
+
+        throw createParsingFailedException("Unsupported list: " + ctx.getText(), ctx);
     }
 
     @Override
