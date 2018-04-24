@@ -324,6 +324,7 @@ variableDeclaratorId
 
 variableInitializer
     :   enhancedStatementExpression
+    |   array
     ;
 
 variableInitializers
@@ -1034,9 +1035,12 @@ primary
     |   builtInType                                                                         #builtInTypePrmrAlt
     ;
 
+array
+    :   arrayInitializer
+    ;
+
 list
     :   LBRACK expressionList[true]? COMMA? RBRACK
-    |   arrayInitializer
     ;
 
 map

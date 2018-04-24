@@ -147,6 +147,7 @@ import static org.apache.groovy.parser.antlr4.GroovyLangParser.AnnotationNameCon
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.AnnotationsOptContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.AnonymousInnerClassDeclarationContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.ArgumentsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.ArrayContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.ArrayInitializerContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.AssertStatementContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.AssertStmtAltContext;
@@ -2049,9 +2050,17 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             return EmptyExpression.INSTANCE;
         }
 
-        return configureAST(
-                this.visitEnhancedStatementExpression(ctx.enhancedStatementExpression()),
-                ctx);
+        if (asBoolean(ctx.enhancedStatementExpression())) {
+            return configureAST(
+                    this.visitEnhancedStatementExpression(ctx.enhancedStatementExpression()),
+                    ctx);
+        } else if (asBoolean(ctx.array())) {
+            return configureAST(
+                    this.visitArray(ctx.array()),
+                    ctx);
+        }
+
+        throw createParsingFailedException("Unsupported variable initializer", ctx);
     }
 
     @Override
@@ -3424,42 +3433,41 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private int arrayLiteralDim = 0;
 
     @Override
+    public Expression visitArray(ArrayContext ctx) {
+        if (null == this.variableDeclarationType) {
+            throw createParsingFailedException("array type should be specified when using array literal", ctx);
+        }
+        if (!this.variableDeclarationType.isArray()) {
+            throw createParsingFailedException("The type specified " + this.variableDeclarationType.getName() + " is not array type", ctx);
+        }
+
+        arrayLiteralDim++;
+
+        ClassNode elementType = this.variableDeclarationType;
+        for (int i = 0; i < arrayLiteralDim; i++) {
+            elementType = elementType.getComponentType();
+        }
+
+        ArrayExpression arrayExpression =
+                new ArrayExpression(
+                        elementType,
+                        this.visitArrayInitializer(ctx.arrayInitializer()));
+
+        arrayLiteralDim--;
+
+        return configureAST(arrayExpression, ctx);
+    }
+
+    @Override
     public Expression visitList(ListContext ctx) {
         if (asBoolean(ctx.COMMA()) && !asBoolean(ctx.expressionList())) {
-            throw createParsingFailedException("Empty " + (asBoolean(ctx.LBRACK()) ? "list" : "array") + " constructor should not contain any comma(,)", ctx.COMMA());
+            throw createParsingFailedException("Empty list constructor should not contain any comma(,)", ctx.COMMA());
         }
 
-        if (asBoolean(ctx.LBRACK())) { // e.g. [1, 2, 3]
-            return configureAST(
-                    new ListExpression(
-                            this.visitExpressionList(ctx.expressionList())),
-                    ctx);
-        } else if (asBoolean(ctx.arrayInitializer())) { // e.g. {1, 2, 3}
-            if (null == this.variableDeclarationType) {
-                throw createParsingFailedException("array type should be specified when using array literal", ctx);
-            }
-            if (!this.variableDeclarationType.isArray()) {
-                throw createParsingFailedException("The type specified " + this.variableDeclarationType.getName() + " is not array type", ctx);
-            }
-
-            arrayLiteralDim++;
-
-            ClassNode elementType = this.variableDeclarationType;
-            for (int i = 0; i < arrayLiteralDim; i++) {
-                elementType = elementType.getComponentType();
-            }
-
-            ArrayExpression arrayExpression =
-                    new ArrayExpression(
-                            elementType,
-                            this.visitArrayInitializer(ctx.arrayInitializer()));
-
-            arrayLiteralDim--;
-
-            return configureAST(arrayExpression, ctx);
-        }
-
-        throw createParsingFailedException("Unsupported list: " + ctx.getText(), ctx);
+        return configureAST(
+                new ListExpression(
+                        this.visitExpressionList(ctx.expressionList())),
+                ctx);
     }
 
     @Override
