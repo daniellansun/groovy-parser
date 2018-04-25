@@ -43,6 +43,8 @@ def testArrayLiteral() {
     assert 2 == a8[1][0]
     assert 3 == a8[1][1]
 
+    int[][] a9 = {{}}
+    assert 0 == a9[0].length
 
     def c = { 1 }
     assert 1 == c()
@@ -93,6 +95,8 @@ def testArrayLiteralCS() {
     assert 2 == a8[1][0]
     assert 3 == a8[1][1]
 
+    int[][] a9 = {{}}
+    assert 0 == a9[0].length
 
     def c = { 1 }
     assert 1 == c()

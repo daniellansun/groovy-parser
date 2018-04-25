@@ -4180,11 +4180,18 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                         getCurrentArrayElementType(),
                                 Collections.singletonList(expressionStatement.getExpression())
                         ), ctx);
-            }  else {
+            } else {
                 throw new GroovyBugError("statement's type is not ExpressionStatement: " + statement.getClass()); // should never reach here
             }
+        } else if (0 == statementList.size()) {
+            arrayExpression =
+                    configureAST(
+                            new ArrayExpression(
+                                    getCurrentArrayElementType(),
+                                    Collections.emptyList()
+                            ), ctx);
         } else {
-            throw new GroovyBugError("statementList size is not 1: " + statementList.size()); // should never reach here
+            throw new GroovyBugError("statementList size is greater than 1: " + statementList.size()); // should never reach here
         }
 
         return arrayExpression;
