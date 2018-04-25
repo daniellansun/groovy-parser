@@ -3434,27 +3434,21 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitArray(ArrayContext ctx) {
-        if (null == this.variableDeclarationType || !this.variableDeclarationType.isArray()) {
-            VariableInitializersContext variableInitializersContext = ctx.arrayInitializer().variableInitializers();
-            if (null == variableInitializersContext || (null != variableInitializersContext && 1 == variableInitializersContext.variableInitializer().size())) {
-                // if array literal contains only one or zero element and variable declaration type is not specified or is not array type, it is actually a closure
-
+        VariableInitializersContext variableInitializersContext = ctx.arrayInitializer().variableInitializers();
+        if (null != variableInitializersContext && 1 == variableInitializersContext.variableInitializer().size()) {
+            // if array literal contains only one element and variable declaration type is not specified or is not array type, it is actually a closure
+            if (null == this.variableDeclarationType || !this.variableDeclarationType.isArray()) {
                 visitingClosureCnt++;
 
-                Statement code;
                 List<Expression> expressionList = this.visitArrayInitializer(ctx.arrayInitializer());
-                if (expressionList.size() > 0) {
-                    Expression expression = expressionList.get(0);
-                    code = this.createBlockStatement(
-                                    configureAST(
-                                            new ExpressionStatement(expression),
-                                            expression
-                                    )
-                            );
-                } else {
-                    code = this.createBlockStatement();
-                }
-
+                Expression expression = expressionList.get(0);
+                Statement code =
+                        this.createBlockStatement(
+                                configureAST(
+                                        new ExpressionStatement(expression),
+                                        expression
+                                )
+                        );
                 ClosureExpression result = configureAST(new ClosureExpression(Parameter.EMPTY_ARRAY, code), ctx);
 
                 visitingClosureCnt--;
