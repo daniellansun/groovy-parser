@@ -323,8 +323,8 @@ variableDeclaratorId
     ;
 
 variableInitializer
-    :   array
-    |   enhancedStatementExpression
+    :   enhancedStatementExpression
+    |   array
     ;
 
 variableInitializers

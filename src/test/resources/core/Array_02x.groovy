@@ -21,12 +21,6 @@ def testArrayLiteral() {
     assert 2 == a2[1][1]
     assert 3 == a2[1][2]
     assert 4 == a2[1][3]
-
-    int[] a3 = { 1 }
-    assert 1 == a3[0]
-
-    def c = { 1 }
-    assert 1 == c()
 }
 testArrayLiteral()
 
@@ -52,11 +46,5 @@ def testArrayLiteralCS() {
     assert 2 == a2[1][1]
     assert 3 == a2[1][2]
     assert 4 == a2[1][3]
-
-    int[] a3 = { 1 }
-    assert 1 == a3[0]
-
-    def c = { 1 }
-    assert 1 == c()
 }
 testArrayLiteralCS()

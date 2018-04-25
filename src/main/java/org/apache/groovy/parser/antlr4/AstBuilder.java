@@ -3434,29 +3434,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitArray(ArrayContext ctx) {
-        VariableInitializersContext variableInitializersContext = ctx.arrayInitializer().variableInitializers();
-        if (null != variableInitializersContext && 1 == variableInitializersContext.variableInitializer().size()) {
-            // if array literal contains only one element and variable declaration type is not specified or is not array type, it is actually a closure
-            if (null == this.variableDeclarationType || !this.variableDeclarationType.isArray()) {
-                visitingClosureCnt++;
-
-                List<Expression> expressionList = this.visitArrayInitializer(ctx.arrayInitializer());
-                Expression expression = expressionList.get(0);
-                Statement code =
-                        this.createBlockStatement(
-                                configureAST(
-                                        new ExpressionStatement(expression),
-                                        expression
-                                )
-                        );
-                ClosureExpression result = configureAST(new ClosureExpression(Parameter.EMPTY_ARRAY, code), ctx);
-
-                visitingClosureCnt--;
-
-                return result;
-            }
-        }
-
         if (null == this.variableDeclarationType) {
             throw createParsingFailedException("array type should be specified when using array literal", ctx);
         }
@@ -3466,25 +3443,19 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         arrayLiteralDim++;
 
-        ClassNode elementType = getCurrentArrayElementType();
-
-        List<Expression> expressionList = this.visitArrayInitializer(ctx.arrayInitializer());
-        ArrayExpression arrayExpression =
-                new ArrayExpression(
-                        elementType,
-                        expressionList);
-
-        arrayLiteralDim--;
-
-        return configureAST(arrayExpression, ctx);
-    }
-
-    private ClassNode getCurrentArrayElementType() {
         ClassNode elementType = this.variableDeclarationType;
         for (int i = 0; i < arrayLiteralDim; i++) {
             elementType = elementType.getComponentType();
         }
-        return elementType;
+
+        ArrayExpression arrayExpression =
+                new ArrayExpression(
+                        elementType,
+                        this.visitArrayInitializer(ctx.arrayInitializer()));
+
+        arrayLiteralDim--;
+
+        return configureAST(arrayExpression, ctx);
     }
 
     @Override
