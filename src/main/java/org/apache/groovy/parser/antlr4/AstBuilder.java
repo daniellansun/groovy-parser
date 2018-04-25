@@ -2435,7 +2435,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             // e.g. 1(), 1.1(), ((int) 1 / 2)(1, 2), {a, b -> a + b }(1, 2), m()()
             return configureAST(createCallMethodCallExpression(baseExpr, argumentsExpr), ctx);
         } else if (asBoolean(ctx.closure())) {
-            ClosureExpression closureExpression = this.visitClosure(ctx.closure());
+            Expression closureExpression = this.visitClosure(ctx.closure());
 
             if (baseExpr instanceof MethodCallExpression) {
                 MethodCallExpression methodCallExpression = (MethodCallExpression) baseExpr;
@@ -3137,7 +3137,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public ClosureExpression visitClosurePrmrAlt(ClosurePrmrAltContext ctx) {
+    public Expression visitClosurePrmrAlt(ClosurePrmrAltContext ctx) {
         return configureAST(this.visitClosure(ctx.closure()), ctx);
     }
 
@@ -3443,19 +3443,22 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         arrayLiteralDim++;
 
-        ClassNode elementType = this.variableDeclarationType;
-        for (int i = 0; i < arrayLiteralDim; i++) {
-            elementType = elementType.getComponentType();
-        }
-
         ArrayExpression arrayExpression =
                 new ArrayExpression(
-                        elementType,
+                        getCurrentArrayElementType(),
                         this.visitArrayInitializer(ctx.arrayInitializer()));
 
         arrayLiteralDim--;
 
         return configureAST(arrayExpression, ctx);
+    }
+
+    private ClassNode getCurrentArrayElementType() {
+        ClassNode elementType = this.variableDeclarationType;
+        for (int i = 0; i < arrayLiteralDim; i++) {
+            elementType = elementType.getComponentType();
+        }
+        return elementType;
     }
 
     @Override
@@ -3749,19 +3752,42 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         throw createParsingFailedException("Unsupported lambda body: " + ctx.getText(), ctx);
     }
 
+
     @Override
-    public ClosureExpression visitClosure(ClosureContext ctx) {
+    public Expression visitClosure(ClosureContext ctx) {
+        boolean hasArrow = asBoolean(ctx.ARROW());
+
+        if (!hasArrow) {
+            if (null != this.variableDeclarationType && this.variableDeclarationType.isArray()) {
+                BlockStatement blockStatementForCheck = this.visitBlockStatementsOpt(ctx.blockStatementsOpt()); // just used to check whether the closure is actually an array, need to visit again later.
+                List<Statement> statementListForCheck = blockStatementForCheck.getStatements();
+                if (1 == statementListForCheck.size()) {
+                    Statement statementForCheck = statementListForCheck.get(0);
+                    if (statementForCheck instanceof ExpressionStatement || statementForCheck instanceof BlockStatement) {
+                        arrayLiteralDim++;
+
+                        BlockStatement blockStatement = this.visitBlockStatementsOpt(ctx.blockStatementsOpt()); // we visit again now, nested array can get correct array element type via `arrayLiteralDim`
+                        ArrayExpression arrayExpression = createArrayExpression(ctx, blockStatement);
+
+                        arrayLiteralDim--;
+
+                        return arrayExpression;
+                    }
+                }
+            }
+        }
+
         visitingClosureCnt++;
 
         Parameter[] parameters = asBoolean(ctx.formalParameterList())
                 ? this.visitFormalParameterList(ctx.formalParameterList())
                 : null;
 
-        if (!asBoolean(ctx.ARROW())) {
+        if (!hasArrow) {
             parameters = Parameter.EMPTY_ARRAY;
         }
 
-        Statement code = this.visitBlockStatementsOpt(ctx.blockStatementsOpt());
+        BlockStatement code = this.visitBlockStatementsOpt(ctx.blockStatementsOpt());
         ClosureExpression result = configureAST(new ClosureExpression(parameters, code), ctx);
 
         visitingClosureCnt--;
@@ -4120,11 +4146,48 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             if (astNode instanceof MethodNode) {
                 throw createParsingFailedException("Method definition not expected here", ctx);
             } else {
+                if (this.arrayLiteralDim > 0) { // visiting nested array, e.g. { { 1 } }, the outer is a closure, the inner is a block
+                    if (astNode instanceof BlockStatement) {
+                        arrayLiteralDim++;
+
+                        BlockStatement blockStatement = (BlockStatement) astNode;
+                        ArrayExpression arrayExpression = createArrayExpression(ctx, blockStatement);
+
+                        arrayLiteralDim--;
+
+                        return configureAST(new ExpressionStatement(arrayExpression), ctx);
+                    }
+                }
+
                 return (Statement) astNode;
             }
         }
 
         throw createParsingFailedException("Unsupported block statement: " + ctx.getText(), ctx);
+    }
+
+    private ArrayExpression createArrayExpression(GroovyParserRuleContext ctx, BlockStatement blockStatement) {
+        List<Statement> statementList = blockStatement.getStatements();
+        ArrayExpression arrayExpression;
+
+        if (1 == statementList.size()) {
+            Statement statement = statementList.get(0);
+            if (statement instanceof ExpressionStatement) {
+                ExpressionStatement expressionStatement = (ExpressionStatement) statement;
+                arrayExpression =
+                        configureAST(
+                                new ArrayExpression(
+                                        getCurrentArrayElementType(),
+                                Collections.singletonList(expressionStatement.getExpression())
+                        ), ctx);
+            }  else {
+                throw new GroovyBugError("statement's type is not ExpressionStatement: " + statement.getClass()); // should never reach here
+            }
+        } else {
+            throw new GroovyBugError("statementList size is not 1: " + statementList.size()); // should never reach here
+        }
+
+        return arrayExpression;
     }
 
     @Override

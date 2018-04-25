@@ -21,6 +21,31 @@ def testArrayLiteral() {
     assert 2 == a2[1][1]
     assert 3 == a2[1][2]
     assert 4 == a2[1][3]
+
+    int[] a3 = { 1 }
+    assert 1 == a3[0]
+
+    int[][] a4 = { {1} }
+    assert 1 == a4[0][0]
+
+    int[][] a5 = { {1} }
+    assert 1 == a5[0][0]
+
+    Closure[] a6 = {{-> 1}}
+    assert 1 == a6[0]()
+
+    int[][] a7 = { new int[] {1} }
+    assert 1 == a7[0][0]
+
+    int[][] a8 = { {1}, new int[] {2, 3} }
+    assert 2 == a8.length
+    assert 1 == a8[0][0]
+    assert 2 == a8[1][0]
+    assert 3 == a8[1][1]
+
+
+    def c = { 1 }
+    assert 1 == c()
 }
 testArrayLiteral()
 
@@ -46,5 +71,30 @@ def testArrayLiteralCS() {
     assert 2 == a2[1][1]
     assert 3 == a2[1][2]
     assert 4 == a2[1][3]
+
+    int[] a3 = { 1 }
+    assert 1 == a3[0]
+
+    int[][] a4 = { {1} }
+    assert 1 == a4[0][0]
+
+    int[][] a5 = { {1} }
+    assert 1 == a5[0][0]
+
+    Closure[] a6 = {{-> 1}}
+    assert 1 == a6[0]()
+
+    int[][] a7 = { new int[] {1} }
+    assert 1 == a7[0][0]
+
+    int[][] a8 = { {1}, new int[] {2, 3} }
+    assert 2 == a8.length
+    assert 1 == a8[0][0]
+    assert 2 == a8[1][0]
+    assert 3 == a8[1][1]
+
+
+    def c = { 1 }
+    assert 1 == c()
 }
 testArrayLiteralCS()
