@@ -46,6 +46,13 @@ def testArrayLiteral() {
     int[][] a9 = {{}}
     assert 0 == a9[0].length
 
+    int[][] a10 = {{}, {1}}
+    assert 2 == a10.length
+    assert 0 == a10[0].length
+    assert 1 == a10[1].length
+    assert 1 == a10[1][0]
+
+
     def c = { 1 }
     assert 1 == c()
 }
@@ -97,6 +104,12 @@ def testArrayLiteralCS() {
 
     int[][] a9 = {{}}
     assert 0 == a9[0].length
+
+    int[][] a10 = {{}, {1}}
+    assert 2 == a10.length
+    assert 0 == a10[0].length
+    assert 1 == a10[1].length
+    assert 1 == a10[1][0]
 
     def c = { 1 }
     assert 1 == c()

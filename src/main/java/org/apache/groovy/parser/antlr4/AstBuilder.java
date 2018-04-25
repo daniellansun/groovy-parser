@@ -3761,18 +3761,22 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             if (null != this.variableDeclarationType && this.variableDeclarationType.isArray()) {
                 BlockStatement blockStatementForCheck = this.visitBlockStatementsOpt(ctx.blockStatementsOpt()); // just used to check whether the closure is actually an array, need to visit again later.
                 List<Statement> statementListForCheck = blockStatementForCheck.getStatements();
-                if (1 == statementListForCheck.size()) {
+                int statementListSizeForCheck = statementListForCheck.size();
+
+                if (1 == statementListSizeForCheck) {
                     Statement statementForCheck = statementListForCheck.get(0);
                     if (statementForCheck instanceof ExpressionStatement || statementForCheck instanceof BlockStatement) {
                         arrayLiteralDim++;
 
                         BlockStatement blockStatement = this.visitBlockStatementsOpt(ctx.blockStatementsOpt()); // we visit again now, nested array can get correct array element type via `arrayLiteralDim`
-                        ArrayExpression arrayExpression = createArrayExpression(ctx, blockStatement);
+                        ArrayExpression arrayExpression = createArrayExpressionForClosureAndBlock(ctx, blockStatement);
 
                         arrayLiteralDim--;
 
                         return arrayExpression;
                     }
+                } else if (0 == statementListSizeForCheck) {
+                    return createArrayExpressionForClosureAndBlock(ctx, this.createBlockStatement());
                 }
             }
         }
@@ -4151,7 +4155,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         arrayLiteralDim++;
 
                         BlockStatement blockStatement = (BlockStatement) astNode;
-                        ArrayExpression arrayExpression = createArrayExpression(ctx, blockStatement);
+                        ArrayExpression arrayExpression = createArrayExpressionForClosureAndBlock(ctx, blockStatement);
 
                         arrayLiteralDim--;
 
@@ -4166,11 +4170,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         throw createParsingFailedException("Unsupported block statement: " + ctx.getText(), ctx);
     }
 
-    private ArrayExpression createArrayExpression(GroovyParserRuleContext ctx, BlockStatement blockStatement) {
+    private ArrayExpression createArrayExpressionForClosureAndBlock(GroovyParserRuleContext ctx, BlockStatement blockStatement) {
         List<Statement> statementList = blockStatement.getStatements();
         ArrayExpression arrayExpression;
 
-        if (1 == statementList.size()) {
+        int statementListSize = statementList.size();
+        if (1 == statementListSize) {
             Statement statement = statementList.get(0);
             if (statement instanceof ExpressionStatement) {
                 ExpressionStatement expressionStatement = (ExpressionStatement) statement;
@@ -4183,7 +4188,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             } else {
                 throw new GroovyBugError("statement's type is not ExpressionStatement: " + statement.getClass()); // should never reach here
             }
-        } else if (0 == statementList.size()) {
+        } else if (0 == statementListSize) {
             arrayExpression =
                     configureAST(
                             new ArrayExpression(
@@ -4191,7 +4196,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                     Collections.emptyList()
                             ), ctx);
         } else {
-            throw new GroovyBugError("statementList size is greater than 1: " + statementList.size()); // should never reach here
+            throw new GroovyBugError("statementList size is greater than 1: " + statementListSize); // should never reach here
         }
 
         return arrayExpression;
