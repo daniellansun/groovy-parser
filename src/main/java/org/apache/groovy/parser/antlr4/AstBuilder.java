@@ -3757,7 +3757,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         boolean hasArrow = asBoolean(ctx.ARROW());
 
         if (!hasArrow) {
-            if (null != this.variableDeclarationTypeStack && this.variableDeclarationTypeStack.peek().isArray()) {
+            ClassNode variableDeclarationType = this.variableDeclarationTypeStack.peek();
+            if (null != variableDeclarationType && variableDeclarationType.isArray()) {
                 arrayLiteralDim++;
 
                 BlockStatement blockStatement = this.visitBlockStatementsOpt(ctx.blockStatementsOpt()); // we visit again now, nested array can get correct array element type via `arrayLiteralDim`
