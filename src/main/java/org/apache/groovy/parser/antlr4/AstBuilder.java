@@ -1828,7 +1828,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return modifierNodeList;
     }
 
-    private ClassNode variableDeclarationType;
+    private Deque<ClassNode> variableDeclarationType = new ArrayDeque<>();
 
     @Override
     public DeclarationListStatement visitVariableDeclaration(VariableDeclarationContext ctx) {
@@ -1839,9 +1839,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         ClassNode variableType = this.visitType(ctx.type());
-        if (asBoolean(ctx.type())) {
-            this.variableDeclarationType = variableType;
-        }
+        this.variableDeclarationType.push(variableType);
 
         ctx.variableDeclarators().putNodeMetaData(VARIABLE_DECLARATION_VARIABLE_TYPE, variableType);
         List<DeclarationExpression> declarationExpressionList = this.visitVariableDeclarators(ctx.variableDeclarators());
@@ -1852,7 +1850,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(classNode)) {
             DeclarationListStatement declarationListStatement = createFieldDeclarationListStatement(ctx, modifierManager, variableType, declarationExpressionList, classNode);
 
-            this.variableDeclarationType = null;
+            this.variableDeclarationType.pop();
 
             return declarationListStatement;
         }
@@ -1877,7 +1875,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
         }
 
-        this.variableDeclarationType = null;
+        this.variableDeclarationType.pop();
 
         return configureAST(new DeclarationListStatement(declarationExpressionList), ctx);
     }
@@ -3441,8 +3439,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (null == this.variableDeclarationType) {
             throw createParsingFailedException("array type should be specified when using array literal", ctx);
         }
-        if (!this.variableDeclarationType.isArray()) {
-            throw createParsingFailedException("The type specified " + this.variableDeclarationType.getName() + " is not array type", ctx);
+        if (!this.variableDeclarationType.peek().isArray()) {
+            throw createParsingFailedException("The type specified " + this.variableDeclarationType.peek().getName() + " is not array type", ctx);
         }
 
         arrayLiteralDim++;
@@ -3458,7 +3456,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private ClassNode getCurrentArrayElementType() {
-        ClassNode elementType = this.variableDeclarationType;
+        ClassNode elementType = this.variableDeclarationType.peek();
         for (int i = 0; i < arrayLiteralDim; i++) {
             elementType = elementType.getComponentType();
         }
@@ -3762,7 +3760,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         boolean hasArrow = asBoolean(ctx.ARROW());
 
         if (!hasArrow) {
-            if (null != this.variableDeclarationType && this.variableDeclarationType.isArray()) {
+            if (null != this.variableDeclarationType && this.variableDeclarationType.peek().isArray()) {
                 BlockStatement blockStatementForCheck = this.visitBlockStatementsOpt(ctx.blockStatementsOpt()); // just used to check whether the closure is actually an array, need to visit again later.
                 List<Statement> statementListForCheck = blockStatementForCheck.getStatements();
                 int statementListSizeForCheck = statementListForCheck.size();
@@ -3777,7 +3775,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
                         arrayLiteralDim--;
 
-                        return arrayExpression;
+                        if (null != arrayExpression) {
+                            return arrayExpression;
+                        }
                     }
                 } else if (0 == statementListSizeForCheck) {
                     return createArrayExpressionForClosureAndBlock(ctx, this.createBlockStatement());
@@ -4156,14 +4156,28 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             } else {
                 if (this.arrayLiteralDim > 0) { // visiting nested array, e.g. { { 1 } }, the outer is a closure, the inner is a block
                     if (astNode instanceof BlockStatement) {
-                        arrayLiteralDim++;
-
                         BlockStatement blockStatement = (BlockStatement) astNode;
-                        ArrayExpression arrayExpression = createArrayExpressionForClosureAndBlock(ctx, blockStatement);
+                        ArrayExpression arrayExpression = null;
 
-                        arrayLiteralDim--;
+                        if (blockStatement.getStatements().size() <= 1) {
+                            arrayLiteralDim++;
+                            arrayExpression = createArrayExpressionForClosureAndBlock(ctx, blockStatement);
+                            arrayLiteralDim--;
+                        }
 
-                        return configureAST(new ExpressionStatement(arrayExpression), ctx);
+                        if (null != arrayExpression) {
+                            return configureAST(new ExpressionStatement(arrayExpression), ctx);
+                        } else {
+                            return configureAST(
+                                    new ExpressionStatement(
+                                            configureAST(
+                                                    new ClosureExpression(Parameter.EMPTY_ARRAY, blockStatement),
+                                                    ctx
+                                            )
+                                    ),
+                                    ctx
+                            );
+                        }
                     }
                 }
 
@@ -4200,7 +4214,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                     Collections.emptyList()
                             ), ctx);
         } else {
-            throw new GroovyBugError("statementList size is greater than 1: " + statementListSize); // should never reach here
+            return null;
         }
 
         return arrayExpression;
