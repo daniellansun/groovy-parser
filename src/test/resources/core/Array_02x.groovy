@@ -87,6 +87,10 @@ def testArrayLiteral() {
     Closure[] a16 = {{def x = 1; return x}}
     assert 1 == a16[0]()
 
+    Closure[] a17 = {{def x = 1; return x}, {def x = 2; return x}}
+    assert 1 == a17[0]()
+    assert 2 == a17[1]()
+
     def c = { 1 }
     assert 1 == c()
 }
@@ -179,6 +183,10 @@ def testArrayLiteralCS() {
 
     Closure[] a16 = {{def x = 1; return x}}
     assert 1 == a16[0]()
+
+    Closure[] a17 = {{def x = 1; return x}, {def x = 2; return x}}
+    assert 1 == a17[0]()
+    assert 2 == a17[1]()
 
     def c = { 1 }
     assert 1 == c()

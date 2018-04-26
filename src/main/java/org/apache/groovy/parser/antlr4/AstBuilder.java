@@ -3761,26 +3761,15 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         if (!hasArrow) {
             if (null != this.variableDeclarationType && this.variableDeclarationType.peek().isArray()) {
-                BlockStatement blockStatementForCheck = this.visitBlockStatementsOpt(ctx.blockStatementsOpt()); // just used to check whether the closure is actually an array, need to visit again later.
-                List<Statement> statementListForCheck = blockStatementForCheck.getStatements();
-                int statementListSizeForCheck = statementListForCheck.size();
+                arrayLiteralDim++;
 
-                if (1 == statementListSizeForCheck) {
-                    Statement statementForCheck = statementListForCheck.get(0);
-                    if (statementForCheck instanceof ExpressionStatement || statementForCheck instanceof BlockStatement) {
-                        arrayLiteralDim++;
+                BlockStatement blockStatement = this.visitBlockStatementsOpt(ctx.blockStatementsOpt()); // we visit again now, nested array can get correct array element type via `arrayLiteralDim`
+                ArrayExpression arrayExpression = createArrayExpressionForClosureAndBlock(ctx, blockStatement);
 
-                        BlockStatement blockStatement = this.visitBlockStatementsOpt(ctx.blockStatementsOpt()); // we visit again now, nested array can get correct array element type via `arrayLiteralDim`
-                        ArrayExpression arrayExpression = createArrayExpressionForClosureAndBlock(ctx, blockStatement);
+                arrayLiteralDim--;
 
-                        arrayLiteralDim--;
-
-                        if (null != arrayExpression) {
-                            return arrayExpression;
-                        }
-                    }
-                } else if (0 == statementListSizeForCheck) {
-                    return createArrayExpressionForClosureAndBlock(ctx, this.createBlockStatement());
+                if (null != arrayExpression) {
+                    return arrayExpression;
                 }
             }
         }
@@ -4157,26 +4146,21 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 if (this.arrayLiteralDim > 0) { // visiting nested array, e.g. { { 1 } }, the outer is a closure, the inner is a block
                     if (astNode instanceof BlockStatement) {
                         BlockStatement blockStatement = (BlockStatement) astNode;
-                        ArrayExpression arrayExpression = null;
 
-                        if (blockStatement.getStatements().size() <= 1) {
-                            arrayLiteralDim++;
-                            arrayExpression = createArrayExpressionForClosureAndBlock(ctx, blockStatement);
-                            arrayLiteralDim--;
-                        }
+                        arrayLiteralDim++;
+                        ArrayExpression arrayExpression = createArrayExpressionForClosureAndBlock(ctx, blockStatement);
+                        arrayLiteralDim--;
 
                         if (null != arrayExpression) {
                             return configureAST(new ExpressionStatement(arrayExpression), ctx);
-                        } else {
+                        } else { // e.g. Closure[] a = {{def x = 1; return x}}, transform the inner block to a closure
                             return configureAST(
                                     new ExpressionStatement(
                                             configureAST(
                                                     new ClosureExpression(Parameter.EMPTY_ARRAY, blockStatement),
-                                                    ctx
-                                            )
+                                                    ctx)
                                     ),
-                                    ctx
-                            );
+                                    ctx);
                         }
                     }
                 }
