@@ -52,6 +52,37 @@ def testArrayLiteral() {
     assert 1 == a10[1].length
     assert 1 == a10[1][0]
 
+    int[][] a11 = new int[][] { {}, {1}, {2, 3}, new int[] {4, 5, 6}, {7, 8, 9, 10} }
+    assert 5 == a11.length
+    assert 0 == a11[0].length
+    assert 1 == a11[1][0]
+    assert 2 == a11[2][0]
+    assert 4 == a11[3][0]
+    assert 7 == a11[4][0]
+
+    int[][][] a12 = { new int[][] { {} } }
+    assert 0 == a12[0][0].length
+
+    int[][][] a13 = { { {} } }
+    assert 0 == a13[0][0].length
+
+    int[][][] a14 = { {{}}, new int[][] { {} }, new int[][] { {1} }, { {2} } }
+    assert 4 == a14.length
+    assert 0 == a14[0][0].length
+    assert 0 == a14[1][0].length
+    assert 1 == a14[2][0].length
+    assert 1 == a14[3][0].length
+    assert 1 == a14[2][0][0]
+    assert 2 == a14[3][0][0]
+
+    int[][][] a15 = new int[][][] { {{}}, new int[][] { {} }, new int[][] { {1} }, { {2} } }
+    assert 4 == a15.length
+    assert 0 == a15[0][0].length
+    assert 0 == a15[1][0].length
+    assert 1 == a15[2][0].length
+    assert 1 == a15[3][0].length
+    assert 1 == a15[2][0][0]
+    assert 2 == a15[3][0][0]
 
     def c = { 1 }
     assert 1 == c()
@@ -110,6 +141,38 @@ def testArrayLiteralCS() {
     assert 0 == a10[0].length
     assert 1 == a10[1].length
     assert 1 == a10[1][0]
+
+    int[][] a11 = new int[][] { {}, {1}, {2, 3}, new int[] {4, 5, 6}, {7, 8, 9, 10} }
+    assert 5 == a11.length
+    assert 0 == a11[0].length
+    assert 1 == a11[1][0]
+    assert 2 == a11[2][0]
+    assert 4 == a11[3][0]
+    assert 7 == a11[4][0]
+
+    int[][][] a12 = { new int[][] { {} } }
+    assert 0 == a12[0][0].length
+
+    int[][][] a13 = { { {} } }
+    assert 0 == a13[0][0].length
+
+    int[][][] a14 = { {{}}, new int[][] { {} }, new int[][] { {1} }, { {2} } }
+    assert 4 == a14.length
+    assert 0 == a14[0][0].length
+    assert 0 == a14[1][0].length
+    assert 1 == a14[2][0].length
+    assert 1 == a14[3][0].length
+    assert 1 == a14[2][0][0]
+    assert 2 == a14[3][0][0]
+
+    int[][][] a15 = new int[][][] { {{}}, new int[][] { {} }, new int[][] { {1} }, { {2} } }
+    assert 4 == a15.length
+    assert 0 == a15[0][0].length
+    assert 0 == a15[1][0].length
+    assert 1 == a15[2][0].length
+    assert 1 == a15[3][0].length
+    assert 1 == a15[2][0][0]
+    assert 2 == a15[3][0][0]
 
     def c = { 1 }
     assert 1 == c()

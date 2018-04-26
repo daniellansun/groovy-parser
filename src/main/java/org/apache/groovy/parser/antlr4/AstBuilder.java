@@ -3207,6 +3207,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         if (asBoolean(ctx.LBRACK()) || asBoolean(ctx.dims())) { // create array
+            arrayLiteralDim++;
+
             ArrayExpression arrayExpression;
             List<List<AnnotationNode>> allDimList;
 
@@ -3253,6 +3255,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
 
             arrayExpression.setType(createArrayType(classNode, allDimList));
+
+            arrayLiteralDim--;
 
             return configureAST(arrayExpression, ctx);
         }
