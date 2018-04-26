@@ -31,8 +31,8 @@ def testArrayLiteral() {
     int[][] a5 = { {1} }
     assert 1 == a5[0][0]
 
-    Closure[] a6 = {{-> 1}}
-    assert 1 == a6[0]()
+    int[][] a6 = { {1, 2} }
+    assert 1 == a6[0][0]
 
     int[][] a7 = { new int[] {1} }
     assert 1 == a7[0][0]
@@ -87,12 +87,29 @@ def testArrayLiteral() {
     Closure[] a16 = {{def x = 1; return x}}
     assert 1 == a16[0]()
 
-    Closure[] a17 = {{def x = 1; return x}, {def x = 2; return x}}
+    Closure[] a17 = {{def x = 1; return x}, {def x = 2; return x}, {}}
     assert 1 == a17[0]()
     assert 2 == a17[1]()
+    assert a17[2] instanceof Closure
 
-    def c = { 1 }
-    assert 1 == c()
+    Closure[] a18 = {{}}
+    assert a18[0] instanceof Closure
+
+    // legacy way to handle Closure array
+    Closure[] a19 = {-> 1}
+    assert 1 == a19[0]()
+    Closure[] a20 = {def y = 1; return y}
+    assert 1 == a20[0]()
+
+    Closure[] a21 = {{-> 1}}
+    assert 1 == a21[0]()
+
+    Closure[] a22 = {}
+    assert 0 == a22.length
+
+
+    def a23 = { 1 }
+    assert 1 == a23()
 }
 testArrayLiteral()
 
@@ -128,8 +145,8 @@ def testArrayLiteralCS() {
     int[][] a5 = { {1} }
     assert 1 == a5[0][0]
 
-    Closure[] a6 = {{-> 1}}
-    assert 1 == a6[0]()
+    int[][] a6 = { {1, 2} }
+    assert 1 == a6[0][0]
 
     int[][] a7 = { new int[] {1} }
     assert 1 == a7[0][0]
@@ -184,11 +201,28 @@ def testArrayLiteralCS() {
     Closure[] a16 = {{def x = 1; return x}}
     assert 1 == a16[0]()
 
-    Closure[] a17 = {{def x = 1; return x}, {def x = 2; return x}}
+    Closure[] a17 = {{def x = 1; return x}, {def x = 2; return x}, {}}
     assert 1 == a17[0]()
     assert 2 == a17[1]()
+    assert a17[2] instanceof Closure
 
-    def c = { 1 }
-    assert 1 == c()
+    Closure[] a18 = {{}}
+    assert a18[0] instanceof Closure
+
+    // legacy way to handle Closure array
+//    Closure[] a19 = {-> 1}
+//    assert 1 == a19[0]()
+//    Closure[] a20 = {def y = 1; return y}
+//    assert 1 == a20[0]()
+
+    Closure[] a21 = {{-> 1}}
+    assert 1 == a21[0]()
+
+    Closure[] a22 = {}
+    assert 0 == a22.length
+
+
+    def a23 = { 1 }
+    assert 1 == a23()
 }
 testArrayLiteralCS()

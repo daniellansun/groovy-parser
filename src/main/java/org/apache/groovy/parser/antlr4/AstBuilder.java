@@ -1828,7 +1828,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return modifierNodeList;
     }
 
-    private Deque<ClassNode> variableDeclarationType = new ArrayDeque<>();
+    private Deque<ClassNode> variableDeclarationTypeStack = new ArrayDeque<>();
 
     @Override
     public DeclarationListStatement visitVariableDeclaration(VariableDeclarationContext ctx) {
@@ -1839,7 +1839,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         ClassNode variableType = this.visitType(ctx.type());
-        this.variableDeclarationType.push(variableType);
+        this.variableDeclarationTypeStack.push(variableType);
 
         ctx.variableDeclarators().putNodeMetaData(VARIABLE_DECLARATION_VARIABLE_TYPE, variableType);
         List<DeclarationExpression> declarationExpressionList = this.visitVariableDeclarators(ctx.variableDeclarators());
@@ -1850,7 +1850,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (asBoolean(classNode)) {
             DeclarationListStatement declarationListStatement = createFieldDeclarationListStatement(ctx, modifierManager, variableType, declarationExpressionList, classNode);
 
-            this.variableDeclarationType.pop();
+            this.variableDeclarationTypeStack.pop();
 
             return declarationListStatement;
         }
@@ -1875,7 +1875,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             }
         }
 
-        this.variableDeclarationType.pop();
+        this.variableDeclarationTypeStack.pop();
 
         return configureAST(new DeclarationListStatement(declarationExpressionList), ctx);
     }
@@ -3436,11 +3436,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Expression visitArray(ArrayContext ctx) {
-        if (null == this.variableDeclarationType) {
-            throw createParsingFailedException("array type should be specified when using array literal", ctx);
-        }
-        if (!this.variableDeclarationType.peek().isArray()) {
-            throw createParsingFailedException("The type specified " + this.variableDeclarationType.peek().getName() + " is not array type", ctx);
+        if (!this.variableDeclarationTypeStack.peek().isArray()) {
+            throw createParsingFailedException("The variable type[" + this.variableDeclarationTypeStack.peek().getName() + "] is not array type", ctx);
         }
 
         arrayLiteralDim++;
@@ -3456,7 +3453,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private ClassNode getCurrentArrayElementType() {
-        ClassNode elementType = this.variableDeclarationType.peek();
+        ClassNode elementType = this.variableDeclarationTypeStack.peek();
         for (int i = 0; i < arrayLiteralDim; i++) {
             elementType = elementType.getComponentType();
         }
@@ -3760,7 +3757,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         boolean hasArrow = asBoolean(ctx.ARROW());
 
         if (!hasArrow) {
-            if (null != this.variableDeclarationType && this.variableDeclarationType.peek().isArray()) {
+            if (null != this.variableDeclarationTypeStack && this.variableDeclarationTypeStack.peek().isArray()) {
                 arrayLiteralDim++;
 
                 BlockStatement blockStatement = this.visitBlockStatementsOpt(ctx.blockStatementsOpt()); // we visit again now, nested array can get correct array element type via `arrayLiteralDim`
@@ -4174,15 +4171,13 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private ArrayExpression createArrayExpressionForClosureAndBlock(GroovyParserRuleContext ctx, BlockStatement blockStatement) {
         List<Statement> statementList = blockStatement.getStatements();
-        ArrayExpression arrayExpression;
 
         int statementListSize = statementList.size();
         if (1 == statementListSize) {
             Statement statement = statementList.get(0);
             if (statement instanceof ExpressionStatement) {
                 ExpressionStatement expressionStatement = (ExpressionStatement) statement;
-                arrayExpression =
-                        configureAST(
+                return configureAST(
                                 new ArrayExpression(
                                         getCurrentArrayElementType(),
                                 Collections.singletonList(expressionStatement.getExpression())
@@ -4191,8 +4186,13 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 throw new GroovyBugError("statement's type is not ExpressionStatement: " + statement.getClass()); // should never reach here
             }
         } else if (0 == statementListSize) {
-            arrayExpression =
-                    configureAST(
+            if (CLOSURE_STR.equals(elementType(this.variableDeclarationTypeStack.peek()).getName())) {
+                if (this.arrayLiteralDim > 1) { // e.g. if dim is 1, {} is still an array, e.g. Closure[] a = {}
+                    return null;
+                }
+            }
+
+            return configureAST(
                             new ArrayExpression(
                                     getCurrentArrayElementType(),
                                     Collections.emptyList()
@@ -4200,8 +4200,40 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         } else {
             return null;
         }
+    }
 
-        return arrayExpression;
+    /**
+     * TODO move the method to org.codehaus.groovy.runtime.ArrayTypeUtils
+     *
+     * Get the type of array elements
+     *
+     * @param classNode the type of array
+     * @return the type of elements
+     */
+    public static ClassNode elementType(ClassNode classNode) {
+        checkArrayType(classNode);
+
+        while (classNode.isArray()) {
+            classNode = classNode.getComponentType();
+        }
+
+        return classNode;
+    }
+
+    /**
+     * TODO move the method to org.codehaus.groovy.runtime.ArrayTypeUtils
+     *
+     * Check whether the type passed in is array type.
+     * If the type is not array type, throw IllegalArgumentException.
+     */
+    private static void checkArrayType(ClassNode classNode) {
+        if (null == classNode) {
+            throw new IllegalArgumentException("classNode can not be null");
+        }
+
+        if (!classNode.isArray()) {
+            throw new IllegalArgumentException(classNode.getName() + " is not array type");
+        }
     }
 
     @Override
@@ -4871,6 +4903,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private static final String PACKAGE_INFO = "package-info";
     private static final String PACKAGE_INFO_FILE_NAME = PACKAGE_INFO + ".groovy";
+
+    private static final String CLOSURE_STR = "Closure";
 
     private static final String GROOVY_TRANSFORM_TRAIT = "groovy.transform.Trait";
     private static final Set<String> PRIMITIVE_TYPE_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("boolean", "char", "byte", "short", "int", "long", "float", "double")));
