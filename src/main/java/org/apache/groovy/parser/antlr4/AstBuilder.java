@@ -441,7 +441,13 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     public ModuleNode buildAST() {
         try {
-            return (ModuleNode) this.visit(this.buildCST());
+            ModuleNode moduleNode = (ModuleNode) this.visit(this.buildCST());
+
+            if (!this.variableDeclarationTypeStack.isEmpty()) {
+                throw createParsingFailedException("BUG! variableDeclarationTypeStack is not empty when parsing is completed", moduleNode);
+            }
+
+            return moduleNode;
         } catch (Throwable t) {
             throw convertException(t);
         }
@@ -2136,7 +2142,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         } else if (baseExpr instanceof MethodCallExpression && !isInsideParentheses(baseExpr)) { // e.g. m {} a, b  OR  m(...) a, b
             if (asBoolean(arguments)) {
                 // The error should never be thrown.
-                throw new GroovyBugError("When baseExpr is a instance of MethodCallExpression, which should follow NO argumentList");
+                throw createParsingFailedException("BUG! When baseExpr is a instance of MethodCallExpression, which should follow NO argumentList", arguments);
             }
 
             methodCallExpression = (MethodCallExpression) baseExpr;
@@ -2870,7 +2876,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         throw createParsingFailedException(e.getMessage(), ctx);
                     }
 
-                    throw new GroovyBugError("Failed to find the original number literal text: " + constantExpression.getText());
+                    throw createParsingFailedException("BUG! Failed to find the original number literal text: " + constantExpression.getText(), ctx);
                 }
 
                 return configureAST(new UnaryMinusExpression(expression), ctx);
@@ -4184,7 +4190,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 Collections.singletonList(expressionStatement.getExpression())
                         ), ctx);
             } else {
-                throw new GroovyBugError("statement's type is not ExpressionStatement: " + statement.getClass()); // should never reach here
+                throw createParsingFailedException("BUG! statement's type is not ExpressionStatement: " + statement.getClass(), ctx); // should never reach here
             }
         } else if (0 == statementListSize) {
             if (CLOSURE_STR.equals(elementType(this.variableDeclarationTypeStack.peek()).getName())) {
