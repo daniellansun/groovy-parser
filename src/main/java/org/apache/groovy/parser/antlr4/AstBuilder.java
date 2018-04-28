@@ -4217,7 +4217,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     /**
-     * TODO move the method to org.codehaus.groovy.runtime.ArrayTypeUtils
+     * TODO move the method to org.codehaus.groovy.ast.ClassNode
      *
      * Calculate the dimension of array
      *
@@ -4237,7 +4237,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     /**
-     * TODO move the method to org.codehaus.groovy.runtime.ArrayTypeUtils
+     * TODO move the method to org.codehaus.groovy.ast.ClassNode
      *
      * Get the type of array elements
      *
@@ -4255,7 +4255,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     /**
-     * TODO move the method to org.codehaus.groovy.runtime.ArrayTypeUtils
+     * TODO move the method to org.codehaus.groovy.ast.ClassNode
      *
      * Check whether the type passed in is array type.
      * If the type is not array type, throw IllegalArgumentException.
