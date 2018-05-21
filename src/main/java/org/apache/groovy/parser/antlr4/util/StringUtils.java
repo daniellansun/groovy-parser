@@ -111,8 +111,8 @@ public class StringUtils {
 			}
 
 			if (slashyType == DOLLAR_SLASHY) {
-				text = replace(text,"$$", "$");
 				text = replace(text,"$/", "/");
+				text = replace(text,"$$", "$");
 			}
 
 		} else if (slashyType == NONE_SLASHY) {
