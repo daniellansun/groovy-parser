@@ -1212,7 +1212,7 @@ keywords
 rparen
     :   RPAREN
     |   ~RPAREN // !!!Error Alternative
-        { require(false, "Missing ')'", -1); }
+        { require(false, "Missing ')'"); }
     ;
 
 nls
