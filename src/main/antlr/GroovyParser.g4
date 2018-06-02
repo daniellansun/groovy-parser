@@ -1211,8 +1211,8 @@ keywords
 
 rparen
     :   RPAREN
-    |   ~RPAREN // !!!Error Alternative
-        { require(false, "Missing ')'"); }
+    |   r=~RPAREN // !!!Error Alternative
+        { require(false, "Missing ')'", -$r.text.length()); }
     ;
 
 nls
