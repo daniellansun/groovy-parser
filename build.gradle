@@ -89,10 +89,10 @@ compileJava.options.encoding = 'UTF-8'
 
 
 ext {
-    asmVersion = '6.1.1'
+    asmVersion = '6.2'
     antlr4Version = '4.7.1'
 //    groovyVersion = '3.0.0-SNAPSHOT'
-    groovyVersion = '3.0.0-alpha-2'
+    groovyVersion = '3.0.0-alpha-3'
     junitVersion = '4.12'
 }
 
@@ -127,7 +127,7 @@ sourceSets.test.java.srcDirs += file("$srcTest/groovy-sources")
 
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.8'
+    gradleVersion = '4.8.1'
 }
 
 task groovyConsole(type: JavaExec, dependsOn:[classes]) {
