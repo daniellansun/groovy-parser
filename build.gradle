@@ -64,8 +64,9 @@ repositories {
     maven { url 'https://oss.jfrog.org/oss-snapshot-local/' }
 }
 
-final PARSER_PACKAGE_NAME = 'org.apache.groovy.parser.antlr4'
 generateGrammarSource {
+    final PARSER_PACKAGE_NAME = 'org.apache.groovy.parser.antlr4'
+
     arguments += ["-visitor", "-no-listener", "-package", PARSER_PACKAGE_NAME]
 
     doLast {
