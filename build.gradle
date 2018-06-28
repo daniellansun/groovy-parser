@@ -54,6 +54,7 @@ apply plugin: 'antlr'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
+compileJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenLocal()
@@ -85,7 +86,6 @@ generateGrammarSource {
 
 generateGrammarSource.dependsOn clean
 compileJava.dependsOn generateGrammarSource
-compileJava.options.encoding = 'UTF-8'
 
 
 ext {
@@ -117,13 +117,6 @@ dependencies {
 
     testCompile "junit:junit:$junitVersion"
 }
-
-def srcBase = "src"
-def srcMain = "$srcBase/main"
-def srcTest = "$srcBase/test"
-
-sourceSets.main.java.srcDirs += file("$srcMain/groovy-sources")
-sourceSets.test.java.srcDirs += file("$srcTest/groovy-sources")
 
 
 task wrapper(type: Wrapper) {
