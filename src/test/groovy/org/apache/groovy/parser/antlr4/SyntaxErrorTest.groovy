@@ -22,6 +22,7 @@ import groovy.transform.CompileStatic
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 
 import static org.apache.groovy.parser.antlr4.TestUtils.COMMON_IGNORE_CLASS_LIST
+import static org.apache.groovy.parser.antlr4.TestUtils.doTest
 
 /**
  * Some syntax error test cases for the new parser
@@ -233,6 +234,11 @@ class SyntaxErrorTest extends GroovyTestCase {
     void "test groovy core - Import"() {
         TestUtils.doRunAndShouldFail('fail/Import_01x.groovy');
         TestUtils.doRunAndShouldFail('fail/Import_02x.groovy');
+    }
+
+    void "test groovy core - UnaryOperator"() {
+        TestUtils.doRunAndShouldFail('fail/UnaryOperator_01x.groovy');
+        TestUtils.doRunAndShouldFail('fail/UnaryOperator_02x.groovy');
     }
 
     /**************************************/
