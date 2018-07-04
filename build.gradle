@@ -119,6 +119,7 @@ dependencies {
     testCompile "junit:junit:$junitVersion"
 }
 
+task antlr(dependsOn: generateGrammarSource) // alias for generateGrammarSource
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.8.1'
