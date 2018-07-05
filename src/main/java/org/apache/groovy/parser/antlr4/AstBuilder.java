@@ -4365,7 +4365,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private Expression createPathExpression(Expression primaryExpr, List<? extends PathElementContext> pathElementContextList) {
-        if (DEF_STR.equals(primaryExpr.getText())) {
+        if ("def".equals(primaryExpr.getText())) {
             throw createParsingFailedException("keyword `def` is not expected here", primaryExpr);
         }
 
@@ -4780,7 +4780,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private static final String DQ_STR = "\"";
     private static final String DOLLAR_SLASH_STR = "$/";
     private static final String VAR_STR = "var";
-    private static final String DEF_STR = "def";
 
     private static final Map<String, String> QUOTATION_MAP = Maps.of(
             DQ_STR, DQ_STR,
