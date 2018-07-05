@@ -4365,10 +4365,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private Expression createPathExpression(Expression primaryExpr, List<? extends PathElementContext> pathElementContextList) {
-        if ("def".equals(primaryExpr.getText())) {
-            throw createParsingFailedException("keyword `def` is not expected here", primaryExpr);
-        }
-
         return (Expression) pathElementContextList.stream()
                 .map(e -> (Object) e)
                 .reduce(primaryExpr,
