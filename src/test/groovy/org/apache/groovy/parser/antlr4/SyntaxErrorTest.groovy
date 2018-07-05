@@ -52,6 +52,7 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.shouldFail('fail/Expression_07.groovy');
         TestUtils.shouldFail('fail/Expression_08.groovy');
         TestUtils.shouldFail('fail/Expression_09.groovy');
+        TestUtils.shouldFail('fail/Expression_10.groovy');
     }
 
     void "test groovy core - Switch"() {
