@@ -2861,11 +2861,9 @@ class Gradle310SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/execution/SelectedTaskExecutionActionTest.groovy", [])
     }
 
-    /* FIXME SEE https://github.com/danielsun1106/groovy-parser/issues/10
     void "test subprojects/core/src/test/groovy/org/gradle/execution/TaskNameResolverTest.groovy"() {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/execution/TaskNameResolverTest.groovy", [])
     }
-    */
 
     void "test subprojects/core/src/test/groovy/org/gradle/execution/TaskNameResolvingBuildConfigurationActionSpec.groovy"() {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/execution/TaskNameResolvingBuildConfigurationActionSpec.groovy", [])
@@ -8479,11 +8477,9 @@ class Gradle310SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/internal-performance-testing/src/main/groovy/org/gradle/performance/fixture/HonestProfilerCollector.groovy", [])
     }
 
-    /* FIXME SEE https://github.com/danielsun1106/groovy-parser/issues/11
     void "test subprojects/internal-performance-testing/src/main/groovy/org/gradle/performance/fixture/InvocationSpec.groovy"() {
         unzipAndTest("subprojects/internal-performance-testing/src/main/groovy/org/gradle/performance/fixture/InvocationSpec.groovy", [])
     }
-    */
 
     void "test subprojects/internal-performance-testing/src/main/groovy/org/gradle/performance/fixture/MavenBuildExperimentSpec.groovy"() {
         unzipAndTest("subprojects/internal-performance-testing/src/main/groovy/org/gradle/performance/fixture/MavenBuildExperimentSpec.groovy", [])
