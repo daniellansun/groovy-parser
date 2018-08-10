@@ -58,6 +58,12 @@ compileJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenLocal()
+
+    if (rootProject.hasProperty('buildInChina')) {
+        // Try to use Aliyun maven repository when building in China
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
+    }
+
     jcenter()
     mavenCentral()
 

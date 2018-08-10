@@ -1560,8 +1560,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public MethodNode visitMethodDeclaration(MethodDeclarationContext ctx) {
-        validateMethodDeclaration(ctx);
-
         ModifierManager modifierManager = createModifierManager(ctx);
 
         if (modifierManager.containsAny(VAR)) {
@@ -1614,7 +1612,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return methodNode;
     }
 
-    private void validateMethodDeclaration(MethodDeclarationContext ctx) {
+    private void validateMethodDeclaration(MethodDeclarationContext ctx, MethodNode methodNode, ModifierManager modifierManager, ClassNode classNode) {
         if (1 == ctx.t || 2 == ctx.t || 3 == ctx.t) { // 1: normal method declaration; 2: abstract method declaration; 3: normal method declaration OR abstract method declaration
             if (!(asBoolean(ctx.modifiersOpt().modifiers()) || asBoolean(ctx.returnType()))) {
                 throw createParsingFailedException("Modifiers or return type is required", ctx);
@@ -1632,9 +1630,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 throw createParsingFailedException("Abstract method should not have method body", ctx);
             }
         }
-    }
 
-    private void validateMethodDeclaration(MethodDeclarationContext ctx, MethodNode methodNode, ModifierManager modifierManager, ClassNode classNode) {
         boolean isAbstractMethod = methodNode.isAbstract();
         boolean hasMethodBody = asBoolean(methodNode.getCode());
 
