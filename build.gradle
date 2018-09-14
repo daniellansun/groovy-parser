@@ -128,7 +128,7 @@ dependencies {
 task antlr(dependsOn: generateGrammarSource) // alias for generateGrammarSource
 
 wrapper {
-    gradleVersion = '4.10'
+    gradleVersion = '4.10.1'
 }
 
 task groovyConsole(type: JavaExec, dependsOn:[classes]) {
