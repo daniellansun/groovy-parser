@@ -7,7 +7,7 @@ import org.apache.groovy.parser.antlr4.GroovyLangParser;
  * Manage ATN for parser to avoid memory leak
  */
 public class ParserAtnManager extends AtnManager {
-    private AtnWrapper parserAtnWrapper = new AtnManager.AtnWrapper(GroovyLangParser._ATN);
+    private final AtnWrapper parserAtnWrapper = new AtnManager.AtnWrapper(GroovyLangParser._ATN);
     public static final ParserAtnManager INSTANCE = new ParserAtnManager();
 
     @Override
