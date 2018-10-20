@@ -31,7 +31,7 @@ plugins {
     id 'me.champeau.buildscan-recipes' version '0.2.3'
 
     id 'com.github.kt3k.coveralls' version '2.6.3'
-    id 'jacoco'
+//    id 'jacoco'
 }
 
 buildScan {
@@ -96,10 +96,10 @@ compileJava.dependsOn generateGrammarSource
 
 
 ext {
-    asmVersion = '6.2'
+    asmVersion = '7.0-beta'
     antlr4Version = '4.7.1'
-//    groovyVersion = '3.0.0-SNAPSHOT'
-    groovyVersion = '3.0.0-alpha-3'
+    groovyVersion = '3.0.0-SNAPSHOT'
+//    groovyVersion = '3.0.0-alpha-3'
     junitVersion = '4.12'
 }
 
@@ -119,9 +119,8 @@ dependencies {
         compile files("lib/groovy-all-${groovyVersion}.jar")
     }
     */
-//    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
+    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
 //    compile files("lib/groovy-all-${groovyVersion}.jar")
-    compile fileTree("lib")
 
     testCompile "junit:junit:$junitVersion"
 }
@@ -165,6 +164,7 @@ test {
 
 logger.lifecycle "Detected ${isRunningOnCI() ? 'Continuous Integration environment' : 'development environment'}"
 
+/*
 jacoco {
     toolVersion = '0.7.6.201602180812'
 }
@@ -181,6 +181,7 @@ jacocoTestReport {
         html.enabled = true
     }
 }
+*/
 
 boolean isRunningOnCI() {
     new File('.').absolutePath =~ /teamcity|jenkins|hudson|travis|ubuntu/
