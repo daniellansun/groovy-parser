@@ -1,6 +1,9 @@
 language: groovy
 sudo: required
 jdk:
+  - openjdk11
+  - openjdk10
+  - oraclejdk9
   - oraclejdk8
 install: true
 before_cache:

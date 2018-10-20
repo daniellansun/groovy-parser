@@ -51,7 +51,7 @@ class GroovyParserTest extends GroovyTestCase {
         doTestAttachedComments();
     }
 
-    void "test IO stream/reader closed by the parser properly"() {
+    void "test IO stream or reader closed by the parser properly"() {
         def f = File.createTempFile("Script${System.nanoTime()}", ".groovy")
         f.text = '''
             def a = 123
@@ -266,6 +266,7 @@ class GroovyParserTest extends GroovyTestCase {
         doRunAndTestAntlr4('core/SafeIndex_01x.groovy');
         doRunAndTestAntlr4('core/SafeIndex_02x.groovy');
         doRunAndTestAntlr4('core/SafeIndex_03x.groovy');
+        doRunAndTestAntlr4('core/SafeIndex_04x.groovy');
     }
 
     void "test groovy core - NegativeRelationalOperators"() {
