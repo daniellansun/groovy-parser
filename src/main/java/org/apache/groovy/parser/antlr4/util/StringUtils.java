@@ -210,7 +210,7 @@ public class StringUtils {
 		increase = (increase < 0 ? 0 : increase) * 16;
 		final StringBuilder buf = new StringBuilder(text.length() + increase);
 		while (end != INDEX_NOT_FOUND) {
-			buf.append(text.substring(start, end)).append(replacement);
+			buf.append(text, start, end).append(replacement);
 			start = end + replLength;
 			end = text.indexOf(searchString, start);
 		}
