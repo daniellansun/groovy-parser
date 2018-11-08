@@ -45,7 +45,7 @@ buildScanRecipes {
     recipes 'git-status', 'gc-stats', 'travis-ci'
 }
 
-group 'com.groovyhelp'
+group 'me.sunlan'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
