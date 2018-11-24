@@ -137,6 +137,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static groovy.lang.Tuple.tuple;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.ADD;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.AS;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.AdditiveExprAltContext;
@@ -726,7 +727,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         // FIXME Groovy will ignore variableModifier of parameter in the for control
         // In order to make the new parser behave same with the old one, we do not process variableModifier*
 
-        return new Tuple2<>(parameter, (Expression) this.visit(ctx.expression()));
+        return tuple(parameter, (Expression) this.visit(ctx.expression()));
     }
 
     @Override
@@ -737,7 +738,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         closureListExpression.addExpression(asBoolean(ctx.expression()) ? (Expression) this.visit(ctx.expression()) : EmptyExpression.INSTANCE);
         closureListExpression.addExpression(this.visitForUpdate(ctx.forUpdate()));
 
-        return new Tuple2<>(ForStatement.FOR_LOOP_DUMMY, closureListExpression);
+        return tuple(ForStatement.FOR_LOOP_DUMMY, closureListExpression);
     }
 
     @Override
@@ -1015,9 +1016,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Tuple2<Token, Expression> visitSwitchLabel(SwitchLabelContext ctx) {
         if (asBoolean(ctx.CASE())) {
-            return new Tuple2<>(ctx.CASE().getSymbol(), (Expression) this.visit(ctx.expression()));
+            return tuple(ctx.CASE().getSymbol(), (Expression) this.visit(ctx.expression()));
         } else if (asBoolean(ctx.DEFAULT())) {
-            return new Tuple2<>(ctx.DEFAULT().getSymbol(), EmptyExpression.INSTANCE);
+            return tuple(ctx.DEFAULT().getSymbol(), EmptyExpression.INSTANCE);
         }
 
         throw createParsingFailedException("Unsupported switch label: " + ctx.getText(), ctx);
@@ -2737,14 +2738,14 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 indexExpr = expr;
             }
 
-            return new Tuple2<>(ctx.LBRACK().getSymbol(), indexExpr);
+            return tuple(ctx.LBRACK().getSymbol(), indexExpr);
         }
 
         // e.g. a[1, 2]
         ListExpression listExpression = new ListExpression(expressionList);
         listExpression.setWrapped(true);
 
-        return new Tuple2<>(ctx.LBRACK().getSymbol(), configureAST(listExpression, ctx));
+        return tuple(ctx.LBRACK().getSymbol(), configureAST(listExpression, ctx));
     }
 
     @Override
@@ -3505,7 +3506,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         try {
             num = Numbers.parseInteger(null, text);
         } catch (Exception e) {
-            this.numberFormatError = new Tuple2<>(ctx, e);
+            this.numberFormatError = tuple(ctx, e);
         }
 
         ConstantExpression constantExpression = new ConstantExpression(num, !text.startsWith(SUB_STR));
@@ -3523,7 +3524,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         try {
             num = Numbers.parseDecimal(text);
         } catch (Exception e) {
-            this.numberFormatError = new Tuple2<>(ctx, e);
+            this.numberFormatError = tuple(ctx, e);
         }
 
         ConstantExpression constantExpression = new ConstantExpression(num, !text.startsWith(SUB_STR));
@@ -4146,9 +4147,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         List<Tuple2<String, Expression>> annotationElementValues = new LinkedList<>();
 
         if (asBoolean(ctx.elementValuePairs())) {
-            this.visitElementValuePairs(ctx.elementValuePairs()).forEach((key, value) -> annotationElementValues.add(new Tuple2<>(key, value)));
+            this.visitElementValuePairs(ctx.elementValuePairs()).forEach((key, value) -> annotationElementValues.add(tuple(key, value)));
         } else if (asBoolean(ctx.elementValue())) {
-            annotationElementValues.add(new Tuple2<>(VALUE_STR, this.visitElementValue(ctx.elementValue())));
+            annotationElementValues.add(tuple(VALUE_STR, this.visitElementValue(ctx.elementValue())));
         }
 
         return annotationElementValues;
@@ -4176,7 +4177,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     @Override
     public Tuple2<String, Expression> visitElementValuePair(ElementValuePairContext ctx) {
-        return new Tuple2<>(ctx.elementValuePairName().getText(), this.visitElementValue(ctx.elementValue()));
+        return tuple(ctx.elementValuePairName().getText(), this.visitElementValue(ctx.elementValue()));
     }
 
     @Override
