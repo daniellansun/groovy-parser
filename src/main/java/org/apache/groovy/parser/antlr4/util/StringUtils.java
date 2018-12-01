@@ -172,6 +172,10 @@ public class StringUtils {
 		return length == quotationLength << 1 ? "" : text.substring(quotationLength, length - quotationLength);
 	}
 
+	public static boolean matches(String text, Pattern pattern) {
+		return pattern.matcher(text).matches();
+	}
+
 	/**
 	 * The modified implementation is based on StringUtils#replace(String text, String searchString, String replacement, int max), Apache commons-lang3-3.6
 	 *
