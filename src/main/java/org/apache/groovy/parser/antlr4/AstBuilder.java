@@ -23,10 +23,12 @@ import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -2131,7 +2133,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         if (hasArgumentList || hasCommandArgument) {
             if (baseExpr instanceof BinaryExpression) {
                 if (!"[".equals(((BinaryExpression) baseExpr).getOperation().getText()) && !isInsideParentheses(baseExpr)) {
-                    throw createParsingFailedException("Unexpected input: '" + ctx.expression().getText() + "'", ctx.expression());
+                    throw createParsingFailedException("Unexpected input: '" + getOriginalText(ctx.expression()) + "'", ctx.expression());
                 }
             }
         }
@@ -4591,6 +4593,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             scriptClassNode.setLastColumnNumber(lastStatement.getLastColumnNumber());
             scriptClassNode.setLastLineNumber(lastStatement.getLastLineNumber());
         }
+
+    }
+
+    private String getOriginalText(ParserRuleContext context) {
+        CharStream charStream = lexer.getInputStream();
+        return charStream.getText(Interval.of(context.getStart().getStartIndex(), context.getStop().getStopIndex()));
 
     }
 
