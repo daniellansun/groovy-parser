@@ -18,27 +18,17 @@ The new parser(Parrot) can parse Groovy source code and construct the related AS
 * new operators: identity operators(`===`, `!==`), elvis assignment(`?=`), `!in`, `!instanceof`
 * safe index, e.g. `nullableVar?[1, 2]`
 * non-static inner class instantiation, e.g. `outer.new Inner()`
-* runtime groovydoc, i.e. groovydoc with `@Groovydoc`; groovydoc attached to AST node as metadata
+* runtime groovydoc, i.e. groovydoc starting with `/**@`; groovydoc attached to AST node as metadata
 
 **JVM system properties to control parsing:**
 
 * `groovy.antlr4.cache.threshold`: how frequently to clear DFA cache(default: 64). **Notice:** The more frequently the DFA cache is cleared, the poorer parsing performance will be(you can not set the value that is less than the default value). But the DFA cache has to be cleared to avoid OutOfMemoryError's occurring.
 * `groovy.clear.lexer.dfa.cache`: whether to clear the dfa cache of lexer(default: false)
 * `groovy.attach.groovydoc`: whether to attach groovydoc to node as metadata while parsing groovy source code(default: false)
-* `groovy.attach.runtime.groovydoc`: whether to attach `@Groovydoc` annotation to all members which have groovydoc(i.e. `/** ... */`)
+* `groovy.attach.runtime.groovydoc`: whether to attach `@Groovydoc` annotation to all members which have groovydoc(i.e. `/**@ ... */`)
 * `groovy.extract.doc.comment`: whether to collect groovydoc while parsing groovy source code(default: false). **DEPRECATED, USE `groovy.attach.groovydoc` INSTEAD** 
 
 **Parrot is based on the highly optimized version of antlr4(com.tunnelvisionlabs:antlr4), which is licensed under BSD. On 20161103 Parrot was contributed to Apache Groovy, but the project will be maintained as a lab to experiment new features for Groovy. You can find it at [apache/groovy](https://github.com/apache/groovy/tree/master/subprojects/parser-antlr4).**
-
-If you want to give it a try, make sure your machine have `JDK 8+` installed first, then follow the steps:
-
-```
-$ git clone https://github.com/danielsun1106/groovy-parser.git
-$ cd groovy-parser
-$ ./gradlew groovyConsole
-```
-
-Feel free to report any issue you found, and pull requests are always welcome.
 
 ### Sample Code
 * [Sample code from Apache Groovy 3.0 release note](http://groovy-lang.org/releasenotes/groovy-3.0.html)
