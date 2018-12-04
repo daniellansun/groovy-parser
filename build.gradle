@@ -27,16 +27,13 @@ buildscript {
 }
 
 plugins {
-    id 'com.gradle.build-scan' version '1.12.1'
+    id 'com.gradle.build-scan' version '2.0.2'
     id 'me.champeau.buildscan-recipes' version '0.2.3'
-
-    id 'com.github.kt3k.coveralls' version '2.6.3'
-//    id 'jacoco'
 }
 
 buildScan {
-    licenseAgreementUrl = 'https://gradle.com/terms-of-service'
-    licenseAgree = 'yes'
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+    termsOfServiceAgree = 'yes'
     publishAlways()
 }
 
@@ -71,8 +68,10 @@ repositories {
 }
 
 generateGrammarSource {
-    final PARSER_PACKAGE_NAME = 'org.apache.groovy.parser.antlr4'
+    maxHeapSize = '1g'
+    outputs.cacheIf { true }
 
+    final PARSER_PACKAGE_NAME = 'org.apache.groovy.parser.antlr4'
     arguments += ["-visitor", "-no-listener", "-package", PARSER_PACKAGE_NAME]
 
     doLast {
@@ -91,12 +90,12 @@ generateGrammarSource {
     }
 }
 
-generateGrammarSource.dependsOn clean
-compileJava.dependsOn generateGrammarSource
+task antlr(dependsOn: generateGrammarSource) // alias for generateGrammarSource
+compileJava.dependsOn antlr
 
 
 ext {
-    asmVersion = '7.0-beta'
+    asmVersion = '7.0'
     antlr4Version = '4.7.1'
     groovyVersion = '3.0.0-SNAPSHOT'
 //    groovyVersion = '3.0.0-alpha-3'
@@ -112,30 +111,13 @@ dependencies {
     compile "org.ow2.asm:asm-tree:$asmVersion"
     compile "org.ow2.asm:asm-util:$asmVersion"
 
-    /*
-    if (isRunningOnCI()) {
-        compile "org.codehaus.groovy:groovy-all:$groovyVersion"
-    } else {
-        compile files("lib/groovy-all-${groovyVersion}.jar")
-    }
-    */
     compile "org.codehaus.groovy:groovy-all:$groovyVersion"
-//    compile files("lib/groovy-all-${groovyVersion}.jar")
 
     testCompile "junit:junit:$junitVersion"
 }
 
-task antlr(dependsOn: generateGrammarSource) // alias for generateGrammarSource
-
 wrapper {
-    gradleVersion = '4.10.2'
-}
-
-task groovyConsole(type: JavaExec, dependsOn:[classes]) {
-    jvmArgs '-ea', "-Xms256m", "-Xmx512m", "-Dgroovy.antlr4=true", "-Dgroovy.attach.groovydoc=true"
-
-    main = 'org.apache.groovy.parser.antlr4.ui.GroovyConsole'
-    classpath = sourceSets.main.runtimeClasspath
+    gradleVersion = '5.0'
 }
 
 test {
@@ -164,26 +146,6 @@ test {
 
 logger.lifecycle "Detected ${isRunningOnCI() ? 'Continuous Integration environment' : 'development environment'}"
 
-/*
-jacoco {
-    toolVersion = '0.7.6.201602180812'
-}
-
-jacocoTestReport {
-    group = 'Reporting'
-    description = 'Generate Jacoco coverage reports after running tests.'
-    additionalSourceDirs = project.files(sourceSets.main.allSource.srcDirs)
-    sourceDirectories = project.files(sourceSets.main.allSource.srcDirs)
-    classDirectories =  project.files(sourceSets.main.output)
-    reports {
-        xml.enabled = true
-        csv.enabled = false
-        html.enabled = true
-    }
-}
-*/
-
 boolean isRunningOnCI() {
-    new File('.').absolutePath =~ /teamcity|jenkins|hudson|travis|ubuntu/
+    new File('.').absolutePath =~ /teamcity|jenkins|hudson|travis|circleci|ubuntu/
 }
-
