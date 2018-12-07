@@ -44,8 +44,8 @@ import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asBoolean;
  */
 public class GroovydocManager {
     public static final String DOC_COMMENT = GroovydocHolder.DOC_COMMENT; // keys for meta data
-    private static final String DOC_COMMENT_PREFIX = "/**";
-    private static final String RUNTIME_GROOVYDOC_PREFIX = DOC_COMMENT_PREFIX + "@";
+    private static final String GROOVYDOC_PREFIX = "/**";
+    private static final String RUNTIME_GROOVYDOC_PREFIX = GROOVYDOC_PREFIX + "@";
     private static final String TRUE_STR = "true";
 
     @Deprecated
@@ -189,7 +189,7 @@ public class GroovydocManager {
                     continue;
                 }
 
-                if (text.startsWith(DOC_COMMENT_PREFIX)) {
+                if (text.startsWith(GROOVYDOC_PREFIX)) {
                     docCommentNodeText = text;
                 } else {
                     docCommentNodeText = null;
