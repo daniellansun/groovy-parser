@@ -165,6 +165,7 @@ import static org.apache.groovy.parser.antlr4.GroovyLangParser.BuiltInTypeContex
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.BuiltInTypePrmrAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.CASE;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.CastExprAltContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.CastExpressionContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.CastParExpressionContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.CatchClauseContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.CatchTypeContext;
@@ -2835,7 +2836,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public CastExpression visitCastExprAlt(CastExprAltContext ctx) {
+    public CastExpression visitCastExpression(CastExpressionContext ctx) {
         return configureAST(
                 new CastExpression(
                         this.visitCastParExpression(ctx.castParExpression()),
@@ -2843,6 +2844,11 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 ),
                 ctx
         );
+    }
+
+    @Override
+    public CastExpression visitCastExprAlt(CastExprAltContext ctx) {
+        return configureAST(this.visitCastExpression(ctx.castExpression()), ctx);
     }
 
     @Override

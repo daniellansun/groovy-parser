@@ -776,10 +776,17 @@ postfixExpression
     :   pathExpression op=(INC | DEC)?
     ;
 
+castExpression
+    // (a.b) + c()` will be parsed as cast expression without the semantic predicate
+    :   { SemanticPredicates.isTypeCast(_input) }?
+        castParExpression expression
+    ;
+
 expression
     // qualified names, array expressions, method invocation, post inc/dec, type casting (level 1)
     // The cast expression must be put before pathExpression to resovle the ambiguities between type casting and call on parentheses expression, e.g. (int)(1 / 2)
-    :   castParExpression expression                                                        #castExprAlt
+    :   castExpression                                                                      #castExprAlt
+
     |   postfixExpression                                                                   #postfixExprAlt
 
     // ~(BNOT)/!(LNOT) (level 1)

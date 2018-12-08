@@ -23,24 +23,40 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import static org.apache.groovy.parser.antlr4.GroovyParser.ASSIGN;
+import static org.apache.groovy.parser.antlr4.GroovyParser.BooleanLiteral;
 import static org.apache.groovy.parser.antlr4.GroovyParser.BuiltInPrimitiveType;
 import static org.apache.groovy.parser.antlr4.GroovyParser.CapitalizedIdentifier;
 import static org.apache.groovy.parser.antlr4.GroovyParser.DOT;
 import static org.apache.groovy.parser.antlr4.GroovyParser.ExpressionContext;
+import static org.apache.groovy.parser.antlr4.GroovyParser.FloatingPointLiteral;
+import static org.apache.groovy.parser.antlr4.GroovyParser.GStringBegin;
 import static org.apache.groovy.parser.antlr4.GroovyParser.Identifier;
+import static org.apache.groovy.parser.antlr4.GroovyParser.IntegerLiteral;
+import static org.apache.groovy.parser.antlr4.GroovyParser.LBRACE;
 import static org.apache.groovy.parser.antlr4.GroovyParser.LBRACK;
 import static org.apache.groovy.parser.antlr4.GroovyParser.LPAREN;
 import static org.apache.groovy.parser.antlr4.GroovyParser.LT;
+import static org.apache.groovy.parser.antlr4.GroovyParser.NL;
+import static org.apache.groovy.parser.antlr4.GroovyParser.NullLiteral;
 import static org.apache.groovy.parser.antlr4.GroovyParser.PathExpressionContext;
 import static org.apache.groovy.parser.antlr4.GroovyParser.PostfixExprAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyParser.PostfixExpressionContext;
+import static org.apache.groovy.parser.antlr4.GroovyParser.RPAREN;
+import static org.apache.groovy.parser.antlr4.GroovyParser.SUPER;
 import static org.apache.groovy.parser.antlr4.GroovyParser.StringLiteral;
+import static org.apache.groovy.parser.antlr4.GroovyParser.THIS;
 import static org.apache.groovy.parser.antlr4.util.StringUtils.matches;
 
 /**
@@ -192,6 +208,49 @@ public class SemanticPredicates {
                         && Character.isLowerCase(token.getText().codePointAt(0))
                         && !(ASSIGN == tokenType3 || (LT == tokenType2 || LBRACK == tokenType2));
 
+    }
+
+    private static final Set<Integer> VALID_TYPE_CAST_TOKEN_SET =
+            Collections.unmodifiableSet(
+                    new HashSet<>(
+                            Arrays.asList(
+                                Identifier, CapitalizedIdentifier, THIS, SUPER, IntegerLiteral, FloatingPointLiteral, BooleanLiteral,
+                                NullLiteral, StringLiteral, GStringBegin, LPAREN, LBRACK, LBRACE
+                            )
+                    )
+            );
+
+    public static boolean isTypeCast(TokenStream ts) {
+        int index = 1;
+        if (LPAREN != ts.LT(index++).getType()) { // not start with `(`, so must not be type casting
+            return false;
+        }
+
+        int cnt = 1;
+        do {
+            int tokenType = ts.LT(index++).getType();
+
+            if (LPAREN == tokenType) {
+                cnt++;
+
+                if (cnt > 1) { // contains at least two `(`, so must not be type casting, e.g. `((int)) a`
+                    return false;
+                }
+            } else if (RPAREN == tokenType) {
+                cnt--;
+            }
+        } while (cnt > 0); // unmatched parentheses is handled by lexer, so endless loop should not happen here
+
+        // ignore the new lines
+        while (NL == ts.LT(index).getType()) {
+            index++;
+        }
+
+        if (VALID_TYPE_CAST_TOKEN_SET.contains(ts.LT(index).getType())) {
+            return true;
+        }
+
+        return false;
     }
 
 }
