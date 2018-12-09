@@ -48,6 +48,7 @@ import static org.apache.groovy.parser.antlr4.GroovyParser.LBRACE;
 import static org.apache.groovy.parser.antlr4.GroovyParser.LBRACK;
 import static org.apache.groovy.parser.antlr4.GroovyParser.LPAREN;
 import static org.apache.groovy.parser.antlr4.GroovyParser.LT;
+import static org.apache.groovy.parser.antlr4.GroovyParser.NEW;
 import static org.apache.groovy.parser.antlr4.GroovyParser.NL;
 import static org.apache.groovy.parser.antlr4.GroovyParser.NullLiteral;
 import static org.apache.groovy.parser.antlr4.GroovyParser.PathExpressionContext;
@@ -215,7 +216,7 @@ public class SemanticPredicates {
                     new HashSet<>(
                             Arrays.asList(
                                 Identifier, CapitalizedIdentifier, THIS, SUPER, IntegerLiteral, FloatingPointLiteral, BooleanLiteral,
-                                NullLiteral, StringLiteral, GStringBegin, LPAREN, LBRACK, LBRACE
+                                NullLiteral, StringLiteral, GStringBegin, LPAREN, LBRACK, LBRACE, NEW
                             )
                     )
             );
