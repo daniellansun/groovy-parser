@@ -23,4 +23,5 @@ jobs:
           name: Run tests
           command: ./gradlew test --no-build-cache --no-daemon
           no_output_timeout: 60m
-      - deploy: bash <(curl -s https://codecov.io/bash)
+      - deploy:
+          command: bash <(curl -s https://codecov.io/bash)
