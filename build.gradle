@@ -48,6 +48,7 @@ version '1.0-SNAPSHOT'
 apply plugin: 'java'
 apply plugin: 'groovy'
 apply plugin: 'antlr'
+apply plugin: 'jacoco'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -116,10 +117,6 @@ dependencies {
     testCompile "junit:junit:$junitVersion"
 }
 
-wrapper {
-    gradleVersion = '5.0'
-}
-
 test {
     jvmArgs '-ea', "-Xms512m", "-Xmx1g", "-XX:+UseConcMarkSweepGC", "-Dgroovy.antlr4.cache.threshold=150", "-Dgroovy.attach.groovydoc=true"
 
@@ -142,6 +139,27 @@ test {
             }
         }
     }
+}
+
+jacoco {
+    toolVersion = "0.8.2"
+    reportsDir = file("${buildDir}/reports/jacoco/")
+}
+
+task codeCoverageReport(type: JacocoReport) {
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
+    reports {
+        xml.enabled true
+        html.enabled false
+        csv.enabled false
+    }
+}
+
+codeCoverageReport.dependsOn test
+
+wrapper {
+    gradleVersion = '5.0'
 }
 
 logger.lifecycle "Detected ${isRunningOnCI() ? 'Continuous Integration environment' : 'development environment'}"
