@@ -21,7 +21,7 @@ jobs:
       - run: ./gradlew dependencies
       - run:
           name: Run tests
-          command: ./gradlew jacocoTestReport --no-daemon
+          command: ./gradlew codeCoverageReport --no-daemon
           no_output_timeout: 60m
       - deploy:
           command: bash <(curl -s https://codecov.io/bash)
