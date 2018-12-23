@@ -96,7 +96,7 @@ compileJava.dependsOn antlr
 
 ext {
     asmVersion = '7.0'
-    antlr4Version = '4.7.1'
+    antlr4Version = '4.7.2'
     groovyVersion = '3.0.0-SNAPSHOT'
 //    groovyVersion = '3.0.0-alpha-3'
     junitVersion = '4.12'
