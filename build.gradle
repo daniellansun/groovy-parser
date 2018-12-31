@@ -97,8 +97,8 @@ compileJava.dependsOn antlr
 ext {
     asmVersion = '7.0'
     antlr4Version = '4.7.2'
-    groovyVersion = '3.0.0-SNAPSHOT'
-//    groovyVersion = '3.0.0-alpha-3'
+//    groovyVersion = '3.0.0-SNAPSHOT'
+    groovyVersion = '3.0.0-alpha-4'
     junitVersion = '4.12'
 }
 
@@ -121,7 +121,7 @@ wrapper {
 }
 
 test {
-    jvmArgs '-ea', "-Xms512m", "-Xmx1g", "-XX:+UseConcMarkSweepGC", "-Dgroovy.antlr4.cache.threshold=150", "-Dgroovy.attach.groovydoc=true"
+    jvmArgs '-ea', "-Xms512m", "-Xmx1g", "-XX:+UseConcMarkSweepGC", "-Dgroovy.antlr4.cache.threshold=150" /*, "-Dgroovy.attach.groovydoc=true"*/
 
     def headless = System.properties['java.awt.headless']
     if (headless == 'true') {
