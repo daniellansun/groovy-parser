@@ -878,9 +878,9 @@ options { baseContext = expression; }
     :   castParExpression castOperandExpression                                             #castExprAlt
     |   postfixExpression                                                                   #postfixExprAlt
     // ~(BNOT)/!(LNOT) (level 1)
-    |   (BITNOT | NOT) nls expression                                                       #unaryNotExprAlt
+    |   (BITNOT | NOT) nls castOperandExpression                                            #unaryNotExprAlt
     // ++(prefix)/--(prefix)/+(unary)/-(unary) (level 3)
-    |   op=(INC | DEC | ADD | SUB) expression                                               #unaryAddExprAlt
+    |   op=(INC | DEC | ADD | SUB) castOperandExpression                                    #unaryAddExprAlt
     ;
 
 
