@@ -24,3 +24,5 @@ def y = 2
 (boolean) !(-x + (+y--))
 
 assertEquals((short)-1, IH.unaryMinus((short)1));
+
+(Number) (Long) m()
