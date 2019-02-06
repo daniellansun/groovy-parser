@@ -18,3 +18,9 @@
  */
 
 def x = (a.b) + c()
+
+def x = 1
+def y = 2
+(boolean) !(-x + (+y--))
+
+assertEquals((short)-1, IH.unaryMinus((short)1));
