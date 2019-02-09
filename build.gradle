@@ -64,6 +64,7 @@ repositories {
     jcenter()
     mavenCentral()
 
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
     maven { url 'https://oss.jfrog.org/oss-snapshot-local/' }
 }
 
@@ -96,7 +97,7 @@ compileJava.dependsOn antlr
 
 ext {
     asmVersion = '7.0'
-    antlr4Version = '4.7.2'
+    antlr4Version = '4.7.3-SNAPSHOT'
 //    groovyVersion = '3.0.0-SNAPSHOT'
     groovyVersion = '3.0.0-alpha-4'
     junitVersion = '4.12'
