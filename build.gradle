@@ -29,7 +29,7 @@ buildscript {
 plugins {
     id 'com.gradle.build-scan' version '2.0.2'
     id 'me.champeau.buildscan-recipes' version '0.2.3'
-    id 'jacoco'
+//    id 'jacoco'
     id 'org.sonarqube' version '2.7'
 }
 
@@ -156,11 +156,11 @@ test {
     }
 }
 
-jacocoTestReport {
-    reports {
-        xml.enabled true
-    }
-}
+//jacocoTestReport {
+//    reports {
+//        xml.enabled true
+//    }
+//}
 
 logger.lifecycle "Detected ${isRunningOnCI() ? 'Continuous Integration environment' : 'development environment'}"
 
