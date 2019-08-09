@@ -51,7 +51,16 @@ apply plugin: 'antlr'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
-compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+//    options.fork = true
+//    options.forkOptions.jvmArgs += ["-Duser.language=en"]
+}
+
+tasks.withType(GroovyCompile) {
+    groovyOptions.encoding = 'UTF-8'
+}
 
 repositories {
     mavenLocal()
