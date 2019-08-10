@@ -20,6 +20,10 @@ jobs:
       - run: ./gradlew --version
       - run: ./gradlew dependencies
       - run:
-          name: Run tests and execute the scanner
+          name: Run tests
+          command: ./gradlew test
+          no_output_timeout: 60m
+      - run:
+          name: Execute the scanner
           command: ./gradlew sonarqube -Dsonar.projectKey=danielsun1106_groovy-parser -Dsonar.organization=danielsun1106 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN
           no_output_timeout: 60m
