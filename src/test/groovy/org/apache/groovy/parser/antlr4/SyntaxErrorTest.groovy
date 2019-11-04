@@ -252,6 +252,12 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.shouldFail('fail/Trait_01.groovy');
     }
 
+    void "test groovy core - SwitchExpression"() {
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_01x.groovy');
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_02x.groovy');
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_03x.groovy');
+    }
+
     /**************************************/
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
         ignoreClazzList.addAll(COMMON_IGNORE_CLASS_LIST)

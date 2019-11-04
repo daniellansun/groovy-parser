@@ -416,6 +416,22 @@ class GroovyParserTest extends GroovyTestCase {
         doRunAndTestAntlr4('core/NonStaticClass_01x.groovy');
     }
 
+    void "test groovy core - SwitchExpression"() {
+        doRunAndTestAntlr4('core/SwitchExpression_01x.groovy');
+        doRunAndTestAntlr4('core/SwitchExpression_02x.groovy');
+        doRunAndTestAntlr4('core/SwitchExpression_03x.groovy');
+        doRunAndTestAntlr4('core/SwitchExpression_04x.groovy');
+        doRunAndTestAntlr4('core/SwitchExpression_05x.groovy');
+        doRunAndTestAntlr4('core/SwitchExpression_06x.groovy');
+        doRunAndTestAntlr4('core/SwitchExpression_07x.groovy');
+        doRunAndTestAntlr4('core/SwitchExpression_08x.groovy');
+        doRunAndTestAntlr4('core/SwitchExpression_09x.groovy');
+        doRunAndTestAntlr4('core/SwitchExpression_10x.groovy');
+        doRunAndTestAntlr4('core/SwitchExpression_11x.groovy');
+        doRunAndTestAntlr4('core/SwitchExpression_12x.groovy');
+        doRunAndTestAntlr4('core/SwitchExpression_13x.groovy');
+    }
+
     void "test groovy core - BUG"() {
         doRunAndTestAntlr4('bugs/BUG-GROOVY-4757.groovy');
         doRunAndTestAntlr4('bugs/BUG-GROOVY-5652.groovy');

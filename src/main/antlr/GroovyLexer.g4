@@ -378,6 +378,7 @@ fragment
 BOOLEAN       : 'boolean';
 
 BREAK         : 'break';
+YIELD         : 'yield';
 
 fragment
 BYTE          : 'byte';

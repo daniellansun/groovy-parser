@@ -46,6 +46,7 @@ options {
 }
 
 @members {
+    private boolean inSwitchExpression = false;
 
     public static class GroovyParserRuleContext extends ParserRuleContext implements NodeMetaDataHandler {
         private Map metaDataMap = null;
@@ -641,6 +642,11 @@ breakStatement
         identifier?
     ;
 
+yieldStatement
+    :   YIELD
+        expression
+    ;
+
 tryCatchStatement
     :   TRY resources? nls block
         (nls catchClause)*
@@ -664,6 +670,9 @@ statement
 
     |   breakStatement                                                                                      #breakStmtAlt
     |   continueStatement                                                                                   #continueStmtAlt
+
+    |   { inSwitchExpression }?
+        yieldStatement                                                                                      #yieldStmtAlt
 
     |   identifier COLON nls statement                                                                      #labeledStmtAlt
 
@@ -782,6 +791,26 @@ postfixExpression
     :   pathExpression op=(INC | DEC)?
     ;
 
+switchExpression
+@init {
+    inSwitchExpression = true;
+}
+@after {
+    inSwitchExpression = false;
+}
+    :   SWITCH expressionInPar nls LBRACE nls switchBlockStatementExpressionGroup* nls RBRACE
+    ;
+
+switchBlockStatementExpressionGroup
+    :   (switchExpressionLabel nls)+ blockStatements
+    ;
+
+switchExpressionLabel
+    :   (   CASE expressionList[true]
+        |   DEFAULT
+        ) ac=(ARROW | COLON)
+    ;
+
 expression
     // qualified names, array expressions, method invocation, post inc/dec, type casting (level 1)
     // The cast expression must be put before pathExpression to resovle the ambiguities between type casting and call on parentheses expression, e.g. (int)(1 / 2)
@@ -796,6 +825,8 @@ expression
 
     // ++(prefix)/--(prefix)/+(unary)/-(unary) (level 3)
     |   op=(INC | DEC | ADD | SUB) expression                                               #unaryAddExprAlt
+
+    |   switchExpression                                                                    #switchExprAlt
 
     // multiplication/division/modulo (level 4)
     |   left=expression nls op=(MUL | DIV | MOD) nls right=expression                       #multiplicativeExprAlt
@@ -1161,6 +1192,7 @@ identifier
 //    |   DEF
     |   TRAIT
     |   AS
+    |   YIELD
     ;
 
 builtInType
@@ -1213,6 +1245,7 @@ keywords
     |   VAR
     |   VOLATILE
     |   WHILE
+    |   YIELD
 
     |   NullLiteral
     |   BooleanLiteral
