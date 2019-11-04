@@ -110,7 +110,7 @@ ext {
     asmVersion = '7.2-beta'
     antlr4Version = '4.7.4'
 //    groovyVersion = '3.0.0-SNAPSHOT'
-    groovyVersion = '3.0.0-beta-3'
+    groovyVersion = '3.0.0-rc-1'
     junitVersion = '4.12'
 }
 
