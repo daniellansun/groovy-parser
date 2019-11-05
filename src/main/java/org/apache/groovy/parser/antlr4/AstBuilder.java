@@ -32,6 +32,7 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.groovy.parser.antlr4.GroovyParser.MethodDeclarationStmtAltContext;
 import org.apache.groovy.parser.antlr4.internal.DescriptiveErrorStrategy;
 import org.apache.groovy.parser.antlr4.internal.atnmanager.AtnManager;
 import org.apache.groovy.parser.antlr4.util.StringUtils;
@@ -1090,6 +1091,11 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     @Override
     public Statement visitLocalVariableDeclarationStmtAlt(LocalVariableDeclarationStmtAltContext ctx) {
         return configureAST(this.visitLocalVariableDeclaration(ctx.localVariableDeclaration()), ctx);
+    }
+
+    @Override
+    public MethodNode visitMethodDeclarationStmtAlt(MethodDeclarationStmtAltContext ctx) {
+        return configureAST(this.visitMethodDeclaration(ctx.methodDeclaration()), ctx);
     }
 
     // } statement    --------------------------------------------------------------------
