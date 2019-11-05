@@ -32,7 +32,6 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.groovy.parser.antlr4.GroovyParser.MethodDeclarationStmtAltContext;
 import org.apache.groovy.parser.antlr4.internal.DescriptiveErrorStrategy;
 import org.apache.groovy.parser.antlr4.internal.atnmanager.AtnManager;
 import org.apache.groovy.parser.antlr4.util.StringUtils;
@@ -268,6 +267,7 @@ import static org.apache.groovy.parser.antlr4.GroovyLangParser.MapPrmrAltContext
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.MemberDeclarationContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.MethodBodyContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.MethodDeclarationContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.MethodDeclarationStmtAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.MethodNameContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.ModifierContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.ModifiersContext;
