@@ -1251,18 +1251,18 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     private boolean containsDefaultMethods(ClassDeclarationContext ctx) {
         List<MethodDeclarationContext> methodDeclarationContextList =
                 (List<MethodDeclarationContext>) ctx.classBody().classBodyDeclaration().stream()
-                        .map(ClassBodyDeclarationContext::memberDeclaration)
-                        .filter(Objects::nonNull)
-                        .map(e -> (Object) e.methodDeclaration())
-                        .filter(Objects::nonNull).reduce(new LinkedList<MethodDeclarationContext>(), (r, e) -> {
-                            MethodDeclarationContext methodDeclarationContext = (MethodDeclarationContext) e;
+                .map(ClassBodyDeclarationContext::memberDeclaration)
+                .filter(Objects::nonNull)
+                .map(e -> (Object) e.methodDeclaration())
+                .filter(Objects::nonNull).reduce(new LinkedList<MethodDeclarationContext>(), (r, e) -> {
+                    MethodDeclarationContext methodDeclarationContext = (MethodDeclarationContext) e;
 
-                            if (createModifierManager(methodDeclarationContext).containsAny(DEFAULT)) {
-                                ((List) r).add(methodDeclarationContext);
-                            }
+                    if (createModifierManager(methodDeclarationContext).containsAny(DEFAULT)) {
+                        ((List) r).add(methodDeclarationContext);
+                    }
 
-                            return r;
-                        });
+                    return r;
+        });
 
         return !methodDeclarationContextList.isEmpty();
     }
@@ -1861,7 +1861,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
             int modifiers = modifierManager.getClassMemberModifiersOpValue();
 
-            Expression initialValue = EmptyExpression.INSTANCE.equals(declarationExpression.getRightExpression()) ? null : declarationExpression.getRightExpression();
+            Expression initialValue = declarationExpression.getRightExpression() instanceof EmptyExpression ? null : declarationExpression.getRightExpression();
             Object defaultValue = findDefaultValueByType(variableType);
 
             if (classNode.isInterface()) {
@@ -2032,8 +2032,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         return ctx.variableInitializer().stream()
-                .map(this::visitVariableInitializer)
-                .collect(Collectors.toList());
+                        .map(this::visitVariableInitializer)
+                        .collect(Collectors.toList());
     }
 
     private int visitingArrayInitializerCnt = 0;
@@ -2680,7 +2680,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private int getSlashyType(String text) {
         return text.startsWith(SLASH_STR) ? StringUtils.SLASHY :
-                text.startsWith(DOLLAR_SLASH_STR) ? StringUtils.DOLLAR_SLASHY : StringUtils.NONE_SLASHY;
+                    text.startsWith(DOLLAR_SLASH_STR) ? StringUtils.DOLLAR_SLASHY : StringUtils.NONE_SLASHY;
     }
 
     @Override
@@ -2819,7 +2819,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                         String integerLiteralText = constantExpression.getNodeMetaData(INTEGER_LITERAL_TEXT);
                         if (null != integerLiteralText) {
 
-                            ConstantExpression result = new ConstantExpression(Numbers.parseInteger(null, SUB_STR + integerLiteralText));
+                            ConstantExpression result = new ConstantExpression(Numbers.parseInteger(SUB_STR + integerLiteralText));
 
                             this.numberFormatError = null; // reset the numberFormatError
 
@@ -3046,7 +3046,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 && Types.LEFT_SQUARE_BRACKET == ((BinaryExpression) leftExpr).getOperation().getType()) // e.g. map[a] = 123 OR map['a'] = 123 OR map["$a"] = 123
                 )
 
-        ) {
+            ) {
 
             throw createParsingFailedException("The LHS of an assignment should be a variable or a field accessing expression", ctx);
         }
@@ -3185,8 +3185,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
                 arrayExpression =
                         new ArrayExpression(
-                                elementType,
-                                this.visitArrayInitializer(ctx.arrayInitializer()));
+                            elementType,
+                            this.visitArrayInitializer(ctx.arrayInitializer()));
 
             } else {
                 Expression[] empties;
@@ -3453,7 +3453,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         Number num = null;
         try {
-            num = Numbers.parseInteger(null, text);
+            num = Numbers.parseInteger(text);
         } catch (Exception e) {
             this.numberFormatError = tuple(ctx, e);
         }
