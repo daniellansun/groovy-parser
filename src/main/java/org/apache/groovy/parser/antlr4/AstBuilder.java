@@ -4784,3 +4784,4 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private static final String CLASS_NAME = "_CLASS_NAME";
 }
+
