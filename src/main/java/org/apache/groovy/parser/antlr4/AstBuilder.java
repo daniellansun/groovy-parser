@@ -3084,9 +3084,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
             if (asBoolean(ctx.arrayInitializer())) {
                 ClassNode elementType = classNode;
                 allDimList = this.visitDims(ctx.dims());
-
-                for (int i = 0, n = allDimList.size() - 1; i < n; i++) {
-                    elementType = elementType.makeArray();
+                for (int i = 0, n = allDimList.size() - 1; i < n; i += 1) {
+                    elementType = this.createArrayType(elementType);
                 }
 
                 arrayExpression =
@@ -3123,21 +3122,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                 Collections.reverse(allDimList);
             }
 
-            arrayExpression.setType(createArrayType(classNode, allDimList));
+            arrayExpression.setType(this.createArrayType(classNode, allDimList));
 
             return configureAST(arrayExpression, ctx);
         }
 
         throw createParsingFailedException("Unsupported creator: " + ctx.getText(), ctx);
-    }
-
-    private ClassNode createArrayType(ClassNode classNode, List<List<AnnotationNode>> dimList) {
-        ClassNode arrayType = classNode;
-        for (int i = 0, n = dimList.size(); i < n; i++) {
-            arrayType = arrayType.makeArray();
-            arrayType.addAnnotations(dimList.get(i));
-        }
-        return arrayType;
     }
 
     private static String nextAnonymousClassName(ClassNode outerClass) {
@@ -4113,6 +4103,19 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         return this.createClassNode(ctx);
     }
 
+    private ClassNode createArrayType(ClassNode elementType, List<List<AnnotationNode>> dimsList) {
+        ClassNode arrayType = elementType;
+        for (int i = 0, n = dimsList.size(); i < n; i += 1) {
+            arrayType = this.createArrayType(arrayType);
+            arrayType.addAnnotations(dimsList.get(i));
+        }
+        return arrayType;
+    }
+
+    private ClassNode createArrayType(ClassNode elementType) {
+        return elementType.makeArray();
+    }
+
     private ClassNode createClassNode(GroovyParserRuleContext ctx) {
         ClassNode result = ClassHelper.make(ctx.getText());
 
@@ -4199,7 +4202,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         ClassNode classNode = this.visitType(typeContext);
 
         if (asBoolean(ellipsis)) {
-            classNode = configureAST(classNode.makeArray(), classNode);
+            classNode = this.createArrayType(classNode);
+            if (!asBoolean(typeContext)) {
+                configureAST(classNode, ellipsis);
+            } else {
+                configureAST(classNode, typeContext, configureAST(new ConstantExpression("..."), ellipsis));
+            }
         }
 
         Parameter parameter =
@@ -4410,17 +4418,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         );
     }
 
-    /*
-    private org.codehaus.groovy.syntax.Token createGroovyToken(String text, int startLine, int startColumn) {
-        return new org.codehaus.groovy.syntax.Token(
-                Types.lookup(text, Types.ANY),
-                text,
-                startLine,
-                startColumn
-        );
-    }
-    */
-
     /**
      * set the script source position
      */
@@ -4552,18 +4549,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         parser.addErrorListener(this.createANTLRErrorListener());
     }
 
-    /*
-    private String createExceptionMessage(Throwable t) {
-        StringWriter sw = new StringWriter();
-
-        try (PrintWriter pw = new PrintWriter(sw)) {
-            t.printStackTrace(pw);
-        }
-
-        return sw.toString();
-    }
-    */
-
     private static class DeclarationListStatement extends Statement {
         private final List<ExpressionStatement> declarationStatements;
 
@@ -4677,4 +4662,3 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
     private static final String CLASS_NAME = "_CLASS_NAME";
 }
-
