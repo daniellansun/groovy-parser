@@ -4113,6 +4113,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     private ClassNode createArrayType(ClassNode elementType) {
+        if (ClassHelper.VOID_TYPE.equals(elementType)) {
+            throw this.createParsingFailedException("void[] is an invalid type", elementType);
+        }
         return elementType.makeArray();
     }
 
