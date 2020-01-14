@@ -24,9 +24,8 @@ import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.codehaus.groovy.ast.ModifierNode;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import static org.apache.groovy.parser.antlr4.GroovyParser.ASSIGN;
@@ -46,9 +45,6 @@ import static org.apache.groovy.parser.antlr4.util.StringUtils.matches;
 
 /**
  * Some semantic predicates for altering the behaviour of the lexer and parser
- *
- * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * Created on    2016/08/20
  */
 public class SemanticPredicates {
     private static final Pattern NONSPACES_PATTERN = Pattern.compile("\\S+?");
@@ -115,7 +111,6 @@ public class SemanticPredicates {
      * Method name should not end with "2: arguments" and "3: closure"
      *
      * @param context the preceding expression
-     * @return
      */
     public static boolean isFollowingArgumentsOrClosure(ExpressionContext context) {
         if (context instanceof PostfixExprAltContext) {
@@ -154,8 +149,9 @@ public class SemanticPredicates {
                 && LPAREN == (ts.LT(2).getType());
     }
 
-    private static final Set<Integer> MODIFIER_SET =
-            Collections.unmodifiableSet(ModifierNode.MODIFIER_OPCODE_MAP.keySet());
+    private static final int[] MODIFIER_ARRAY =
+            ModifierNode.MODIFIER_OPCODE_MAP.keySet().stream()
+                    .mapToInt(Integer::intValue).sorted().toArray();
     /**
      * Distinguish between local variable declaration and method call, e.g. `a b`
      */
@@ -189,7 +185,7 @@ public class SemanticPredicates {
         tokenType3 = ts.LT(index + 2).getType();
 
         return // VOID == tokenType ||
-                !(BuiltInPrimitiveType == tokenType || MODIFIER_SET.contains(tokenType))
+                !(BuiltInPrimitiveType == tokenType || Arrays.binarySearch(MODIFIER_ARRAY, tokenType) >= 0)
                         && Character.isLowerCase(token.getText().codePointAt(0))
                         && !(ASSIGN == tokenType3 || (LT == tokenType2 || LBRACK == tokenType2));
 
