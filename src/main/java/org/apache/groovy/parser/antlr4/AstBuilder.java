@@ -3801,10 +3801,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         List<List<AnnotationNode>> dimList = this.visitDimsOpt(ctx.dimsOpt());
         if (asBoolean(dimList)) {
-            // clear array's generics type info. Groovy's bug? array's generics type will be ignored. e.g. List<String>[]... p
-            classNode.setGenericsTypes(null);
-            classNode.setUsingGenerics(false);
-
             classNode = this.createArrayType(classNode, dimList);
         }
 
