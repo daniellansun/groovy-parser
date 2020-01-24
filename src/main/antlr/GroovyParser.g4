@@ -140,7 +140,7 @@ modifiersOpt
     ;
 
 modifiers
-    :   (modifier nls)+
+    :   modifier (nls modifier)* nls
     ;
 
 classOrInterfaceModifiersOpt
