@@ -532,7 +532,7 @@ blockStatements
 // ANNOTATIONS
 
 annotationsOpt
-    :   (annotation nls)*
+    :   (annotation (nls annotation)* nls)?
     ;
 
 annotation
@@ -716,7 +716,7 @@ resource
  *  To handle empty cases at the end, we add switchLabel* to statement.
  */
 switchBlockStatementGroup
-    :   (switchLabel nls)+ blockStatements
+    :   switchLabel (nls switchLabel)* nls blockStatements
     ;
 
 switchLabel
