@@ -148,7 +148,7 @@ classOrInterfaceModifiersOpt
     ;
 
 classOrInterfaceModifiers
-    :   (classOrInterfaceModifier nls)+
+    :   classOrInterfaceModifier (nls classOrInterfaceModifier)* nls
     ;
 
 classOrInterfaceModifier
