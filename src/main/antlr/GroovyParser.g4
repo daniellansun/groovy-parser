@@ -188,7 +188,7 @@ variableModifiersOpt
     ;
 
 variableModifiers
-    :   (variableModifier nls)+
+    :   variableModifier (nls variableModifier)* nls
     ;
 
 typeParameters
