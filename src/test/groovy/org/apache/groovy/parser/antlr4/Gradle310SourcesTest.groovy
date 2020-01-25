@@ -2125,7 +2125,7 @@ class Gradle310SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/api/internal/changedetection/state/InMemoryTaskArtifactCacheTest.groovy", [])
     }
 
-    /* FIXME
+    /* FIXME `write [:]`, antlr4: `write[:]`, antlr2: `write([:])`
     void "test subprojects/core/src/test/groovy/org/gradle/api/internal/changedetection/state/InputPropertiesSerializerTest.groovy"() {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/api/internal/changedetection/state/InputPropertiesSerializerTest.groovy", [])
     }
@@ -8480,6 +8480,7 @@ class Gradle310SourcesTest extends GroovyTestCase {
     }
 
     /* FIXME [org.gradle.performance.fixture.InvocationSpec$Builder][class org.codehaus.groovy.ast.InnerClassNode][modifiers]:: 1545 != 1537
+        antlr2: inner interface: non-static, antlr4: inner interface: static
     void "test subprojects/internal-performance-testing/src/main/groovy/org/gradle/performance/fixture/InvocationSpec.groovy"() {
         unzipAndTest("subprojects/internal-performance-testing/src/main/groovy/org/gradle/performance/fixture/InvocationSpec.groovy", [])
     }

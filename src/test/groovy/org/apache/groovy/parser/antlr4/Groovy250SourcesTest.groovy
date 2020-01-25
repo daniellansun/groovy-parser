@@ -1621,7 +1621,7 @@ class Groovy250SourcesTest extends GroovyTestCase {
         unzipAndTest("src/test/groovy/GroovyMethodsTest.groovy", [])
     }
 
-    /* FIXME
+    /* FIXME `testFalse [:]`, antlr4 parser parses it into `testFalse[:]`, but antlr2 parser parses it into `testFalse([:])`
     void "test src/test/groovy/GroovyTruthTest.groovy"() {
         unzipAndTest("src/test/groovy/GroovyTruthTest.groovy", [])
     }
