@@ -11,19 +11,26 @@ jobs:
     working_directory: ~/repo
 
     environment:
-      JVM_OPTS: -Xmx2g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSPermGenSweepingEnabled -XX:+IgnoreUnrecognizedVMOptions
       TERM: dumb
+      ASYNC_PROFILER_HOME: /tmp/async-profiler-1.7-ea-linux-x64
 
     steps:
       - checkout
+      - run: wget https://github.com/jvm-profiling-tools/async-profiler/releases/download/v1.7-ea/async-profiler-1.7-ea-linux-x64.tar.gz
+      - run: mkdir $ASYNC_PROFILER_HOME && tar xvfz async-profiler-1.7-ea-linux-x64.tar.gz -C $ASYNC_PROFILER_HOME
+      - run: chmod -R 755 $ASYNC_PROFILER_HOME
       - run: chmod +x gradlew
       - run: ./gradlew --version
       - run: ./gradlew dependencies
+      - run: mkdir -p build/reports
       - run:
-          name: Run tests
-          command: ./gradlew test
+          name: Run tests and Execute the scanner
+          command: sudo ./gradlew sonarqube -Pasync.profiler.agentpath=$ASYNC_PROFILER_HOME/build/libasyncProfiler.so -Dsonar.projectKey=danielsun1106_groovy-parser -Dsonar.organization=danielsun1106 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN
           no_output_timeout: 60m
-      - run:
-          name: Execute the scanner
-          command: ./gradlew sonarqube -Dsonar.projectKey=danielsun1106_groovy-parser -Dsonar.organization=danielsun1106 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN
-          no_output_timeout: 60m
+      - store_test_results:
+          # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+          path: build/test-results/test
+      - store_artifacts:
+          # Upload test results for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
+          path: build/reports
+          when: always
