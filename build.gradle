@@ -133,9 +133,9 @@ wrapper {
 }
 
 test {
-    def commonJvmArgs = ['-ea', "-Xms1g", "-Xmx2g", "-XX:+UseG1GC", "-XX:MaxMetaspaceSize=512m", "-Dgroovy.antlr4.cache.threshold=150", "-Dgroovy.permissive.property.access=true", "-Duser.language=en"]
+    def commonJvmArgs = ['-ea', "-Xms512m", "-Xmx2g", "-XX:+UseG1GC", "-XX:MaxMetaspaceSize=512m", "-Dgroovy.antlr4.cache.threshold=150", "-Dgroovy.permissive.property.access=true", "-Duser.language=en"]
     if (rootProject.hasProperty('async.profiler.agentpath')) {
-        commonJvmArgs << "-agentpath:${rootProject.property('async.profiler.agentpath')}"
+        commonJvmArgs << "-agentpath:${rootProject.property('async.profiler.agentpath')}=start,file=build/reports/profile-${System.nanoTime()}.svg"
     }
     jvmArgs(*commonJvmArgs)
 
@@ -144,7 +144,7 @@ test {
         systemProperties 'java.awt.headless': 'true'
     }
 
-    forkEvery = 50
+    forkEvery = 0
     maxParallelForks = isRunningOnCI() ? 1 : Runtime.runtime.availableProcessors()
     scanForTestClasses = true
     ignoreFailures = false

@@ -25,11 +25,11 @@ jobs:
       - run: mkdir -p build/reports
       - run:
           name: Run tests
-          command: sudo ./gradlew test -Pasync.profiler.agentpath=$ASYNC_PROFILER_HOME/build/libasyncProfiler.so=start,file=build/reports/profile.svg
+          command: sudo ./gradlew test -Pasync.profiler.agentpath=$ASYNC_PROFILER_HOME/build/libasyncProfiler.so
           no_output_timeout: 60m
       - run:
           name: Execute the scanner
-          command: ./gradlew sonarqube -Dsonar.projectKey=danielsun1106_groovy-parser -Dsonar.organization=danielsun1106 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN
+          command: sudo ./gradlew sonarqube -Dsonar.projectKey=danielsun1106_groovy-parser -Dsonar.organization=danielsun1106 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN
           no_output_timeout: 60m
       - store_test_results:
           # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
