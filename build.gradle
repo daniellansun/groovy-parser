@@ -133,7 +133,11 @@ wrapper {
 }
 
 test {
-    jvmArgs '-ea', "-Xms512m", "-Xmx2g", "-XX:+UseG1GC", "-Dgroovy.antlr4.cache.threshold=150", "-Dgroovy.permissive.property.access=true", "-agentpath:${rootProject.property('async.profiler.agentpath')}"
+    def commonJvmArgs = ['-ea', "-Xms512m", "-Xmx2g", "-XX:+UseG1GC", "-Dgroovy.antlr4.cache.threshold=150", "-Dgroovy.permissive.property.access=true", "-Duser.language=en"]
+    if (rootProject.hasProperty('async.profiler.agentpath')) {
+        commonJvmArgs << "-agentpath:${rootProject.property('async.profiler.agentpath')}"
+    }
+    jvmArgs(*commonJvmArgs)
 
     def headless = System.properties['java.awt.headless']
     if (headless == 'true') {
