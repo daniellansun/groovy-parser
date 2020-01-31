@@ -274,8 +274,7 @@ enumConstant
     ;
 
 classBodyDeclaration[int t]
-    :   SEMI
-    |   (STATIC nls)? block
+    :   (STATIC nls)? block
     |   memberDeclaration[$t]
     ;
 
