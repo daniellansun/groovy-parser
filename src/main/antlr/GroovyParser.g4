@@ -225,7 +225,7 @@ locals[ int t ]
 
         (
             { 3 != $t }?
-            typeParameters? nls
+            (typeParameters nls)?
             (
                 { 2 != $t }?
                 (EXTENDS nls
@@ -630,7 +630,7 @@ ifElseStatement
     ;
 
 switchStatement
-    :   SWITCH expressionInPar nls LBRACE nls switchBlockStatementGroup* nls RBRACE
+    :   SWITCH expressionInPar nls LBRACE nls (switchBlockStatementGroup+ nls)? RBRACE
     ;
 
 loopStatement
@@ -1090,7 +1090,7 @@ creator[int t]
     ;
 
 arrayInitializer
-    :   LBRACE nls variableInitializers? nls RBRACE
+    :   LBRACE nls (variableInitializers nls)? RBRACE
     ;
 
 /**
