@@ -133,14 +133,18 @@ wrapper {
 }
 
 test {
-    jvmArgs '-ea', "-Xms512m", "-Xmx1g", "-XX:+UseConcMarkSweepGC", "-Dgroovy.antlr4.cache.threshold=150", "-Dgroovy.permissive.property.access=true"
+    def commonJvmArgs = ['-ea', "-Xms512m", "-Xmx2g", "-XX:MaxMetaspaceSize=512m", "-XX:+UseG1GC", "-XX:+UnlockDiagnosticVMOptions", "-XX:+DebugNonSafepoints", "-Dgroovy.antlr4.cache.threshold=150", "-Dgroovy.permissive.property.access=true", "-Duser.language=en"]
+    if (rootProject.hasProperty('async.profiler.agentpath')) {
+        commonJvmArgs << "-agentpath:${rootProject.property('async.profiler.agentpath')}=start,event=cpu,width=3600,file=build/reports/profile-${System.nanoTime()}.svg"
+    }
+    jvmArgs(*commonJvmArgs)
 
     def headless = System.properties['java.awt.headless']
     if (headless == 'true') {
         systemProperties 'java.awt.headless': 'true'
     }
 
-    forkEvery = 50
+    forkEvery = 0
     maxParallelForks = isRunningOnCI() ? 1 : Runtime.runtime.availableProcessors()
     scanForTestClasses = true
     ignoreFailures = false
@@ -150,7 +154,7 @@ test {
 
         afterSuite { desc, result ->
             if (!desc.parent) {
-                println "Test results for ${project.name}: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} passed, ${result.failedTestCount} failed, ${result.skippedTestCount} skipped)"
+                println "Test results for ${project.name}: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} passed, ${result.failedTestCount} failed, ${result.skippedTestCount} skipped), forkEvery: ${forkEvery}, maxParallelForks: ${maxParallelForks}"
             }
         }
     }
