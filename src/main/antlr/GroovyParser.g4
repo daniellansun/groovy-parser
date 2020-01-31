@@ -228,21 +228,21 @@ locals[ int t ]
             (typeParameters nls)?
             (
                 { 2 != $t }?
-                (EXTENDS nls
+                EXTENDS nls
                     (
                         // Only interface can extend more than one super class
                         {1 == $t}? scs=typeList
                     |
                         sc=type
                     )
-                nls)?
+                nls
             |
                 /* enum should not have type parameters and extends */
             )
 
             (
                 {1 != $t}?
-                (IMPLEMENTS nls is=typeList nls)?
+                IMPLEMENTS nls is=typeList nls
             |
                 /* interface should not implement other interfaces */
             )
