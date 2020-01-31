@@ -255,19 +255,18 @@ locals[ int t ]
 
 // t    see the comment of classDeclaration
 classBody[int t]
-    :   LBRACE
+    :   LBRACE nls
         (
             /* Only enum can have enum constants */
             { 2 == $t }?
-            nls enumConstants
+            enumConstants (nls COMMA)? sep?
         |
         )
-        sep?
         (classBodyDeclaration[$t] (sep classBodyDeclaration[$t])*)? sep? RBRACE
     ;
 
 enumConstants
-    :   enumConstant (nls COMMA nls enumConstant)* (nls COMMA)?
+    :   enumConstant (nls COMMA nls enumConstant)*
     ;
 
 enumConstant
