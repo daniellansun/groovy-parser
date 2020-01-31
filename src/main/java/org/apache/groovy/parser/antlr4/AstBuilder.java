@@ -1691,6 +1691,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         }
 
         if (asBoolean(ctx.VOID())) {
+            if (3 == ctx.ct) { // annotation
+                throw createParsingFailedException("annotation method can not have void return type", ctx);
+            }
+
             return ClassHelper.VOID_TYPE;
         }
 
