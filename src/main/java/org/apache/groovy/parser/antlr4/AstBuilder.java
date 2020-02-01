@@ -18,7 +18,9 @@
  */
 package org.apache.groovy.parser.antlr4;
 
+import groovy.lang.Tuple;
 import groovy.lang.Tuple2;
+import groovy.lang.Tuple3;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -192,8 +194,7 @@ import static org.apache.groovy.parser.antlr4.GroovyLangParser.CreatorContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.DEC;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.DEF;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.DEFAULT;
-import static org.apache.groovy.parser.antlr4.GroovyLangParser.DimsContext;
-import static org.apache.groovy.parser.antlr4.GroovyLangParser.DimsOptContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.DimContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.DoWhileStmtAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.DynamicMemberNameContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.ElementValueArrayInitializerContext;
@@ -201,6 +202,8 @@ import static org.apache.groovy.parser.antlr4.GroovyLangParser.ElementValueConte
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.ElementValuePairContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.ElementValuePairsContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.ElementValuesContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.EmptyDimsContext;
+import static org.apache.groovy.parser.antlr4.GroovyLangParser.EmptyDimsOptContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.EnhancedArgumentListContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.EnhancedArgumentListElementContext;
 import static org.apache.groovy.parser.antlr4.GroovyLangParser.EnhancedForControlContext;
@@ -3082,14 +3085,45 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                     ctx);
         }
 
-        if (asBoolean(ctx.LBRACK()) || asBoolean(ctx.dims())) { // create array
+        if (asBoolean(ctx.dim())) { // create array
             ArrayExpression arrayExpression;
-            List<List<AnnotationNode>> allDimList;
+            List<List<AnnotationNode>> allDimAnnotationList;
 
+            List<Tuple3<Expression, List<AnnotationNode>, TerminalNode>> dimList =
+                    ctx.dim().stream()
+                            .map(this::visitDim)
+                            .collect(Collectors.toList());
+
+            TerminalNode invalidDimLBrack = null;
+            Boolean exprEmpty = null;
+            List<Tuple3<Expression, List<AnnotationNode>, TerminalNode>> emptyDimList = new LinkedList<>();
+            List<Tuple3<Expression, List<AnnotationNode>, TerminalNode>> dimWithExprList = new LinkedList<>();
+            Tuple3<Expression, List<AnnotationNode>, TerminalNode> latestDim = null;
+            for (Tuple3<Expression, List<AnnotationNode>, TerminalNode> dim : dimList) {
+                if (null == dim.getV1()) {
+                    emptyDimList.add(dim);
+                    exprEmpty = true;
+                } else {
+                    if (null != exprEmpty && exprEmpty) {
+                        invalidDimLBrack = latestDim.getV3();
+                    }
+
+                    dimWithExprList.add(dim);
+                    exprEmpty = false;
+                }
+
+                latestDim = dim;
+            }
+
+            List<List<AnnotationNode>> emptyDimAnnotationList = emptyDimList.stream().map(Tuple3::getV2).collect(Collectors.toList());
             if (asBoolean(ctx.arrayInitializer())) {
+                if (!dimWithExprList.isEmpty()) {
+                    throw createParsingFailedException("dimension should be empty", dimWithExprList.get(0).getV3());
+                }
+
                 ClassNode elementType = classNode;
-                allDimList = this.visitDims(ctx.dims());
-                for (int i = 0, n = allDimList.size() - 1; i < n; i += 1) {
+                allDimAnnotationList = emptyDimAnnotationList;
+                for (int i = 0, n = allDimAnnotationList.size() - 1; i < n; i += 1) {
                     elementType = this.createArrayType(elementType);
                 }
 
@@ -3099,11 +3133,17 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                             this.visitArrayInitializer(ctx.arrayInitializer()));
 
             } else {
-                Expression[] empties;
-                List<List<AnnotationNode>> emptyDimList = this.visitDimsOpt(ctx.dimsOpt());
+                if (null != invalidDimLBrack) {
+                    throw createParsingFailedException("dimension cannot be empty", invalidDimLBrack);
+                }
 
-                if (asBoolean(emptyDimList)) {
-                    empties = new Expression[emptyDimList.size()];
+                if (dimWithExprList.isEmpty() && !emptyDimList.isEmpty()) {
+                    throw createParsingFailedException("dimensions cannot be all empty", emptyDimList.get(0).getV3());
+                }
+
+                Expression[] empties;
+                if (asBoolean(emptyDimAnnotationList)) {
+                    empties = new Expression[emptyDimAnnotationList.size()];
                     Arrays.fill(empties, ConstantExpression.EMPTY_EXPRESSION);
                 } else {
                     empties = Expression.EMPTY_ARRAY;
@@ -3114,25 +3154,28 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
                                 classNode,
                                 null,
                                 Stream.concat(
-                                        ctx.expression().stream()
-                                                .map(e -> (Expression) this.visit(e)),
+                                        dimWithExprList.stream().map(Tuple3::getV1),
                                         Arrays.stream(empties)
                                 ).collect(Collectors.toList()));
 
-
-                List<List<AnnotationNode>> exprDimList = ctx.annotationsOpt().stream().map(this::visitAnnotationsOpt).collect(Collectors.toList());
-                allDimList = new ArrayList<>(exprDimList);
-                Collections.reverse(emptyDimList);
-                allDimList.addAll(emptyDimList);
-                Collections.reverse(allDimList);
+                List<List<AnnotationNode>> exprDimAnnotationList = dimWithExprList.stream().map(Tuple3::getV2).collect(Collectors.toList());
+                allDimAnnotationList = new ArrayList<>(exprDimAnnotationList);
+                Collections.reverse(emptyDimAnnotationList);
+                allDimAnnotationList.addAll(emptyDimAnnotationList);
+                Collections.reverse(allDimAnnotationList);
             }
 
-            arrayExpression.setType(this.createArrayType(classNode, allDimList));
+            arrayExpression.setType(this.createArrayType(classNode, allDimAnnotationList));
 
             return configureAST(arrayExpression, ctx);
         }
 
         throw createParsingFailedException("Unsupported creator: " + ctx.getText(), ctx);
+    }
+
+    @Override
+    public Tuple3<Expression, List<AnnotationNode>, TerminalNode> visitDim(DimContext ctx) {
+        return Tuple.tuple((Expression) this.visit(ctx.expression()), this.visitAnnotationsOpt(ctx.annotationsOpt()), ctx.LBRACK());
     }
 
     private static String nextAnonymousClassName(ClassNode outerClass) {
@@ -3756,7 +3799,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public List<List<AnnotationNode>> visitDims(DimsContext ctx) {
+    public List<List<AnnotationNode>> visitEmptyDims(EmptyDimsContext ctx) {
         List<List<AnnotationNode>> dimList =
                 ctx.annotationsOpt().stream()
                         .map(this::visitAnnotationsOpt)
@@ -3768,12 +3811,12 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
     }
 
     @Override
-    public List<List<AnnotationNode>> visitDimsOpt(DimsOptContext ctx) {
-        if (!asBoolean(ctx.dims())) {
+    public List<List<AnnotationNode>> visitEmptyDimsOpt(EmptyDimsOptContext ctx) {
+        if (!asBoolean(ctx.emptyDims())) {
             return Collections.emptyList();
         }
 
-        return this.visitDims(ctx.dims());
+        return this.visitEmptyDims(ctx.emptyDims());
     }
 
     // type {       --------------------------------------------------------------------
@@ -3803,7 +3846,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
 
         classNode.addAnnotations(this.visitAnnotationsOpt(ctx.annotationsOpt()));
 
-        List<List<AnnotationNode>> dimList = this.visitDimsOpt(ctx.dimsOpt());
+        List<List<AnnotationNode>> dimList = this.visitEmptyDimsOpt(ctx.emptyDimsOpt());
         if (asBoolean(dimList)) {
             classNode = this.createArrayType(classNode, dimList);
         }
