@@ -3359,6 +3359,10 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> implements Groov
         validateExpressionListElement(ctx, expression);
 
         if (asBoolean(ctx.MUL())) {
+            if (!ctx.canSpread) {
+                throw createParsingFailedException("spread operator is not allowed here", ctx.MUL());
+            }
+
             return configureAST(new SpreadExpression(expression), ctx);
         }
 
