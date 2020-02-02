@@ -1156,14 +1156,14 @@ identifier
     :   Identifier
     |   CapitalizedIdentifier
     |   VAR
-    |
-        // if 'static' followed by DOT, we can treat them as identifiers, e.g. static.unused = { -> }
-        { DOT == _input.LT(2).getType() }?
-        STATIC
     |   IN
 //    |   DEF
     |   TRAIT
     |   AS
+    |
+        // if 'static' followed by DOT, we can treat them as identifiers, e.g. static.unused = { -> }
+        { DOT == _input.LT(2).getType() }?
+        STATIC
     ;
 
 builtInType
