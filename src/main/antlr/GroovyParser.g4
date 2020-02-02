@@ -585,9 +585,7 @@ localVariableDeclaration
     ;
 
 classifiedModifiers[int t]
-    :   (   { 0 == $t }? variableModifiers
-        |   { 1 == $t }? modifiers
-        ) nls
+    :   modifiers nls
     ;
 
 /**
