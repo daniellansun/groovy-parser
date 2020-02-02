@@ -164,8 +164,10 @@ options {
         String text = getText();
 
         require(null != paren, "Too many '" + text + "'");
-        require(text.equals(PAREN_MAP.get(paren.getText())),
-                "'" + paren.getText() + "'" + new PositionInfo(paren.getLine(), paren.getColumn()) + " can not match '" + text + "'", -1);
+
+        // Comment out the following code due to its meaningless error info
+        // require(text.equals(PAREN_MAP.get(paren.getText())),
+        //        "'" + paren.getText() + "'" + new PositionInfo(paren.getLine(), paren.getColumn()) + " can not match '" + text + "'", -1);
 
         exitParenCallback(text);
         parenStack.pop();
