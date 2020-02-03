@@ -261,6 +261,14 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.doRunAndShouldFail('fail/Array_02x.groovy');
     }
 
+    void "test error alternative - Missing ')'"() {
+        def err = groovy.test.GroovyAssert.shouldFail '''\
+            println ((int 123)
+        '''
+
+        assert err.message.contains("Missing ')' @ line 1, column 26")
+    }
+
     /**************************************/
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
         ignoreClazzList.addAll(COMMON_IGNORE_CLASS_LIST)
