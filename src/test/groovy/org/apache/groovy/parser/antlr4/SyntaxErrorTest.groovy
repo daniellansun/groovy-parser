@@ -262,14 +262,25 @@ class SyntaxErrorTest extends GroovyTestCase {
     }
 
     void "test error alternative - Missing ')'"() {
-        def err = groovy.test.GroovyAssert.shouldFail '''\
+        def err = expectFail '''\
             println ((int 123)
         '''
 
-        assert err.message.contains("Missing ')' @ line 1, column 26")
+        assert err == '''\
+startup failed:
+TestScript0.groovy: 1: Missing ')' @ line 1, column 26.
+               println ((int 123)
+                            ^
+
+1 error
+'''
     }
 
     /**************************************/
+    String expectFail(String code) {
+        return shouldFail(code).replaceAll('\r\n', '\n')
+    }
+
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
         ignoreClazzList.addAll(COMMON_IGNORE_CLASS_LIST)
 
