@@ -80,7 +80,7 @@ repositories {
 }
 
 generateGrammarSource {
-    maxHeapSize = '1g'
+    maxHeapSize = '2g'
     outputs.cacheIf { true }
 
     final PARSER_PACKAGE_NAME = 'org.apache.groovy.parser.antlr4'

@@ -292,7 +292,7 @@ memberDeclaration[int t]
  */
 methodDeclaration[int t, int ct]
     :   { 3 == $ct }?
-        returnType[$ct] methodName LPAREN rparen (DEFAULT nls elementValue)?
+        returnType[$ct] methodName LPAREN nls RPAREN (DEFAULT nls elementValue)?
     |
         modifiersOpt typeParameters? returnType[$ct]?
         methodName formalParameters (nls THROWS nls qualifiedClassNameList)?
@@ -335,7 +335,7 @@ variableInitializers
     ;
 
 emptyDims
-    :   (annotationsOpt LBRACK RBRACK)+
+    :   (annotationsOpt LBRACK nls RBRACK)+
     ;
 
 emptyDimsOpt
@@ -406,11 +406,11 @@ qualifiedClassNameList
     ;
 
 formalParameters
-    :   LPAREN formalParameterList? rparen
+    :   LPAREN nls (formalParameterList nls)? RPAREN
     ;
 
 formalParameterList
-    :   (formalParameter | thisFormalParameter) (COMMA nls formalParameter)*
+    :   (formalParameter | thisFormalParameter) (nls COMMA nls formalParameter)*
     ;
 
 thisFormalParameter
@@ -418,7 +418,7 @@ thisFormalParameter
     ;
 
 formalParameter
-    :   variableModifiersOpt type? ELLIPSIS? variableDeclaratorId (nls ASSIGN nls expression)?
+    :   variableModifiersOpt type? ELLIPSIS? variableDeclaratorId (nls ASSIGN nls spanExpression)?
     ;
 
 methodBody
@@ -534,7 +534,7 @@ annotationsOpt
     ;
 
 annotation
-    :   AT annotationName ( LPAREN elementValues? rparen)?
+    :   AT annotationName (LPAREN nls (elementValues nls)? RPAREN)?
     ;
 
 elementValues
@@ -545,7 +545,7 @@ elementValues
 annotationName : qualifiedClassName ;
 
 elementValuePairs
-    :   elementValuePair (COMMA elementValuePair)*
+    :   elementValuePair (nls COMMA nls elementValuePair)*
     ;
 
 elementValuePair
@@ -561,11 +561,11 @@ elementValuePairName
 elementValue
     :   elementValueArrayInitializer
     |   annotation
-    |   expression
+    |   spanExpression
     ;
 
 elementValueArrayInitializer
-    :   LBRACK (elementValue (COMMA elementValue)* COMMA?)? RBRACK
+    :   LBRACK (nls elementValue (nls COMMA nls elementValue)* (nls COMMA)?)? nls RBRACK
     ;
 
 // STATEMENTS / BLOCKS
@@ -601,7 +601,7 @@ variableDeclaration[int t]
     ;
 
 typeNamePairs
-    :   LPAREN typeNamePair (COMMA typeNamePair)* rparen
+    :   LPAREN nls typeNamePair (nls COMMA nls typeNamePair)* nls RPAREN
     ;
 
 typeNamePair
@@ -609,7 +609,7 @@ typeNamePair
     ;
 
 variableNames
-    :   LPAREN variableDeclaratorId (COMMA variableDeclaratorId)+ rparen
+    :   LPAREN nls variableDeclaratorId (nls COMMA nls variableDeclaratorId)+ nls RPAREN
     ;
 
 conditionalStatement
@@ -626,7 +626,7 @@ switchStatement
     ;
 
 loopStatement
-    :   FOR LPAREN forControl rparen nls statement                                                            #forStmtAlt
+    :   FOR LPAREN nls forControl nls rparen nls statement                                                    #forStmtAlt
     |   WHILE expressionInPar nls statement                                                                   #whileStmtAlt
     |   DO nls statement nls WHILE expressionInPar                                                            #doWhileStmtAlt
     ;
@@ -681,11 +681,11 @@ statement
     ;
 
 catchClause
-    :   CATCH LPAREN variableModifiersOpt catchType? identifier rparen nls block
+    :   CATCH LPAREN nls variableModifiersOpt (catchType nls)? identifier nls RPAREN nls block
     ;
 
 catchType
-    :   qualifiedClassName (BITOR qualifiedClassName)*
+    :   qualifiedClassName (nls BITOR nls qualifiedClassName)*
     ;
 
 finallyBlock
@@ -702,7 +702,7 @@ resourceList
 
 resource
     :   localVariableDeclaration
-    |   expression
+    |   spanExpression
     ;
 
 
@@ -724,11 +724,11 @@ forControl
     ;
 
 enhancedForControl
-    :   variableModifiersOpt type? variableDeclaratorId (COLON | IN) expression
+    :   variableModifiersOpt (type nls)? variableDeclaratorId nls (COLON | IN) nls spanExpression
     ;
 
 classicalForControl
-    :   forInit? SEMI expression? SEMI forUpdate?
+    :   (forInit nls)? SEMI nls (spanExpression nls)? SEMI (nls forUpdate)?
     ;
 
 forInit
@@ -744,7 +744,7 @@ forUpdate
 // EXPRESSIONS
 
 castParExpression
-    :   LPAREN type rparen
+    :   LPAREN nls type nls rparen
     ;
 
 parExpression
@@ -752,11 +752,11 @@ parExpression
     ;
 
 expressionInPar
-    :   LPAREN enhancedStatementExpression rparen
+    :   LPAREN nls spanEnhancedStatementExpression nls rparen
     ;
 
 expressionList[boolean canSpread]
-    :   expressionListElement[$canSpread] (COMMA expressionListElement[$canSpread])*
+    :   expressionListElement[$canSpread] (nls COMMA nls expressionListElement[$canSpread])*
     ;
 
 expressionListElement[boolean canSpread]
@@ -768,8 +768,19 @@ enhancedStatementExpression
     |   standardLambdaExpression
     ;
 
+spanEnhancedStatementExpression
+options { baseContext = enhancedStatementExpression; }
+    :   spanStatementExpression
+    |   standardLambdaExpression
+    ;
+
 statementExpression
     :   commandExpression                   #commandExprAlt
+    ;
+
+spanStatementExpression
+options { baseContext = statementExpression; }
+    :   spanCommandExpression                   #commandExprAlt
     ;
 
 postfixExpression
@@ -883,6 +894,103 @@ options { baseContext = expression; }
     |   op=(INC | DEC | ADD | SUB) castOperandExpression                                    #unaryAddExprAlt
     ;
 
+spanExpression
+options { baseContext = expression; }
+    // qualified names, array expressions, method invocation, post inc/dec, type casting (level 1)
+    // The cast expression must be put before pathExpression to resovle the ambiguities between type casting and call on parentheses expression, e.g. (int)(1 / 2)
+    :   castParExpression castOperandExpression                                             #castExprAlt
+    |   postfixExpression                                                                   #postfixExprAlt
+
+    // ~(BNOT)/!(LNOT) (level 1)
+    |   (BITNOT | NOT) nls spanExpression                                                       #unaryNotExprAlt
+
+    // math power operator (**) (level 2)
+    |   left=spanExpression op=POWER nls right=spanExpression                                       #powerExprAlt
+
+    // ++(prefix)/--(prefix)/+(unary)/-(unary) (level 3)
+    |   op=(INC | DEC | ADD | SUB) spanExpression                                               #unaryAddExprAlt
+
+    // multiplication/division/modulo (level 4)
+    |   left=spanExpression nls op=(MUL | DIV | MOD) nls right=spanExpression                       #multiplicativeExprAlt
+
+    // binary addition/subtraction (level 5)
+    |   left=spanExpression nls op=(ADD | SUB) nls right=spanExpression                                 #additiveExprAlt
+
+    // bit shift expressions (level 6)
+    |   left=spanExpression nls
+            (           (   dlOp=LT LT
+                        |   tgOp=GT GT GT
+                        |   dgOp=GT GT
+                        )
+            |   rangeOp=(    RANGE_INCLUSIVE
+                        |    RANGE_EXCLUSIVE
+                        )
+            ) nls
+        right=spanExpression                                                                    #shiftExprAlt
+
+    // boolean relational expressions (level 7)
+    |   left=spanExpression nls op=(AS | INSTANCEOF | NOT_INSTANCEOF) nls type                  #relationalExprAlt
+    |   left=spanExpression nls op=(LE | GE | GT | LT | IN | NOT_IN)  nls right=spanExpression      #relationalExprAlt
+
+    // equality/inequality (==/!=) (level 8)
+    |   left=spanExpression nls
+            op=(    IDENTICAL
+               |    NOT_IDENTICAL
+               |    EQUAL
+               |    NOTEQUAL
+               |    SPACESHIP
+               ) nls
+        right=spanExpression                                                                    #equalityExprAlt
+
+    // regex find and match (=~ and ==~) (level 8.5)
+    // jez: moved =~ closer to precedence of == etc, as...
+    // 'if (foo =~ "a.c")' is very close in intent to 'if (foo == "abc")'
+    |   left=spanExpression nls op=(REGEX_FIND | REGEX_MATCH) nls right=spanExpression              #regexExprAlt
+
+    // bitwise or non-short-circuiting and (&)  (level 9)
+    |   left=spanExpression nls op=BITAND nls right=spanExpression                                  #andExprAlt
+
+    // exclusive or (^)  (level 10)
+    |   left=spanExpression nls op=XOR nls right=spanExpression                                     #exclusiveOrExprAlt
+
+    // bitwise or non-short-circuiting or (|)  (level 11)
+    |   left=spanExpression nls op=BITOR nls right=spanExpression                                   #inclusiveOrExprAlt
+
+    // logical and (&&)  (level 12)
+    |   left=spanExpression nls op=AND nls right=spanExpression                                     #logicalAndExprAlt
+
+    // logical or (||)  (level 13)
+    |   left=spanExpression nls op=OR nls right=spanExpression                                      #logicalOrExprAlt
+
+    // conditional test (level 14)
+    |   <assoc=right> con=spanExpression nls
+        (   QUESTION nls tb=spanExpression nls COLON nls
+        |   ELVIS nls
+        )
+        fb=spanExpression                                                                       #conditionalExprAlt
+
+    // assignment spanExpression (level 15)
+    // "(a) = [1]" is a special case of multipleAssignmentExprAlt, it will be handle by assignmentExprAlt
+    |   <assoc=right> left=variableNames nls op=ASSIGN nls right=statementExpression        #multipleAssignmentExprAlt
+    |   <assoc=right> left=spanExpression nls
+                        op=(   ASSIGN
+                           |   ADD_ASSIGN
+                           |   SUB_ASSIGN
+                           |   MUL_ASSIGN
+                           |   DIV_ASSIGN
+                           |   AND_ASSIGN
+                           |   OR_ASSIGN
+                           |   XOR_ASSIGN
+                           |   RSHIFT_ASSIGN
+                           |   URSHIFT_ASSIGN
+                           |   LSHIFT_ASSIGN
+                           |   MOD_ASSIGN
+                           |   POWER_ASSIGN
+                           |   ELVIS_ASSIGN
+                           ) nls
+                     enhancedStatementExpression                                            #assignmentExprAlt
+    ;
+
 
 /*
 enhancedExpression
@@ -895,6 +1003,19 @@ commandExpression
     :   expression
         (
             { !SemanticPredicates.isFollowingArgumentsOrClosure($expression.ctx) }?
+            argumentList
+        |
+            /* if pathExpression is a method call, no need to have any more arguments */
+        )
+
+        commandArgument*
+    ;
+
+spanCommandExpression
+options { baseContext = commandExpression; }
+    :   spanExpression
+        (
+            { !SemanticPredicates.isFollowingArgumentsOrClosure($spanExpression.ctx) }?
             argumentList
         |
             /* if pathExpression is a method call, no need to have any more arguments */
@@ -1018,11 +1139,11 @@ dynamicMemberName
  *  The brackets may also be empty, as in T[].  This is how Groovy names array types.
  */
 indexPropertyArgs
-    :   QUESTION? LBRACK expressionList[true]? RBRACK
+    :   QUESTION? LBRACK nls (expressionList[true] nls)? RBRACK
     ;
 
 namedPropertyArgs
-    :   QUESTION? LBRACK (mapEntryList | COLON) RBRACK
+    :   QUESTION? LBRACK nls (mapEntryList | COLON) nls RBRACK
     ;
 
 primary
@@ -1043,24 +1164,24 @@ primary
     ;
 
 list
-    :   LBRACK expressionList[true]? COMMA? RBRACK
+    :   LBRACK nls (expressionList[true] nls)? (COMMA nls)?  RBRACK
     ;
 
 map
-    :   LBRACK
-        (   mapEntryList COMMA?
+    :   LBRACK nls
+        (   mapEntryList (nls COMMA)?
         |   COLON
-        )
+        ) nls
         RBRACK
     ;
 
 mapEntryList
-    :   mapEntry (COMMA mapEntry)*
+    :   mapEntry (nls COMMA nls mapEntry)*
     ;
 
 mapEntry
-    :   mapEntryLabel COLON nls expression
-    |   MUL COLON nls expression
+    :   mapEntryLabel nls COLON nls spanExpression
+    |   MUL nls COLON nls spanExpression
     ;
 
 mapEntryLabel
@@ -1079,7 +1200,7 @@ creator[int t]
     ;
 
 dim
-    :   annotationsOpt LBRACK expression? RBRACK
+    :   annotationsOpt LBRACK nls (spanExpression nls)? RBRACK
     ;
 
 arrayInitializer
@@ -1110,7 +1231,7 @@ typeArgumentsOrDiamond
     ;
 
 arguments
-    :   LPAREN enhancedArgumentList? COMMA? rparen
+    :   LPAREN nls (enhancedArgumentList nls)? (COMMA nls)? rparen
     ;
 
 argumentList
@@ -1123,7 +1244,7 @@ options { baseContext = enhancedArgumentList; }
 
 enhancedArgumentList
     :   enhancedArgumentListElement
-        (   COMMA nls
+        (   nls COMMA nls
             enhancedArgumentListElement
         )*
     ;
@@ -1226,9 +1347,9 @@ keywords
 
 rparen
     :   RPAREN
-    |
-        // !!!Error Alternative, impact the performance of parsing
-        { require(false, "Missing ')'"); }
+//    |
+//        // !!!Error Alternative, impact the performance of parsing
+//        { require(false, "Missing ')'"); }
     ;
 
 nls

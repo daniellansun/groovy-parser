@@ -151,26 +151,29 @@ options {
 
     protected void exitParenCallback(String text) {}
 
-    private final Deque<Paren> parenStack = new ArrayDeque<>(32);
+//    private final Deque<Paren> parenStack = new ArrayDeque<>(32);
 
     private void enterParen() {
         String text = getText();
         enterParenCallback(text);
-        parenStack.push(new Paren(text, this.lastTokenType, getLine(), getCharPositionInLine()));
+//        parenStack.push(new Paren(text, this.lastTokenType, getLine(), getCharPositionInLine()));
     }
 
     private void exitParen() {
-        Paren paren = parenStack.peek();
+//        Paren paren = parenStack.peek();
         String text = getText();
 
-        require(null != paren, "Too many '" + text + "'");
-        require(text.equals(PAREN_MAP.get(paren.getText())),
-                "'" + paren.getText() + "'" + new PositionInfo(paren.getLine(), paren.getColumn()) + " can not match '" + text + "'", -1);
+//        require(null != paren, "Too many '" + text + "'");
+//        require(text.equals(PAREN_MAP.get(paren.getText())),
+//                "'" + paren.getText() + "'" + new PositionInfo(paren.getLine(), paren.getColumn()) + " can not match '" + text + "'", -1);
 
         exitParenCallback(text);
-        parenStack.pop();
+//        parenStack.pop();
     }
     private boolean isInsideParens() {
+        return false;
+
+        /*
         Paren paren = parenStack.peek();
 
         // We just care about "(" and "[", inside which the new lines will be ignored.
@@ -180,6 +183,7 @@ options {
         }
         return ("(".equals(paren.getText()) && TRY != paren.getLastTokenType()) // we don't treat try-paren(i.e. try (....)) as parenthesis
                     || "[".equals(paren.getText());
+        */
     }
     private void ignoreTokenInsideParens() {
         if (!this.isInsideParens()) {
