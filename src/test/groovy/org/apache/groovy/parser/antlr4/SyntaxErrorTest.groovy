@@ -20,6 +20,8 @@ package org.apache.groovy.parser.antlr4
 
 import groovy.transform.CompileStatic
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
+import org.codehaus.groovy.control.CompilationUnit
+import org.codehaus.groovy.control.Phases
 
 import static org.apache.groovy.parser.antlr4.TestUtils.COMMON_IGNORE_CLASS_LIST
 import static org.apache.groovy.parser.antlr4.TestUtils.doTest
@@ -261,24 +263,50 @@ class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.doRunAndShouldFail('fail/Array_02x.groovy');
     }
 
-    void "test error alternative - Missing ')'"() {
+    void "test error alternative - Missing ')' 1"() {
         def err = expectFail '''\
-            println ((int 123)
+println ((int 123)
         '''
 
         assert err == '''\
 startup failed:
-TestScript0.groovy: 1: Missing ')' @ line 1, column 26.
-               println ((int 123)
-                            ^
+test.groovy: 1: Missing ')' @ line 1, column 14.
+   println ((int 123)
+                ^
+
+1 error
+'''
+    }
+
+    void "test error alternative - Missing ')' 2"() {
+        def err = expectFail '''\
+def x() {
+    println((int) 123
+}
+        '''
+
+        assert err == '''\
+startup failed:
+test.groovy: 2: Missing ')' @ line 2, column 22.
+       println((int) 123
+                        ^
 
 1 error
 '''
     }
 
     /**************************************/
-    String expectFail(String code) {
-        return shouldFail(code).replaceAll('\r\n', '\n')
+    def expectFail(String code) {
+        try {
+            def ast = new CompilationUnit().tap {
+                addSource 'test.groovy', code
+                compile Phases.CONVERSION
+            }.getAST()
+
+            fail("should fail")
+        } catch (e) {
+            return e.message.replaceAll('\r\n', '\n')
+        }
     }
 
     static unzipScriptAndShouldFail(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:], boolean toCheckNewParserOnly = false) {
