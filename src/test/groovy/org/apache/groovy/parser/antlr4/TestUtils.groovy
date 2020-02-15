@@ -284,7 +284,7 @@ class TestUtils {
     }
 
     static GroovyShell createAntlr4Shell(CompilerConfiguration compilerConfiguration = new CompilerConfiguration(CompilerConfiguration.DEFAULT)) {
-        compilerConfiguration.pluginFactory = new Antlr4PluginFactory(compilerConfiguration)
+        compilerConfiguration.pluginFactory = new Antlr4PluginFactory()
 
         return new GroovyShell(compilerConfiguration);
     }

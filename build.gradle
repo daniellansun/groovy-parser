@@ -65,12 +65,7 @@ tasks.withType(GroovyCompile) {
 }
 
 repositories {
-    mavenLocal()
-
-    if (rootProject.hasProperty('buildInChina')) {
-        // Try to use Aliyun maven repository when building in China
-        maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
-    }
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
 
     jcenter()
     mavenCentral()
@@ -110,7 +105,7 @@ ext {
     asmVersion = '7.3.1'
     antlr4Version = '4.7.4'
 //    groovyVersion = '3.0.0-SNAPSHOT'
-    groovyVersion = '3.0.0-rc-3'
+    groovyVersion = '3.0.0'
     junitVersion = '4.13'
 }
 

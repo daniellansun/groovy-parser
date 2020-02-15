@@ -33,7 +33,7 @@ public class Antlr4Parser extends AbstractParser {
 
     public Antlr4Parser(CompilerConfiguration compilerConfiguration) {
         this.compilerConfiguration = compilerConfiguration;
-        compilerConfiguration.setPluginFactory(new Antlr4PluginFactory(compilerConfiguration));
+        compilerConfiguration.setPluginFactory(new Antlr4PluginFactory());
     }
 
     @Override
