@@ -292,7 +292,7 @@ memberDeclaration[int t]
  */
 methodDeclaration[int t, int ct]
     :   modifiersOpt
-        ({ 3 == $ct }?
+        (   { 3 == $ct }?
             returnType[$ct] methodName LPAREN rparen (DEFAULT nls elementValue)?
         |
             typeParameters? returnType[$ct]?
