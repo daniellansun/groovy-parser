@@ -586,15 +586,11 @@ localVariableDeclaration
         variableDeclaration[0]
     ;
 
-classifiedModifiers[int t]
-    :   modifiers nls
-    ;
-
 /**
  *  t   0: local variable declaration; 1: field declaration
  */
 variableDeclaration[int t]
-    :   classifiedModifiers[$t]
+    :   modifiers nls
         (   type? variableDeclarators
         |   typeNamePairs nls ASSIGN nls variableInitializer
         )
