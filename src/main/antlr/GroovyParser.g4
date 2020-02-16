@@ -653,20 +653,14 @@ statement
     :   block                                                                                               #blockStmtAlt
     |   conditionalStatement                                                                                #conditionalStmtAlt
     |   loopStatement                                                                                       #loopStmtAlt
-
     |   tryCatchStatement                                                                                   #tryCatchStmtAlt
-
     |   SYNCHRONIZED expressionInPar nls block                                                              #synchronizedStmtAlt
     |   RETURN expression?                                                                                  #returnStmtAlt
     |   THROW expression                                                                                    #throwStmtAlt
-
     |   breakStatement                                                                                      #breakStmtAlt
     |   continueStatement                                                                                   #continueStmtAlt
-
     |   identifier COLON nls statement                                                                      #labeledStmtAlt
-
     |   assertStatement                                                                                     #assertStmtAlt
-
     |   localVariableDeclaration                                                                            #localVariableDeclarationStmtAlt
 
     // validate the method in the AstBuilder#visitMethodDeclaration, e.g. method without method body is not allowed
@@ -674,7 +668,6 @@ statement
         methodDeclaration[3, 9]                                                                             #methodDeclarationStmtAlt
 
     |   statementExpression                                                                                 #expressionStmtAlt
-
     |   SEMI                                                                                                #emptyStmtAlt
     ;
 
@@ -875,19 +868,13 @@ castOperandExpression
 options { baseContext = expression; }
     :   castParExpression castOperandExpression                                             #castExprAlt
     |   postfixExpression                                                                   #postfixExprAlt
+
     // ~(BNOT)/!(LNOT) (level 1)
     |   (BITNOT | NOT) nls castOperandExpression                                            #unaryNotExprAlt
+
     // ++(prefix)/--(prefix)/+(unary)/-(unary) (level 3)
     |   op=(INC | DEC | ADD | SUB) castOperandExpression                                    #unaryAddExprAlt
     ;
-
-
-/*
-enhancedExpression
-    :   expression
-    |   standardLambdaExpression
-    ;
-*/
 
 commandExpression
     :   expression

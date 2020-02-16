@@ -1593,7 +1593,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
                 && methodName.equals(className)) { // constructor declaration
 
             methodNode = createConstructorNodeForClass(methodName, parameters, exceptions, code, classNode, modifiers);
-        } else { // class memeber method declaration
+        } else { // class member method declaration
             if (!hasReturnType && hasMethodBody && (0 == modifierManager.getModifierCount())) {
                 throw createParsingFailedException("Invalid method declaration: " + methodName, ctx);
             }
