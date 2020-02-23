@@ -12,12 +12,12 @@ jobs:
 
     environment:
       TERM: dumb
-      ASYNC_PROFILER_HOME: /tmp/async-profiler-1.7-ea-linux-x64
+      ASYNC_PROFILER_HOME: /tmp/async-profiler
 
     steps:
       - checkout
-      - run: wget https://github.com/jvm-profiling-tools/async-profiler/releases/download/v1.7-ea2/async-profiler-1.7-ea2-linux-x64.tar.gz
-      - run: mkdir $ASYNC_PROFILER_HOME && tar xvfz async-profiler-1.7-ea2-linux-x64.tar.gz -C $ASYNC_PROFILER_HOME
+      - run: wget https://github.com/jvm-profiling-tools/async-profiler/releases/download/v1.6/async-profiler-1.6-linux-x64.tar.gz
+      - run: mkdir $ASYNC_PROFILER_HOME && tar xvfz async-profiler-1.6-linux-x64.tar.gz -C $ASYNC_PROFILER_HOME
       - run: chmod -R 755 $ASYNC_PROFILER_HOME
       - run: chmod +x gradlew
       - run: ./gradlew --version
