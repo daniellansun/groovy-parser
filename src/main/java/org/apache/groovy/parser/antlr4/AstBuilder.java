@@ -3462,21 +3462,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
         stringLiteralList.add(configureAST(new ConstantExpression(parseGStringEnd(ctx, beginQuotation)), ctx.GStringEnd()));
 
         List<Expression> values = ctx.gstringValue().stream()
-                .map(e -> {
-                    Expression expression = this.visitGstringValue(e);
-
-                    if (expression instanceof ClosureExpression && !hasArrow(e)) {
-                        List<Statement> statementList = ((BlockStatement) ((ClosureExpression) expression).getCode()).getStatements();
-
-                        if (statementList.stream().noneMatch(DefaultGroovyMethods::asBoolean)) {
-                            return configureAST(new ConstantExpression(null), e);
-                        }
-
-                        return configureAST(this.createCallMethodCallExpression(expression, new ArgumentListExpression(), true), e);
-                    }
-
-                    return expression;
-                })
+                .map(this::visitGstringValue)
                 .collect(Collectors.toList());
 
         StringBuilder verbatimText = new StringBuilder(ctx.getText().length());
@@ -3562,6 +3548,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
                 } else if (0 == size) {
                     return configureAST(new ConstantExpression(null), ctx);
                 }
+
+                return configureAST(this.createCallMethodCallExpression(closureExpression, new ArgumentListExpression(), true), ctx);
             }
 
             return configureAST(closureExpression, ctx);
