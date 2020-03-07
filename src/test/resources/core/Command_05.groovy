@@ -43,14 +43,14 @@ m 1, 2
 ("m") 1, 2
 ("$m") 1, 2
 
-find x:
-        1 confirm right
+//find x:
+//        1 confirm right
 
 
-find x:
-        1,
-        y:
-                2 confirm right
+//find x:
+//        1,
+//        y:
+//                2 confirm right
 
 a b 1 2
 

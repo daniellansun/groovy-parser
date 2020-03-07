@@ -854,7 +854,7 @@ commandExpression
     :   expression
         (
             { !SemanticPredicates.isFollowingArgumentsOrClosure($expression.ctx) }?
-            argumentList
+            methodArgumentList
         |
             /* if pathExpression is a method call, no need to have any more arguments */
         )
@@ -1105,6 +1105,14 @@ options { baseContext = enhancedArgumentList; }
         )*
     ;
 
+methodArgumentList
+options { baseContext = enhancedArgumentList; }
+    :   methodArgumentListElement
+        (   COMMA nls
+            methodArgumentListElement
+        )*
+    ;
+
 enhancedArgumentList
     :   enhancedArgumentListElement
         (   COMMA nls
@@ -1116,6 +1124,11 @@ argumentListElement
 options { baseContext = enhancedArgumentListElement; }
     :   expressionListElement[true]
     |   namedPropertyArg
+    ;
+
+methodArgumentListElement
+options { baseContext = enhancedArgumentListElement; }
+    :   expressionListElement[true]
     ;
 
 enhancedArgumentListElement
@@ -1210,9 +1223,9 @@ keywords
 
 rparen
     :   RPAREN
-    |
-        // !!!Error Alternative, impact the performance of parsing
-        { require(false, "Missing ')'"); }
+//    |
+//        // !!!Error Alternative, impact the performance of parsing
+//        { require(false, "Missing ')'"); }
     ;
 
 nls
