@@ -28,14 +28,12 @@ import java.util.regex.Pattern;
 /**
  * Utilities for handling strings
  *
- * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * Created on    2016/08/20
  */
 public class StringUtils {
 	private static final String BACKSLASH = "\\";
 	private static final Pattern HEX_ESCAPES_PATTERN = Pattern.compile("(\\\\*)\\\\u([0-9abcdefABCDEF]{4})");
 	private static final Pattern OCTAL_ESCAPES_PATTERN = Pattern.compile("(\\\\*)\\\\([0-3]?[0-7]?[0-7])");
-	private static final Pattern STANDARD_ESCAPES_PATTERN = Pattern.compile("(\\\\*)\\\\([btnfr\"'])");
+	private static final Pattern STANDARD_ESCAPES_PATTERN = Pattern.compile("(\\\\*)\\\\([btnfrs\"'])");
 	private static final Pattern LINE_ESCAPE_PATTERN = Pattern.compile("(\\\\*)\\\\\r?\n");
 
 	public static String replaceHexEscapes(String text) {
@@ -75,7 +73,8 @@ public class StringUtils {
 			't', '\t',
 			'n', '\n',
 			'f', '\f',
-			'r', '\r'
+			'r', '\r',
+			's', ' '
 	);
 
 	public static String replaceStandardEscapes(String text) {
@@ -218,7 +217,7 @@ public class StringUtils {
 			start = end + replLength;
 			end = text.indexOf(searchString, start);
 		}
-		buf.append(text.substring(start));
+		buf.append(text, start, text.length());
 		return buf.toString();
 	}
 
@@ -241,7 +240,6 @@ public class StringUtils {
 	 *
 	 * @param cs  the CharSequence to check, may be null
 	 * @return {@code true} if the CharSequence is empty or null
-	 * @since 3.0 Changed signature from isEmpty(String) to isEmpty(CharSequence)
 	 */
 	public static boolean isEmpty(final CharSequence cs) {
 		return cs == null || cs.length() == 0;
