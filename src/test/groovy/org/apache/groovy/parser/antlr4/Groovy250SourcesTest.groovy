@@ -237,7 +237,7 @@ class Groovy250SourcesTest extends GroovyTestCase {
     }
 
     void "test src/examples/swing/ModelNodeExample.groovy"() {
-        unzipAndTest("src/examples/swing/ModelNodeExample.groovy", [])
+        unzipAndTest("src/examples/swing/ModelNodeExample.groovy", [], [(~/\r?\n\s*[{]/): ' {'])
     }
 
     void "test src/examples/swing/RegexCoach.groovy"() {
@@ -257,7 +257,7 @@ class Groovy250SourcesTest extends GroovyTestCase {
     }
 
     void "test src/examples/swing/binding/caricature/Caricature.groovy"() {
-        unzipAndTest("src/examples/swing/binding/caricature/Caricature.groovy", [])
+        unzipAndTest("src/examples/swing/binding/caricature/Caricature.groovy", [], [(~/\r?\n\s*[{]/): ' {'])
     }
 
     void "test src/examples/swing/greet/Greet.groovy"() {
@@ -269,7 +269,7 @@ class Groovy250SourcesTest extends GroovyTestCase {
     }
 
     void "test src/examples/swing/greet/View.groovy"() {
-        unzipAndTest("src/examples/swing/greet/View.groovy", [])
+        unzipAndTest("src/examples/swing/greet/View.groovy", [], [(~/\r?\n\s*[{]/): ' {'])
     }
 
     void "test src/examples/swing/timelog/TimeLogMain.groovy"() {
@@ -281,7 +281,7 @@ class Groovy250SourcesTest extends GroovyTestCase {
     }
 
     void "test src/examples/swing/timelog/TimeLogView.groovy"() {
-        unzipAndTest("src/examples/swing/timelog/TimeLogView.groovy", [])
+        unzipAndTest("src/examples/swing/timelog/TimeLogView.groovy", [], [(~/\r?\n\s*[{]/): ' {'])
     }
 
     void "test src/examples/transforms/global/CompiledAtASTTransformation.groovy"() {
@@ -665,7 +665,7 @@ class Groovy250SourcesTest extends GroovyTestCase {
     }
 
     void "test src/spec/test/ClosuresSpecTest.groovy"() {
-        unzipAndTest("src/spec/test/ClosuresSpecTest.groovy", [])
+        unzipAndTest("src/spec/test/ClosuresSpecTest.groovy", [], [(~$///.+/$):'\n', (~/\r?\n\s*[{]/): ' {'])
     }
 
     void "test src/spec/test/CodeGenerationASTTransformsTest.groovy"() {
@@ -1520,7 +1520,7 @@ class Groovy250SourcesTest extends GroovyTestCase {
     }
 
     void "test src/test/groovy/CurlyBracketLayoutTest.groovy"() {
-        unzipAndTest("src/test/groovy/CurlyBracketLayoutTest.groovy", [])
+        unzipAndTest("src/test/groovy/CurlyBracketLayoutTest.groovy", [], [(~/\r?\n\s*[{]/): ' {'])
     }
 
     void "test src/test/groovy/DateTest.groovy"() {
@@ -7423,7 +7423,7 @@ class Groovy250SourcesTest extends GroovyTestCase {
 
 
     /*************************************/
-    static unzipAndTest(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:]) {
+    static unzipAndTest(String entryName, List ignoreClazzList, Map replacementsMap=[:]) {
         ignoreClazzList.addAll(TestUtils.COMMON_IGNORE_CLASS_LIST)
 
         TestUtils.unzipAndTest(ZIP_PATH, entryName, TestUtils.addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), replacementsMap)

@@ -109,7 +109,7 @@ class TestUtils {
     */
 
     @CompileDynamic
-    static unzipAndTest(String path, String entryName, conf, Map<String, String> replacementsMap=[:]) {
+    static unzipAndTest(String path, String entryName, conf, Map<Object, String> replacementsMap=[:]) {
         AbstractParser antlr4Parser = new Antlr4Parser()
         AbstractParser antlr2Parser = new Antlr2Parser()
 
@@ -117,7 +117,7 @@ class TestUtils {
         String text = readZipEntry(path, entryName);
 
         replacementsMap?.each {k, v ->
-            text = text.replace(k, v);
+            text = k instanceof String ? text.replace(k, v) : text.replaceAll(k, v);
         }
 
         def (newAST, newElapsedTime) = profile { antlr4Parser.parse(name, text) }
