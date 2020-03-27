@@ -11072,7 +11072,7 @@ class Groovy250ScriptsTest extends GroovyTestCase {
     }
 
     /*************************************/
-    static unzipAndTest(String entryName, List ignoreClazzList, Map<String, String> replacementsMap=[:]) {
+    static unzipAndTest(String entryName, List ignoreClazzList, Map replacementsMap=[:]) {
         ignoreClazzList.addAll(TestUtils.COMMON_IGNORE_CLASS_LIST)
 
         TestUtils.unzipAndTest(ZIP_PATH, entryName, TestUtils.addIgnore(ignoreClazzList, ASTComparatorCategory.LOCATION_IGNORE_LIST), replacementsMap)
