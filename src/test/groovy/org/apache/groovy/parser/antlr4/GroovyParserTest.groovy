@@ -48,6 +48,10 @@ class GroovyParserTest extends GroovyTestCase {
 
     void tearDown() {}
 
+    void "test groovy core - Shebang Comments"() {
+        doRunAndTestAntlr4('core/Comments_03x.groovy')
+    }
+
     void "test groovy core - Comments"() {
         doTest('core/Comments_01.groovy', [ExpressionStatement]);
         doTestAttachedComments();
