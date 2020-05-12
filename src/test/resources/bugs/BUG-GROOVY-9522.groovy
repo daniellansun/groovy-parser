@@ -30,3 +30,8 @@ def x = a() ? [b(), a()] : b()
 def x = a() ? ([b(), a()]).join(',') : b()
 
 x == ''
+
+ds = DB_DATASOURCE.newInstance(
+        (DB_DS_KEY): DB_URL_PREFIX + getMethodName(),
+        user: DB_USER,
+        password: DB_PASSWORD)

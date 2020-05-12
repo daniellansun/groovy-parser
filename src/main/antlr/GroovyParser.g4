@@ -1119,11 +1119,11 @@ typeArgumentsOrDiamond
     ;
 
 arguments
-    :   LPAREN enhancedArgumentList? COMMA? rparen
+    :   LPAREN enhancedArgumentListInPar? COMMA? rparen
     ;
 
 argumentList
-options { baseContext = enhancedArgumentList; }
+options { baseContext = enhancedArgumentListInPar; }
     :   firstArgumentListElement
         (   COMMA nls
             argumentListElement
@@ -1131,7 +1131,15 @@ options { baseContext = enhancedArgumentList; }
     ;
 
 enhancedArgumentList
+options { baseContext = enhancedArgumentListInPar; }
     :   firstEnhancedArgumentListElement
+        (   COMMA nls
+            enhancedArgumentListElement
+        )*
+    ;
+
+enhancedArgumentListInPar
+    :   enhancedArgumentListElement
         (   COMMA nls
             enhancedArgumentListElement
         )*
