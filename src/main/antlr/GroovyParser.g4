@@ -1256,8 +1256,8 @@ keywords
 
 rparen
     :   RPAREN
-    |   r=~RPAREN // !!!Error Alternative
-        { require(false, "Missing ')'", PositionConfigureUtils.calcMissingRparenOffset($r, _input)); }
+//    |   r=~RPAREN // !!!Error Alternative
+//        { require(false, "Missing ')'", PositionConfigureUtils.calcMissingRparenOffset($r, _input)); }
     ;
 
 nls
