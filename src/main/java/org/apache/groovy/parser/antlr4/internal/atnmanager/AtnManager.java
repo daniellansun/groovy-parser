@@ -19,35 +19,25 @@
 package org.apache.groovy.parser.antlr4.internal.atnmanager;
 
 import org.antlr.v4.runtime.atn.ATN;
+import org.apache.groovy.util.SystemUtil;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Manage ATN to avoid memory leak
- *
- * @author <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * Created on 2016/08/14
  */
 public abstract class AtnManager {
     private static final ReentrantReadWriteLock RRWL = new ReentrantReadWriteLock(true);
     private static final ReentrantReadWriteLock.WriteLock WRITE_LOCK = RRWL.writeLock();
     public static final ReentrantReadWriteLock.ReadLock READ_LOCK = RRWL.readLock();
     private static final String DFA_CACHE_THRESHOLD_OPT = "groovy.antlr4.cache.threshold";
-    private static final int DEFAULT_DFA_CACHE_THRESHOLD = 64;
-    private static final int MIN_DFA_CACHE_THRESHOLD = 2;
-    private static final int DFA_CACHE_THRESHOLD;
+    private static final long DFA_CACHE_THRESHOLD;
 
     static {
-        int t = DEFAULT_DFA_CACHE_THRESHOLD;
-
-        try {
-            t = Integer.parseInt(System.getProperty(DFA_CACHE_THRESHOLD_OPT));
-
-            // cache threshold should be at least MIN_DFA_CACHE_THRESHOLD for better performance
-            t = t < MIN_DFA_CACHE_THRESHOLD ? MIN_DFA_CACHE_THRESHOLD : t;
-        } catch (Exception e) {
-            // ignored
+        long t = SystemUtil.getLongSafe(DFA_CACHE_THRESHOLD_OPT, 64L);
+        if (t <= 0) {
+            t = Long.MAX_VALUE;
         }
 
         DFA_CACHE_THRESHOLD = t;
