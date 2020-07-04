@@ -29,6 +29,8 @@ import org.antlr.v4.runtime.atn.ProfilingATNSimulator
 import org.apache.groovy.parser.antlr4.GroovyLangLexer
 import org.apache.groovy.parser.antlr4.GroovyLangParser
 
+import java.text.DecimalFormat
+
 /**
  * A basic debug tool for investigating the parse trees and tokens of Groovy source code
  *
@@ -66,17 +68,25 @@ class GroovyTestRig extends TestRig {
         if (profile) {
             DecisionInfo[] decisionInfos = ((ProfilingATNSimulator) interpreter).decisionInfo
             if (decisionInfos) {
-                println "################# BEGIN PROFILING RESULT #################"
-                println "DECISION,${'\t' * 5}TIME_IN_PREDICTION,${'\t' * 5}DETAILS"
+                println "${'-' * 10} BEGIN PROFILING RESULT ${'-' * 10}"
                 long sumTimeInPrediction = 0
                 decisionInfos
                         .sort { d1, d2 -> d2.timeInPrediction <=> d1.timeInPrediction }
                         .each { DecisionInfo decisionInfo ->
                     sumTimeInPrediction += decisionInfo.timeInPrediction
-                    println "${decisionInfo.decision},${'\t' * 5}${decisionInfo.timeInPrediction  / 10D**9}s,${'\t' * 5}${decisionInfo}"
+//                    println "${decisionInfo.decision},${'\t' * 5}${decisionInfo.timeInPrediction  / 10D**9}s,${'\t' * 5}${decisionInfo}, ${GroovyParser.ruleNames[GroovyParser._ATN.getDecisionState(decisionInfo.decision).ruleIndex]}"
+
+                            String detail = String.format("Time: %15s in %5d calls - LL_TotalLook: %5d LL_MaxLook: %5d - SLL_TotalLook: %5d SLL_MaxLook: %5d - Ambiguities: %5d Errors: %5d - Rule: %s",
+                                    new DecimalFormat("0.0000000000").format(decisionInfo.timeInPrediction / 10D**9), decisionInfo.invocations,
+                                    decisionInfo.LL_TotalLook, decisionInfo.LL_MaxLook,
+                                    decisionInfo.SLL_TotalLook, decisionInfo.SLL_MaxLook,
+                                    decisionInfo.ambiguities.size(), decisionInfo.errors.size(),
+                                    GroovyLangParser.ruleNames[GroovyLangParser._ATN.getDecisionState(decisionInfo.decision).ruleIndex]
+                            )
+                            println detail
                 }
-                println "SUM_TIME_IN_PREDICTION: ${sumTimeInPrediction / 10D**9}s, SUM_TIME_IN_PROCESSING: ${(endTime - beginTime) / 10D**9}s"
-                println "################# END   PROFILING RESULT #################"
+                println "Sum time in prediction: ${sumTimeInPrediction / 10D**9}s, Sum time in processing: ${(endTime - beginTime) / 10D**9}s"
+                println "${'-' * 10} END PROFILING RESULT ${'-' * 10}"
             }
         }
     }
