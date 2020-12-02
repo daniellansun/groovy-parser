@@ -403,7 +403,6 @@ final class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.doRunAndShouldFail('fail/Array_02x.groovy')
     }
 
-    @NotYetImplemented
     void 'test error alternative - Missing ")" 1'() {
         def err = expectParseError '''\
             |println ((int 123)
@@ -411,15 +410,14 @@ final class SyntaxErrorTest extends GroovyTestCase {
 
         assert err == '''\
             |startup failed:
-            |test.groovy: 1: Missing ')' @ line 1, column 15.
+            |test.groovy: 1: Missing ')' @ line 1, column 14.
             |   println ((int 123)
-            |                 ^
+            |                ^
             |
             |1 error
             |'''.stripMargin()
     }
 
-    @NotYetImplemented
     void 'test error alternative - Missing ")" 2'() {
         def err = expectParseError '''\
             |def x() {
@@ -437,7 +435,6 @@ final class SyntaxErrorTest extends GroovyTestCase {
             |'''.stripMargin()
     }
 
-    @NotYetImplemented
     void 'test error alternative - Missing ")" 3'() {
         def err = expectParseError '''\
             |def m( {
@@ -446,9 +443,9 @@ final class SyntaxErrorTest extends GroovyTestCase {
 
         assert err == '''\
             |startup failed:
-            |test.groovy: 1: Missing ')' @ line 1, column 8.
+            |test.groovy: 1: Missing ')' @ line 1, column 7.
             |   def m( {
-            |          ^
+            |         ^
             |
             |1 error
             |'''.stripMargin()

@@ -115,7 +115,7 @@ public class SemanticPredicates {
      */
     public static boolean isFollowingArgumentsOrClosure(ExpressionContext context) {
         if (context instanceof PostfixExprAltContext) {
-            List<ParseTree> peacChildren = ((PostfixExprAltContext) context).children;
+            List<ParseTree> peacChildren = context.children;
 
             try {
                 ParseTree peacChild = peacChildren.get(0);
@@ -123,6 +123,28 @@ public class SemanticPredicates {
 
                 ParseTree pecChild = pecChildren.get(0);
                 PathExpressionContext pec = (PathExpressionContext) pecChild;
+
+                int t = pec.t;
+
+                return (2 == t || 3 == t);
+            } catch (IndexOutOfBoundsException | ClassCastException e) {
+                throw new GroovyBugError("Unexpected structure of expression context: " + context, e);
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isFollowingArgumentsOrClosureFast(FastGroovyParser.ExpressionContext context) {
+        if (context instanceof FastGroovyParser.PostfixExprAltContext) {
+            List<ParseTree> peacChildren = context.children;
+
+            try {
+                ParseTree peacChild = peacChildren.get(0);
+                List<ParseTree>  pecChildren = ((FastGroovyParser.PostfixExpressionContext) peacChild).children;
+
+                ParseTree pecChild = pecChildren.get(0);
+                FastGroovyParser.PathExpressionContext pec = (FastGroovyParser.PathExpressionContext) pecChild;
 
                 int t = pec.t;
 

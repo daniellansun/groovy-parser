@@ -85,7 +85,10 @@ task generateAntlrSource {
         def antlrTemplateFile = file("${projectDir}/src/main/antlr/GroovyParser.g4.tpl")
         def template = new groovy.text.StreamingTemplateEngine().createTemplate(antlrTemplateFile.text.replace('$', '\\$'))
         def smartParserAntlrSourceFile = file("${projectDir}/src/main/antlr/GroovyParser.g4")
-        smartParserAntlrSourceFile.text = template.make([smart: true]).toString().replace('\\$', '$')
+        smartParserAntlrSourceFile.text = template.make([grammarName: 'GroovyParser', smart: true]).toString().replace('\\$', '$')
+
+        def fastParserAntlrSourceFile = file("${projectDir}/src/main/antlr/FastGroovyParser.g4")
+        fastParserAntlrSourceFile.text = template.make([grammarName: 'FastGroovyParser', smart: false]).toString().replace('\\$', '$')
     }
 }
 
@@ -97,7 +100,7 @@ generateGrammarSource {
     arguments += ["-visitor", "-no-listener", "-package", PARSER_PACKAGE_NAME]
 
     doLast {
-        def parserFilePattern = 'Groovy*'
+        def parserFilePattern = '*Groovy*'
         def outputPath = generateGrammarSource.outputDirectory.canonicalPath
         def parserPackagePath = "${outputPath}/${PARSER_PACKAGE_NAME.replace('.', '/')}"
         file(parserPackagePath).mkdirs()

@@ -31,7 +31,7 @@
  * The Groovy grammar is based on the official grammar for Java:
  * https://github.com/antlr/grammars-v4/blob/master/java/Java.g4
  */
-parser grammar GroovyParser;
+parser grammar <% out << grammarName %>;
 
 options {
     tokenVocab = GroovyLexer;
@@ -850,7 +850,7 @@ options { baseContext = expression; }
 commandExpression
     :   expression
         (
-            { !SemanticPredicates.isFollowingArgumentsOrClosure($expression.ctx) }?
+            { !SemanticPredicates.isFollowingArgumentsOrClosure<%out << (smart ? '' : 'Fast')%>($expression.ctx) }?
             argumentList
         |
             /* if pathExpression is a method call, no need to have any more arguments */
