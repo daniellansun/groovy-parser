@@ -80,6 +80,15 @@ repositories {
     maven { url 'https://oss.jfrog.org/oss-snapshot-local/' }
 }
 
+task generateAntlrSource {
+    doLast {
+        def antlrTemplateFile = file("${projectDir}/src/main/antlr/GroovyParser.g4.tpl")
+        def template = new groovy.text.StreamingTemplateEngine().createTemplate(antlrTemplateFile.text.replace('$', '\\$'))
+        def smartParserAntlrSourceFile = file("${projectDir}/src/main/antlr/GroovyParser.g4")
+        smartParserAntlrSourceFile.text = template.make([smart: true]).toString().replace('\\$', '$')
+    }
+}
+
 generateGrammarSource {
     maxHeapSize = '1g'
     outputs.cacheIf { true }
@@ -103,6 +112,7 @@ generateGrammarSource {
     }
 }
 
+generateGrammarSource.dependsOn generateAntlrSource
 task antlr(dependsOn: generateGrammarSource) // alias for generateGrammarSource
 compileJava.dependsOn antlr
 

@@ -1256,8 +1256,10 @@ keywords
 
 rparen
     :   RPAREN
+<% if (smart) {%>
     |   // !!!Error Alternative, impact the performance of parsing
         { require(false, "Missing ')'"); }
+<%} %>
     ;
 
 nls
