@@ -23,6 +23,7 @@ import groovy.transform.CompileStatic
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.FieldNode
+import org.codehaus.groovy.ast.GenericsType
 import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.PropertyNode
@@ -439,6 +440,7 @@ class GroovyParserTest extends GroovyTestCase {
         doTest('bugs/BUG-GROOVY-8913.groovy');
         doRunAndTestAntlr4('bugs/BUG-GROOVY-8991.groovy');
         doTest('bugs/BUG-GROOVY-9399.groovy');
+        doTest('bugs/BUG-GROOVY-9859.groovy', [GenericsType])
     }
 
     void "test groovy core - GROOVY-9427"() {
