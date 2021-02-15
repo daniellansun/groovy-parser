@@ -278,7 +278,6 @@ final class SyntaxErrorTest extends GroovyTestCase {
             |    String a() {
             |    }
             |}'''.stripMargin()
-        println err
         assert err == '''\
             |startup failed:
             |test.groovy: 2: Annotation type element should not have body @ line 2, column 5.
