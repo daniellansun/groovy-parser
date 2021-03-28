@@ -117,7 +117,6 @@ import org.apache.groovy.parser.antlr4.GroovyParser.IdentifierPrmrAltContext;
 import org.apache.groovy.parser.antlr4.GroovyParser.IfElseStatementContext;
 import org.apache.groovy.parser.antlr4.GroovyParser.ImportDeclarationContext;
 import org.apache.groovy.parser.antlr4.GroovyParser.InclusiveOrExprAltContext;
-import org.apache.groovy.parser.antlr4.GroovyParser.IndexPropertyArgsContext;
 import org.apache.groovy.parser.antlr4.GroovyParser.IntegerLiteralAltContext;
 import org.apache.groovy.parser.antlr4.GroovyParser.KeywordsContext;
 import org.apache.groovy.parser.antlr4.GroovyParser.LabeledStmtAltContext;
@@ -141,7 +140,6 @@ import org.apache.groovy.parser.antlr4.GroovyParser.ModifiersOptContext;
 import org.apache.groovy.parser.antlr4.GroovyParser.MultipleAssignmentExprAltContext;
 import org.apache.groovy.parser.antlr4.GroovyParser.MultiplicativeExprAltContext;
 import org.apache.groovy.parser.antlr4.GroovyParser.NamePartContext;
-import org.apache.groovy.parser.antlr4.GroovyParser.NamedPropertyArgsContext;
 import org.apache.groovy.parser.antlr4.GroovyParser.NewPrmrAltContext;
 import org.apache.groovy.parser.antlr4.GroovyParser.NonWildcardTypeArgumentsContext;
 import org.apache.groovy.parser.antlr4.GroovyParser.NullLiteralAltContext;
@@ -1846,6 +1844,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
         FieldNode fieldNode = classNode.getDeclaredField(fieldName);
 
         if (fieldNode != null && !classNode.hasProperty(fieldName)) {
+            if (fieldNode.hasInitialExpression() && initialValue != null) {
+                throw createParsingFailedException("A field and a property have the same name '" + fieldName + "' and both have initial values", ctx);
+            }
             classNode.getFields().remove(fieldNode);
 
             propertyNode = new PropertyNode(fieldNode, modifiers | Opcodes.ACC_PUBLIC, null, null);
@@ -1889,6 +1890,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
         PropertyNode propertyNode = classNode.getProperty(fieldName);
 
         if (null != propertyNode && propertyNode.getField().isSynthetic()) {
+            if (propertyNode.hasInitialExpression() && initialValue != null) {
+                throw createParsingFailedException("A field and a property have the same name '" + fieldName + "' and both have initial values", ctx);
+            }
             classNode.getFields().remove(propertyNode.getField());
             fieldNode = new FieldNode(fieldName, modifiers, variableType, classNode.redirect(), initialValue);
             propertyNode.setField(fieldNode);
@@ -2280,50 +2284,80 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
             CreatorContext creatorContext = ctx.creator();
             creatorContext.putNodeMetaData(ENCLOSING_INSTANCE_EXPRESSION, baseExpr);
             return configureAST(this.visitCreator(creatorContext), ctx);
-        } else if (asBoolean(ctx.indexPropertyArgs())) { // e.g. list[1, 3, 5]
-            Tuple2<Token, Expression> tuple = this.visitIndexPropertyArgs(ctx.indexPropertyArgs());
-            boolean isSafeChain = this.isTrue(baseExpr, PATH_EXPRESSION_BASE_EXPR_SAFE_CHAIN);
-            return configureAST(
-                    new BinaryExpression(baseExpr, createGroovyToken(tuple.getV1()), tuple.getV2(), isSafeChain || asBoolean(ctx.indexPropertyArgs().SAFE_INDEX())),
-                    ctx);
-        } else if (asBoolean(ctx.namedPropertyArgs())) { // this is a special way to signify a cast, e.g. Person[name: 'Daniel.Sun', location: 'Shanghai']
-            List<MapEntryExpression> mapEntryExpressionList = this.visitNamedPropertyArgs(ctx.namedPropertyArgs());
+        } else if (asBoolean(ctx.SAFE_INDEX())  // e.g. list[1, 3, 5]
+                || asBoolean(ctx.LBRACK()) // this is a special way to signify a cast, e.g. Person[name: 'Daniel.Sun', location: 'Shanghai']
+        ) {
+            Token token = (ctx.LBRACK() == null
+                    ? ctx.SAFE_INDEX()
+                    : ctx.LBRACK()).getSymbol();
 
-            Expression right;
-            Expression firstKeyExpression;
-            int mapEntryExpressionListSize = mapEntryExpressionList.size();
-            if (mapEntryExpressionListSize == 0) {
-                // expecting list of MapEntryExpressions later so use SpreadMap to smuggle empty MapExpression to later stages
-                right = configureAST(
-                        new SpreadMapExpression(configureAST(new MapExpression(), ctx.namedPropertyArgs())),
-                        ctx.namedPropertyArgs());
-            } else if (mapEntryExpressionListSize == 1 && (firstKeyExpression = mapEntryExpressionList.get(0).getKeyExpression()) instanceof SpreadMapExpression) {
-                right = firstKeyExpression;
+            if (4 == ctx.t) { // indexPropertyArgs
+                Tuple2<Token, Expression> tuple;
+                List<Expression> expressionList = this.visitExpressionList(ctx.expressionList());
+
+
+                if (expressionList.size() == 1) {
+                    Expression expr = expressionList.get(0);
+
+                    Expression indexExpr;
+                    if (expr instanceof SpreadExpression) { // e.g. a[*[1, 2]]
+                        ListExpression listExpression = new ListExpression(expressionList);
+                        listExpression.setWrapped(false);
+
+                        indexExpr = listExpression;
+                    } else { // e.g. a[1]
+                        indexExpr = expr;
+                    }
+
+                    tuple = tuple(token, indexExpr);
+                } else {
+                    // e.g. a[1, 2]
+                    ListExpression listExpression = new ListExpression(expressionList);
+                    listExpression.setWrapped(true);
+
+                    tuple = tuple(token, configureAST(listExpression, ctx));
+                }
+
+                boolean isSafeChain = this.isTrue(baseExpr, PATH_EXPRESSION_BASE_EXPR_SAFE_CHAIN);
+                return configureAST(
+                        new BinaryExpression(baseExpr, createGroovyToken(tuple.getV1()), tuple.getV2(), isSafeChain || asBoolean(ctx.SAFE_INDEX())),
+                        ctx);
+            } else if (5 == ctx.t) { // namedPropertyArgs
+                List<MapEntryExpression> mapEntryExpressionList = this.visitMapEntryList(ctx.mapEntryList());
+
+                Expression right;
+                Expression firstKeyExpression;
+                int mapEntryExpressionListSize = mapEntryExpressionList.size();
+                if (mapEntryExpressionListSize == 0) {
+                    // expecting list of MapEntryExpressions later so use SpreadMap to smuggle empty MapExpression to later stages
+                    right = configureAST(new SpreadMapExpression(configureAST(new MapExpression(), token)), token);
+                } else if (mapEntryExpressionListSize == 1 && (firstKeyExpression = mapEntryExpressionList.get(0).getKeyExpression()) instanceof SpreadMapExpression) {
+                    right = firstKeyExpression;
+                } else {
+                    ListExpression listExpression =
+                            configureAST(
+                                    new ListExpression(
+                                            mapEntryExpressionList.stream()
+                                                    .map(e -> {
+                                                        if (e.getKeyExpression() instanceof SpreadMapExpression) {
+                                                            return e.getKeyExpression();
+                                                        }
+                                                        return e;
+                                                    })
+                                                    .collect(Collectors.toList())),
+                                    token
+                            );
+                    listExpression.setWrapped(true);
+                    right = listExpression;
+                }
+
+                return configureAST(
+                        new BinaryExpression(baseExpr, createGroovyToken(token), right),
+                        ctx);
             } else {
-                ListExpression listExpression =
-                        configureAST(
-                                new ListExpression(
-                                        mapEntryExpressionList.stream()
-                                                .map(e -> {
-                                                    if (e.getKeyExpression() instanceof SpreadMapExpression) {
-                                                        return e.getKeyExpression();
-                                                    }
-                                                    return e;
-                                                })
-                                                .collect(Collectors.toList())),
-                                ctx.namedPropertyArgs()
-                        );
-                listExpression.setWrapped(true);
-                right = listExpression;
+                // should never happen
+                throw createParsingFailedException("Unsupported indexing", token);
             }
-
-            NamedPropertyArgsContext namedPropertyArgsContext = ctx.namedPropertyArgs();
-            Token token = (namedPropertyArgsContext.LBRACK() == null
-                            ? namedPropertyArgsContext.SAFE_INDEX()
-                            : namedPropertyArgsContext.LBRACK()).getSymbol();
-            return configureAST(
-                    new BinaryExpression(baseExpr, createGroovyToken(token), right),
-                    ctx);
         } else if (asBoolean(ctx.arguments())) {
             Expression argumentsExpr = this.visitArguments(ctx.arguments());
             configureAST(argumentsExpr, ctx);
@@ -2647,41 +2681,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
     private int getSlashyType(final String text) {
         return text.startsWith(SLASH_STR) ? StringUtils.SLASHY :
                     text.startsWith(DOLLAR_SLASH_STR) ? StringUtils.DOLLAR_SLASHY : StringUtils.NONE_SLASHY;
-    }
-
-    @Override
-    public Tuple2<Token, Expression> visitIndexPropertyArgs(final IndexPropertyArgsContext ctx) {
-        List<Expression> expressionList = this.visitExpressionList(ctx.expressionList());
-        Token token = (ctx.LBRACK() == null
-                            ? ctx.SAFE_INDEX()
-                            : ctx.LBRACK()).getSymbol();
-
-        if (expressionList.size() == 1) {
-            Expression expr = expressionList.get(0);
-
-            Expression indexExpr;
-            if (expr instanceof SpreadExpression) { // e.g. a[*[1, 2]]
-                ListExpression listExpression = new ListExpression(expressionList);
-                listExpression.setWrapped(false);
-
-                indexExpr = listExpression;
-            } else { // e.g. a[1]
-                indexExpr = expr;
-            }
-
-            return tuple(token, indexExpr);
-        }
-
-        // e.g. a[1, 2]
-        ListExpression listExpression = new ListExpression(expressionList);
-        listExpression.setWrapped(true);
-
-        return tuple(token, configureAST(listExpression, ctx));
-    }
-
-    @Override
-    public List<MapEntryExpression> visitNamedPropertyArgs(final NamedPropertyArgsContext ctx) {
-        return this.visitMapEntryList(ctx.mapEntryList());
     }
 
     @Override

@@ -934,11 +934,11 @@ pathElement returns [int t]
     // Element selection is always an option, too.
     // In Groovy, the stuff between brackets is a general argument list,
     // since the bracket operator is transformed into a method call.
-    |   indexPropertyArgs
-        { $t = 4; }
-
-    |   namedPropertyArgs
-        { $t = 5; }
+    |   (SAFE_INDEX | LBRACK)
+        (   expressionList[true]? { $t = 4; }
+        |   (namedPropertyArgList | COLON) { $t = 5; }
+        )
+        RBRACK
     ;
 
 /**
@@ -974,18 +974,6 @@ dynamicMemberName
     |   gstring
     ;
 
-/** An expression may be followed by [...].
- *  Unlike Java, these brackets may contain a general argument list,
- *  which is passed to the array element operator, which can make of it what it wants.
- *  The brackets may also be empty, as in T[].  This is how Groovy names array types.
- */
-indexPropertyArgs
-    :   (SAFE_INDEX | LBRACK) expressionList[true]? RBRACK
-    ;
-
-namedPropertyArgs
-    :   (SAFE_INDEX | LBRACK) (namedPropertyArgList | COLON) RBRACK
-    ;
 
 primary
     :

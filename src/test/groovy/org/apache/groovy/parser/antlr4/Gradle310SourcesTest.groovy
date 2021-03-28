@@ -18,6 +18,7 @@
  */
 package org.apache.groovy.parser.antlr4
 
+import groovy.test.NotYetImplemented
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
@@ -2863,6 +2864,7 @@ class Gradle310SourcesTest extends GroovyTestCase {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/execution/SelectedTaskExecutionActionTest.groovy", [])
     }
 
+    @NotYetImplemented // A field and a property have the same name 'resolver' and both have initial values @ line 33, column 5.
     void "test subprojects/core/src/test/groovy/org/gradle/execution/TaskNameResolverTest.groovy"() {
         unzipAndTest("subprojects/core/src/test/groovy/org/gradle/execution/TaskNameResolverTest.groovy", [])
     }
