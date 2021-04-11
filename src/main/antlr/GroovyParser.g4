@@ -621,7 +621,7 @@ tryCatchStatement
     ;
 
 assertStatement
-    :   ASSERT ce=expression (nls (COLON | COMMA) nls me=expression)?
+    :   ASSERT ce=plainExpression (nls (COLON | COMMA) nls me=plainExpression)?
     ;
 
 statement
@@ -630,8 +630,8 @@ statement
     |   loopStatement                                                                                       #loopStmtAlt
     |   tryCatchStatement                                                                                   #tryCatchStmtAlt
     |   SYNCHRONIZED expressionInPar nls block                                                              #synchronizedStmtAlt
-    |   RETURN expression?                                                                                  #returnStmtAlt
-    |   THROW expression                                                                                    #throwStmtAlt
+    |   RETURN plainExpression?                                                                                  #returnStmtAlt
+    |   THROW plainExpression                                                                                    #throwStmtAlt
     |   breakStatement                                                                                      #breakStmtAlt
     |   continueStatement                                                                                   #continueStmtAlt
     |   identifier COLON nls statement                                                                      #labeledStmtAlt
@@ -663,7 +663,7 @@ resourceList
 
 resource
     :   localVariableDeclaration
-    |   expression
+    |   plainExpression
     ;
 
 
@@ -675,7 +675,7 @@ switchBlockStatementGroup
     ;
 
 switchLabel
-    :   CASE expression COLON
+    :   CASE plainExpression COLON
     |   DEFAULT COLON
     ;
 
@@ -685,11 +685,11 @@ forControl
     ;
 
 enhancedForControl
-    :   variableModifiersOpt type? variableDeclaratorId (COLON | IN) expression
+    :   variableModifiersOpt type? variableDeclaratorId (COLON | IN) plainExpression
     ;
 
 classicalForControl
-    :   forInit? SEMI expression? SEMI forUpdate?
+    :   forInit? SEMI plainExpression? SEMI forUpdate?
     ;
 
 forInit
