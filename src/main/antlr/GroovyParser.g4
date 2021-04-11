@@ -482,7 +482,7 @@ standardLambdaParameters
 
 lambdaBody
     :   block
-    |   statementExpression
+    |   plainStatementExpression
     ;
 
 // CLOSURE
@@ -842,7 +842,7 @@ expression
                            |   POWER_ASSIGN
                            |   ELVIS_ASSIGN
                            ) nls
-                     enhancedStatementExpression                                            #assignmentExprAlt
+                     right=enhancedStatementExpression                                            #assignmentExprAlt
     ;
 
 castOperandExpression
@@ -953,7 +953,7 @@ options { baseContext = expression; }
                            |   POWER_ASSIGN
                            |   ELVIS_ASSIGN
                            ) nls
-                     enhancedPlainStatementExpression                                                  #assignmentExprAlt
+                     right=enhancedPlainStatementExpression                                                  #assignmentExprAlt
     ;
 
 plainCommandExpression
