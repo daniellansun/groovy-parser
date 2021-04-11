@@ -958,7 +958,7 @@ options { baseContext = expression; }
 
 plainCommandExpression
 options { baseContext = commandExpression; }
-    :   expression
+    :   plainExpression
     ;
 
 commandExpression
