@@ -630,8 +630,8 @@ statement
     |   loopStatement                                                                                       #loopStmtAlt
     |   tryCatchStatement                                                                                   #tryCatchStmtAlt
     |   SYNCHRONIZED expressionInPar nls block                                                              #synchronizedStmtAlt
-    |   RETURN plainExpression?                                                                                  #returnStmtAlt
-    |   THROW plainExpression                                                                                    #throwStmtAlt
+    |   RETURN plainExpression?                                                                             #returnStmtAlt
+    |   THROW plainExpression                                                                               #throwStmtAlt
     |   breakStatement                                                                                      #breakStmtAlt
     |   continueStatement                                                                                   #continueStmtAlt
     |   identifier COLON nls statement                                                                      #labeledStmtAlt
@@ -842,7 +842,7 @@ expression
                            |   POWER_ASSIGN
                            |   ELVIS_ASSIGN
                            ) nls
-                     right=enhancedStatementExpression                                            #assignmentExprAlt
+                     right=enhancedStatementExpression                                      #assignmentExprAlt
     ;
 
 castOperandExpression
@@ -953,7 +953,7 @@ options { baseContext = expression; }
                            |   POWER_ASSIGN
                            |   ELVIS_ASSIGN
                            ) nls
-                     right=enhancedPlainStatementExpression                                                  #assignmentExprAlt
+                     right=enhancedPlainStatementExpression                                            #assignmentExprAlt
     ;
 
 plainCommandExpression
