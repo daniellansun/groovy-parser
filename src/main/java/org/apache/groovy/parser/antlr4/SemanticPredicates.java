@@ -124,7 +124,8 @@ public class SemanticPredicates {
                 ParseTree pecChild = pecChildren.get(0);
                 PathExpressionContext pec = (PathExpressionContext) pecChild;
 
-                int t = pec.t;
+                final Integer tMD = pec.getNodeMetaData("t");
+                int t = null == tMD ? -1 : tMD;
 
                 return (2 == t || 3 == t);
             } catch (IndexOutOfBoundsException | ClassCastException e) {
