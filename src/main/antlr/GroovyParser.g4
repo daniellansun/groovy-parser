@@ -1121,7 +1121,7 @@ pathExpression
             // if 'static' followed by DOT, we can treat them as identifiers, e.g. static.unused = { -> }
             { _input.LT(2).getType() == DOT }?
             STATIC
-        ) (pathElement {_localctx.putNodeMetaData("t", $pathElement.t);})*
+        ) (pathElement { _localctx.putNodeMetaData("t", $pathElement.t); })*
     ;
 
 pathExpressionNoPar
@@ -1132,7 +1132,7 @@ options { baseContext = pathExpression; }
             // if 'static' followed by DOT, we can treat them as identifiers, e.g. static.unused = { -> }
             { _input.LT(2).getType() == DOT }?
             STATIC
-        ) (pathElement {_localctx.putNodeMetaData("t", $pathElement.t);})*
+        ) (pathElement { _localctx.putNodeMetaData("t", $pathElement.t); })*
     ;
 
 pathElement returns [int t]
