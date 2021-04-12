@@ -183,8 +183,10 @@ options {
             return false;
         }
 
-        return ("(".equals(paren.getText()) && TRY != paren.getLastTokenType()) // we don't treat try-paren(i.e. try (....)) as parenthesis
-                    || "[".equals(paren.getText());
+        String text = paren.getText();
+
+        return ("(".equals(text) && TRY != paren.getLastTokenType()) // we don't treat try-paren(i.e. try (....)) as parenthesis
+                    || "[".equals(text) || "?[".equals(text);
     }
     private void ignoreTokenInsideParens() {
         if (!this.isInsideParens()) {
@@ -812,7 +814,7 @@ RANGE_INCLUSIVE     : '..';
 RANGE_EXCLUSIVE     : '..<';
 SPREAD_DOT          : '*.';
 SAFE_DOT            : '?.';
-SAFE_INDEX          : '?[';
+SAFE_INDEX          : '?[' { this.enterParen();     } -> pushMode(DEFAULT_MODE);
 SAFE_CHAIN_DOT      : '??.';
 ELVIS               : '?:';
 METHOD_POINTER      : '.&';
