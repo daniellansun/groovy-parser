@@ -160,7 +160,7 @@ options {
     private final Deque<Paren> parenStack = new ArrayDeque<>(32);
 
     private void enterParen() {
-        String text = getText();
+        String text = getText().trim();
         enterParenCallback(text);
 
         parenStack.push(new Paren(text, this.lastTokenType, getLine(), getCharPositionInLine()));
@@ -835,14 +835,15 @@ NOT_IN              : '!in'         { isFollowedBy(_input, ' ', '\t', '\r', '\n'
 
 // §3.11 Separators
 
-LPAREN          : '('  { this.enterParen();     } -> pushMode(DEFAULT_MODE);
-RPAREN          : ')'  { this.exitParen();      } -> popMode;
+WS_LPAREN       : [ \t] '(' { this.enterParen();     } -> pushMode(DEFAULT_MODE);
+LPAREN          : '('       { this.enterParen();     } -> pushMode(DEFAULT_MODE);
+RPAREN          : ')'       { this.exitParen();      } -> popMode;
 
-LBRACE          : '{'  { this.enterParen();     } -> pushMode(DEFAULT_MODE);
-RBRACE          : '}'  { this.exitParen();      } -> popMode;
+LBRACE          : '{'       { this.enterParen();     } -> pushMode(DEFAULT_MODE);
+RBRACE          : '}'       { this.exitParen();      } -> popMode;
 
-LBRACK          : '['  { this.enterParen();     } -> pushMode(DEFAULT_MODE);
-RBRACK          : ']'  { this.exitParen();      } -> popMode;
+LBRACK          : '['       { this.enterParen();     } -> pushMode(DEFAULT_MODE);
+RBRACK          : ']'       { this.exitParen();      } -> popMode;
 
 SEMI            : ';';
 COMMA           : ',';

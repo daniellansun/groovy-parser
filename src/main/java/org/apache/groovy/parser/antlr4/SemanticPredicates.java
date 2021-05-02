@@ -42,6 +42,7 @@ import static org.apache.groovy.parser.antlr4.GroovyParser.PathExpressionContext
 import static org.apache.groovy.parser.antlr4.GroovyParser.PostfixExprAltContext;
 import static org.apache.groovy.parser.antlr4.GroovyParser.PostfixExpressionContext;
 import static org.apache.groovy.parser.antlr4.GroovyParser.StringLiteral;
+import static org.apache.groovy.parser.antlr4.GroovyParser.WS_LPAREN;
 import static org.apache.groovy.parser.antlr4.util.StringUtils.matches;
 
 /**
@@ -135,6 +136,8 @@ public class SemanticPredicates {
         return false;
     }
 
+    private static final List<Integer> LPAREN_TYPE_LIST = Arrays.asList(LPAREN, WS_LPAREN);
+
     /**
      * Distinguish between method declaration and method call/constructor declaration
      */
@@ -142,7 +145,7 @@ public class SemanticPredicates {
         int tokenType = ts.LT(1).getType();
 
         return (Identifier == tokenType || CapitalizedIdentifier == tokenType || StringLiteral == tokenType)
-                && LPAREN == (ts.LT(2).getType());
+                && LPAREN_TYPE_LIST.contains((ts.LT(2).getType()));
     }
 
     private static final int[] MODIFIER_ARRAY =

@@ -384,7 +384,7 @@ qualifiedClassNameList
     ;
 
 formalParameters
-    :   LPAREN formalParameterList? rparen
+    :   lparen formalParameterList? rparen
     ;
 
 formalParameterList
@@ -511,7 +511,7 @@ annotationsOpt
     ;
 
 annotation
-    :   AT annotationName (nls LPAREN elementValues? rparen)?
+    :   AT annotationName (nls lparen elementValues? rparen)?
     ;
 
 elementValues
@@ -574,7 +574,7 @@ variableDeclaration[int t]
     ;
 
 typeNamePairs
-    :   LPAREN typeNamePair (COMMA typeNamePair)* rparen
+    :   lparen typeNamePair (COMMA typeNamePair)* rparen
     ;
 
 typeNamePair
@@ -582,7 +582,7 @@ typeNamePair
     ;
 
 variableNames
-    :   LPAREN variableDeclaratorId (COMMA variableDeclaratorId)+ rparen
+    :   lparen variableDeclaratorId (COMMA variableDeclaratorId)+ rparen
     ;
 
 conditionalStatement
@@ -599,7 +599,7 @@ switchStatement
     ;
 
 loopStatement
-    :   FOR LPAREN forControl rparen nls statement                                                            #forStmtAlt
+    :   FOR lparen forControl rparen nls statement                                                            #forStmtAlt
     |   WHILE expressionInPar nls statement                                                                   #whileStmtAlt
     |   DO nls statement nls WHILE expressionInPar                                                            #doWhileStmtAlt
     ;
@@ -642,7 +642,7 @@ statement
     ;
 
 catchClause
-    :   CATCH LPAREN variableModifiersOpt catchType? identifier rparen nls block
+    :   CATCH lparen variableModifiersOpt catchType? identifier rparen nls block
     ;
 
 catchType
@@ -654,7 +654,7 @@ finallyBlock
     ;
 
 resources
-    :   LPAREN nls resourceList sep? rparen
+    :   lparen nls resourceList sep? rparen
     ;
 
 resourceList
@@ -705,7 +705,7 @@ forUpdate
 // EXPRESSIONS
 
 castParExpression
-    :   LPAREN type rparen
+    :   lparen type rparen
     ;
 
 parExpression
@@ -713,7 +713,7 @@ parExpression
     ;
 
 expressionInPar
-    :   LPAREN enhancedStatementExpression rparen
+    :   lparen enhancedStatementExpression rparen
     ;
 
 expressionList[boolean canSpread]
@@ -1123,7 +1123,7 @@ typeArgumentsOrDiamond
     ;
 
 arguments
-    :   LPAREN enhancedArgumentListInPar? COMMA? rparen
+    :   lparen enhancedArgumentListInPar? COMMA? rparen
     ;
 
 argumentList
@@ -1252,6 +1252,11 @@ keywords
     |   PUBLIC
     |   PROTECTED
     |   PRIVATE
+    ;
+
+lparen
+    :   LPAREN
+    |   WS_LPAREN
     ;
 
 rparen
