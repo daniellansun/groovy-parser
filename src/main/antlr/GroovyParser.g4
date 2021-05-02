@@ -1134,14 +1134,6 @@ options { baseContext = enhancedArgumentListInPar; }
         )*
     ;
 
-enhancedArgumentList
-options { baseContext = enhancedArgumentListInPar; }
-    :   firstEnhancedArgumentListElement
-        (   COMMA nls
-            enhancedArgumentListElement
-        )*
-    ;
-
 enhancedArgumentListInPar
     :   enhancedArgumentListElement
         (   COMMA nls
