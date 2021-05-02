@@ -1153,13 +1153,6 @@ options { baseContext = enhancedArgumentListElement; }
     |   namedPropertyArg
     ;
 
-firstEnhancedArgumentListElement
-options { baseContext = enhancedArgumentListElement; }
-    :   expressionListElement[true]
-    |   standardLambdaExpression
-    |   namedArg
-    ;
-
 enhancedArgumentListElement
     :   expressionListElement[true]
     |   standardLambdaExpression
