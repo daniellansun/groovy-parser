@@ -116,7 +116,7 @@ public class SemanticPredicates {
      */
     public static boolean isFollowingArgumentsOrClosure(ExpressionContext context) {
         if (context instanceof PostfixExprAltContext) {
-            List<ParseTree> peacChildren = ((PostfixExprAltContext) context).children;
+            List<ParseTree> peacChildren = context.children;
 
             try {
                 ParseTree peacChild = peacChildren.get(0);
@@ -125,7 +125,8 @@ public class SemanticPredicates {
                 ParseTree pecChild = pecChildren.get(0);
                 PathExpressionContext pec = (PathExpressionContext) pecChild;
 
-                int t = pec.t;
+                Integer t = pec.getNodeMetaData("t");
+                if (null == t) t = -1;
 
                 return (2 == t || 3 == t);
             } catch (IndexOutOfBoundsException | ClassCastException e) {

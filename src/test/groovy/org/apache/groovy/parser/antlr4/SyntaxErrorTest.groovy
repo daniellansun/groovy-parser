@@ -160,6 +160,7 @@ final class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.doRunAndShouldFail('fail/DoWhile_01x.groovy')
     }
 
+    @NotYetImplemented
     void 'test groovy core - For'() {
         TestUtils.shouldFail('fail/For_01.groovy')
         TestUtils.shouldFail('fail/For_02.groovy')

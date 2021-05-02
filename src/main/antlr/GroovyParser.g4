@@ -694,11 +694,11 @@ classicalForControl
 
 forInit
     :   localVariableDeclaration
-    |   expressionList[false]
+    |   expressionList
     ;
 
 forUpdate
-    :   expressionList[false]
+    :   expressionList
     ;
 
 
@@ -712,16 +712,31 @@ parExpression
     :   expressionInPar
     ;
 
+firstArgumentParExpression
+options { baseContext = parExpression; }
+    :   firstArgumentExpressionInPar
+    ;
+
 expressionInPar
     :   lparen enhancedStatementExpression rparen
     ;
 
-expressionList[boolean canSpread]
-    :   expressionListElement[$canSpread] (COMMA expressionListElement[$canSpread])*
+firstArgumentExpressionInPar
+options { baseContext = expressionInPar; }
+    :   firstArgumentLparen enhancedStatementExpression rparen
     ;
 
-expressionListElement[boolean canSpread]
+expressionList
+    :   expressionListElement (COMMA expressionListElement)*
+    ;
+
+expressionListElement
     :   MUL? expression
+    ;
+
+firstArgumentExpressionListElement
+options { baseContext = expressionListElement; }
+    :   MUL? firstArgumentExpression
     ;
 
 enhancedStatementExpression
@@ -735,6 +750,11 @@ statementExpression
 
 postfixExpression
     :   pathExpression op=(INC | DEC)?
+    ;
+
+firstArgumentPostfixExpression
+options { baseContext = postfixExpression; }
+    :   firstArgumentPathExpression op=(INC | DEC)?
     ;
 
 expression
@@ -847,6 +867,102 @@ options { baseContext = expression; }
     |   op=(INC | DEC | ADD | SUB) castOperandExpression                                    #unaryAddExprAlt
     ;
 
+firstArgumentExpression
+options { baseContext = expression; }
+    :   // qualified names, array expressions, method invocation, post inc/dec
+        firstArgumentPostfixExpression                                                                  #postfixExprAlt
+
+    // ~(BNOT)/!(LNOT) (level 1)
+    |   (BITNOT | NOT) nls firstArgumentExpression                                                                   #unaryNotExprAlt
+
+    // math power operator (**) (level 2)
+    |   left=firstArgumentExpression op=POWER nls right=firstArgumentExpression                                      #powerExprAlt
+
+    // ++(prefix)/--(prefix)/+(unary)/-(unary) (level 3)
+    |   op=(INC | DEC | ADD | SUB) firstArgumentExpression                                                           #unaryAddExprAlt
+
+    // multiplication/division/modulo (level 4)
+    |   left=firstArgumentExpression nls op=(MUL | DIV | MOD) nls right=firstArgumentExpression                      #multiplicativeExprAlt
+
+    // binary addition/subtraction (level 5)
+    |   left=firstArgumentExpression op=(ADD | SUB) nls right=firstArgumentExpression                                #additiveExprAlt
+
+    // bit shift expressions (level 6)
+    |   left=firstArgumentExpression nls
+            (           (   dlOp=LT LT
+                        |   tgOp=GT GT GT
+                        |   dgOp=GT GT
+                        )
+            |   rangeOp=(    RANGE_INCLUSIVE
+                        |    RANGE_EXCLUSIVE
+                        )
+            ) nls
+        right=firstArgumentExpression                                                                                #shiftExprAlt
+
+    // boolean relational expressions (level 7)
+    |   left=firstArgumentExpression nls op=(AS | INSTANCEOF | NOT_INSTANCEOF) nls type                 #relationalExprAlt
+    |   left=firstArgumentExpression nls op=(LE | GE | GT | LT | IN | NOT_IN)  nls right=firstArgumentExpression     #relationalExprAlt
+
+    // equality/inequality (==/!=) (level 8)
+    |   left=firstArgumentExpression nls
+            op=(    IDENTICAL
+               |    NOT_IDENTICAL
+               |    EQUAL
+               |    NOTEQUAL
+               |    SPACESHIP
+               ) nls
+        right=firstArgumentExpression                                                                                #equalityExprAlt
+
+    // regex find and match (=~ and ==~) (level 8.5)
+    // jez: moved =~ closer to precedence of == etc, as...
+    // 'if (foo =~ "a.c")' is very close in intent to 'if (foo == "abc")'
+    |   left=firstArgumentExpression nls op=(REGEX_FIND | REGEX_MATCH) nls right=firstArgumentExpression             #regexExprAlt
+
+    // bitwise or non-short-circuiting and (&)  (level 9)
+    |   left=firstArgumentExpression nls op=BITAND nls right=firstArgumentExpression                                 #andExprAlt
+
+    // exclusive or (^)  (level 10)
+    |   left=firstArgumentExpression nls op=XOR nls right=firstArgumentExpression                                    #exclusiveOrExprAlt
+
+    // bitwise or non-short-circuiting or (|)  (level 11)
+    |   left=firstArgumentExpression nls op=BITOR nls right=firstArgumentExpression                                  #inclusiveOrExprAlt
+
+    // logical and (&&)  (level 12)
+    |   left=firstArgumentExpression nls op=AND nls right=firstArgumentExpression                                    #logicalAndExprAlt
+
+    // logical or (||)  (level 13)
+    |   left=firstArgumentExpression nls op=OR nls right=firstArgumentExpression                                     #logicalOrExprAlt
+
+    // conditional test (level 14)
+    |   <assoc=right> con=firstArgumentExpression nls
+        (   QUESTION nls tb=firstArgumentExpression nls COLON nls
+        |   ELVIS nls
+        )
+        fb=firstArgumentExpression                                                                                   #conditionalExprAlt
+
+    // assignment expression (level 15)
+    // "(a) = [1]" is a special case of multipleAssignmentExprAlt, it will be handle by assignmentExprAlt
+    |   <assoc=right> left=variableNames nls op=ASSIGN nls right=statementExpression                    #multipleAssignmentExprAlt
+    |   <assoc=right> left=firstArgumentExpression nls
+                        op=(   ASSIGN
+                           |   ADD_ASSIGN
+                           |   SUB_ASSIGN
+                           |   MUL_ASSIGN
+                           |   DIV_ASSIGN
+                           |   AND_ASSIGN
+                           |   OR_ASSIGN
+                           |   XOR_ASSIGN
+                           |   RSHIFT_ASSIGN
+                           |   URSHIFT_ASSIGN
+                           |   LSHIFT_ASSIGN
+                           |   MOD_ASSIGN
+                           |   POWER_ASSIGN
+                           |   ELVIS_ASSIGN
+                           ) nls
+                     right=enhancedStatementExpression                                                  #assignmentExprAlt
+    ;
+
+
 commandExpression
     :   expression
         (
@@ -892,14 +1008,25 @@ commandArgument
  *  t   0: primary, 1: namePart, 2: arguments, 3: closureOrLambdaExpression, 4: indexPropertyArgs, 5: namedPropertyArgs,
  *      6: non-static inner class creator
  */
-pathExpression returns [int t]
+pathExpression
     :   (
             primary
         |
             // if 'static' followed by DOT, we can treat them as identifiers, e.g. static.unused = { -> }
             { _input.LT(2).getType() == DOT }?
             STATIC
-        ) (pathElement { $t = $pathElement.t; })*
+        ) (pathElement { _localctx.putNodeMetaData("t", $pathElement.t); })*
+    ;
+
+firstArgumentPathExpression
+options { baseContext = pathExpression; }
+    :   (
+            firstArgumentPrimary
+        |
+            // if 'static' followed by DOT, we can treat them as identifiers, e.g. static.unused = { -> }
+            { _input.LT(2).getType() == DOT }?
+            STATIC
+        ) (pathElement { _localctx.putNodeMetaData("t", $pathElement.t); })*
     ;
 
 pathElement returns [int t]
@@ -980,7 +1107,7 @@ dynamicMemberName
  *  The brackets may also be empty, as in T[].  This is how Groovy names array types.
  */
 indexPropertyArgs
-    :   (SAFE_INDEX | LBRACK) expressionList[true]? RBRACK
+    :   (SAFE_INDEX | LBRACK) expressionList? RBRACK
     ;
 
 namedPropertyArgs
@@ -998,6 +1125,24 @@ primary
     |   THIS                                                                                #thisPrmrAlt
     |   SUPER                                                                               #superPrmrAlt
     |   parExpression                                                                       #parenPrmrAlt
+    |   closureOrLambdaExpression                                                           #closureOrLambdaExpressionPrmrAlt
+    |   list                                                                                #listPrmrAlt
+    |   map                                                                                 #mapPrmrAlt
+    |   builtInType                                                                         #builtInTypePrmrAlt
+    ;
+
+firstArgumentPrimary
+options { baseContext = primary; }
+    :
+        // Append `typeArguments?` to `identifier` to support constructor reference with generics, e.g. HashMap<String, Integer>::new
+        // Though this is not a graceful solution, it is much faster than replacing `builtInType` with `type`
+        identifier typeArguments?                                                           #identifierPrmrAlt
+    |   literal                                                                             #literalPrmrAlt
+    |   gstring                                                                             #gstringPrmrAlt
+    |   NEW nls creator[0]                                                                  #newPrmrAlt
+    |   THIS                                                                                #thisPrmrAlt
+    |   SUPER                                                                               #superPrmrAlt
+    |   firstArgumentParExpression                                                          #parenPrmrAlt
     |   closureOrLambdaExpression                                                           #closureOrLambdaExpressionPrmrAlt
     |   list                                                                                #listPrmrAlt
     |   map                                                                                 #mapPrmrAlt
@@ -1027,7 +1172,7 @@ options { baseContext = primary; }
     ;
 
 list
-    :   LBRACK expressionList[true]? COMMA? RBRACK
+    :   LBRACK expressionList? COMMA? RBRACK
     ;
 
 map
@@ -1134,14 +1279,6 @@ options { baseContext = enhancedArgumentListInPar; }
         )*
     ;
 
-enhancedArgumentList
-options { baseContext = enhancedArgumentListInPar; }
-    :   firstEnhancedArgumentListElement
-        (   COMMA nls
-            enhancedArgumentListElement
-        )*
-    ;
-
 enhancedArgumentListInPar
     :   enhancedArgumentListElement
         (   COMMA nls
@@ -1151,25 +1288,18 @@ enhancedArgumentListInPar
 
 firstArgumentListElement
 options { baseContext = enhancedArgumentListElement; }
-    :   expressionListElement[true]
+    :   firstArgumentExpressionListElement
     |   namedArg
     ;
 
 argumentListElement
 options { baseContext = enhancedArgumentListElement; }
-    :   expressionListElement[true]
+    :   expressionListElement
     |   namedPropertyArg
     ;
 
-firstEnhancedArgumentListElement
-options { baseContext = enhancedArgumentListElement; }
-    :   expressionListElement[true]
-    |   standardLambdaExpression
-    |   namedArg
-    ;
-
 enhancedArgumentListElement
-    :   expressionListElement[true]
+    :   expressionListElement
     |   standardLambdaExpression
     |   namedPropertyArg
     ;
@@ -1257,6 +1387,11 @@ keywords
 lparen
     :   LPAREN
     |   WS_LPAREN
+    ;
+
+firstArgumentLparen
+options { baseContext = lparen; }
+    :   WS_LPAREN
     ;
 
 rparen
