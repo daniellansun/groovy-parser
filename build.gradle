@@ -112,7 +112,7 @@ ext {
     antlr4Version = '4.9.0'
 //    groovyVersion = '3.0.0-SNAPSHOT'
     groovyVersion = '3.0.8'
-    junitVersion = '4.13'
+    junitVersion = '4.13.2'
 }
 
 dependencies {
