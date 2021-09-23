@@ -106,13 +106,18 @@ generateGrammarSource {
 task antlr(dependsOn: generateGrammarSource) // alias for generateGrammarSource
 compileJava.dependsOn antlr
 
+configurations {
+    antlr2
+}
 
 ext {
-    asmVersion = '9.1'
+    asmVersion = '9.2'
     antlr4Version = '4.9.0'
-//    groovyVersion = '3.0.0-SNAPSHOT'
-    groovyVersion = '3.0.8'
+    groovyVersion = '4.0.0-beta-1'
     junitVersion = '4.13.2'
+
+    antlrVersion = '2.7.7'
+    antVersion = '1.10.11'
 }
 
 dependencies {
@@ -124,10 +129,74 @@ dependencies {
     compile "org.ow2.asm:asm-tree:$asmVersion"
     compile "org.ow2.asm:asm-util:$asmVersion"
 
-    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
+    compile "org.apache.groovy:groovy:$groovyVersion"
+    compile "org.apache.groovy:groovy:$groovyVersion"
+
+    compile "antlr:antlr:$antlrVersion"
+    antlr2 "org.apache.ant:ant-antlr:$antVersion"
 
     testCompile "junit:junit:$junitVersion"
 }
+
+ext.generatedDirectory = "${buildDir}/generated/sources"
+
+sourceSets {
+    main {
+        java {
+            srcDir "$generatedDirectory/antlr2/src/main"
+        }
+        groovy {
+            srcDir "$generatedDirectory/antlr2/src/main"
+        }
+        resources {
+            srcDirs = ['src/resources']
+        }
+    }
+    antlr2 {
+        resources {
+            srcDirs = ['src/main/antlr2']
+        }
+    }
+    test {
+        groovy {
+            srcDirs = ['src/test']
+        }
+        resources {
+            srcDirs = ['src/test-resources']
+        }
+    }
+}
+
+task ensureGrammars {
+    outputs.cacheIf { true }
+    description = 'Ensure all the Antlr2 generated files are up to date.'
+    ext.antlrDirectory = "$projectDir/src/main/antlr2/org/codehaus/groovy/antlr"
+    ext.javaParserDirectory = "$ext.antlrDirectory/java"
+    ext.genPath = "$generatedDirectory/antlr2/src/main/org/codehaus/groovy/antlr"
+    ext.groovyOutDir = "$ext.genPath/parser"
+    ext.javaOutDir = "$ext.genPath/java"
+    inputs.dir(antlrDirectory)
+    outputs.dir(groovyOutDir)
+    outputs.dir(javaOutDir)
+    doFirst {
+        new File(groovyOutDir).mkdirs()
+        new File(javaOutDir).mkdirs()
+        ant {
+            taskdef(name: 'antlr2',
+                    classname: 'org.apache.tools.ant.taskdefs.optional.ANTLR',
+                    classpath: configurations.antlr2.asPath)
+
+            antlr2(target: "$ext.antlrDirectory/groovy.g", outputdirectory: ext.groovyOutDir) {
+                classpath path: configurations.compileClasspath.asPath
+            }
+            antlr2(target: "$ext.javaParserDirectory/java.g", outputdirectory: ext.javaOutDir) {
+                classpath path: configurations.compileClasspath.asPath
+            }
+        }
+    }
+}
+
+compileJava.dependsOn ensureGrammars
 
 wrapper {
     gradleVersion = '5.6.4'
