@@ -18,6 +18,7 @@
  */
 package org.apache.groovy.parser.antlr4
 
+import groovy.test.GroovyTestCase
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.apache.groovy.parser.antlr4.util.ASTComparatorCategory
