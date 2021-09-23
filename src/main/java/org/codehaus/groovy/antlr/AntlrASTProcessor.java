@@ -16,33 +16,18 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.groovy.parser.antlr4.ui
+package org.codehaus.groovy.antlr;
 
-import groovy.ui.Console
-import org.apache.groovy.parser.antlr4.Antlr4PluginFactory
-import org.codehaus.groovy.control.CompilerConfiguration
+import antlr.collections.AST;
 
 /**
- * A console for evaluating the new parser
- *
- * @author  <a href="mailto:realbluesun@hotmail.com">Daniel.Sun</a>
- * Created on    2016/09/04
+ * An interface for processing antlr AST objects
  */
-class GroovyConsole {
-    private Console console;
-
-    public GroovyConsole() {
-        CompilerConfiguration configuration = new CompilerConfiguration(CompilerConfiguration.DEFAULT);
-        configuration.setPluginFactory(new Antlr4PluginFactory());
-
-        this.console = new Console(this.getClass().getClassLoader(), new Binding(), configuration);
-    }
-
-    public void run() {
-        this.console.run();
-    }
-
-    public static void main(String[] args) {
-        new GroovyConsole().run();
-    }
+public interface AntlrASTProcessor {
+    /**
+     * performs some processing on the supplied AST node.
+     * @param t the AST node to process.
+     * @return possibly returns the AST modified or null, depends on the implementation.
+     */
+    AST process(AST t);
 }
