@@ -810,8 +810,10 @@ NullLiteral
 
 // Groovy Operators
 
-RANGE_INCLUSIVE     : '..';
-RANGE_EXCLUSIVE     : '..<';
+RANGE_INCLUSIVE         : '..';
+RANGE_EXCLUSIVE_LEFT    : '<..';
+RANGE_EXCLUSIVE_RIGHT   : '..<';
+RANGE_EXCLUSIVE_FULL    : '<..<';
 SPREAD_DOT          : '*.';
 SAFE_DOT            : '?.';
 SAFE_INDEX          : '?[' { this.enterParen();     } -> pushMode(DEFAULT_MODE);
