@@ -14,6 +14,8 @@ The new parser(Parrot) can parse Groovy source code and construct the related AS
 * lambda expressions, e.g. `stream.map(e -> e + 1)`
 * method references and constructor references
 * try-with-resources, AKA ARM
+* switch-expression
+* sealed type
 * code blocks, i.e. `{..}`
 * Java style array initializers, e.g. `new int[] {1, 2, 3}`
 * default methods within interfaces
