@@ -4368,7 +4368,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
         List<Tuple2<String, Expression>> annotationElementValues = this.visitElementValues(ctx.elementValues());
 
         annotationElementValues.forEach(e -> annotationNode.addMember(e.getV1(), e.getV2()));
-
+        configureAST(annotationNode.getClassNode(), ctx.annotationName());
         return configureAST(annotationNode, ctx);
     }
 
