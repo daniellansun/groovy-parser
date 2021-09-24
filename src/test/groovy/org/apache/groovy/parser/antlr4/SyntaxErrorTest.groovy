@@ -402,6 +402,19 @@ final class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.doRunAndShouldFail('fail/Array_02x.groovy')
     }
 
+    void "test groovy core - SwitchExpression"() {
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_01x.groovy')
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_02x.groovy')
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_03x.groovy')
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_04x.groovy')
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_05x.groovy')
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_06x.groovy')
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_07x.groovy')
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_08x.groovy')
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_09x.groovy')
+        TestUtils.doRunAndShouldFail('fail/SwitchExpression_10x.groovy')
+    }
+
     @NotYetImplemented
     void 'test error alternative - Missing ")" 1'() {
         def err = expectParseError '''\
