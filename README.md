@@ -25,11 +25,13 @@ The new parser(Parrot) can parse Groovy source code and construct the related AS
 
 **JVM system properties to control parsing:**
 
-* `groovy.antlr4.cache.threshold`: how frequently to clear DFA cache(default: 64). **Notice:** The more frequently the DFA cache is cleared, the poorer parsing performance will be(you can not set the value that is less than the default value). But the DFA cache has to be cleared to avoid OutOfMemoryError's occurring.
-* `groovy.clear.lexer.dfa.cache`: whether to clear the dfa cache of lexer(default: false)
-* `groovy.attach.groovydoc`: whether to attach groovydoc to node as metadata while parsing groovy source code(default: false)
-* `groovy.attach.runtime.groovydoc`: whether to attach `@Groovydoc` annotation to all members which have groovydoc(i.e. `/**@ ... */`)
-* `groovy.extract.doc.comment`: whether to collect groovydoc while parsing groovy source code(default: false). **DEPRECATED, USE `groovy.attach.groovydoc` INSTEAD** 
+| Option | Description | Default | Example |
+| ---- | ---- | ---- | ---- |
+| groovy.antlr4.cache.threshold | antlr4 relies on DFA cache heavily for better performance, so antlr4 will not clear DFA cache, thus OutOfMemoryError will probably occur. Groovy trades off parsing performance and memory usage, when the count of Groovy source files parsed hits the cache threshold, the DFA cache will be cleared. *Note:* `0` means never clearing DFA cache, so requiring bigger JVM heap size. Or set a greater value, e.g. 200 to clear DFA cache if threshold hits. **Note: ** the threshold specified is the count of groovy source files | `64` | -Dgroovy.antlr4.cache.threshold=200 |
+| groovy.antlr4.sll.threshold | Parrot parser will try SLL mode and then try LL mode if SLL failed. But the more tokens to parse, the more likely SLL will fail. If SLL threshold hits, SLL will be skipped. Setting the threshold to `0` means never trying SLL mode, which is not recommended at most cases because SLL is the fastest mode though SLL is less powerful than LL. **Note: ** the threshold specified is the token count | `-1` (disabled by default) | -Dgroovy.antlr4.sll.threshold=1000 |
+| groovy.antlr4.clear.lexer.dfa.cache | Clear the DFA cache for lexer. The DFA cache for lexer is always small and important for parsing performance, so it's strongly recommended to leave it as it is util OutOfMemoryError will truely occur | `false` | -Dgroovy.antlr4.clear.lexer.dfa.cache=true |
+
+
 
 **Parrot is based on the highly optimized version of antlr4(com.tunnelvisionlabs:antlr4), which is licensed under BSD. On 20161103 Parrot was contributed to Apache Groovy, but the project will be maintained as a lab to experiment new features for Groovy. You can find it at [apache/groovy](https://github.com/apache/groovy/tree/master/subprojects/parser-antlr4).**
 
