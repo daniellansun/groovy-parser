@@ -20,7 +20,6 @@ package org.apache.groovy.parser.antlr4;
 
 import groovy.lang.Tuple2;
 import groovy.lang.Tuple3;
-import groovy.transform.CompileStatic;
 import groovy.transform.NonSealed;
 import groovy.transform.Sealed;
 import groovy.transform.Trait;
@@ -32,6 +31,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -210,6 +210,7 @@ import org.apache.groovy.parser.antlr4.internal.DescriptiveErrorStrategy;
 import org.apache.groovy.parser.antlr4.internal.atnmanager.AtnManager;
 import org.apache.groovy.parser.antlr4.util.StringUtils;
 import org.apache.groovy.util.Maps;
+import org.apache.groovy.util.SystemUtil;
 import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.antlr.EnumHelper;
 import org.codehaus.groovy.ast.ASTNode;
@@ -287,7 +288,6 @@ import org.codehaus.groovy.ast.stmt.ThrowStatement;
 import org.codehaus.groovy.ast.stmt.TryCatchStatement;
 import org.codehaus.groovy.ast.stmt.WhileStatement;
 import org.codehaus.groovy.ast.tools.ClosureUtils;
-import org.codehaus.groovy.classgen.Verifier;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
@@ -352,15 +352,12 @@ import static org.apache.groovy.parser.antlr4.GroovyParser.STATIC;
 import static org.apache.groovy.parser.antlr4.GroovyParser.SUB;
 import static org.apache.groovy.parser.antlr4.GroovyParser.VAR;
 import static org.apache.groovy.parser.antlr4.util.PositionConfigureUtils.configureAST;
-import static org.codehaus.groovy.ast.ClassHelper.isPrimitiveVoid;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.assignX;
 import static org.codehaus.groovy.ast.tools.GeneralUtils.callX;
 import static org.codehaus.groovy.ast.tools.GeneralUtils.closureX;
 import static org.codehaus.groovy.ast.tools.GeneralUtils.declS;
 import static org.codehaus.groovy.ast.tools.GeneralUtils.listX;
 import static org.codehaus.groovy.ast.tools.GeneralUtils.localVarX;
 import static org.codehaus.groovy.ast.tools.GeneralUtils.returnS;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.stmt;
 import static org.codehaus.groovy.ast.tools.GeneralUtils.varX;
 import static org.codehaus.groovy.classgen.asm.util.TypeUtil.isPrimitiveType;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asBoolean;
@@ -406,14 +403,25 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
             // parsing have to wait util clearing is complete.
             AtnManager.READ_LOCK.lock();
             try {
-                result = buildCST(PredictionMode.SLL);
-            } catch (Throwable t) {
-                // if some syntax error occurred in the lexer, no need to retry the powerful LL mode
-                if (t instanceof GroovySyntaxError && GroovySyntaxError.LEXER == ((GroovySyntaxError) t).getSource()) {
-                    throw t;
-                }
+                final TokenStream tokenStream = parser.getInputStream();
+                if (SLL_THRESHOLD >= 0 && tokenStream.size() > SLL_THRESHOLD) {
+                    // The more tokens to parse, the more possibility SLL will fail and the more parsing time will waste.
+                    // The option `groovy.antlr4.sll.threshold` could be tuned for better parsing performance, but it is disabled by default.
+                    // If the token count is greater than `groovy.antlr4.sll.threshold`, use LL directly.
+                    result = buildCST(PredictionMode.LL);
+                } else {
+                    try {
+                        result = buildCST(PredictionMode.SLL);
+                    } catch (Throwable t) {
+                        // if some syntax error occurred in the lexer, no need to retry the powerful LL mode
+                        if (t instanceof GroovySyntaxError && GroovySyntaxError.LEXER == ((GroovySyntaxError) t).getSource()) {
+                            throw t;
+                        }
 
-                result = buildCST(PredictionMode.LL);
+                        tokenStream.seek(0);
+                        result = buildCST(PredictionMode.LL);
+                    }
+                }
             } finally {
                 AtnManager.READ_LOCK.unlock();
             }
@@ -430,7 +438,6 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
         if (PredictionMode.SLL.equals(predictionMode)) {
             this.removeErrorListeners();
         } else {
-            parser.getInputStream().seek(0);
             this.addErrorListeners();
         }
 
@@ -5017,6 +5024,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
     private int visitingSwitchStatementCount;
     private int visitingAssertStatementCount;
     private int visitingArrayInitializerCount;
+
+    private static final int SLL_THRESHOLD = SystemUtil.getIntegerSafe("groovy.antlr4.sll.threshold", -1);
 
     private static final String QUESTION_STR = "?";
     private static final String DOT_STR = ".";

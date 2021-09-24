@@ -144,7 +144,7 @@ sourceSets {
     }
 }
 
-task ensureGrammars {
+task generateLegacyGrammarSource {
     outputs.cacheIf { true }
     description = 'Ensure all the Antlr2 generated files are up to date.'
     ext.antlrDirectory = "$projectDir/src/main/antlr2/org/codehaus/groovy/antlr"
@@ -173,7 +173,7 @@ task ensureGrammars {
     }
 }
 
-compileJava.dependsOn ensureGrammars
+compileJava.dependsOn generateLegacyGrammarSource
 
 wrapper {
     gradleVersion = '7.2'
