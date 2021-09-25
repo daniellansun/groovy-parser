@@ -343,6 +343,7 @@ class GroovyParserTest extends GroovyTestCase {
     }
 
     void "test groovy core - EnumDeclaration"() {
+        doTest('core/EnumDeclaration_00.groovy');
         doTest('core/EnumDeclaration_01.groovy');
         doTest('core/EnumDeclaration_02.groovy', [ExpressionStatement]);
         doTest('core/EnumDeclaration_03.groovy');
