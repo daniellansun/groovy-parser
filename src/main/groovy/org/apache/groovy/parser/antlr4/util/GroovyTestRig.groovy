@@ -18,6 +18,7 @@
  */
 package org.apache.groovy.parser.antlr4.util
 
+import groovy.console.ui.AstNodeToScriptAdapter
 import groovy.util.logging.Log
 import org.antlr.v4.gui.TestRig
 import org.antlr.v4.runtime.CharStream
@@ -28,6 +29,8 @@ import org.antlr.v4.runtime.atn.DecisionInfo
 import org.antlr.v4.runtime.atn.ProfilingATNSimulator
 import org.apache.groovy.parser.antlr4.GroovyLangLexer
 import org.apache.groovy.parser.antlr4.GroovyLangParser
+import org.codehaus.groovy.control.CompilerConfiguration
+import org.codehaus.groovy.control.Phases
 
 import java.text.DecimalFormat
 
@@ -107,6 +110,15 @@ class GroovyTestRig extends TestRig {
         GroovyTestRig groovyTestRig = new GroovyTestRig(args)
 
         groovyTestRig.inspectParseTree()
+    }
+
+    static String inspect(String src) {
+        String result = new AstNodeToScriptAdapter()
+                .compileToScript(src, Phases.CONVERSION,
+                        new GroovyClassLoader(), false, true,
+                        new CompilerConfiguration(CompilerConfiguration.DEFAULT))
+
+        return result
     }
 }
 
