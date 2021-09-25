@@ -2864,7 +2864,7 @@ class Gradle310SourcesTest extends GroovyTestCase {
     }
 
     void "test subprojects/core/src/test/groovy/org/gradle/execution/TaskNameResolverTest_groovy"() {
-        unzipAndTest("subprojects/core/src/test/groovy/org/gradle/execution/TaskNameResolverTest.groovy", [])
+        unzipAndTest("subprojects/core/src/test/groovy/org/gradle/execution/TaskNameResolverTest.groovy", [], ['def resolver = new TaskNameResolver()': 'TaskNameResolver resolver'])
     }
 
     void "test subprojects/core/src/test/groovy/org/gradle/execution/TaskNameResolvingBuildConfigurationActionSpec_groovy"() {
