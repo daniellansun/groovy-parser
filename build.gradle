@@ -18,14 +18,8 @@
  */
 buildscript {
     repositories {
-        if (rootProject.hasProperty('buildInChina')) {
-            // Try to use Aliyun maven repository when building in China
-            maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
-        }
-        jcenter()
         mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
-        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -46,8 +40,6 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
-//    options.fork = true
-//    options.forkOptions.jvmArgs += ["-Duser.language=en"]
 }
 
 tasks.withType(GroovyCompile) {
@@ -57,12 +49,6 @@ tasks.withType(GroovyCompile) {
 repositories {
     flatDir { dirs("lib") }
 
-    if (rootProject.hasProperty('buildInChina')) {
-        // Try to use Aliyun maven repository when building in China
-        maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
-    }
-
-    jcenter()
     mavenCentral()
 
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
@@ -79,7 +65,6 @@ generateGrammarSource {
     doLast {
         def parserFilePattern = 'Groovy*'
         def outputPath = generateGrammarSource.outputDirectory.canonicalPath
-        println "outputPath: ${outputPath}"
         def parserPackagePath = "${outputPath}/${PARSER_PACKAGE_NAME.replace('.', '/')}"
         file(parserPackagePath).mkdirs()
         copy {
