@@ -1217,6 +1217,6 @@ class Spock11RC2SourcesTest extends GroovyTestCase {
     }
 
 
-    public static final String ZIP_PATH = "$TestUtils.RESOURCES_PATH/spock-spock-1.1-rc-2/spock-spock-1.1-rc-2-allsources.zip";
+    public static final String ZIP_PATH = "$TestUtils.RESOURCES_PATH/spock-1.1-rc-2/spock-1.1-rc-2-allsources.zip";
 
 }
