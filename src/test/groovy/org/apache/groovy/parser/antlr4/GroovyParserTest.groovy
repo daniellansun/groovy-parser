@@ -358,6 +358,18 @@ class GroovyParserTest extends GroovyTestCase {
         doTest('core/TraitDeclaration_05.groovy');
     }
 
+    void "test groovy core - RecordDeclaration"() {
+        doRunAndTestAntlr4('core/RecordDeclaration_01x.groovy')
+        doRunAndTestAntlr4('core/RecordDeclaration_02x.groovy')
+        doRunAndTestAntlr4('core/RecordDeclaration_03x.groovy')
+        doRunAndTestAntlr4('core/RecordDeclaration_04x.groovy')
+        doRunAndTestAntlr4('core/RecordDeclaration_05x.groovy')
+        doRunAndTestAntlr4('core/RecordDeclaration_06x.groovy')
+        doRunAndTestAntlr4('core/RecordDeclaration_07x.groovy')
+        doRunAndTestAntlr4('core/RecordDeclaration_08x.groovy')
+        doRunAndTestAntlr4('core/RecordDeclaration_09x.groovy')
+    }
+
     void "test groovy core - AnnotationDeclaration"() {
         doTest('core/AnnotationDeclaration_01.groovy');
     }

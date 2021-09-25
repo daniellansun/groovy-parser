@@ -56,6 +56,7 @@ options {
 @members {
     private static final Logger LOGGER = Logger.getLogger(GroovyLexer.class.getName());
 
+    private boolean errorIgnored;
     private long tokenIndex;
     private int  lastTokenType;
     private int  invalidDigitCount;
@@ -237,6 +238,14 @@ options {
 
     private static boolean isJavaIdentifierPartAndNotIdentifierIgnorable(int codePoint) {
         return Character.isJavaIdentifierPart(codePoint) && !Character.isIdentifierIgnorable(codePoint);
+    }
+
+    public boolean isErrorIgnored() {
+        return errorIgnored;
+    }
+
+    public void setErrorIgnored(boolean errorIgnored) {
+        this.errorIgnored = errorIgnored;
     }
 }
 
@@ -462,6 +471,8 @@ PERMITS       : 'permits';
 PRIVATE       : 'private';
 PROTECTED     : 'protected';
 PUBLIC        : 'public';
+
+RECORD        : 'record';
 RETURN        : 'return';
 
 SEALED        : 'sealed';
@@ -492,10 +503,10 @@ IntegerLiteral
         |   HexIntegerLiteral
         |   OctalIntegerLiteral
         |   BinaryIntegerLiteral
-        ) (Underscore { require(false, "Number ending with underscores is invalid", -1, true); })?
+        ) (Underscore { require(errorIgnored, "Number ending with underscores is invalid", -1, true); })?
 
     // !!! Error Alternative !!!
-    |   Zero ([0-9] { invalidDigitCount++; })+ { require(false, "Invalid octal number", -(invalidDigitCount + 1), true); } IntegerTypeSuffix?
+    |   Zero ([0-9] { invalidDigitCount++; })+ { require(errorIgnored, "Invalid octal number", -(invalidDigitCount + 1), true); } IntegerTypeSuffix?
     ;
 
 fragment
@@ -634,12 +645,12 @@ BinaryDigitOrUnderscore
 FloatingPointLiteral
     :   (   DecimalFloatingPointLiteral
         |   HexadecimalFloatingPointLiteral
-        ) (Underscore { require(false, "Number ending with underscores is invalid", -1, true); })?
+        ) (Underscore { require(errorIgnored, "Number ending with underscores is invalid", -1, true); })?
     ;
 
 fragment
 DecimalFloatingPointLiteral
-    :   Digits Dot Digits ExponentPart? FloatTypeSuffix?
+    :   Digits? Dot Digits ExponentPart? FloatTypeSuffix?
     |   Digits ExponentPart FloatTypeSuffix?
     |   Digits FloatTypeSuffix
     ;
@@ -820,21 +831,21 @@ RANGE_INCLUSIVE         : '..';
 RANGE_EXCLUSIVE_LEFT    : '<..';
 RANGE_EXCLUSIVE_RIGHT   : '..<';
 RANGE_EXCLUSIVE_FULL    : '<..<';
-SPREAD_DOT          : '*.';
-SAFE_DOT            : '?.';
-SAFE_INDEX          : '?[' { this.enterParen();     } -> pushMode(DEFAULT_MODE);
-SAFE_CHAIN_DOT      : '??.';
-ELVIS               : '?:';
-METHOD_POINTER      : '.&';
-METHOD_REFERENCE    : '::';
-REGEX_FIND          : '=~';
-REGEX_MATCH         : '==~';
-POWER               : '**';
-POWER_ASSIGN        : '**=';
-SPACESHIP           : '<=>';
-IDENTICAL           : '===';
-NOT_IDENTICAL       : '!==';
-ARROW               : '->';
+SPREAD_DOT              : '*.';
+SAFE_DOT                : '?.';
+SAFE_INDEX              : '?[' { this.enterParen();     } -> pushMode(DEFAULT_MODE);
+SAFE_CHAIN_DOT          : '??.';
+ELVIS                   : '?:';
+METHOD_POINTER          : '.&';
+METHOD_REFERENCE        : '::';
+REGEX_FIND              : '=~';
+REGEX_MATCH             : '==~';
+POWER                   : '**';
+POWER_ASSIGN            : '**=';
+SPACESHIP               : '<=>';
+IDENTICAL               : '===';
+NOT_IDENTICAL           : '!==';
+ARROW                   : '->';
 
 // !internalPromise will be parsed as !in ternalPromise, so semantic predicates are necessary
 NOT_INSTANCEOF      : '!instanceof' { isFollowedBy(_input, ' ', '\t', '\r', '\n') }?;
@@ -978,10 +989,10 @@ SL_COMMENT
 // Script-header comments.
 // The very first characters of the file may be "#!".  If so, ignore the first line.
 SH_COMMENT
-    :   '#!' { require(0 == this.tokenIndex, "Shebang comment should appear at the first line", -2, true); } ShCommand (LineTerminator '#!' ShCommand)* -> skip
+    :   '#!' { require(errorIgnored || 0 == this.tokenIndex, "Shebang comment should appear at the first line", -2, true); } ShCommand (LineTerminator '#!' ShCommand)* -> skip
     ;
 
 // Unexpected characters will be handled by groovy parser later.
 UNEXPECTED_CHAR
-    :   .
+    :   . { require(errorIgnored, "Unexpected character: '" + getText().replace("'", "\\'") + "'", -1, false); }
     ;

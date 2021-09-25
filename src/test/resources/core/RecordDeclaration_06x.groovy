@@ -16,14 +16,23 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package fail
+package core
 
-class Person {
-    String name
-    int age
-
-    public Person {
-        if (name == 'Devil') throw new IllegalArgumentException("Invalid person: $name")
-        if (age < 18) throw new IllegalArgumentException("Invalid age: $age")
+@groovy.transform.CompileStatic
+record Fruit(String name, double price) {
+    String name() {
+        return name
+    }
+    double price() {
+        return price
     }
 }
+
+@groovy.transform.CompileStatic
+void test() {
+    def apple = new Fruit('Apple', 11.6D)
+    assert 'Apple' == apple.name()
+    assert 11.6 == apple.price()
+}
+
+test()

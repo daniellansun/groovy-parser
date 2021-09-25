@@ -83,7 +83,7 @@ final class SyntaxErrorTest extends GroovyTestCase {
         // TODO: Could the character be escaped in the error message?
         assert err == '''\
             |startup failed:
-            |test.groovy: 1: Unexpected input: 'def \u200B' @ line 1, column 5.
+            |test.groovy: 1: Unexpected character: '\u200B' @ line 1, column 5.
             |   def \u200Bname = null
             |       ^
             |
@@ -99,7 +99,7 @@ final class SyntaxErrorTest extends GroovyTestCase {
         // TODO: Could the character be escaped in the error message?
         assert err == '''\
             |startup failed:
-            |test.groovy: 1: Unexpected input: '\u200B' @ line 1, column 7.
+            |test.groovy: 1: Unexpected character: '\u200B' @ line 1, column 7.
             |   def na\u200Bme = null
             |         ^
             |
@@ -115,7 +115,7 @@ final class SyntaxErrorTest extends GroovyTestCase {
         // TODO: Could the character be escaped in the error message?
         assert err == '''\
             |startup failed:
-            |test.groovy: 1: Unexpected input: '\u000C' @ line 1, column 7.
+            |test.groovy: 1: Unexpected character: '\u000C' @ line 1, column 7.
             |   def na\u000Cme = null
             |         ^
             |
@@ -175,10 +175,14 @@ final class SyntaxErrorTest extends GroovyTestCase {
     }
 
     void 'test groovy core - ClassDeclaration 1'() {
-        TestUtils.doRunAndShouldFail('fail/ClassDeclaration_02x.groovy')
+        TestUtils.doRunAndShouldFail('fail/ClassDeclaration_01x.groovy')
     }
 
     void 'test groovy core - ClassDeclaration 2'() {
+        TestUtils.doRunAndShouldFail('fail/ClassDeclaration_02x.groovy')
+    }
+
+    void 'test groovy core - ClassDeclaration 3'() {
         def err = expectParseError '''\
             |class C extends Object, Number {}
             |'''.stripMargin()
@@ -409,6 +413,17 @@ final class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.shouldFail('fail/Trait_01.groovy')
     }
 
+    void 'test groovy core - Record'() {
+        TestUtils.doRunAndShouldFail('fail/RecordDeclaration_01x.groovy')
+        TestUtils.doRunAndShouldFail('fail/RecordDeclaration_02x.groovy')
+        TestUtils.doRunAndShouldFail('fail/RecordDeclaration_03x.groovy')
+        TestUtils.doRunAndShouldFail('fail/RecordDeclaration_04x.groovy')
+        TestUtils.doRunAndShouldFail('fail/RecordDeclaration_05x.groovy')
+        TestUtils.doRunAndShouldFail('fail/RecordDeclaration_06x.groovy')
+        TestUtils.doRunAndShouldFail('fail/RecordDeclaration_07x.groovy')
+        TestUtils.doRunAndShouldFail('fail/RecordDeclaration_08x.groovy')
+    }
+
     void 'test groovy core - Array'() {
         TestUtils.doRunAndShouldFail('fail/Array_01x.groovy')
         TestUtils.doRunAndShouldFail('fail/Array_02x.groovy')
@@ -478,6 +493,7 @@ final class SyntaxErrorTest extends GroovyTestCase {
             |'''.stripMargin()
     }
 
+    @NotYetImplemented
     void 'test CompilerErrorTest_001'() {
         unzipScriptAndShouldFail('scripts/CompilerErrorTest_001.groovy', [])
     }
