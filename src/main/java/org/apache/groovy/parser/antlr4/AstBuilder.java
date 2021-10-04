@@ -235,6 +235,7 @@ import org.codehaus.groovy.ast.NodeMetaDataHandler;
 import org.codehaus.groovy.ast.PackageNode;
 import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.ast.PropertyNode;
+import org.codehaus.groovy.ast.RecordComponentNode;
 import org.codehaus.groovy.ast.expr.AnnotationConstantExpression;
 import org.codehaus.groovy.ast.expr.ArgumentListExpression;
 import org.codehaus.groovy.ast.expr.ArrayExpression;
@@ -1611,7 +1612,13 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
             classNode.setModifiers(classNode.getModifiers() | Opcodes.ACC_RECORD | Opcodes.ACC_FINAL);
             classNode.setInterfaces(this.visitTypeList(ctx.is));
 
-            this.transformRecordHeaderToProperties(ctx, classNode);
+            Parameter[] parameters = this.transformRecordHeaderToProperties(ctx, classNode);
+            List<RecordComponentNode> recordComponentNodeList =
+                    Arrays.stream(parameters)
+                            .map(p -> new RecordComponentNode(classNode, p.getName(), p.getOriginType(), p.getAnnotations()))
+                            .collect(Collectors.toList());
+            classNode.setRecordComponentNodes(recordComponentNodeList);
+
             this.initUsingGenerics(classNode);
         } else {
             throw createParsingFailedException("Unsupported class declaration: " + ctx.getText(), ctx);
@@ -1647,7 +1654,7 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
         return classNode;
     }
 
-    private void transformRecordHeaderToProperties(ClassDeclarationContext ctx, ClassNode classNode) {
+    private Parameter[] transformRecordHeaderToProperties(ClassDeclarationContext ctx, ClassNode classNode) {
         Parameter[] parameters = this.visitFormalParameters(ctx.formalParameters());
         classNode.putNodeMetaData(RECORD_HEADER, parameters);
         for (int i = 0; i < parameters.length; i++) {
@@ -1657,6 +1664,8 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
             PropertyNode propertyNode = declareProperty(parameterCtx, parameterModifierManager, parameter.getType(), classNode, i, parameter, parameter.getName(), parameter.getModifiers(), parameter.getInitialExpression());
             propertyNode.getField().putNodeMetaData(IS_RECORD_GENERATED, true);
         }
+
+        return parameters;
     }
 
     @SuppressWarnings("unchecked")
