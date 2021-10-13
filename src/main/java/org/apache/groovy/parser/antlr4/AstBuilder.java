@@ -3594,6 +3594,9 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
                 } else {
                     throw createParsingFailedException("Unsupported arguments", arguments); // should never reach here
                 }
+                if (enclosingInstanceExpression instanceof ConstructorCallExpression && classNode.getName().indexOf('.') < 0) {
+                    classNode.setName(enclosingInstanceExpression.getType().getName() + '.' + classNode.getName()); // GROOVY-8947
+                }
             }
 
             if (asBoolean(ctx.anonymousInnerClassDeclaration())) {
