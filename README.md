@@ -2,7 +2,6 @@
 [![CircleCI](https://circleci.com/gh/danielsun1106/groovy-parser.svg?style=svg)](https://circleci.com/gh/danielsun1106/groovy-parser)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=danielsun1106_groovy-parser&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=danielsun1106_groovy-parser)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=danielsun1106_groovy-parser&metric=security_rating)](https://sonarcloud.io/dashboard?id=danielsun1106_groovy-parser)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=danielsun1106_groovy-parser&metric=coverage)](https://sonarcloud.io/dashboard?id=danielsun1106_groovy-parser)
 [![Java 8+](https://img.shields.io/badge/java-8+-4c7e9f.svg)](http://www.oracle.com/technetwork/java/javase/downloads)
 [![Apache License 2](https://img.shields.io/badge/license-APL2-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 [![Join the chat at https://gitter.im/groovy-parser/Lobby](https://badges.gitter.im/groovy-parser/Lobby.svg)](https://gitter.im/groovy-parser/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
