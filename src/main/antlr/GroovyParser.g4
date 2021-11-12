@@ -241,14 +241,14 @@ classBody[int t]
         (
             /* Only enum can have enum constants */
             { 2 == $t }?
-            enumConstants (nls COMMA)? sep?
+            enumConstants sep?
         |
         )
         (classBodyDeclaration[$t] (sep classBodyDeclaration[$t])*)? sep? RBRACE
     ;
 
 enumConstants
-    :   enumConstant (nls COMMA nls enumConstant)*
+    :   (enumConstant nls COMMA nls)* enumConstant?
     ;
 
 enumConstant
