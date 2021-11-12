@@ -16,8 +16,15 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+package core
 
-enum E {
-    X, Y, Z
-    trait T { }
+record Fruit(String name, double price) {
+    Fruit {
+        name = name.toUpperCase()
+        price = price * 1.2
+    }
 }
+def apple = new Fruit('Apple', 11.6)
+assert 'APPLE' == apple.name()
+assert 13.92 == apple.price()
+
