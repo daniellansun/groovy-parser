@@ -23,6 +23,7 @@ import groovy.test.NotYetImplemented
 import groovy.transform.AutoFinal
 import org.codehaus.groovy.control.CompilationUnit
 import org.codehaus.groovy.control.Phases
+import org.junit.Assert
 
 import static org.apache.groovy.parser.antlr4.util.ASTComparatorCategory.LOCATION_IGNORE_LIST
 
@@ -139,6 +140,24 @@ final class SyntaxErrorTest extends GroovyTestCase {
 
     void 'test groovy core - Super'() {
         TestUtils.doRunAndShouldFail('fail/Super_01x.groovy')
+    }
+
+    void 'test groovy core - Typecast super'() {
+        expectParseError '''\
+            |class A { def m() {} }
+            |class B extends A {  }
+            |class C extends B {
+            |    def m() {
+            |        ((A) super).m()
+            |    }
+            |}
+            |'''.stripMargin(), '''\
+            |Cannot cast or coerce `super` @ line 5, column 10.
+            |           ((A) super).m()
+            |            ^
+            |
+            |1 error
+            |'''.stripMargin()
     }
 
     void 'test groovy core - AbstractMethod'() {
@@ -529,6 +548,20 @@ final class SyntaxErrorTest extends GroovyTestCase {
             fail('expected parse to fail')
         } catch (e) {
             return e.message.replace('\r\n', '\n')
+        }
+    }
+
+    private static void expectParseError(String source, String expect) {
+        try {
+            new CompilationUnit().with {
+                addSource('test.groovy', source)
+                compile(Phases.CONVERSION)
+                getAST()
+            }
+            Assert.fail('expected parse to fail')
+        } catch (e) {
+            def line = (expect =~ /@ line (\d+),/)[0][1]
+            Assert.assertEquals("startup failed:\ntest.groovy: $line: $expect".toString(), e.message.replace('\r\n', '\n'))
         }
     }
 

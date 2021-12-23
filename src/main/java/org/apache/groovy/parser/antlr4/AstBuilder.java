@@ -3274,11 +3274,11 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
 
     @Override
     public CastExpression visitCastExprAlt(final CastExprAltContext ctx) {
-        CastExpression cast = new CastExpression(
-                this.visitCastParExpression(ctx.castParExpression()),
-                (Expression) this.visit(ctx.expression())
-        );
-
+        Expression expr = (Expression) this.visit(ctx.expression());
+        if (expr instanceof VariableExpression && ((VariableExpression) expr).isSuperExpression()) {
+            this.createParsingFailedException("Cannot cast or coerce `super`", ctx); // GROOVY-9391
+        }
+        CastExpression cast = new CastExpression(this.visitCastParExpression(ctx.castParExpression()), expr);
         return configureAST(cast, ctx);
     }
 
@@ -3395,36 +3395,33 @@ public class AstBuilder extends GroovyParserBaseVisitor<Object> {
     public Expression visitRelationalExprAlt(final RelationalExprAltContext ctx) {
         switch (ctx.op.getType()) {
             case AS:
-                return configureAST(
-                        CastExpression.asExpression(this.visitType(ctx.type()), (Expression) this.visit(ctx.left)),
-                        ctx);
+                Expression expr = (Expression) this.visit(ctx.left);
+                if (expr instanceof VariableExpression && ((VariableExpression) expr).isSuperExpression()) {
+                    this.createParsingFailedException("Cannot cast or coerce `super`", ctx); // GROOVY-9391
+                }
+                CastExpression cast = CastExpression.asExpression(this.visitType(ctx.type()), expr);
+                return configureAST(cast, ctx);
 
             case INSTANCEOF:
             case NOT_INSTANCEOF:
-                ctx.type().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, true);
+                ctx.type().putNodeMetaData(IS_INSIDE_INSTANCEOF_EXPR, Boolean.TRUE);
                 return configureAST(
-                        new BinaryExpression((Expression) this.visit(ctx.left),
+                        new BinaryExpression(
+                                (Expression) this.visit(ctx.left),
                                 this.createGroovyToken(ctx.op),
                                 configureAST(new ClassExpression(this.visitType(ctx.type())), ctx.type())),
                         ctx);
 
-            case LE:
-            case GE:
             case GT:
+            case GE:
             case LT:
+            case LE:
             case IN:
-            case NOT_IN: {
-                if (ctx.op.getType() == IN || ctx.op.getType() == NOT_IN ) {
-                    return this.createBinaryExpression(ctx.left, ctx.op, ctx.right, ctx);
-                }
-
-                return configureAST(
-                        this.createBinaryExpression(ctx.left, ctx.op, ctx.right),
-                        ctx);
-            }
+            case NOT_IN:
+                return this.createBinaryExpression(ctx.left, ctx.op, ctx.right, ctx);
 
             default:
-                throw createParsingFailedException("Unsupported relational expression: " + ctx.getText(), ctx);
+                throw this.createParsingFailedException("Unsupported relational expression: " + ctx.getText(), ctx);
         }
     }
 
