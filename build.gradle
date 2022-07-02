@@ -163,7 +163,7 @@ task generateLegacyGrammarSource {
 compileJava.dependsOn generateLegacyGrammarSource
 
 wrapper {
-    gradleVersion = '7.2'
+    gradleVersion = '7.4.2'
 }
 
 tasks.register("console", JavaExec) {
