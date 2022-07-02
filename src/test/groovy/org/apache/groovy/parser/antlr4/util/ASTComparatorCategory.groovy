@@ -239,6 +239,9 @@ class ASTComparatorCategory {
             return true
 
         def difference = a.metaClass.properties.find { MetaProperty mp  ->
+            if (mp !instanceof MetaBeanProperty)
+                return false
+
             MetaBeanProperty p = (MetaBeanProperty) mp
             if (!p.getter)
                 return false
