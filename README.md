@@ -1,5 +1,5 @@
 # groovy-parser(Parrot)
-[![CircleCI](https://circleci.com/gh/danielsun1106/groovy-parser.svg?style=svg)](https://circleci.com/gh/danielsun1106/groovy-parser)
+[![GithubActions](https://github.com/daniellansun/groovy-parser/actions/workflows/build-test.yml/badge.svg?branch=master)](https://github.com/daniellansun/groovy-parser/actions?query=branch%3Amaster++)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=danielsun1106_groovy-parser&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=danielsun1106_groovy-parser)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=danielsun1106_groovy-parser&metric=security_rating)](https://sonarcloud.io/dashboard?id=danielsun1106_groovy-parser)
 [![Java 8+](https://img.shields.io/badge/java-8+-4c7e9f.svg)](http://www.oracle.com/technetwork/java/javase/downloads)
