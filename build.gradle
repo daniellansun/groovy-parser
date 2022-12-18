@@ -38,6 +38,11 @@ apply plugin: 'antlr'
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
+// added duplicatesStrategy for tasks with Jar to avoid: Execution failed for task ':jar'.: Entry org/codehaus/groovy/antlr/java/JavaLexer$1.class is a duplicate but no duplicate handling strategy has been set.
+tasks.withType(Jar).all {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
