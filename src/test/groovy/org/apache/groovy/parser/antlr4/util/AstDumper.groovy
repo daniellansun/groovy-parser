@@ -125,7 +125,7 @@ class AstDumper {
         try {
             AstNodeToScriptVisitor visitor = new AstNodeToScriptVisitor(out, true, true);
 
-            new LinkedList<ClassNode>((List) this.ast?.classes ?: []).sort { c1, c2 -> c1.name <=> c2.name }?.each {
+            new LinkedList<ClassNode>((Collection<ClassNode>) this.ast?.classes ?: []).sort { c1, c2 -> c1.name <=> c2.name }?.each {
                 visitor.call(new SourceUnit((String) null, (ReaderSource) null, null, null, null) {
                     @Override
                     public ModuleNode getAST() {
