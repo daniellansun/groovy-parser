@@ -179,7 +179,7 @@ tasks.register("console", JavaExec) {
 }
 
 test {
-    def commonJvmArgs = ['-ea', "-Xms512m", "-Xmx2g", "-XX:MaxMetaspaceSize=512m", "-XX:+UseG1GC", "-XX:+UnlockDiagnosticVMOptions", "-XX:+DebugNonSafepoints", "-Dgroovy.antlr4.cache.threshold=150", "-Dgroovy.permissive.property.access=true", "-Duser.language=en"]
+    def commonJvmArgs = ['-ea', "-Xms512m", "-Xmx2g", "-XX:MaxMetaspaceSize=512m", "-XX:+UseG1GC", "-XX:+UnlockDiagnosticVMOptions", "-XX:+DebugNonSafepoints", "-Dgroovy.antlr4.cache.threshold=0", "-Dgroovy.permissive.property.access=true", "-Duser.language=en"]
     if (rootProject.hasProperty('async.profiler.agentpath')) {
         commonJvmArgs << "-agentpath:${rootProject.property('async.profiler.agentpath')}=start,event=cpu,width=3600,file=build/reports/profile-${System.nanoTime()}.svg"
     }

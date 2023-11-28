@@ -25,11 +25,11 @@ The new parser(Parrot) can parse Groovy source code and construct the related AS
 
 **JVM system properties to control parsing:**
 
-| Option | Description | Default | Example |
-| ---- | ---- | ---- | ---- |
-| groovy.antlr4.cache.threshold | antlr4 relies on DFA cache heavily for better performance, so antlr4 will not clear DFA cache, thus OutOfMemoryError will probably occur. Groovy trades off parsing performance and memory usage, when the count of Groovy source files parsed hits the cache threshold, the DFA cache will be cleared. *Note:* `0` means never clearing DFA cache, so requiring bigger JVM heap size. Or set a greater value, e.g. 200 to clear DFA cache if threshold hits. **Note: ** the threshold specified is the count of groovy source files | `64` | -Dgroovy.antlr4.cache.threshold=200 |
+| Option | Description | Default                    | Example |
+| ---- | ---- |----------------------------| ---- |
+| groovy.antlr4.cache.threshold | antlr4 relies on DFA cache heavily for better performance, so antlr4 will not clear DFA cache, thus OutOfMemoryError will probably occur. Groovy trades off parsing performance and memory usage, when the count of Groovy source files parsed hits the cache threshold, the DFA cache will be cleared. *Note:* `0` means managing the DFA cache automatically, `-1` means never clearing DFA cache, so requiring bigger JVM heap size. Or set a greater value, e.g. 200 to clear DFA cache if threshold hits. **Note: ** the threshold specified is the count of groovy source files | `0`                        | -Dgroovy.antlr4.cache.threshold=200 |
 | groovy.antlr4.sll.threshold | Parrot parser will try SLL mode and then try LL mode if SLL failed. But the more tokens to parse, the more likely SLL will fail. If SLL threshold hits, SLL will be skipped. Setting the threshold to `0` means never trying SLL mode, which is not recommended at most cases because SLL is the fastest mode though SLL is less powerful than LL. **Note: ** the threshold specified is the token count | `-1` (disabled by default) | -Dgroovy.antlr4.sll.threshold=1000 |
-| groovy.antlr4.clear.lexer.dfa.cache | Clear the DFA cache for lexer. The DFA cache for lexer is always small and important for parsing performance, so it's strongly recommended to leave it as it is util OutOfMemoryError will truely occur | `false` | -Dgroovy.antlr4.clear.lexer.dfa.cache=true |
+| groovy.antlr4.clear.lexer.dfa.cache | Clear the DFA cache for lexer. The DFA cache for lexer is always small and important for parsing performance, so it's strongly recommended to leave it as it is util OutOfMemoryError will truely occur | `false`                    | -Dgroovy.antlr4.clear.lexer.dfa.cache=true |
 
 
 
