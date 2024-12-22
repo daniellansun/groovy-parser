@@ -91,7 +91,7 @@ configurations {
 
 ext {
     asmVersion = '9.6'
-    antlr4Version = '4.13.2.3'
+    antlr4Version = '4.13.2.4'
     groovyVersion = '4.0.16'
     junitVersion = '4.13.2'
 
