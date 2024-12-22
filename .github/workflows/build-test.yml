@@ -34,7 +34,7 @@ jobs:
           java-version: ${{ matrix.java }}
           check-latest: true
       - name: Test with Gradle
-        run: chmod 755 gradlew && ./gradlew test
+        run: chmod 755 gradlew && ./gradlew test --stacktrace
         timeout-minutes: 60
         env:
           GRADLE_SCANS_ACCEPT: yes
