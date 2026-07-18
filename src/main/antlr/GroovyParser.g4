@@ -564,8 +564,7 @@ block
     ;
 
 blockStatement
-    :   localVariableDeclaration
-    |   statement
+    :   statement
     ;
 
 localVariableDeclaration
@@ -953,21 +952,32 @@ pathExpression returns [int t]
 pathElement returns [int t]
     :   nls
         (
-            DOT nls NEW creator[1]
-            { $t = 6; }
-        |
-            // AT: foo.@bar selects the field (or attribute), not property
-            (
-                (   DOT                 // The all-powerful dot.
-                |   SPREAD_DOT          // Spread operator:  x*.y  ===  x?.collect{it.y}
-                |   SAFE_DOT            // Optional-null operator:  x?.y  === (x==null)?null:x.y
-                |   SAFE_CHAIN_DOT      // Optional-null chain operator:  x??.y.z  === x?.y?.z
-                ) nls (AT | nonWildcardTypeArguments)?
+            // DOT is left-factored: `obj.new X` (inner-class creator) vs `obj.prop`
+            // previously sat in two alternatives that both started with DOT, forcing
+            // SLL prediction to explore both branches. After DOT, NEW is LL(1).
+            DOT nls
+            (   NEW creator[1]
+                { $t = 6; }
             |
-                METHOD_POINTER nls      // Method pointer operator: foo.&y == foo.metaClass.getMethodPointer(foo, "y")
-            |
-                METHOD_REFERENCE nls    // Method reference: System.out::println
+                // AT: foo.@bar selects the field (or attribute), not property
+                (AT | nonWildcardTypeArguments)?
+                namePart
+                { $t = 1; }
             )
+        |
+            // Non-DOT member selection operators (still share namePart tail)
+            (   SPREAD_DOT          // Spread operator:  x*.y  ===  x?.collect{it.y}
+            |   SAFE_DOT            // Optional-null operator:  x?.y  === (x==null)?null:x.y
+            |   SAFE_CHAIN_DOT      // Optional-null chain operator:  x??.y.z  === x?.y?.z
+            ) nls (AT | nonWildcardTypeArguments)?
+            namePart
+            { $t = 1; }
+        |
+            METHOD_POINTER nls      // Method pointer operator: foo.&y == foo.metaClass.getMethodPointer(foo, "y")
+            namePart
+            { $t = 1; }
+        |
+            METHOD_REFERENCE nls (nonWildcardTypeArguments)?  // Method reference: System.out::println
             namePart
             { $t = 1; }
 
@@ -988,6 +998,7 @@ pathElement returns [int t]
     |   namedPropertyArgs
         { $t = 5; }
     ;
+
 
 /**
  *  This is the grammar for what can follow a dot:  x.a, x.@a, x.&a, x.'a', etc.
