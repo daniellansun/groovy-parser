@@ -463,7 +463,6 @@ final class SyntaxErrorTest extends GroovyTestCase {
         TestUtils.doRunAndShouldFail('fail/SwitchExpression_10x.groovy')
     }
 
-    @NotYetImplemented
     void 'test error alternative - Missing ")" 1'() {
         def err = expectParseError '''\
             |println ((int 123)
@@ -479,7 +478,6 @@ final class SyntaxErrorTest extends GroovyTestCase {
             |'''.stripMargin()
     }
 
-    @NotYetImplemented
     void 'test error alternative - Missing ")" 2'() {
         def err = expectParseError '''\
             |def x() {
@@ -497,7 +495,6 @@ final class SyntaxErrorTest extends GroovyTestCase {
             |'''.stripMargin()
     }
 
-    @NotYetImplemented
     void 'test error alternative - Missing ")" 3'() {
         def err = expectParseError '''\
             |def m( {
@@ -509,6 +506,168 @@ final class SyntaxErrorTest extends GroovyTestCase {
             |test.groovy: 1: Missing ')' @ line 1, column 8.
             |   def m( {
             |          ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+
+    void 'test error alternative - Missing ")" 4'() {
+        expectParseError '''\
+            |foo(1, 2
+            |'''.stripMargin(), '''\
+            |Missing ')' @ line 1, column 9.
+            |   foo(1, 2
+            |           ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+    void 'test error alternative - Missing ")" 5'() {
+        expectParseError '''\
+            |def f(int x
+            |'''.stripMargin(), '''\
+            |Missing ')' @ line 1, column 12.
+            |   def f(int x
+            |              ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+    void 'test error alternative - Missing ")" 6'() {
+        expectParseError '''\
+            |println ((int) 123
+            |'''.stripMargin(), '''\
+            |Missing ')' @ line 1, column 19.
+            |   println ((int) 123
+            |                     ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+    void 'test error alternative - Missing "]" 1'() {
+        expectParseError '''\
+            |[1, 2
+            |'''.stripMargin(), '''\
+            |Missing ']' @ line 1, column 6.
+            |   [1, 2
+            |        ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+    void 'test error alternative - Missing "]" 2'() {
+        expectParseError '''\
+            |foo[1
+            |'''.stripMargin(), '''\
+            |Missing ']' @ line 1, column 6.
+            |   foo[1
+            |        ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+    void 'test error alternative - Missing "]" 3'() {
+        expectParseError '''\
+            |def x = [[1, 2]
+            |'''.stripMargin(), '''\
+            |Missing ']' @ line 1, column 16.
+            |   def x = [[1, 2]
+            |                  ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+    void 'test error alternative - Missing "]" 4'() {
+        expectParseError '''\
+            |foo([1, 2)
+            |'''.stripMargin(), '''\
+            |Missing ']' @ line 1, column 10.
+            |   foo([1, 2)
+            |            ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+    void 'test error alternative - Missing "]" 5'() {
+        expectParseError '''\
+            |a?[0
+            |'''.stripMargin(), '''\
+            |Missing ']' @ line 1, column 5.
+            |   a?[0
+            |       ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+    void 'test error alternative - Missing "]" 6'() {
+        expectParseError '''\
+            |def x() {
+            |    a[0
+            |}
+            |'''.stripMargin(), '''\
+            |Missing ']' @ line 2, column 8.
+            |       a[0
+            |          ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+    void 'test error alternative - Missing "}" 1'() {
+        expectParseError '''\
+            |def m() {
+            |    println 1
+            |'''.stripMargin(), '''\
+            |Missing '}' @ line 2, column 14.
+            |       println 1
+            |                ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+    void 'test error alternative - Missing "}" 2'() {
+        expectParseError '''\
+            |class C {
+            |    def x
+            |'''.stripMargin(), '''\
+            |Missing '}' @ line 2, column 10.
+            |       def x
+            |            ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+    void 'test error alternative - Missing "}" 3'() {
+        expectParseError '''\
+            |def c = { it
+            |'''.stripMargin(), '''\
+            |Missing '}' @ line 1, column 13.
+            |   def c = { it
+            |               ^
+            |
+            |1 error
+            |'''.stripMargin()
+    }
+
+    void 'test error alternative - Missing "}" 4'() {
+        expectParseError '''\
+            |if (true) {
+            |    x = 1
+            |'''.stripMargin(), '''\
+            |Missing '}' @ line 2, column 10.
+            |       x = 1
+            |            ^
             |
             |1 error
             |'''.stripMargin()
